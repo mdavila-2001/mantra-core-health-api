@@ -3,12 +3,12 @@
 # Flujos del módulo `consent`
 
 - **Procesos:** 2 · **Máquinas de estado:** 0
-- **Operaciones:** 27 (22 con decisiones propias, 5 sin ellas)
+- **Operaciones:** 28 (23 con decisiones propias, 5 sin ellas)
 - Inventario de endpoints del módulo: [consent](../endpoints/consent.md)
 
 ## Proceso: Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence)
 
-- **Código:** `consent` · **Agrupación:** MIXTO · **Operaciones:** 27
+- **Código:** `consent` · **Agrupación:** MIXTO · **Operaciones:** 28
 - **Actores:** CLINICIAN · PATIENT · PRACTITIONER · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/consent/README.md`
@@ -30,7 +30,7 @@ _Fuente: `src/modules/consent/README.md:3`_
 | `UC-07-05` | Revocar autorización HIPAA | POST /consent/hipaa-authorizations/{id}/revoke | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-07-06` | Establecer/versionar base legal (supersede la anterior) | POST /consent/processing-legal-bases | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-07-07` | Aplicar restricción de privacidad que afecta RLS clínico | POST /consent/privacy-restrictions | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-07-08` | Capturar consentimiento informado de tratamiento | POST /consent/treatment-informed-consents | SECURITY_ADMIN · CLINICIAN · PRACTITIONER | MEDIO | 23 |
+| `UC-07-08` | Capturar consentimiento informado de tratamiento | POST /consent/treatment-informed-consents | SECURITY_ADMIN · CLINICIAN · PRACTITIONER | MEDIO | 24 |
 | `UC-07-09` | Actualizar provisiones granulares (soft-close + insert) | PATCH /consent/consents/{id}/provisions | SECURITY_ADMIN | MEDIO | 5 |
 | `UC-07-10` | Registrar evidencia inmutable (append-only) | POST /consent/consent-evidence | SECURITY_ADMIN | MEDIO | 1 |
 | `UC-07-11` | Barrido de expiraciones (worker) | POST /consent/internal/expiration-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 7 |
@@ -40,16 +40,17 @@ _Fuente: `src/modules/consent/README.md:3`_
 |  |  | GET /consent/me/hipaa-authorizations | PATIENT | BAJO | 4 |
 |  |  | GET /consent/me/objections | PATIENT | BAJO | 4 |
 |  |  | GET /consent/me/treatment-informed-consents | PATIENT | BAJO | 3 |
-| `ctrl:EncounterInformedConsentsController` | Operaciones de EncounterInformedConsentsController que el README no asigna a un caso de uso | GET /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | BAJO | 22 |
-|  |  | POST /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | MEDIO | 23 |
-| `ctrl:PractitionerAccessRequestsController` | Operaciones de PractitionerAccessRequestsController que el README no asigna a un caso de uso | POST /consent/practitioner-access-requests | PRACTITIONER · CLINICIAN | MEDIO | 21 |
-|  |  | POST /consent/practitioner-access-requests/{id}/decision | PATIENT | MEDIO | 25 |
+| `ctrl:EncounterInformedConsentsController` | Operaciones de EncounterInformedConsentsController que el README no asigna a un caso de uso | GET /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | BAJO | 24 |
+|  |  | POST /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | MEDIO | 24 |
+| `ctrl:PractitionerAccessRequestsController` | Operaciones de PractitionerAccessRequestsController que el README no asigna a un caso de uso | POST /consent/practitioner-access-requests | PRACTITIONER · CLINICIAN | MEDIO | 23 |
+|  |  | POST /consent/practitioner-access-requests/{id}/decision | PATIENT | MEDIO | 26 |
+|  |  | POST /consent/practitioner-access-requests/{id}/revoke | PATIENT | MEDIO | 9 |
 |  |  | GET /consent/practitioner-access-requests/mine | PATIENT | BAJO | 4 |
-| `ctrl:TreatmentInformedConsentsController` | Operaciones de TreatmentInformedConsentsController que el README no asigna a un caso de uso | GET /consent/treatment-informed-consents | CLINICIAN · PRACTITIONER | BAJO | 22 |
-|  |  | GET /consent/treatment-informed-consents/{id} | CLINICIAN · PRACTITIONER | BAJO | 22 |
-|  |  | POST /consent/treatment-informed-consents/{id}/evidence | CLINICIAN · PRACTITIONER | MEDIO | 20 |
-|  |  | PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | CLINICIAN · PRACTITIONER | MEDIO | 21 |
-|  |  | PATCH /consent/treatment-informed-consents/{id}/withdraw | CLINICIAN · PRACTITIONER | MEDIO | 24 |
+| `ctrl:TreatmentInformedConsentsController` | Operaciones de TreatmentInformedConsentsController que el README no asigna a un caso de uso | GET /consent/treatment-informed-consents | CLINICIAN · PRACTITIONER | BAJO | 24 |
+|  |  | GET /consent/treatment-informed-consents/{id} | CLINICIAN · PRACTITIONER | BAJO | 24 |
+|  |  | POST /consent/treatment-informed-consents/{id}/evidence | CLINICIAN · PRACTITIONER | MEDIO | 22 |
+|  |  | PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | CLINICIAN · PRACTITIONER | MEDIO | 23 |
+|  |  | PATCH /consent/treatment-informed-consents/{id}/withdraw | CLINICIAN · PRACTITIONER | MEDIO | 26 |
 
 ### Diagrama 1 de 2 — etapas `UC-07-01`, `UC-07-02`, `UC-07-03`…
 
@@ -102,7 +103,7 @@ flowchart LR
   subgraph s6["UC-07-07 · Aplicar restricción de privacidad que afecta RLS clínico"]
     o21["POST /consent/privacy-restrictions"]:::op
   end
-  t29[("+17 tablas más")]
+  t29[("+18 tablas más")]
   subgraph s7["UC-07-08 · Capturar consentimiento informado de tratamiento"]
     o22["POST /consent/treatment-informed-consents"]:::op
   end
@@ -127,8 +128,8 @@ flowchart LR
     o43["GET /consent/me/objections"]:::op
     o44["GET /consent/me/treatment-informed-consents"]:::op
   end
-  t48[("+16 tablas más")]
-  t50[("+17 tablas más")]
+  t48[("+18 tablas más")]
+  t50[("+18 tablas más")]
   subgraph s13["ctrl:EncounterInformedConsentsController · Operaciones de EncounterInformedCons…"]
     o46["GET /consent/encounters/{encounterId}/informed-consent"]:::op
     o49["POST /consent/encounters/{encounterId}/informed-consent"]:::op
@@ -256,37 +257,39 @@ flowchart LR
 flowchart LR
   a2(["PRACTITIONER · CLINICIAN"]):::actor
   a9(["PATIENT"]):::actor
-  a16(["CLINICIAN · PRACTITIONER"]):::actor
+  a18(["CLINICIAN · PRACTITIONER"]):::actor
   t3[("audit.audit_log")]:::tabla
   t4[("consent.consent_events")]:::tabla
   t5[("consent.consent_provisions")]:::tabla
   t6[("consent.consents")]:::tabla
   t10[("authz.clinical_access_grants")]:::tabla
-  t13[("profiles.patient_profiles")]:::tabla
-  t14[("profiles.person_account_links")]:::tabla
-  t17[("authz.access_policies")]:::tabla
-  t18[("authz.care_relationships")]:::tabla
-  t19[("authz.field_permissions")]:::tabla
-  t20[("authz.patient_legal_representations")]:::tabla
-  t21[("authz.permissions")]:::tabla
-  t7[("+15 tablas más")]
-  t11[("+19 tablas más")]
+  t15[("profiles.patient_profiles")]:::tabla
+  t16[("profiles.person_account_links")]:::tabla
+  t19[("authz.access_policies")]:::tabla
+  t20[("authz.care_relationships")]:::tabla
+  t21[("authz.field_permissions")]:::tabla
+  t22[("authz.patient_legal_representations")]:::tabla
+  t23[("authz.permissions")]:::tabla
+  t7[("+17 tablas más")]
+  t11[("+20 tablas más")]
+  t13[("+3 tablas más")]
   subgraph s0["ctrl:PractitionerAccessRequestsController · Operaciones de PractitionerAccessRe…"]
     o1["POST /consent/practitioner-access-requests"]:::op
     o8["POST /consent/practitioner-access-requests/{id}/decision"]:::op
-    o12["GET /consent/practitioner-access-requests/mine"]:::op
+    o12["POST /consent/practitioner-access-requests/{id}/revoke"]:::op
+    o14["GET /consent/practitioner-access-requests/mine"]:::op
   end
-  t22[("+16 tablas más")]
-  t24[("+16 tablas más")]
-  t26[("+14 tablas más")]
-  t28[("+15 tablas más")]
-  t30[("+18 tablas más")]
+  t24[("+18 tablas más")]
+  t26[("+18 tablas más")]
+  t28[("+16 tablas más")]
+  t30[("+17 tablas más")]
+  t32[("+20 tablas más")]
   subgraph s1["ctrl:TreatmentInformedConsentsController · Operaciones de TreatmentInformedCons…"]
-    o15["GET /consent/treatment-informed-consents"]:::op
-    o23["GET /consent/treatment-informed-consents/{id}"]:::op
-    o25["POST /consent/treatment-informed-consents/{id}/evidence"]:::op
-    o27["PATCH /consent/treatment-informed-consents/{id}/post-emergency-inform…"]:::op
-    o29["PATCH /consent/treatment-informed-consents/{id}/withdraw"]:::op
+    o17["GET /consent/treatment-informed-consents"]:::op
+    o25["GET /consent/treatment-informed-consents/{id}"]:::op
+    o27["POST /consent/treatment-informed-consents/{id}/evidence"]:::op
+    o29["PATCH /consent/treatment-informed-consents/{id}/post-emergency-inform…"]:::op
+    o31["PATCH /consent/treatment-informed-consents/{id}/withdraw"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -300,55 +303,63 @@ flowchart LR
   o8 -->|"CREA"| t3
   o8 -->|"LEE"| t3
   o8 -->|"CREA"| t10
-  o8 -->|"LEE"| t10
   o8 -->|"CREA"| t4
   o8 -->|"ACTUALIZA"| t5
+  o8 -->|"LEE"| t5
   o8 -.-> t11
   a9 --> o12
-  o12 -->|"LEE"| t5
+  o12 -->|"CREA"| t3
+  o12 -->|"LEE"| t3
+  o12 -->|"ACTUALIZA"| t10
+  o12 -->|"LEE"| t10
+  o12 -->|"CREA"| t4
   o12 -->|"LEE"| t6
-  o12 -->|"LEE"| t13
-  o12 -->|"LEE"| t14
-  a16 --> o15
-  o15 -->|"LEE"| t17
-  o15 -->|"LEE"| t18
-  o15 -->|"LEE"| t10
-  o15 -->|"LEE"| t19
-  o15 -->|"LEE"| t20
-  o15 -->|"LEE"| t21
-  o15 -.-> t22
-  a16 --> o23
-  o23 -->|"LEE"| t17
-  o23 -->|"LEE"| t18
-  o23 -->|"LEE"| t10
-  o23 -->|"LEE"| t19
-  o23 -->|"LEE"| t20
-  o23 -->|"LEE"| t21
-  o23 -.-> t24
-  a16 --> o25
-  o25 -->|"LEE"| t17
-  o25 -->|"LEE"| t18
-  o25 -->|"LEE"| t10
+  o12 -.-> t13
+  a9 --> o14
+  o14 -->|"LEE"| t5
+  o14 -->|"LEE"| t6
+  o14 -->|"LEE"| t15
+  o14 -->|"LEE"| t16
+  a18 --> o17
+  o17 -->|"LEE"| t19
+  o17 -->|"LEE"| t20
+  o17 -->|"LEE"| t10
+  o17 -->|"LEE"| t21
+  o17 -->|"LEE"| t22
+  o17 -->|"LEE"| t23
+  o17 -.-> t24
+  a18 --> o25
   o25 -->|"LEE"| t19
   o25 -->|"LEE"| t20
+  o25 -->|"LEE"| t10
   o25 -->|"LEE"| t21
+  o25 -->|"LEE"| t22
+  o25 -->|"LEE"| t23
   o25 -.-> t26
-  a16 --> o27
-  o27 -->|"LEE"| t17
-  o27 -->|"LEE"| t18
-  o27 -->|"LEE"| t10
+  a18 --> o27
   o27 -->|"LEE"| t19
   o27 -->|"LEE"| t20
+  o27 -->|"LEE"| t10
   o27 -->|"LEE"| t21
+  o27 -->|"LEE"| t22
+  o27 -->|"LEE"| t23
   o27 -.-> t28
-  a16 --> o29
-  o29 -->|"LEE"| t17
-  o29 -->|"LEE"| t18
-  o29 -->|"LEE"| t10
+  a18 --> o29
   o29 -->|"LEE"| t19
   o29 -->|"LEE"| t20
+  o29 -->|"LEE"| t10
   o29 -->|"LEE"| t21
+  o29 -->|"LEE"| t22
+  o29 -->|"LEE"| t23
   o29 -.-> t30
+  a18 --> o31
+  o31 -->|"LEE"| t19
+  o31 -->|"LEE"| t20
+  o31 -->|"LEE"| t10
+  o31 -->|"LEE"| t21
+  o31 -->|"LEE"| t22
+  o31 -->|"LEE"| t23
+  o31 -.-> t32
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -765,55 +776,35 @@ flowchart TD
   n6 -->|"sí"| n7
   n8["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
   n6 -->|"no"| n8
-  n9{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n9["Llama a ClinicalReadService.resolveReadScope"]:::llamada
   n8 --> n9
-  n10["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
-  n9 -->|"sí"| n10
-  n11["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n10 --> n11
-  n12[("LEE profiles.person_account_links")]:::efecto
+  n10{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n9 --> n10
+  n11["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n10 -->|"sí"| n11
+  n12{"!link || !profile || profile.profileId !== link.personId"}:::decision
   n11 --> n12
-  n13["Llama a PatientProfilesRepository.findById"]:::llamada
-  n12 --> n13
-  n14[("LEE profiles.patient_profiles")]:::efecto
-  n13 --> n14
-  n15{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n13(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n12 -->|"no"| n14
+  n10 -->|"no"| n14
+  n15[("LEE profiles.person_account_links")]:::efecto
   n14 --> n15
-  n16(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n15 -->|"no"| n17
-  n9 -->|"no"| n17
-  n18[("LEE profiles.person_account_links")]:::efecto
+  n16["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n15 --> n16
+  n17[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n16 --> n17
+  n18["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
   n17 --> n18
-  n19["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n19{"!link || !profile || profile.profileId !== link.personId"}:::decision
   n18 --> n19
-  n20[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n19 --> n20
-  n21["Llama a ClinicalReadService.isAttending"]:::llamada
-  n20 --> n21
-  n22["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n20(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n19 -->|"sí"| n20
+  n21[("LEE consent.treatment_informed_consents")]:::efecto
+  n19 -->|"no"| n21
+  n22(("200 Responde con éxito")):::ok
   n21 --> n22
-  n23[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
-  n22 --> n23
-  n24["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
-  n23 --> n24
-  n25["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n24 --> n25
-  n26[("LEE profiles.person_account_links")]:::efecto
-  n25 --> n26
-  n27["Llama a PatientProfilesRepository.findById"]:::llamada
-  n26 --> n27
-  n28[("LEE profiles.patient_profiles")]:::efecto
-  n27 --> n28
-  n29{"!link || !profile || profile.profileId !== link.personId"}:::decision
-  n28 --> n29
-  n30(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n29 -->|"sí"| n30
-  n31[("LEE consent.treatment_informed_consents")]:::efecto
-  n29 -->|"no"| n31
-  n32(("200 Responde con éxito")):::ok
-  n31 --> n32
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -862,87 +853,109 @@ flowchart TD
   n11 --> n12
   n13[("LEE profiles.health_practitioner_profiles")]:::efecto
   n12 --> n13
-  n14["Llama a ClinicalReadService.isAttending"]:::llamada
+  n14["Llama a ClinicalReadService.attendanceBasis"]:::llamada
   n13 --> n14
   n15["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
   n14 --> n15
   n16[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
   n15 --> n16
-  n17(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n17["Llama a ClinicalScopeRepository.isOwnOpenEncounter"]:::llamada
   n16 --> n17
-  n9 -->|"no"| n17
-  n18["Llama a TreatmentInformedConsentsService.sign"]:::llamada
-  n19["Llama a TreatmentInformedConsentsService.assertContentRules"]:::llamada
+  n18[("LEE clinical.encounters")]:::efecto
+  n17 --> n18
+  n19["Llama a ClinicalScopeRepository.participates"]:::llamada
   n18 --> n19
-  n20{"Boolean(dto.targetType) !== Boolean(dto.targetId)"}:::decision
+  n20[("LEE clinical.encounter_participants")]:::efecto
   n19 --> n20
-  n21(["↩ (relanza el error capturado)"]):::error
-  n20 -->|"sí"| n21
-  n22{"dto.exceptionType && !dto.exceptionJustification?.trim()"}:::decision
-  n20 -->|"no"| n22
-  n23(["↩ (relanza el error capturado)"]):::error
-  n22 -->|"sí"| n23
-  n24{"dto.targetType && !dto.exceptionType"}:::decision
-  n22 -->|"no"| n24
-  n25{"missing.length › 0"}:::decision
-  n24 -->|"sí"| n25
-  n26(["↩ (relanza el error capturado)"]):::error
-  n25 -->|"sí"| n26
-  n27{"dto.grantedBy && dto.grantedBy !== 'PATIENT'"}:::decision
-  n25 -->|"no"| n27
-  n24 -->|"no"| n27
-  n28{"missing.length › 0"}:::decision
-  n27 -->|"sí"| n28
-  n29(["↩ (relanza el error capturado)"]):::error
-  n28 -->|"sí"| n29
-  n30{"typeof dto.assentObtained !== 'boolean'"}:::decision
-  n28 -->|"no"| n30
-  n31(["↩ (relanza el error capturado)"]):::error
-  n30 -->|"sí"| n31
-  n32{"dto.decision === 'ACCEPTED' && dto.targetType && dto.exceptionType !== 'EMERGENCY' && dto.revocationRightInfo…"}:::decision
-  n30 -->|"no"| n32
-  n27 -->|"no"| n32
-  n33(["↩ (relanza el error capturado)"]):::error
-  n32 -->|"sí"| n33
-  n34["Transacción: transactional(…)"]:::transaccion
-  n32 -->|"no"| n34
-  n35{"dto.targetType && dto.targetId"}:::decision
-  n34 --> n35
-  n36["Llama a TreatmentInformedConsentsService.assertTargetOfPatient"]:::llamada
+  n21["Llama a ClinicalScopeRepository.hasOwnOpenEncounter"]:::llamada
+  n20 --> n21
+  n22[("LEE clinical.encounters")]:::efecto
+  n21 --> n22
+  n23["Llama a ClinicalScopeRepository.participates"]:::llamada
+  n22 --> n23
+  n24[("LEE clinical.encounter_participants")]:::efecto
+  n23 --> n24
+  n25["Llama a ClinicalGranularScopeService.hasWriteLevelGrant"]:::llamada
+  n24 --> n25
+  n26["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
+  n25 --> n26
+  n27[("LEE authz.clinical_access_grants")]:::efecto
+  n26 --> n27
+  n28(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n27 --> n28
+  n9 -->|"no"| n28
+  n29["Llama a TreatmentInformedConsentsService.sign"]:::llamada
+  n30["Llama a TreatmentInformedConsentsService.assertContentRules"]:::llamada
+  n29 --> n30
+  n31{"Boolean(dto.targetType) !== Boolean(dto.targetId)"}:::decision
+  n30 --> n31
+  n32(["↩ (relanza el error capturado)"]):::error
+  n31 -->|"sí"| n32
+  n33{"dto.exceptionType && !dto.exceptionJustification?.trim()"}:::decision
+  n31 -->|"no"| n33
+  n34(["↩ (relanza el error capturado)"]):::error
+  n33 -->|"sí"| n34
+  n35{"dto.targetType && !dto.exceptionType"}:::decision
+  n33 -->|"no"| n35
+  n36{"missing.length › 0"}:::decision
   n35 -->|"sí"| n36
-  n37{"!target"}:::decision
-  n36 --> n37
-  n38(["404 NOT_FOUND El objeto consentido no existe"]):::error
-  n37 -->|"sí"| n38
-  n39{"target.patientProfileId !== patientProfileId"}:::decision
-  n37 -->|"no"| n39
+  n37(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"sí"| n37
+  n38{"dto.grantedBy && dto.grantedBy !== 'PATIENT'"}:::decision
+  n36 -->|"no"| n38
+  n35 -->|"no"| n38
+  n39{"missing.length › 0"}:::decision
+  n38 -->|"sí"| n39
   n40(["↩ (relanza el error capturado)"]):::error
   n39 -->|"sí"| n40
-  n41["Llama a TreatmentInformedConsentsRepository.create"]:::llamada
+  n41{"typeof dto.assentObtained !== 'boolean'"}:::decision
   n39 -->|"no"| n41
-  n35 -->|"no"| n41
-  n42[("CREA consent.treatment_informed_consents")]:::efecto
-  n41 --> n42
-  n43{"dto.targetType === 'REFERRAL' && dto.decision !== 'DECLINED' && target"}:::decision
-  n42 --> n43
-  n44["Llama a TreatmentInformedConsentsService.linkReferral"]:::llamada
+  n42(["↩ (relanza el error capturado)"]):::error
+  n41 -->|"sí"| n42
+  n43{"dto.decision === 'ACCEPTED' && dto.targetType && dto.exceptionType !== 'EMERGENCY' && dto.revocationRightInfo…"}:::decision
+  n41 -->|"no"| n43
+  n38 -->|"no"| n43
+  n44(["↩ (relanza el error capturado)"]):::error
   n43 -->|"sí"| n44
-  n45{"referral.informedConsentId"}:::decision
-  n44 --> n45
-  n46["Llama a TreatmentInformedConsentsRepository.findById"]:::llamada
-  n45 -->|"sí"| n46
-  n47[("LEE consent.treatment_informed_consents")]:::efecto
-  n46 --> n47
-  n48[("ACTUALIZA clinical_ext.referrals")]:::efecto
+  n45["Transacción: transactional(…)"]:::transaccion
+  n43 -->|"no"| n45
+  n46{"dto.targetType && dto.targetId"}:::decision
+  n45 --> n46
+  n47["Llama a TreatmentInformedConsentsService.assertTargetOfPatient"]:::llamada
+  n46 -->|"sí"| n47
+  n48{"!target"}:::decision
   n47 --> n48
-  n45 -->|"no"| n48
-  n49["Llama a ConsentEventsRepository.record"]:::llamada
-  n48 --> n49
-  n43 -->|"no"| n49
-  n50[("CREA consent.consent_events")]:::efecto
-  n49 --> n50
-  n51(("201 Responde con éxito")):::ok
-  n50 --> n51
+  n49(["404 NOT_FOUND El objeto consentido no existe"]):::error
+  n48 -->|"sí"| n49
+  n50{"target.patientProfileId !== patientProfileId"}:::decision
+  n48 -->|"no"| n50
+  n51(["↩ (relanza el error capturado)"]):::error
+  n50 -->|"sí"| n51
+  n52["Llama a TreatmentInformedConsentsRepository.create"]:::llamada
+  n50 -->|"no"| n52
+  n46 -->|"no"| n52
+  n53[("CREA consent.treatment_informed_consents")]:::efecto
+  n52 --> n53
+  n54{"dto.targetType === 'REFERRAL' && dto.decision !== 'DECLINED' && target"}:::decision
+  n53 --> n54
+  n55["Llama a TreatmentInformedConsentsService.linkReferral"]:::llamada
+  n54 -->|"sí"| n55
+  n56{"referral.informedConsentId"}:::decision
+  n55 --> n56
+  n57["Llama a TreatmentInformedConsentsRepository.findById"]:::llamada
+  n56 -->|"sí"| n57
+  n58[("LEE consent.treatment_informed_consents")]:::efecto
+  n57 --> n58
+  n59[("ACTUALIZA clinical_ext.referrals")]:::efecto
+  n58 --> n59
+  n56 -->|"no"| n59
+  n60["Llama a ConsentEventsRepository.record"]:::llamada
+  n59 --> n60
+  n54 -->|"no"| n60
+  n61[("CREA consent.consent_events")]:::efecto
+  n60 --> n61
+  n62(("201 Responde con éxito")):::ok
+  n61 --> n62
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1340,7 +1353,7 @@ Pedir acceso al expediente de un paciente encontrado en la búsqueda
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Solicitud de notificación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal no existe |
 | 409 | `CONFLICT` | ConflictException: Ya existe una solicitud pendiente o un vínculo activo con este paciente |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1352,120 +1365,137 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a ConsentsRepository.findByPatientCreatorCategory"]:::llamada
+  n5["Llama a MedicalSpecialtyCatalogService.assertAllAreSpecialties"]:::llamada
   n4 --> n5
-  n6[("LEE consent.consents")]:::efecto
+  n6["Llama a MedicalSpecialtyCatalogService.listMemberIds"]:::llamada
   n5 --> n6
-  n7{"inCourse"}:::decision
+  n7{"members === null"}:::decision
   n6 --> n7
-  n8(["409 CONFLICT Ya existe una solicitud pendiente o un vínculo activo con este paciente"]):::error
+  n8(["422 PRECONDITION_FAILED El catálogo de especialidades médicas no está disponible"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a ConsentsRepository.create"]:::llamada
+  n9{"outside.length › 0"}:::decision
   n7 -->|"no"| n9
-  n10[("CREA consent.consents")]:::efecto
-  n9 --> n10
-  n11["Repite: por cada const specialtyId de dto.specialtyConceptIds"]:::bucle
-  n10 --> n11
-  n12["Llama a ConsentProvisionsRepository.create"]:::llamada
-  n11 -->|"cada elemento"| n12
-  n13[("CREA consent.consent_provisions")]:::efecto
+  n10(["422 PRECONDITION_FAILED La especialidad no pertenece al catálogo de especialidades médicas"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a ConsentsRepository.findByPatientCreatorCategory"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE consent.consents")]:::efecto
+  n11 --> n12
+  n13{"inCourse"}:::decision
   n12 --> n13
-  n14["Llama a ConsentEventsRepository.record"]:::llamada
-  n13 --> n14
-  n11 -->|"al terminar"| n14
-  n15[("CREA consent.consent_events")]:::efecto
-  n14 --> n15
-  n16["Llama a AuditTrailService.record"]:::llamada
+  n14(["409 CONFLICT Ya existe una solicitud pendiente o un vínculo activo con este paciente"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a ConsentsRepository.create"]:::llamada
+  n13 -->|"no"| n15
+  n16[("CREA consent.consents")]:::efecto
   n15 --> n16
-  n17["Llama a AuditLogRepository.append"]:::llamada
+  n17["Repite: por cada const specialtyId de dto.specialtyConceptIds"]:::bucle
   n16 --> n17
-  n18["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n17 --> n18
-  n19[("LEE audit.audit_log")]:::efecto
+  n18["Llama a ConsentProvisionsRepository.create"]:::llamada
+  n17 -->|"cada elemento"| n18
+  n19[("CREA consent.consent_provisions")]:::efecto
   n18 --> n19
-  n20[("CREA audit.audit_log")]:::efecto
+  n20["Llama a ConsentEventsRepository.record"]:::llamada
   n19 --> n20
-  n21["Llama a PractitionerAccessRequestsService.resolveUserIdForPatient"]:::llamada
+  n17 -->|"al terminar"| n20
+  n21[("CREA consent.consent_events")]:::efecto
   n20 --> n21
-  n22["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
+  n22["Llama a AuditTrailService.record"]:::llamada
   n21 --> n22
-  n23[("LEE profiles.person_account_links")]:::efecto
+  n23["Llama a AuditLogRepository.append"]:::llamada
   n22 --> n23
-  n24{"patientUserId"}:::decision
+  n24["Llama a AuditLogRepository.findChainTip"]:::llamada
   n23 --> n24
-  n25["Llama a MessagingPractitionerAccessNoticeAdapter.emit"]:::llamada
-  n24 -->|"sí"| n25
-  n26["Intenta"]:::intento
+  n25[("LEE audit.audit_log")]:::efecto
+  n24 --> n25
+  n26[("CREA audit.audit_log")]:::efecto
   n25 --> n26
-  n27["Llama a MessagingPractitionerAccessNoticeAdapter.issue"]:::llamada
+  n27["Llama a PractitionerAccessRequestsService.resolveUserIdForPatient"]:::llamada
   n26 --> n27
-  n28["Llama a NotificationsService.createRequest"]:::llamada
+  n28["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
   n27 --> n28
-  n29{"!recipientUserId"}:::decision
+  n29[("LEE profiles.person_account_links")]:::efecto
   n28 --> n29
-  n30(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
-  n29 -->|"sí"| n30
-  n31["Transacción: transactional(…)"]:::transaccion
-  n29 -->|"no"| n31
-  n32{"!channel"}:::decision
+  n30{"patientUserId"}:::decision
+  n29 --> n30
+  n31["Llama a MessagingPractitionerAccessNoticeAdapter.emit"]:::llamada
+  n30 -->|"sí"| n31
+  n32["Intenta"]:::intento
   n31 --> n32
-  n33(["404 NOT_FOUND Canal no encontrado"]):::error
-  n32 -->|"sí"| n33
-  n34{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n32 -->|"no"| n34
-  n35(["422 PRECONDITION_FAILED El canal no está activo"]):::error
-  n34 -->|"sí"| n35
-  n36{"dto.templateId"}:::decision
-  n34 -->|"no"| n36
-  n37{"!template"}:::decision
-  n36 -->|"sí"| n37
-  n38(["404 NOT_FOUND Plantilla no encontrada"]):::error
-  n37 -->|"sí"| n38
-  n39{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n37 -->|"no"| n39
-  n40(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
-  n39 -->|"sí"| n40
-  n41{"template.channelId !== dto.channelId"}:::decision
-  n39 -->|"no"| n41
-  n42(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
-  n41 -->|"sí"| n42
-  n43["Llama a NotificationsService.deliverNotification"]:::llamada
-  n41 -->|"no"| n43
-  n36 -->|"no"| n43
-  n44["Transacción: transactional(…)"]:::transaccion
-  n43 --> n44
-  n45{"!request"}:::decision
-  n44 --> n45
-  n46(["404 NOT_FOUND Solicitud de notificación no encontrada"]):::error
+  n33["Llama a MessagingPractitionerAccessNoticeAdapter.issue"]:::llamada
+  n32 --> n33
+  n34["Llama a NotificationsService.createRequest"]:::llamada
+  n33 --> n34
+  n35{"!recipientUserId"}:::decision
+  n34 --> n35
+  n36(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n35 -->|"sí"| n36
+  n37["Transacción: transactional(…)"]:::transaccion
+  n35 -->|"no"| n37
+  n38{"!channel"}:::decision
+  n37 --> n38
+  n39(["404 NOT_FOUND Canal no encontrado"]):::error
+  n38 -->|"sí"| n39
+  n40{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n38 -->|"no"| n40
+  n41(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n40 -->|"sí"| n41
+  n42{"dto.templateId"}:::decision
+  n40 -->|"no"| n42
+  n43{"!template"}:::decision
+  n42 -->|"sí"| n43
+  n44(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n43 -->|"sí"| n44
+  n45{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n43 -->|"no"| n45
+  n46(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
   n45 -->|"sí"| n46
-  n47{"request.statusConceptId === CONCEPTS.NOTIF_SUPPRESSED"}:::decision
+  n47{"template.channelId !== dto.channelId"}:::decision
   n45 -->|"no"| n47
-  n48(["422 PRECONDITION_FAILED La notificación está suprimida"]):::error
+  n48(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
   n47 -->|"sí"| n48
-  n49{"request.statusConceptId !== CONCEPTS.NOTIF_PENDING && request.statusConceptId !== CONCEPTS.NOTIF_SENDING"}:::decision
+  n49["Llama a NotificationsService.deliverNotification"]:::llamada
   n47 -->|"no"| n49
-  n50(["422 PRECONDITION_FAILED La notificación ya no admite intentos"]):::error
-  n49 -->|"sí"| n50
-  n51{"!config"}:::decision
-  n49 -->|"no"| n51
-  n52(["422 PRECONDITION_FAILED El canal no tiene configuración de proveedor activa"]):::error
+  n42 -->|"no"| n49
+  n50["Transacción: transactional(…)"]:::transaccion
+  n49 --> n50
+  n51{"!request"}:::decision
+  n50 --> n51
+  n52(["404 NOT_FOUND Solicitud de notificación no encontrada"]):::error
   n51 -->|"sí"| n52
-  n53{"!provider"}:::decision
+  n53{"request.statusConceptId === CONCEPTS.NOTIF_SUPPRESSED"}:::decision
   n51 -->|"no"| n53
-  n54(["404 NOT_FOUND El proveedor configurado para el canal no existe"]):::error
+  n54(["422 PRECONDITION_FAILED La notificación está suprimida"]):::error
   n53 -->|"sí"| n54
-  n55{"sent && channel?.channelTypeConceptId === CONCEPTS.CHANNEL_TYPE_IN_APP"}:::decision
+  n55{"request.statusConceptId !== CONCEPTS.NOTIF_PENDING && request.statusConceptId !== CONCEPTS.NOTIF_SENDING"}:::decision
   n53 -->|"no"| n55
-  n56{"!request.recipientUserId"}:::decision
+  n56(["422 PRECONDITION_FAILED La notificación ya no admite intentos"]):::error
   n55 -->|"sí"| n56
-  n57(["422 PRECONDITION_FAILED Una notificación in-app necesita destinatario interno"]):::error
-  n56 -->|"sí"| n57
-  n58[("ACTUALIZA messaging.notification_requests")]:::efecto
-  n56 -->|"no"| n58
-  n55 -->|"no"| n58
-  n59(("201 Responde con éxito")):::ok
-  n58 --> n59
-  n24 -->|"no"| n59
+  n57{"!config"}:::decision
+  n55 -->|"no"| n57
+  n58(["422 PRECONDITION_FAILED El canal no tiene configuración de proveedor activa"]):::error
+  n57 -->|"sí"| n58
+  n59{"!provider"}:::decision
+  n57 -->|"no"| n59
+  n60(["404 NOT_FOUND El proveedor configurado para el canal no existe"]):::error
+  n59 -->|"sí"| n60
+  n61{"sent && channel?.channelTypeConceptId === CONCEPTS.CHANNEL_TYPE_IN_APP"}:::decision
+  n59 -->|"no"| n61
+  n62{"!request.recipientUserId"}:::decision
+  n61 -->|"sí"| n62
+  n63(["422 PRECONDITION_FAILED Una notificación in-app necesita destinatario interno"]):::error
+  n62 -->|"sí"| n63
+  n64{"availableAt › now"}:::decision
+  n62 -->|"no"| n64
+  n65[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n64 -->|"sí"| n65
+  n66[("ACTUALIZA messaging.notification_requests")]:::efecto
+  n65 --> n66
+  n64 -->|"no"| n66
+  n61 -->|"no"| n66
+  n67(("201 Responde con éxito")):::ok
+  n66 --> n67
+  n30 -->|"no"| n67
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1486,7 +1516,7 @@ Aceptar (con las especialidades autorizadas) o rechazar la solicitud
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Solicitud de notificación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal no existe |
 | 409 | `CONFLICT` | ConflictException: Esta solicitud ya fue decidida |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud no tiene profesional asociado; PreconditionFailedException: Sólo se pueden autorizar especialidades que el profesional pidió; PreconditionFailedException: Aceptar exige autorizar al menos una especialidad; si no autoriza ninguna, rechace la solicitud; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud no tiene profesional asociado; PreconditionFailedException: Sólo se pueden autorizar especialidades que el profesional pidió; PreconditionFailedException: Aceptar exige autorizar al menos una especialidad; si no autoriza ninguna, rechace la solicitud; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1562,81 +1592,79 @@ flowchart TD
   n32 -->|"no"| n34
   n35(["422 PRECONDITION_FAILED Aceptar exige autorizar al menos una especialidad; si no autoriza ninguna, rechace la…"]):::error
   n34 -->|"sí"| n35
-  n36[("ACTUALIZA consent.consents · ACTUALIZA consent.consents · ACTUALIZA consent.consents · ACTUALIZA consent.cons…")]:::efecto
+  n36["Llama a MedicalSpecialtyCatalogService.assertAllAreSpecialties"]:::llamada
   n34 -->|"no"| n36
-  n37["Repite: por cada const provision de requested"]:::bucle
+  n37["Llama a MedicalSpecialtyCatalogService.listMemberIds"]:::llamada
   n36 --> n37
-  n38[("ACTUALIZA consent.consent_provisions")]:::efecto
-  n37 -->|"cada elemento"| n38
-  n39["Llama a ConsentEventsRepository.record"]:::llamada
-  n38 --> n39
-  n37 -->|"al terminar"| n39
-  n40[("CREA consent.consent_events")]:::efecto
-  n39 --> n40
-  n41["Llama a ClinicalAccessGrantsRepository.findActive"]:::llamada
-  n40 --> n41
-  n42[("LEE authz.clinical_access_grants")]:::efecto
-  n41 --> n42
-  n43{"!existing"}:::decision
+  n38{"members === null"}:::decision
+  n37 --> n38
+  n39(["422 PRECONDITION_FAILED El catálogo de especialidades médicas no está disponible"]):::error
+  n38 -->|"sí"| n39
+  n40{"outside.length › 0"}:::decision
+  n38 -->|"no"| n40
+  n41(["422 PRECONDITION_FAILED La especialidad no pertenece al catálogo de especialidades médicas"]):::error
+  n40 -->|"sí"| n41
+  n42[("ACTUALIZA consent.consents · ACTUALIZA consent.consents · ACTUALIZA consent.consents · ACTUALIZA consent.cons…")]:::efecto
+  n40 -->|"no"| n42
+  n43["Repite: por cada const provision de requested"]:::bucle
   n42 --> n43
-  n44["Llama a ClinicalAccessGrantsRepository.create"]:::llamada
-  n43 -->|"sí"| n44
-  n45[("CREA authz.clinical_access_grants")]:::efecto
+  n44[("ACTUALIZA consent.consent_provisions")]:::efecto
+  n43 -->|"cada elemento"| n44
+  n45["Llama a ConsentEventsRepository.record"]:::llamada
   n44 --> n45
-  n46["Llama a AuditTrailService.record"]:::llamada
+  n43 -->|"al terminar"| n45
+  n46[("CREA consent.consent_events")]:::efecto
   n45 --> n46
-  n43 -->|"no"| n46
-  n47["Llama a AuditLogRepository.append"]:::llamada
+  n47["Llama a ClinicalAccessGrantsRepository.create"]:::llamada
   n46 --> n47
-  n48["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n48[("CREA authz.clinical_access_grants")]:::efecto
   n47 --> n48
-  n49[("LEE audit.audit_log")]:::efecto
+  n49["Llama a AuditTrailService.record"]:::llamada
   n48 --> n49
-  n50[("CREA audit.audit_log")]:::efecto
+  n50["Llama a AuditLogRepository.append"]:::llamada
   n49 --> n50
-  n51["Llama a MessagingPractitionerAccessNoticeAdapter.emit"]:::llamada
+  n51["Llama a AuditLogRepository.findChainTip"]:::llamada
   n50 --> n51
-  n52["Intenta"]:::intento
+  n52[("LEE audit.audit_log")]:::efecto
   n51 --> n52
-  n53["Llama a MessagingPractitionerAccessNoticeAdapter.issue"]:::llamada
+  n53[("CREA audit.audit_log")]:::efecto
   n52 --> n53
-  n54["Llama a NotificationsService.createRequest"]:::llamada
+  n54["Llama a MessagingPractitionerAccessNoticeAdapter.emit"]:::llamada
   n53 --> n54
-  n55{"!recipientUserId"}:::decision
+  n55["Intenta"]:::intento
   n54 --> n55
-  n56(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
-  n55 -->|"sí"| n56
-  n57["Transacción: transactional(…)"]:::transaccion
-  n55 -->|"no"| n57
-  n58{"!channel"}:::decision
+  n56["Llama a MessagingPractitionerAccessNoticeAdapter.issue"]:::llamada
+  n55 --> n56
+  n57["Llama a NotificationsService.createRequest"]:::llamada
+  n56 --> n57
+  n58{"!recipientUserId"}:::decision
   n57 --> n58
-  n59(["404 NOT_FOUND Canal no encontrado"]):::error
+  n59(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
   n58 -->|"sí"| n59
-  n60{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n60["Transacción: transactional(…)"]:::transaccion
   n58 -->|"no"| n60
-  n61(["422 PRECONDITION_FAILED El canal no está activo"]):::error
-  n60 -->|"sí"| n61
-  n62{"dto.templateId"}:::decision
-  n60 -->|"no"| n62
-  n63{"!template"}:::decision
-  n62 -->|"sí"| n63
-  n64(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n61{"!channel"}:::decision
+  n60 --> n61
+  n62(["404 NOT_FOUND Canal no encontrado"]):::error
+  n61 -->|"sí"| n62
+  n63{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n61 -->|"no"| n63
+  n64(["422 PRECONDITION_FAILED El canal no está activo"]):::error
   n63 -->|"sí"| n64
-  n65{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n65{"dto.templateId"}:::decision
   n63 -->|"no"| n65
-  n66(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n66{"!template"}:::decision
   n65 -->|"sí"| n66
-  n67{"template.channelId !== dto.channelId"}:::decision
-  n65 -->|"no"| n67
-  n68(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
-  n67 -->|"sí"| n68
-  n69["Llama a NotificationsService.deliverNotification"]:::llamada
-  n67 -->|"no"| n69
-  n62 -->|"no"| n69
-  n70["Transacción: transactional(…)"]:::transaccion
-  n69 --> n70
-  n71["… el resto del árbol (14 nodos) está en el JSON del inventario"]:::corte
-  n70 --> n71
+  n67(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n66 -->|"sí"| n67
+  n68{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n66 -->|"no"| n68
+  n69(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n68 -->|"sí"| n69
+  n70{"template.channelId !== dto.channelId"}:::decision
+  n68 -->|"no"| n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 -->|"sí"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1645,7 +1673,61 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. GET /consent/practitioner-access-requests/mine
+#### 14. POST /consent/practitioner-access-requests/{id}/revoke
+
+Revocar un acceso granular que el paciente ya había aceptado
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada; ResourceNotFoundException: {CONSENT_NOT_FOUND.message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAccessRevocationService.revoke"]:::llamada
+  n2 --> n3
+  n4["Llama a ConsentsRepository.findById"]:::llamada
+  n3 --> n4
+  n5[("LEE consent.consents")]:::efecto
+  n4 --> n5
+  n6["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n5 --> n6
+  n7[("LEE profiles.person_account_links")]:::efecto
+  n6 --> n7
+  n8["Llama a PatientProfilesRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.patient_profiles")]:::efecto
+  n8 --> n9
+  n10{"!consent || consent.categoryConceptId !== CONS.CATEGORY_PRACTITIONER_ACCESS || !profile || profile.profileId…"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Solicitud no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a ConsentsService.withdrawAsOwner"]:::llamada
+  n10 -->|"no"| n12
+  n13["Transacción: withdrawScoped(…)"]:::transaccion
+  n12 --> n13
+  n14{"!consent || consent.patientProfileId !== patientProfileId"}:::decision
+  n13 --> n14
+  n15(["404 NOT_FOUND {CONSENT_NOT_FOUND.message}"]):::error
+  n14 -->|"sí"| n15
+  n16(("200 Responde con éxito")):::ok
+  n14 -->|"no"| n16
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. GET /consent/practitioner-access-requests/mine
 
 Mis solicitudes de vínculo pendientes de decisión
 
@@ -1692,7 +1774,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /consent/privacy-restrictions
+#### 16. POST /consent/privacy-restrictions
 
 Aplicar restricción de privacidad que afecta RLS clínico
 
@@ -1749,7 +1831,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /consent/processing-legal-bases
+#### 17. POST /consent/processing-legal-bases
 
 Establecer/versionar base legal de procesamiento
 
@@ -1793,7 +1875,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. GET /consent/treatment-informed-consents
+#### 18. GET /consent/treatment-informed-consents
 
 Listar consentimientos informados de tratamiento
 
@@ -1814,61 +1896,41 @@ flowchart TD
   n2 --> n3
   n4["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
   n3 --> n4
-  n5{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n5["Llama a ClinicalReadService.resolveReadScope"]:::llamada
   n4 --> n5
-  n6["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
-  n5 -->|"sí"| n6
-  n7["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n6 --> n7
-  n8[("LEE profiles.person_account_links")]:::efecto
+  n6{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n5 --> n6
+  n7["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n6 -->|"sí"| n7
+  n8{"!link || !profile || profile.profileId !== link.personId"}:::decision
   n7 --> n8
-  n9["Llama a PatientProfilesRepository.findById"]:::llamada
-  n8 --> n9
-  n10[("LEE profiles.patient_profiles")]:::efecto
-  n9 --> n10
-  n11{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n9(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n8 -->|"no"| n10
+  n6 -->|"no"| n10
+  n11[("LEE profiles.person_account_links")]:::efecto
   n10 --> n11
-  n12(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n11 -->|"no"| n13
-  n5 -->|"no"| n13
-  n14[("LEE profiles.person_account_links")]:::efecto
+  n12["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n11 --> n12
+  n13[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n12 --> n13
+  n14["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
   n13 --> n14
-  n15["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n15{"!link || !profile || profile.profileId !== link.personId"}:::decision
   n14 --> n15
-  n16[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n15 --> n16
-  n17["Llama a ClinicalReadService.isAttending"]:::llamada
-  n16 --> n17
-  n18["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n16(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a TreatmentInformedConsentsRepository.findByPatient"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE consent.treatment_informed_consents")]:::efecto
   n17 --> n18
-  n19[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n19["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
   n18 --> n19
-  n20["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n20[("LEE consent.consent_evidence")]:::efecto
   n19 --> n20
-  n21["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n21(("200 Responde con éxito")):::ok
   n20 --> n21
-  n22[("LEE profiles.person_account_links")]:::efecto
-  n21 --> n22
-  n23["Llama a PatientProfilesRepository.findById"]:::llamada
-  n22 --> n23
-  n24[("LEE profiles.patient_profiles")]:::efecto
-  n23 --> n24
-  n25{"!link || !profile || profile.profileId !== link.personId"}:::decision
-  n24 --> n25
-  n26(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a TreatmentInformedConsentsRepository.findByPatient"]:::llamada
-  n25 -->|"no"| n27
-  n28[("LEE consent.treatment_informed_consents")]:::efecto
-  n27 --> n28
-  n29["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
-  n28 --> n29
-  n30[("LEE consent.consent_evidence")]:::efecto
-  n29 --> n30
-  n31(("200 Responde con éxito")):::ok
-  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1877,7 +1939,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /consent/treatment-informed-consents
+#### 19. POST /consent/treatment-informed-consents
 
 Capturar consentimiento informado de tratamiento
 
@@ -1995,52 +2057,50 @@ flowchart TD
   n47 --> n48
   n49[("LEE profiles.health_practitioner_profiles")]:::efecto
   n48 --> n49
-  n50["Llama a ClinicalReadService.isAttending"]:::llamada
+  n50["Llama a ClinicalReadService.attendanceBasis"]:::llamada
   n49 --> n50
   n51["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
   n50 --> n51
   n52[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
   n51 --> n52
-  n53(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n53["Llama a ClinicalScopeRepository.isOwnOpenEncounter"]:::llamada
   n52 --> n53
-  n45 -->|"no"| n53
-  n54["Llama a TreatmentInformedConsentsService.sign"]:::llamada
-  n55["Llama a TreatmentInformedConsentsService.assertContentRules"]:::llamada
+  n54[("LEE clinical.encounters")]:::efecto
+  n53 --> n54
+  n55["Llama a ClinicalScopeRepository.participates"]:::llamada
   n54 --> n55
-  n56{"Boolean(dto.targetType) !== Boolean(dto.targetId)"}:::decision
+  n56[("LEE clinical.encounter_participants")]:::efecto
   n55 --> n56
-  n57(["↩ (relanza el error capturado)"]):::error
-  n56 -->|"sí"| n57
-  n58{"dto.exceptionType && !dto.exceptionJustification?.trim()"}:::decision
-  n56 -->|"no"| n58
-  n59(["↩ (relanza el error capturado)"]):::error
-  n58 -->|"sí"| n59
-  n60{"dto.targetType && !dto.exceptionType"}:::decision
-  n58 -->|"no"| n60
-  n61{"missing.length › 0"}:::decision
-  n60 -->|"sí"| n61
-  n62(["↩ (relanza el error capturado)"]):::error
-  n61 -->|"sí"| n62
-  n63{"dto.grantedBy && dto.grantedBy !== 'PATIENT'"}:::decision
-  n61 -->|"no"| n63
-  n60 -->|"no"| n63
-  n64{"missing.length › 0"}:::decision
-  n63 -->|"sí"| n64
-  n65(["↩ (relanza el error capturado)"]):::error
-  n64 -->|"sí"| n65
-  n66{"typeof dto.assentObtained !== 'boolean'"}:::decision
-  n64 -->|"no"| n66
-  n67(["↩ (relanza el error capturado)"]):::error
-  n66 -->|"sí"| n67
-  n68{"dto.decision === 'ACCEPTED' && dto.targetType && dto.exceptionType !== 'EMERGENCY' && dto.revocationRightInfo…"}:::decision
-  n66 -->|"no"| n68
-  n63 -->|"no"| n68
-  n69(["↩ (relanza el error capturado)"]):::error
-  n68 -->|"sí"| n69
-  n70["Transacción: transactional(…)"]:::transaccion
-  n68 -->|"no"| n70
-  n71["… el resto del árbol (16 nodos) está en el JSON del inventario"]:::corte
-  n70 --> n71
+  n57["Llama a ClinicalScopeRepository.hasOwnOpenEncounter"]:::llamada
+  n56 --> n57
+  n58[("LEE clinical.encounters")]:::efecto
+  n57 --> n58
+  n59["Llama a ClinicalScopeRepository.participates"]:::llamada
+  n58 --> n59
+  n60[("LEE clinical.encounter_participants")]:::efecto
+  n59 --> n60
+  n61["Llama a ClinicalGranularScopeService.hasWriteLevelGrant"]:::llamada
+  n60 --> n61
+  n62["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
+  n61 --> n62
+  n63[("LEE authz.clinical_access_grants")]:::efecto
+  n62 --> n63
+  n64(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n63 --> n64
+  n45 -->|"no"| n64
+  n65["Llama a TreatmentInformedConsentsService.sign"]:::llamada
+  n66["Llama a TreatmentInformedConsentsService.assertContentRules"]:::llamada
+  n65 --> n66
+  n67{"Boolean(dto.targetType) !== Boolean(dto.targetId)"}:::decision
+  n66 --> n67
+  n68(["↩ (relanza el error capturado)"]):::error
+  n67 -->|"sí"| n68
+  n69{"dto.exceptionType && !dto.exceptionJustification?.trim()"}:::decision
+  n67 -->|"no"| n69
+  n70(["↩ (relanza el error capturado)"]):::error
+  n69 -->|"sí"| n70
+  n71["… el resto del árbol (10 nodos) está en el JSON del inventario"]:::corte
+  n69 -->|"no"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2049,7 +2109,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /consent/treatment-informed-consents/{id}
+#### 20. GET /consent/treatment-informed-consents/{id}
 
 Leer un consentimiento informado de tratamiento
 
@@ -2081,57 +2141,37 @@ flowchart TD
   n7 -->|"sí"| n8
   n9["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
   n7 -->|"no"| n9
-  n10{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n10["Llama a ClinicalReadService.resolveReadScope"]:::llamada
   n9 --> n10
-  n11["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
-  n10 -->|"sí"| n11
-  n12["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n11 --> n12
-  n13[("LEE profiles.person_account_links")]:::efecto
+  n11{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n10 --> n11
+  n12["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n11 -->|"sí"| n12
+  n13{"!link || !profile || profile.profileId !== link.personId"}:::decision
   n12 --> n13
-  n14["Llama a PatientProfilesRepository.findById"]:::llamada
-  n13 --> n14
-  n15[("LEE profiles.patient_profiles")]:::efecto
-  n14 --> n15
-  n16{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n14(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n13 -->|"no"| n15
+  n11 -->|"no"| n15
+  n16[("LEE profiles.person_account_links")]:::efecto
   n15 --> n16
-  n17(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n16 -->|"no"| n18
-  n10 -->|"no"| n18
-  n19[("LEE profiles.person_account_links")]:::efecto
+  n17["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n17 --> n18
+  n19["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
   n18 --> n19
-  n20["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n20{"!link || !profile || profile.profileId !== link.personId"}:::decision
   n19 --> n20
-  n21[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n20 --> n21
-  n22["Llama a ClinicalReadService.isAttending"]:::llamada
-  n21 --> n22
-  n23["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n21(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
+  n20 -->|"no"| n22
+  n23[("LEE consent.consent_evidence")]:::efecto
   n22 --> n23
-  n24[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n24(("200 Responde con éxito")):::ok
   n23 --> n24
-  n25["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
-  n24 --> n25
-  n26["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
-  n25 --> n26
-  n27[("LEE profiles.person_account_links")]:::efecto
-  n26 --> n27
-  n28["Llama a PatientProfilesRepository.findById"]:::llamada
-  n27 --> n28
-  n29[("LEE profiles.patient_profiles")]:::efecto
-  n28 --> n29
-  n30{"!link || !profile || profile.profileId !== link.personId"}:::decision
-  n29 --> n30
-  n31(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
-  n30 -->|"sí"| n31
-  n32["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
-  n30 -->|"no"| n32
-  n33[("LEE consent.consent_evidence")]:::efecto
-  n32 --> n33
-  n34(("200 Responde con éxito")):::ok
-  n33 --> n34
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2140,7 +2180,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /consent/treatment-informed-consents/{id}/evidence
+#### 21. POST /consent/treatment-informed-consents/{id}/evidence
 
 Adjuntar evidencia de firma al consentimiento de tratamiento
 
@@ -2183,28 +2223,50 @@ flowchart TD
   n12 --> n13
   n14[("LEE profiles.health_practitioner_profiles")]:::efecto
   n13 --> n14
-  n15["Llama a ClinicalReadService.isAttending"]:::llamada
+  n15["Llama a ClinicalReadService.attendanceBasis"]:::llamada
   n14 --> n15
   n16["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
   n15 --> n16
   n17[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
   n16 --> n17
-  n18(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n18["Llama a ClinicalScopeRepository.isOwnOpenEncounter"]:::llamada
   n17 --> n18
-  n10 -->|"no"| n18
-  n19{"row.withdrawnAt"}:::decision
-  n20(["409 CONFLICT El consentimiento está revocado"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a ConsentEvidenceService.record"]:::llamada
-  n19 -->|"no"| n21
-  n22["Transacción: transactional(…)"]:::transaccion
+  n19[("LEE clinical.encounters")]:::efecto
+  n18 --> n19
+  n20["Llama a ClinicalScopeRepository.participates"]:::llamada
+  n19 --> n20
+  n21[("LEE clinical.encounter_participants")]:::efecto
+  n20 --> n21
+  n22["Llama a ClinicalScopeRepository.hasOwnOpenEncounter"]:::llamada
   n21 --> n22
-  n23["Llama a ConsentEvidenceRepository.create"]:::llamada
+  n23[("LEE clinical.encounters")]:::efecto
   n22 --> n23
-  n24[("CREA consent.consent_evidence")]:::efecto
+  n24["Llama a ClinicalScopeRepository.participates"]:::llamada
   n23 --> n24
-  n25(("201 Responde con éxito")):::ok
+  n25[("LEE clinical.encounter_participants")]:::efecto
   n24 --> n25
+  n26["Llama a ClinicalGranularScopeService.hasWriteLevelGrant"]:::llamada
+  n25 --> n26
+  n27["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
+  n26 --> n27
+  n28[("LEE authz.clinical_access_grants")]:::efecto
+  n27 --> n28
+  n29(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n28 --> n29
+  n10 -->|"no"| n29
+  n30{"row.withdrawnAt"}:::decision
+  n31(["409 CONFLICT El consentimiento está revocado"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a ConsentEvidenceService.record"]:::llamada
+  n30 -->|"no"| n32
+  n33["Transacción: transactional(…)"]:::transaccion
+  n32 --> n33
+  n34["Llama a ConsentEvidenceRepository.create"]:::llamada
+  n33 --> n34
+  n35[("CREA consent.consent_evidence")]:::efecto
+  n34 --> n35
+  n36(("201 Responde con éxito")):::ok
+  n35 --> n36
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2213,7 +2275,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. PATCH /consent/treatment-informed-consents/{id}/post-emergency-information
+#### 22. PATCH /consent/treatment-informed-consents/{id}/post-emergency-information
 
 Registrar la información posterior a una emergencia
 
@@ -2259,34 +2321,56 @@ flowchart TD
   n13 --> n14
   n15[("LEE profiles.health_practitioner_profiles")]:::efecto
   n14 --> n15
-  n16["Llama a ClinicalReadService.isAttending"]:::llamada
+  n16["Llama a ClinicalReadService.attendanceBasis"]:::llamada
   n15 --> n16
   n17["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
   n16 --> n17
   n18[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
   n17 --> n18
-  n19(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n19["Llama a ClinicalScopeRepository.isOwnOpenEncounter"]:::llamada
   n18 --> n19
-  n11 -->|"no"| n19
-  n20{"row.exceptionType !== 'EMERGENCY'"}:::decision
-  n21(["422 PRECONDITION_FAILED La información posterior sólo aplica a la excepción de emergencia"]):::error
-  n20 -->|"sí"| n21
-  n22{"row.postEmergencyInformedAt"}:::decision
-  n20 -->|"no"| n22
-  n23(["409 CONFLICT La información posterior a la emergencia ya estaba registrada"]):::error
-  n22 -->|"sí"| n23
-  n24{"Number.isNaN(informedAt.getTime()) || informedAt.getTime() › now.getTime() || (floor && informedAt.getTime()…"}:::decision
-  n22 -->|"no"| n24
-  n25(["↩ (relanza el error capturado)"]):::error
-  n24 -->|"sí"| n25
-  n26[("ACTUALIZA consent.treatment_informed_consents")]:::efecto
-  n24 -->|"no"| n26
-  n27["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
+  n20[("LEE clinical.encounters")]:::efecto
+  n19 --> n20
+  n21["Llama a ClinicalScopeRepository.participates"]:::llamada
+  n20 --> n21
+  n22[("LEE clinical.encounter_participants")]:::efecto
+  n21 --> n22
+  n23["Llama a ClinicalScopeRepository.hasOwnOpenEncounter"]:::llamada
+  n22 --> n23
+  n24[("LEE clinical.encounters")]:::efecto
+  n23 --> n24
+  n25["Llama a ClinicalScopeRepository.participates"]:::llamada
+  n24 --> n25
+  n26[("LEE clinical.encounter_participants")]:::efecto
+  n25 --> n26
+  n27["Llama a ClinicalGranularScopeService.hasWriteLevelGrant"]:::llamada
   n26 --> n27
-  n28[("LEE consent.consent_evidence")]:::efecto
+  n28["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
   n27 --> n28
-  n29(("200 Responde con éxito")):::ok
+  n29[("LEE authz.clinical_access_grants")]:::efecto
   n28 --> n29
+  n30(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n29 --> n30
+  n11 -->|"no"| n30
+  n31{"row.exceptionType !== 'EMERGENCY'"}:::decision
+  n32(["422 PRECONDITION_FAILED La información posterior sólo aplica a la excepción de emergencia"]):::error
+  n31 -->|"sí"| n32
+  n33{"row.postEmergencyInformedAt"}:::decision
+  n31 -->|"no"| n33
+  n34(["409 CONFLICT La información posterior a la emergencia ya estaba registrada"]):::error
+  n33 -->|"sí"| n34
+  n35{"Number.isNaN(informedAt.getTime()) || informedAt.getTime() › now.getTime() || (floor && informedAt.getTime()…"}:::decision
+  n33 -->|"no"| n35
+  n36(["↩ (relanza el error capturado)"]):::error
+  n35 -->|"sí"| n36
+  n37[("ACTUALIZA consent.treatment_informed_consents")]:::efecto
+  n35 -->|"no"| n37
+  n38["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
+  n37 --> n38
+  n39[("LEE consent.consent_evidence")]:::efecto
+  n38 --> n39
+  n40(("200 Responde con éxito")):::ok
+  n39 --> n40
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2295,7 +2379,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. PATCH /consent/treatment-informed-consents/{id}/withdraw
+#### 23. PATCH /consent/treatment-informed-consents/{id}/withdraw
 
 Revocar un consentimiento informado de tratamiento
 
@@ -2340,35 +2424,57 @@ flowchart TD
   n13 --> n14
   n15[("LEE profiles.health_practitioner_profiles")]:::efecto
   n14 --> n15
-  n16["Llama a ClinicalReadService.isAttending"]:::llamada
+  n16["Llama a ClinicalReadService.attendanceBasis"]:::llamada
   n15 --> n16
   n17["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
   n16 --> n17
   n18[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
   n17 --> n18
-  n19(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n19["Llama a ClinicalScopeRepository.isOwnOpenEncounter"]:::llamada
   n18 --> n19
-  n11 -->|"no"| n19
-  n20{"row.withdrawnAt"}:::decision
-  n21(["409 CONFLICT El consentimiento ya estaba revocado"]):::error
-  n20 -->|"sí"| n21
-  n22[("ACTUALIZA consent.treatment_informed_consents · ACTUALIZA consent.treatment_informed_consents · ACTUALIZA con…")]:::efecto
-  n20 -->|"no"| n22
-  n23["Repite: por cada const referral de linked"]:::bucle
+  n20[("LEE clinical.encounters")]:::efecto
+  n19 --> n20
+  n21["Llama a ClinicalScopeRepository.participates"]:::llamada
+  n20 --> n21
+  n22[("LEE clinical.encounter_participants")]:::efecto
+  n21 --> n22
+  n23["Llama a ClinicalScopeRepository.hasOwnOpenEncounter"]:::llamada
   n22 --> n23
-  n24[("ACTUALIZA clinical_ext.referrals")]:::efecto
-  n23 -->|"cada elemento"| n24
-  n25["Llama a ConsentEventsRepository.record"]:::llamada
+  n24[("LEE clinical.encounters")]:::efecto
+  n23 --> n24
+  n25["Llama a ClinicalScopeRepository.participates"]:::llamada
   n24 --> n25
-  n23 -->|"al terminar"| n25
-  n26[("CREA consent.consent_events")]:::efecto
+  n26[("LEE clinical.encounter_participants")]:::efecto
   n25 --> n26
-  n27["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
+  n27["Llama a ClinicalGranularScopeService.hasWriteLevelGrant"]:::llamada
   n26 --> n27
-  n28[("LEE consent.consent_evidence")]:::efecto
+  n28["Llama a ClinicalAccessGrantsRepository.findActiveForUserPatient"]:::llamada
   n27 --> n28
-  n29(("200 Responde con éxito")):::ok
+  n29[("LEE authz.clinical_access_grants")]:::efecto
   n28 --> n29
+  n30(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n29 --> n30
+  n11 -->|"no"| n30
+  n31{"row.withdrawnAt"}:::decision
+  n32(["409 CONFLICT El consentimiento ya estaba revocado"]):::error
+  n31 -->|"sí"| n32
+  n33[("ACTUALIZA consent.treatment_informed_consents · ACTUALIZA consent.treatment_informed_consents · ACTUALIZA con…")]:::efecto
+  n31 -->|"no"| n33
+  n34["Repite: por cada const referral de linked"]:::bucle
+  n33 --> n34
+  n35[("ACTUALIZA clinical_ext.referrals")]:::efecto
+  n34 -->|"cada elemento"| n35
+  n36["Llama a ConsentEventsRepository.record"]:::llamada
+  n35 --> n36
+  n34 -->|"al terminar"| n36
+  n37[("CREA consent.consent_events")]:::efecto
+  n36 --> n37
+  n38["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
+  n37 --> n38
+  n39[("LEE consent.consent_evidence")]:::efecto
+  n38 --> n39
+  n40(("200 Responde con éxito")):::ok
+  n39 --> n40
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

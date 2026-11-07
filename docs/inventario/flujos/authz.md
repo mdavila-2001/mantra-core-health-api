@@ -3,12 +3,12 @@
 # Flujos del módulo `authz`
 
 - **Procesos:** 2 · **Máquinas de estado:** 0
-- **Operaciones:** 45 (36 con decisiones propias, 9 sin ellas)
+- **Operaciones:** 49 (40 con decisiones propias, 9 sin ellas)
 - Inventario de endpoints del módulo: [authz](../endpoints/authz.md)
 
 ## Proceso: Módulo 06 — authz (Authorization, Purpose of Use & Field Masking)
 
-- **Código:** `authz` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 45
+- **Código:** `authz` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 49
 - **Actores:** CLINICAL_APPROVER · CLINICIAN · PATIENT · PRACTITIONER · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/authz/README.md`
@@ -30,9 +30,9 @@ _Fuente: `src/modules/authz/README.md:3`_
 |  |  | DELETE /authz/users/{userId}/role-assignments/{assignmentId} | SECURITY_ADMIN | MEDIO | 2 |
 | `ctrl:AuthzCareRelationshipsController` | Operaciones de AuthzCareRelationshipsController que el README no asigna a un caso de uso | GET /authz/care-relationships | CLINICIAN · SECURITY_ADMIN | BAJO | 1 |
 |  |  | POST /authz/care-relationships | CLINICIAN · SECURITY_ADMIN | MEDIO | 7 |
-|  |  | POST /authz/care-relationships/{id}/respond | PATIENT | MEDIO | 8 |
-|  |  | POST /authz/care-relationships/{id}/revoke | CLINICIAN · SECURITY_ADMIN | BAJO | 1 |
-|  |  | POST /authz/care-relationships/request | CLINICIAN · PRACTITIONER | MEDIO | 17 |
+|  |  | POST /authz/care-relationships/{id}/respond | PATIENT | MEDIO | 11 |
+|  |  | POST /authz/care-relationships/{id}/revoke | CLINICIAN · SECURITY_ADMIN | MEDIO | 3 |
+|  |  | POST /authz/care-relationships/request | CLINICIAN · PRACTITIONER | MEDIO | 16 |
 |  |  | GET /authz/care-relationships/requests/mine | PATIENT | BAJO | 1 |
 |  |  | GET /authz/legal-representations | SECURITY_ADMIN | BAJO | 1 |
 |  |  | POST /authz/legal-representations | SECURITY_ADMIN | MEDIO | 7 |
@@ -58,12 +58,16 @@ _Fuente: `src/modules/authz/README.md:3`_
 |  |  | POST /authz/users/{userId}/permission-grants | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /authz/users/{userId}/role-assignments | SECURITY_ADMIN | MEDIO | 3 |
 | `ctrl:AuthzMeController` | Operaciones de AuthzMeController que el README no asigna a un caso de uso | GET /authz/me/access | PATIENT | BAJO | 5 |
-|  |  | POST /authz/me/care-relationships/{id}/revoke | PATIENT | BAJO | 3 |
+|  |  | GET /authz/me/access-requests | PATIENT | BAJO | 5 |
+|  |  | POST /authz/me/care-relationships/{id}/revoke | PATIENT | MEDIO | 5 |
 |  |  | POST /authz/me/clinical-access-grants/{grantId}/revoke | PATIENT | MEDIO | 6 |
+|  |  | POST /authz/me/primary-practitioner-requests | PATIENT | MEDIO | 16 |
 | `ctrl:AuthzModulesCatalogController` | Operaciones de AuthzModulesCatalogController que el README no asigna a un caso de uso | GET /authz/catalog/modules | SECURITY_ADMIN | BAJO | 3 |
 | `ctrl:AuthzPdpController` | Operaciones de AuthzPdpController que el README no asigna a un caso de uso | POST /authz/decisions/evaluate | SECURITY_ADMIN | BAJO | 13 |
 |  |  | POST /authz/pdp/cache/invalidate | SECURITY_ADMIN | BAJO | 0 |
 | `ctrl:AuthzPoliciesController` | Operaciones de AuthzPoliciesController que el README no asigna a un caso de uso | POST /authz/tenants/{tenantId}/access-policies | SECURITY_ADMIN | MEDIO | 2 |
+| `ctrl:AuthzPractitionerRequestsController` | Operaciones de AuthzPractitionerRequestsController que el README no asigna a un caso de uso | GET /authz/practitioners/me/access-requests | CLINICIAN · PRACTITIONER | BAJO | 4 |
+|  |  | POST /authz/practitioners/me/care-relationships/{id}/respond | CLINICIAN · PRACTITIONER | MEDIO | 12 |
 | `ctrl:AuthzRolesController` | Operaciones de AuthzRolesController que el README no asigna a un caso de uso | GET /authz/roles | SECURITY_ADMIN | BAJO | 1 |
 |  |  | POST /authz/roles | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | PUT /authz/roles/{roleId}/field-permissions | SECURITY_ADMIN | MEDIO | 4 |
@@ -76,8 +80,8 @@ flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a14(["CLINICIAN · SECURITY_ADMIN"]):::actor
   a23(["PATIENT"]):::actor
-  a31(["CLINICIAN · PRACTITIONER"]):::actor
-  a44(["CLINICAL_APPROVER · SECURITY_ADMIN"]):::actor
+  a32(["CLINICIAN · PRACTITIONER"]):::actor
+  a45(["CLINICAL_APPROVER · SECURITY_ADMIN"]):::actor
   t3[("authz.roles")]:::tabla
   t4[("authz.user_role_assignments")]:::tabla
   t5[("iam.user_global_roles")]:::tabla
@@ -93,14 +97,15 @@ flowchart LR
   t25[("iam.sessions")]:::tabla
   t26[("messaging.domain_events")]:::tabla
   e28>"authz.care_relationship.responded"]:::evento
-  t32[("iam.devices")]:::tabla
-  t36[("authz.patient_legal_representations")]:::tabla
-  t41[("authz.permission_categories")]:::tabla
-  t45[("authz.clinical_access_grants")]:::tabla
-  t47[("audit.data_access_log")]:::tabla
-  t48[("authz.break_glass_sessions")]:::tabla
-  t49[("clinical.encounters")]:::tabla
-  e51>"authz.break_glass.activated"]:::evento
+  t30[("profiles.patient_primary_practitioners")]:::tabla
+  t33[("messaging.in_app_notifications")]:::tabla
+  t37[("authz.patient_legal_representations")]:::tabla
+  t42[("authz.permission_categories")]:::tabla
+  t46[("authz.clinical_access_grants")]:::tabla
+  t48[("audit.data_access_log")]:::tabla
+  t49[("authz.break_glass_sessions")]:::tabla
+  t50[("clinical.encounters")]:::tabla
+  e52>"authz.break_glass.activated"]:::evento
   subgraph s0["ctrl:AuthzAdminController · Operaciones de AuthzAdminController que el README n…"]
     o1["GET /authz/internal-users"]:::op
     o7["GET /authz/permissions"]:::op
@@ -109,30 +114,30 @@ flowchart LR
     o12["DELETE /authz/users/{userId}/role-assignments/{assignmentId}"]:::op
   end
   t21[("+1 tablas más")]
-  t27[("+2 tablas más")]
-  t33[("+11 tablas más")]
-  t38[("+1 tablas más")]
+  t27[("+5 tablas más")]
+  t34[("+10 tablas más")]
+  t39[("+1 tablas más")]
   subgraph s1["ctrl:AuthzCareRelationshipsController · Operaciones de AuthzCareRelationshipsCo…"]
     o13["GET /authz/care-relationships"]:::op
     o16["POST /authz/care-relationships"]:::op
     o22["POST /authz/care-relationships/{id}/respond"]:::op
     o29["POST /authz/care-relationships/{id}/revoke"]:::op
-    o30["POST /authz/care-relationships/request"]:::op
-    o34["GET /authz/care-relationships/requests/mine"]:::op
-    o35["GET /authz/legal-representations"]:::op
-    o37["POST /authz/legal-representations"]:::op
-    o39["POST /authz/legal-representations/{id}/revoke"]:::op
+    o31["POST /authz/care-relationships/request"]:::op
+    o35["GET /authz/care-relationships/requests/mine"]:::op
+    o36["GET /authz/legal-representations"]:::op
+    o38["POST /authz/legal-representations"]:::op
+    o40["POST /authz/legal-representations/{id}/revoke"]:::op
   end
   subgraph s2["ctrl:AuthzCatalogController · Operaciones de AuthzCatalogController que el READ…"]
-    o40["POST /authz/permission-categories"]:::op
-    o42["POST /authz/permissions"]:::op
+    o41["POST /authz/permission-categories"]:::op
+    o43["POST /authz/permissions"]:::op
   end
-  t50[("+9 tablas más")]
-  t53[("+6 tablas más")]
+  t51[("+9 tablas más")]
+  t54[("+6 tablas más")]
   subgraph s3["ctrl:AuthzClinicalController · Operaciones de AuthzClinicalController que el RE…"]
-    o43["DELETE /authz/clinical-access-grants/{grantId}"]:::op
-    o46["POST /authz/patients/{patientProfileId}/break-the-glass"]:::op
-    o52["POST /authz/patients/{patientProfileId}/clinical-access-grants"]:::op
+    o44["DELETE /authz/clinical-access-grants/{grantId}"]:::op
+    o47["POST /authz/patients/{patientProfileId}/break-the-glass"]:::op
+    o53["POST /authz/patients/{patientProfileId}/clinical-access-grants"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -173,57 +178,59 @@ flowchart LR
   o22 -->|"evento"| e28
   a14 --> o29
   o29 -->|"LEE"| t15
-  a31 --> o30
-  o30 -->|"CREA"| t24
-  o30 -->|"LEE"| t24
-  o30 -->|"CREA"| t15
-  o30 -->|"LEE"| t15
-  o30 -->|"ACTUALIZA"| t32
-  o30 -->|"LEE"| t32
-  o30 -.-> t33
-  a23 --> o34
-  o34 -->|"LEE"| t15
-  a2 --> o35
-  o35 -->|"LEE"| t36
-  a2 --> o37
-  o37 -->|"CREA"| t36
-  o37 -->|"LEE"| t36
-  o37 -->|"LEE"| t17
-  o37 -->|"LEE"| t18
-  o37 -->|"LEE"| t19
-  o37 -->|"LEE"| t20
-  o37 -.-> t38
-  a2 --> o39
-  o39 -->|"LEE"| t36
+  o29 -->|"ACTUALIZA"| t30
+  o29 -->|"LEE"| t30
+  a32 --> o31
+  o31 -->|"CREA"| t24
+  o31 -->|"LEE"| t24
+  o31 -->|"CREA"| t15
+  o31 -->|"LEE"| t15
+  o31 -->|"LEE"| t25
+  o31 -->|"ACTUALIZA"| t33
+  o31 -.-> t34
+  a23 --> o35
+  o35 -->|"LEE"| t15
+  a2 --> o36
+  o36 -->|"LEE"| t37
+  a2 --> o38
+  o38 -->|"CREA"| t37
+  o38 -->|"LEE"| t37
+  o38 -->|"LEE"| t17
+  o38 -->|"LEE"| t18
+  o38 -->|"LEE"| t19
+  o38 -->|"LEE"| t20
+  o38 -.-> t39
   a2 --> o40
-  o40 -->|"CREA"| t41
-  o40 -->|"LEE"| t41
-  a2 --> o42
-  o42 -->|"LEE"| t41
-  o42 -->|"CREA"| t8
-  o42 -->|"LEE"| t8
-  a44 --> o43
-  o43 -->|"CREA"| t24
-  o43 -->|"LEE"| t24
-  o43 -->|"LEE"| t45
-  o43 -->|"LEE"| t25
-  a44 --> o46
-  o46 -->|"CREA"| t24
-  o46 -->|"LEE"| t24
-  o46 -->|"CREA"| t47
-  o46 -->|"CREA"| t48
-  o46 -->|"CREA"| t45
-  o46 -->|"LEE"| t49
-  o46 -.-> t50
-  o46 -->|"evento"| e51
-  a44 --> o52
-  o52 -->|"CREA"| t24
-  o52 -->|"LEE"| t24
-  o52 -->|"CREA"| t45
-  o52 -->|"LEE"| t45
-  o52 -->|"LEE"| t49
-  o52 -->|"LEE"| t17
-  o52 -.-> t53
+  o40 -->|"LEE"| t37
+  a2 --> o41
+  o41 -->|"CREA"| t42
+  o41 -->|"LEE"| t42
+  a2 --> o43
+  o43 -->|"LEE"| t42
+  o43 -->|"CREA"| t8
+  o43 -->|"LEE"| t8
+  a45 --> o44
+  o44 -->|"CREA"| t24
+  o44 -->|"LEE"| t24
+  o44 -->|"LEE"| t46
+  o44 -->|"LEE"| t25
+  a45 --> o47
+  o47 -->|"CREA"| t24
+  o47 -->|"LEE"| t24
+  o47 -->|"CREA"| t48
+  o47 -->|"CREA"| t49
+  o47 -->|"CREA"| t46
+  o47 -->|"LEE"| t50
+  o47 -.-> t51
+  o47 -->|"evento"| e52
+  a45 --> o53
+  o53 -->|"CREA"| t24
+  o53 -->|"LEE"| t24
+  o53 -->|"CREA"| t46
+  o53 -->|"LEE"| t46
+  o53 -->|"LEE"| t50
+  o53 -->|"LEE"| t17
+  o53 -.-> t54
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -255,6 +262,10 @@ flowchart LR
   t38[("profiles.patient_profiles")]:::tabla
   t39[("profiles.person_account_links")]:::tabla
   t40[("profiles.persons")]:::tabla
+  t42[("consent.consent_provisions")]:::tabla
+  t43[("consent.consents")]:::tabla
+  t45[("profiles.patient_primary_practitioners")]:::tabla
+  t48[("messaging.in_app_notifications")]:::tabla
   t14[("+1 tablas más")]
   t21[("+7 tablas más")]
   t23[("+2 tablas más")]
@@ -279,21 +290,24 @@ flowchart LR
     o34["POST /authz/users/{userId}/permission-grants"]:::op
     o35["POST /authz/users/{userId}/role-assignments"]:::op
   end
+  t49[("+10 tablas más")]
   subgraph s3["ctrl:AuthzMeController · Operaciones de AuthzMeController que el README no asig…"]
     o36["GET /authz/me/access"]:::op
-    o41["POST /authz/me/care-relationships/{id}/revoke"]:::op
-    o42["POST /authz/me/clinical-access-grants/{grantId}/revoke"]:::op
+    o41["GET /authz/me/access-requests"]:::op
+    o44["POST /authz/me/care-relationships/{id}/revoke"]:::op
+    o46["POST /authz/me/clinical-access-grants/{grantId}/revoke"]:::op
+    o47["POST /authz/me/primary-practitioner-requests"]:::op
   end
   subgraph s4["ctrl:AuthzModulesCatalogController · Operaciones de AuthzModulesCatalogControll…"]
-    o43["GET /authz/catalog/modules"]:::op
+    o50["GET /authz/catalog/modules"]:::op
   end
-  t45[("+7 tablas más")]
+  t52[("+7 tablas más")]
   subgraph s5["ctrl:AuthzPdpController · Operaciones de AuthzPdpController que el README no as…"]
-    o44["POST /authz/decisions/evaluate"]:::op
-    o46["POST /authz/pdp/cache/invalidate"]:::op
+    o51["POST /authz/decisions/evaluate"]:::op
+    o53["POST /authz/pdp/cache/invalidate"]:::op
   end
   subgraph s6["ctrl:AuthzPoliciesController · Operaciones de AuthzPoliciesController que el RE…"]
-    o47["POST /authz/tenants/{tenantId}/access-policies"]:::op
+    o54["POST /authz/tenants/{tenantId}/access-policies"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -374,67 +388,111 @@ flowchart LR
   o36 -->|"LEE"| t40
   a37 --> o41
   o41 -->|"LEE"| t17
-  o41 -->|"LEE"| t38
+  o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t43
   o41 -->|"LEE"| t39
-  a37 --> o42
-  o42 -->|"CREA"| t3
-  o42 -->|"LEE"| t3
-  o42 -->|"LEE"| t18
-  o42 -->|"LEE"| t25
-  o42 -->|"LEE"| t38
-  o42 -->|"LEE"| t39
-  a2 --> o43
-  o43 -->|"LEE"| t9
-  o43 -->|"LEE"| t11
-  o43 -->|"LEE"| t12
-  a2 --> o44
-  o44 -->|"LEE"| t16
+  o41 -->|"LEE"| t40
+  a37 --> o44
   o44 -->|"LEE"| t17
-  o44 -->|"LEE"| t18
-  o44 -->|"LEE"| t19
-  o44 -->|"LEE"| t20
-  o44 -->|"LEE"| t9
-  o44 -.-> t45
-  a2 --> o46
-  a2 --> o47
-  o47 -->|"CREA"| t16
-  o47 -->|"LEE"| t16
+  o44 -->|"ACTUALIZA"| t45
+  o44 -->|"LEE"| t45
+  o44 -->|"LEE"| t38
+  o44 -->|"LEE"| t39
+  a37 --> o46
+  o46 -->|"CREA"| t3
+  o46 -->|"LEE"| t3
+  o46 -->|"LEE"| t18
+  o46 -->|"LEE"| t25
+  o46 -->|"LEE"| t38
+  o46 -->|"LEE"| t39
+  a37 --> o47
+  o47 -->|"CREA"| t3
+  o47 -->|"LEE"| t3
+  o47 -->|"CREA"| t17
+  o47 -->|"LEE"| t17
+  o47 -->|"LEE"| t25
+  o47 -->|"ACTUALIZA"| t48
+  o47 -.-> t49
+  a2 --> o50
+  o50 -->|"LEE"| t9
+  o50 -->|"LEE"| t11
+  o50 -->|"LEE"| t12
+  a2 --> o51
+  o51 -->|"LEE"| t16
+  o51 -->|"LEE"| t17
+  o51 -->|"LEE"| t18
+  o51 -->|"LEE"| t19
+  o51 -->|"LEE"| t20
+  o51 -->|"LEE"| t9
+  o51 -.-> t52
+  a2 --> o53
+  a2 --> o54
+  o54 -->|"CREA"| t16
+  o54 -->|"LEE"| t16
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 3 de 3 — etapas `ctrl:AuthzRolesController`
+### Diagrama 3 de 3 — etapas `ctrl:AuthzPractitionerRequestsController`, `ctrl:AuthzRolesController`
 
 ```mermaid
 flowchart LR
-  a2(["SECURITY_ADMIN"]):::actor
-  t3[("authz.roles")]:::tabla
-  t6[("authz.field_permissions")]:::tabla
-  t8[("authz.permissions")]:::tabla
-  t9[("authz.role_permissions")]:::tabla
-  subgraph s0["ctrl:AuthzRolesController · Operaciones de AuthzRolesController que el README n…"]
-    o1["GET /authz/roles"]:::op
-    o4["POST /authz/roles"]:::op
-    o5["PUT /authz/roles/{roleId}/field-permissions"]:::op
-    o7["PUT /authz/roles/{roleId}/permissions"]:::op
+  a2(["CLINICIAN · PRACTITIONER"]):::actor
+  a14(["SECURITY_ADMIN"]):::actor
+  t3[("authz.care_relationships")]:::tabla
+  t4[("consent.consent_provisions")]:::tabla
+  t5[("consent.consents")]:::tabla
+  t6[("profiles.persons")]:::tabla
+  t8[("audit.audit_log")]:::tabla
+  t9[("iam.sessions")]:::tabla
+  t10[("messaging.domain_events")]:::tabla
+  e12>"authz.care_relationship.responded"]:::evento
+  t15[("authz.roles")]:::tabla
+  t18[("authz.field_permissions")]:::tabla
+  t20[("authz.permissions")]:::tabla
+  t21[("authz.role_permissions")]:::tabla
+  t11[("+6 tablas más")]
+  subgraph s0["ctrl:AuthzPractitionerRequestsController · Operaciones de AuthzPractitionerRequ…"]
+    o1["GET /authz/practitioners/me/access-requests"]:::op
+    o7["POST /authz/practitioners/me/care-relationships/{id}/respond"]:::op
+  end
+  subgraph s1["ctrl:AuthzRolesController · Operaciones de AuthzRolesController que el README n…"]
+    o13["GET /authz/roles"]:::op
+    o16["POST /authz/roles"]:::op
+    o17["PUT /authz/roles/{roleId}/field-permissions"]:::op
+    o19["PUT /authz/roles/{roleId}/permissions"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
-  a2 --> o4
-  o4 -->|"CREA"| t3
-  o4 -->|"LEE"| t3
-  a2 --> o5
-  o5 -->|"ACTUALIZA"| t6
-  o5 -->|"CREA"| t6
-  o5 -->|"LEE"| t6
-  o5 -->|"LEE"| t3
+  o1 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  o1 -->|"LEE"| t6
   a2 --> o7
+  o7 -->|"CREA"| t8
   o7 -->|"LEE"| t8
-  o7 -->|"ACTUALIZA"| t9
-  o7 -->|"CREA"| t9
+  o7 -->|"ACTUALIZA"| t3
   o7 -->|"LEE"| t3
+  o7 -->|"LEE"| t9
+  o7 -->|"CREA"| t10
+  o7 -.-> t11
+  o7 -->|"evento"| e12
+  a14 --> o13
+  o13 -->|"LEE"| t15
+  a14 --> o16
+  o16 -->|"CREA"| t15
+  o16 -->|"LEE"| t15
+  a14 --> o17
+  o17 -->|"ACTUALIZA"| t18
+  o17 -->|"CREA"| t18
+  o17 -->|"LEE"| t18
+  o17 -->|"LEE"| t15
+  a14 --> o19
+  o19 -->|"LEE"| t20
+  o19 -->|"ACTUALIZA"| t21
+  o19 -->|"CREA"| t21
+  o19 -->|"LEE"| t15
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -669,7 +727,8 @@ Responder (aceptar/rechazar) una solicitud de relación asistencial
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo el paciente titular puede responder esta solicitud; PreconditionFailedException: La solicitud ya fue respondida o ya no está pendiente |
+| 409 | `CONFLICT` | ConflictException: Su médico de cabecera cambió mientras se aceptaba. Vuelva a intentarlo. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo el paciente titular puede responder esta solicitud; PreconditionFailedException: La solicitud ya fue respondida o ya no está pendiente; PreconditionFailedException: Sólo la otra parte puede aceptar esta solicitud |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -699,49 +758,107 @@ flowchart TD
   n11 -->|"sí"| n12
   n13{"dto.decision === 'ACCEPT'"}:::decision
   n11 -->|"no"| n13
-  n14[("ACTUALIZA authz.care_relationships · ACTUALIZA authz.care_relationships")]:::efecto
+  n14["Llama a AuthzPrimaryCareSyncService.activate"]:::llamada
   n13 -->|"sí"| n14
-  n15[("ACTUALIZA authz.care_relationships · ACTUALIZA authz.care_relationships")]:::efecto
-  n13 -->|"no"| n15
-  n16["Llama a AuditTrailService.record"]:::llamada
-  n14 --> n16
-  n15 --> n16
-  n17["Llama a AuditLogRepository.append"]:::llamada
-  n16 --> n17
-  n18["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n15{"isPrimary && rel.establishedByUserId === actor.id"}:::decision
+  n14 --> n15
+  n16(["422 PRECONDITION_FAILED Sólo la otra parte puede aceptar esta solicitud"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a AuthzPrimaryCareSyncService.revokePrevious"]:::llamada
+  n15 -->|"no"| n17
+  n18["Llama a CareRelationshipsRepository.findActivePrimaryInTenant"]:::llamada
   n17 --> n18
-  n19[("LEE audit.audit_log")]:::efecto
+  n19[("LEE authz.care_relationships")]:::efecto
   n18 --> n19
-  n20[("CREA audit.audit_log")]:::efecto
+  n20["Repite: por cada const old de previous"]:::bucle
   n19 --> n20
-  n21["Llama a OutboxService.publishDomainEvent"]:::llamada
-  n20 --> n21
-  n22["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n21[("ACTUALIZA authz.care_relationships · ACTUALIZA authz.care_relationships")]:::efecto
+  n20 -->|"cada elemento"| n21
+  n22{"isPrimary"}:::decision
   n21 --> n22
-  n23["Transacción: startActiveSpan(…)"]:::transaccion
-  n22 --> n23
-  n24["Intenta"]:::intento
+  n20 -->|"al terminar"| n22
+  n23["Llama a AuthzPrimaryCareSyncService.revokePrevious"]:::llamada
+  n22 -->|"sí"| n23
+  n24["Llama a CareRelationshipsRepository.findActivePrimaryInTenant"]:::llamada
   n23 --> n24
-  n25(["↩ (relanza el error capturado)"]):::error
-  n24 -->|"si falla"| n25
-  n26["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n24 --> n26
-  n27["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
-  n26 --> n27
-  n28[("LEE messaging.outbox_messages")]:::efecto
+  n25[("LEE authz.care_relationships")]:::efecto
+  n24 --> n25
+  n26["Repite: por cada const old de previous"]:::bucle
+  n25 --> n26
+  n27[("ACTUALIZA authz.care_relationships · ACTUALIZA authz.care_relationships")]:::efecto
+  n26 -->|"cada elemento"| n27
+  n28[("ACTUALIZA authz.care_relationships · ACTUALIZA authz.care_relationships")]:::efecto
   n27 --> n28
-  n29["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n26 -->|"al terminar"| n28
+  n22 -->|"no"| n28
+  n29["Intenta"]:::intento
   n28 --> n29
-  n30[("CREA messaging.domain_events")]:::efecto
+  n30["Llama a PatientPrimaryPractitionersRepository.findCurrentByPatient"]:::llamada
   n29 --> n30
-  n31["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n31[("LEE profiles.patient_primary_practitioners")]:::efecto
   n30 --> n31
-  n32[("CREA messaging.outbox_messages")]:::efecto
+  n32["Llama a PatientPrimaryPractitionersRepository.close"]:::llamada
   n31 --> n32
-  n33>"Evento authz.care_relationship.responded"]:::evento
+  n33[("ACTUALIZA profiles.patient_primary_practitioners")]:::efecto
   n32 --> n33
-  n34(("200 Responde con éxito")):::ok
+  n34{"current"}:::decision
   n33 --> n34
+  n35["Llama a PatientPrimaryPractitionersRepository.close"]:::llamada
+  n34 -->|"sí"| n35
+  n36[("ACTUALIZA profiles.patient_primary_practitioners")]:::efecto
+  n35 --> n36
+  n37["Llama a PatientPrimaryPractitionersRepository.open"]:::llamada
+  n36 --> n37
+  n34 -->|"no"| n37
+  n38[("CREA profiles.patient_primary_practitioners")]:::efecto
+  n37 --> n38
+  n39{"error instanceof UniqueConstraintViolationException"}:::decision
+  n29 -->|"si falla"| n39
+  n40(["409 CONFLICT Su médico de cabecera cambió mientras se aceptaba. Vuelva a intentarlo."]):::error
+  n39 -->|"sí"| n40
+  n41(["↩ (relanza el error capturado)"]):::error
+  n39 -->|"no"| n41
+  n42[("ACTUALIZA authz.care_relationships · ACTUALIZA authz.care_relationships")]:::efecto
+  n13 -->|"no"| n42
+  n43["Llama a AuditTrailService.record"]:::llamada
+  n38 --> n43
+  n42 --> n43
+  n44["Llama a AuditLogRepository.append"]:::llamada
+  n43 --> n44
+  n45["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n44 --> n45
+  n46[("LEE audit.audit_log")]:::efecto
+  n45 --> n46
+  n47[("CREA audit.audit_log")]:::efecto
+  n46 --> n47
+  n48["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n47 --> n48
+  n49["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n48 --> n49
+  n50["Transacción: startActiveSpan(…)"]:::transaccion
+  n49 --> n50
+  n51["Intenta"]:::intento
+  n50 --> n51
+  n52(["↩ (relanza el error capturado)"]):::error
+  n51 -->|"si falla"| n52
+  n53["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n51 --> n53
+  n54["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n53 --> n54
+  n55[("LEE messaging.outbox_messages")]:::efecto
+  n54 --> n55
+  n56["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n55 --> n56
+  n57[("CREA messaging.domain_events")]:::efecto
+  n56 --> n57
+  n58["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n57 --> n58
+  n59[("CREA messaging.outbox_messages")]:::efecto
+  n58 --> n59
+  n60>"Evento authz.care_relationship.responded"]:::evento
+  n59 --> n60
+  n61(("200 Responde con éxito")):::ok
+  n60 --> n61
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -789,8 +906,18 @@ flowchart TD
   n10 --> n11
   n12(["422 PRECONDITION_FAILED La relación asistencial no está activa"]):::error
   n11 -->|"sí"| n12
-  n13(("200 Responde con éxito")):::ok
+  n13["Llama a AuthzPrimaryCareSyncService.onRevoked"]:::llamada
   n11 -->|"no"| n13
+  n14["Llama a PatientPrimaryPractitionersRepository.findCurrentByPatient"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.patient_primary_practitioners")]:::efecto
+  n14 --> n15
+  n16["Llama a PatientPrimaryPractitionersRepository.close"]:::llamada
+  n15 --> n16
+  n17[("ACTUALIZA profiles.patient_primary_practitioners")]:::efecto
+  n16 --> n17
+  n18(("200 Responde con éxito")):::ok
+  n17 --> n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -878,7 +1005,7 @@ flowchart TD
   n29 --> n30
   n31["Llama a AuthzCareRelationshipsService.resolvePatientUserId"]:::llamada
   n30 --> n31
-  n32["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
+  n32["Llama a PersonAccountLinksRepository.findSelfActiveByPerson"]:::llamada
   n31 --> n32
   n33[("LEE profiles.person_account_links")]:::efecto
   n32 --> n33
@@ -902,18 +1029,16 @@ flowchart TD
   n40 -->|"no"| n42
   n43(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
   n42 -->|"sí"| n43
-  n44{"!result.suppressed && result.inAppNotificationId && result.availableAt && new Date(result.availableAt).getTim…"}:::decision
+  n44[("ACTUALIZA messaging.in_app_notifications")]:::efecto
   n42 -->|"no"| n44
-  n45["Llama a WebPushService.pushToUser"]:::llamada
-  n44 -->|"sí"| n45
-  n46["Intenta"]:::intento
-  n45 --> n46
-  n47[("LEE iam.devices")]:::efecto
+  n45{"availableAt › now"}:::decision
+  n44 --> n45
+  n46[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n45 -->|"sí"| n46
+  n47(("201 Responde con éxito")):::ok
   n46 --> n47
-  n48(("201 Responde con éxito")):::ok
-  n47 --> n48
-  n44 -->|"no"| n48
-  n34 -->|"no"| n48
+  n45 -->|"no"| n47
+  n34 -->|"no"| n47
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1320,7 +1445,64 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /authz/me/care-relationships/{id}/revoke
+#### 11. GET /authz/me/access-requests
+
+Mis solicitudes de acceso, recibidas y enviadas
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AuthzAccessRequestsReadService.listForPatient"]:::llamada
+  n2 --> n3
+  n4["Llama a AuthzClinicalScopeService.resolveTenant"]:::llamada
+  n3 --> n4
+  n5{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
+  n4 --> n5
+  n6(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a AuthzAccessRequestsRepository.careOfPatient"]:::llamada
+  n5 -->|"no"| n7
+  n8[("LEE authz.care_relationships")]:::efecto
+  n7 --> n8
+  n9["Llama a AuthzAccessRequestsRepository.accessConsentsOfPatient"]:::llamada
+  n8 --> n9
+  n10[("LEE consent.consents")]:::efecto
+  n9 --> n10
+  n11["Llama a AuthzAccessRequestsRepository.personIdByUserId"]:::llamada
+  n10 --> n11
+  n12[("LEE profiles.person_account_links")]:::efecto
+  n11 --> n12
+  n13["Llama a AuthzAccessRequestsRepository.namesByPersonId"]:::llamada
+  n12 --> n13
+  n14[("LEE profiles.persons")]:::efecto
+  n13 --> n14
+  n15["Llama a AuthzAccessRequestsReadService.specialtiesOf"]:::llamada
+  n14 --> n15
+  n16["Llama a AuthzAccessRequestsRepository.provisionsOf"]:::llamada
+  n15 --> n16
+  n17[("LEE consent.consent_provisions")]:::efecto
+  n16 --> n17
+  n18(("200 Responde con éxito")):::ok
+  n17 --> n18
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 12. POST /authz/me/care-relationships/{id}/revoke
 
 Revocar una de mis relaciones asistenciales
 
@@ -1384,8 +1566,18 @@ flowchart TD
   n22 --> n23
   n24(["422 PRECONDITION_FAILED La relación asistencial no está activa"]):::error
   n23 -->|"sí"| n24
-  n25(("200 Responde con éxito")):::ok
+  n25["Llama a AuthzPrimaryCareSyncService.onRevoked"]:::llamada
   n23 -->|"no"| n25
+  n26["Llama a PatientPrimaryPractitionersRepository.findCurrentByPatient"]:::llamada
+  n25 --> n26
+  n27[("LEE profiles.patient_primary_practitioners")]:::efecto
+  n26 --> n27
+  n28["Llama a PatientPrimaryPractitionersRepository.close"]:::llamada
+  n27 --> n28
+  n29[("ACTUALIZA profiles.patient_primary_practitioners")]:::efecto
+  n28 --> n29
+  n30(("200 Responde con éxito")):::ok
+  n29 --> n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1394,7 +1586,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /authz/me/clinical-access-grants/{grantId}/revoke
+#### 13. POST /authz/me/clinical-access-grants/{grantId}/revoke
 
 Revocar uno de los accesos clínicos a mi historia
 
@@ -1470,7 +1662,125 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /authz/patients/{patientProfileId}/break-the-glass
+#### 14. POST /authz/me/primary-practitioner-requests
+
+Pedir a un profesional que sea mi médico de cabecera
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado; ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 409 | `CONFLICT` | ConflictException: Ya existe una solicitud de cabecera activa o pendiente con este profesional |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No puede elegirse a sí mismo como médico de cabecera.; PreconditionFailedException: Este profesional no está aceptando pacientes nuevos.; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AuthzPrimaryCareService.requestAsPatient"]:::llamada
+  n2 --> n3
+  n4["Llama a AuthzPrimaryCareService.ownPatientProfileId"]:::llamada
+  n3 --> n4
+  n5{"!actor.patientProfileId"}:::decision
+  n4 --> n5
+  n6(["404 NOT_FOUND Paciente no encontrado"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a AuthzClinicalScopeService.resolveTenant"]:::llamada
+  n7 --> n8
+  n9{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
+  n8 --> n9
+  n10(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a AuthzPrimaryCareService.assertChoosable"]:::llamada
+  n9 -->|"no"| n11
+  n12{"dto.practitionerProfileId === patientProfileId"}:::decision
+  n11 --> n12
+  n13(["422 PRECONDITION_FAILED No puede elegirse a sí mismo como médico de cabecera."]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n14 --> n15
+  n16{"!practitioner"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Profesional no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18{"practitioner.acceptsNewPatients === false"}:::decision
+  n16 -->|"no"| n18
+  n19(["422 PRECONDITION_FAILED Este profesional no está aceptando pacientes nuevos."]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a CareRelationshipsRepository.findOpenPrimaryOfPair"]:::llamada
+  n18 -->|"no"| n20
+  n21[("LEE authz.care_relationships")]:::efecto
+  n20 --> n21
+  n22{"open"}:::decision
+  n21 --> n22
+  n23(["409 CONFLICT Ya existe una solicitud de cabecera activa o pendiente con este profesional"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a CareRelationshipsRepository.create"]:::llamada
+  n22 -->|"no"| n24
+  n25[("CREA authz.care_relationships")]:::efecto
+  n24 --> n25
+  n26["Llama a AuditTrailService.record"]:::llamada
+  n25 --> n26
+  n27["Llama a AuditLogRepository.append"]:::llamada
+  n26 --> n27
+  n28["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n27 --> n28
+  n29[("LEE audit.audit_log")]:::efecto
+  n28 --> n29
+  n30[("CREA audit.audit_log")]:::efecto
+  n29 --> n30
+  n31["Llama a AuthzPrimaryCareService.notifyPractitioner"]:::llamada
+  n30 --> n31
+  n32["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
+  n31 --> n32
+  n33[("LEE profiles.person_account_links")]:::efecto
+  n32 --> n33
+  n34["Llama a NotificationsService.emitInApp"]:::llamada
+  n33 --> n34
+  n35["Intenta"]:::intento
+  n34 --> n35
+  n36["Llama a NotificationsService.writeInApp"]:::llamada
+  n35 --> n36
+  n37{"!channel"}:::decision
+  n36 --> n37
+  n38(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
+  n37 -->|"sí"| n38
+  n39{"!config"}:::decision
+  n37 -->|"no"| n39
+  n40(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
+  n39 -->|"sí"| n40
+  n41{"!provider"}:::decision
+  n39 -->|"no"| n41
+  n42(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
+  n41 -->|"sí"| n42
+  n43[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n41 -->|"no"| n43
+  n44{"availableAt › now"}:::decision
+  n43 --> n44
+  n45[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n44 -->|"sí"| n45
+  n46(("201 Responde con éxito")):::ok
+  n45 --> n46
+  n44 -->|"no"| n46
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. POST /authz/patients/{patientProfileId}/break-the-glass
 
 Break-the-glass / anulación de emergencia
 
@@ -1581,7 +1891,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /authz/patients/{patientProfileId}/clinical-access-grants
+#### 16. POST /authz/patients/{patientProfileId}/clinical-access-grants
 
 Otorgar acceso clínico con propósito de uso
 
@@ -1685,7 +1995,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /authz/permission-categories
+#### 17. POST /authz/permission-categories
 
 Definir una categoría de permiso
 
@@ -1729,7 +2039,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /authz/permissions
+#### 18. GET /authz/permissions
 
 Catálogo de permisos, paginado por código
 
@@ -1766,7 +2076,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /authz/permissions
+#### 19. POST /authz/permissions
 
 Definir un permiso del catálogo global
 
@@ -1821,7 +2131,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. GET /authz/permissions/{permissionId}/holders
+#### 20. GET /authz/permissions/{permissionId}/holders
 
 Quiénes tienen un permiso, con el camino por el que lo tienen
 
@@ -1862,7 +2172,215 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /authz/resource-scope-grants
+#### 21. GET /authz/practitioners/me/access-requests
+
+Solicitudes de acceso enviadas y recibidas
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a AuthzAccessRequestsReadService.listForPractitioner"]:::llamada
+  n2 --> n3
+  n4["Llama a AuthzClinicalScopeService.resolveTenant"]:::llamada
+  n3 --> n4
+  n5{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
+  n4 --> n5
+  n6(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a AuthzAccessRequestsRepository.careOfPractitioner"]:::llamada
+  n5 -->|"no"| n7
+  n8[("LEE authz.care_relationships")]:::efecto
+  n7 --> n8
+  n9["Llama a AuthzAccessRequestsRepository.accessConsentsCreatedBy"]:::llamada
+  n8 --> n9
+  n10[("LEE consent.consents")]:::efecto
+  n9 --> n10
+  n11["Llama a AuthzAccessRequestsRepository.namesByPersonId"]:::llamada
+  n10 --> n11
+  n12[("LEE profiles.persons")]:::efecto
+  n11 --> n12
+  n13["Llama a AuthzAccessRequestsReadService.specialtiesOf"]:::llamada
+  n12 --> n13
+  n14["Llama a AuthzAccessRequestsRepository.provisionsOf"]:::llamada
+  n13 --> n14
+  n15[("LEE consent.consent_provisions")]:::efecto
+  n14 --> n15
+  n16(("200 Responde con éxito")):::ok
+  n15 --> n16
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 22. POST /authz/practitioners/me/care-relationships/{id}/respond
+
+Aceptar o rechazar una solicitud de cabecera de un paciente
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 409 | `CONFLICT` | ConflictException: Su médico de cabecera cambió mientras se aceptaba. Vuelva a intentarlo. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud ya fue respondida o no es de cabecera; PreconditionFailedException: Esta solicitud no la inició el paciente: la responde él; PreconditionFailedException: Sólo la otra parte puede aceptar esta solicitud |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a AuthzPrimaryCareService.respondAsPractitioner"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CareRelationshipsRepository.findById"]:::llamada
+  n4 --> n5
+  n6[("LEE authz.care_relationships")]:::efecto
+  n5 --> n6
+  n7{"!rel || !actor.practitionerProfileId || rel.practitionerProfileId !== actor.practitionerProfileId"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Solicitud no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9{"rel.relationshipTypeConceptId !== AUTHZ.CARE_REL_PRIMARY || rel.statusConceptId !== CONCEPTS.STATE_PENDING"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED La solicitud ya fue respondida o no es de cabecera"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE profiles.person_account_links")]:::efecto
+  n11 --> n12
+  n13{"!rel.establishedByUserId || rel.establishedByUserId !== patientLink?.userId"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED Esta solicitud no la inició el paciente: la responde él"]):::error
+  n13 -->|"sí"| n14
+  n15{"dto.decision === 'ACCEPT'"}:::decision
+  n13 -->|"no"| n15
+  n16["Llama a AuthzPrimaryCareSyncService.activate"]:::llamada
+  n15 -->|"sí"| n16
+  n17{"isPrimary && rel.establishedByUserId === actor.id"}:::decision
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED Sólo la otra parte puede aceptar esta solicitud"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a AuthzPrimaryCareSyncService.revokePrevious"]:::llamada
+  n17 -->|"no"| n19
+  n20["Llama a CareRelationshipsRepository.findActivePrimaryInTenant"]:::llamada
+  n19 --> n20
+  n21[("LEE authz.care_relationships")]:::efecto
+  n20 --> n21
+  n22["Repite: por cada const old de previous"]:::bucle
+  n21 --> n22
+  n23[("ACTUALIZA authz.care_relationships · ACTUALIZA authz.care_relationships")]:::efecto
+  n22 -->|"cada elemento"| n23
+  n24{"isPrimary"}:::decision
+  n23 --> n24
+  n22 -->|"al terminar"| n24
+  n25["Llama a AuthzPrimaryCareSyncService.revokePrevious"]:::llamada
+  n24 -->|"sí"| n25
+  n26["Llama a CareRelationshipsRepository.findActivePrimaryInTenant"]:::llamada
+  n25 --> n26
+  n27[("LEE authz.care_relationships")]:::efecto
+  n26 --> n27
+  n28["Repite: por cada const old de previous"]:::bucle
+  n27 --> n28
+  n29[("ACTUALIZA authz.care_relationships · ACTUALIZA authz.care_relationships")]:::efecto
+  n28 -->|"cada elemento"| n29
+  n30[("ACTUALIZA authz.care_relationships · ACTUALIZA authz.care_relationships")]:::efecto
+  n29 --> n30
+  n28 -->|"al terminar"| n30
+  n24 -->|"no"| n30
+  n31["Intenta"]:::intento
+  n30 --> n31
+  n32["Llama a PatientPrimaryPractitionersRepository.findCurrentByPatient"]:::llamada
+  n31 --> n32
+  n33[("LEE profiles.patient_primary_practitioners")]:::efecto
+  n32 --> n33
+  n34["Llama a PatientPrimaryPractitionersRepository.close"]:::llamada
+  n33 --> n34
+  n35[("ACTUALIZA profiles.patient_primary_practitioners")]:::efecto
+  n34 --> n35
+  n36{"current"}:::decision
+  n35 --> n36
+  n37["Llama a PatientPrimaryPractitionersRepository.close"]:::llamada
+  n36 -->|"sí"| n37
+  n38[("ACTUALIZA profiles.patient_primary_practitioners")]:::efecto
+  n37 --> n38
+  n39["Llama a PatientPrimaryPractitionersRepository.open"]:::llamada
+  n38 --> n39
+  n36 -->|"no"| n39
+  n40[("CREA profiles.patient_primary_practitioners")]:::efecto
+  n39 --> n40
+  n41{"error instanceof UniqueConstraintViolationException"}:::decision
+  n31 -->|"si falla"| n41
+  n42(["409 CONFLICT Su médico de cabecera cambió mientras se aceptaba. Vuelva a intentarlo."]):::error
+  n41 -->|"sí"| n42
+  n43(["↩ (relanza el error capturado)"]):::error
+  n41 -->|"no"| n43
+  n44[("ACTUALIZA authz.care_relationships · ACTUALIZA authz.care_relationships")]:::efecto
+  n15 -->|"no"| n44
+  n45["Llama a AuditTrailService.record"]:::llamada
+  n40 --> n45
+  n44 --> n45
+  n46["Llama a AuditLogRepository.append"]:::llamada
+  n45 --> n46
+  n47["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n46 --> n47
+  n48[("LEE audit.audit_log")]:::efecto
+  n47 --> n48
+  n49[("CREA audit.audit_log")]:::efecto
+  n48 --> n49
+  n50["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n49 --> n50
+  n51["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n50 --> n51
+  n52["Transacción: startActiveSpan(…)"]:::transaccion
+  n51 --> n52
+  n53["Intenta"]:::intento
+  n52 --> n53
+  n54(["↩ (relanza el error capturado)"]):::error
+  n53 -->|"si falla"| n54
+  n55["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n53 --> n55
+  n56["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n55 --> n56
+  n57[("LEE messaging.outbox_messages")]:::efecto
+  n56 --> n57
+  n58["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n57 --> n58
+  n59[("CREA messaging.domain_events")]:::efecto
+  n58 --> n59
+  n60["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n59 --> n60
+  n61[("CREA messaging.outbox_messages")]:::efecto
+  n60 --> n61
+  n62>"Evento authz.care_relationship.responded"]:::evento
+  n61 --> n62
+  n63(("200 Responde con éxito")):::ok
+  n62 --> n63
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 23. POST /authz/resource-scope-grants
 
 Otorgar acceso a un recurso específico (grant polimórfico)
 
@@ -1915,7 +2433,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. DELETE /authz/resource-scope-grants/{grantId}
+#### 24. DELETE /authz/resource-scope-grants/{grantId}
 
 Terminar la vigencia de un permiso por alcance de recurso
 
@@ -1967,7 +2485,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /authz/roles
+#### 25. POST /authz/roles
 
 Componer un rol (con herencia opcional)
 
@@ -2027,7 +2545,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /authz/roles/{roleId}/field-permissions
+#### 26. GET /authz/roles/{roleId}/field-permissions
 
 Reglas de enmascaramiento de campos de un rol
 
@@ -2065,7 +2583,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. PUT /authz/roles/{roleId}/field-permissions
+#### 27. PUT /authz/roles/{roleId}/field-permissions
 
 Configurar el enmascaramiento de campos del rol
 
@@ -2129,7 +2647,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. GET /authz/roles/{roleId}/permissions
+#### 28. GET /authz/roles/{roleId}/permissions
 
 Permisos activos de un rol, con su efecto y ámbito
 
@@ -2170,7 +2688,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. PUT /authz/roles/{roleId}/permissions
+#### 29. PUT /authz/roles/{roleId}/permissions
 
 Asignar permisos al rol (reemplaza los activos)
 
@@ -2232,7 +2750,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /authz/simulations
+#### 30. POST /authz/simulations
 
 Simular una decisión de acceso con el PDP real
 
@@ -2348,7 +2866,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /authz/tenants/{tenantId}/access-policies
+#### 31. POST /authz/tenants/{tenantId}/access-policies
 
 Definir una política de acceso ABAC con enmascaramiento
 
@@ -2395,7 +2913,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. GET /authz/users/{userId}/access-map
+#### 32. GET /authz/users/{userId}/access-map
 
 «Quién puede qué» de un usuario: roles, conteos y última revisión
 
@@ -2452,7 +2970,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /authz/users/{userId}/access-reviews
+#### 33. POST /authz/users/{userId}/access-reviews
 
 Registrar que revisaste los accesos de una cuenta
 
@@ -2512,7 +3030,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. GET /authz/users/{userId}/permission-grants
+#### 34. GET /authz/users/{userId}/permission-grants
 
 Excepciones de permiso por usuario, paginadas
 
@@ -2555,7 +3073,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. POST /authz/users/{userId}/permission-grants
+#### 35. POST /authz/users/{userId}/permission-grants
 
 Otorgar una excepción de permiso por usuario
 
@@ -2608,7 +3126,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. GET /authz/users/{userId}/resource-scope-grants
+#### 36. GET /authz/users/{userId}/resource-scope-grants
 
 Grants sobre un recurso concreto cuyo sujeto es el usuario, paginados
 
@@ -2651,7 +3169,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /authz/users/{userId}/restricted-fields
+#### 37. GET /authz/users/{userId}/restricted-fields
 
 Campos restringidos que alcanzan al usuario por sus roles efectivos
 
@@ -2694,7 +3212,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. GET /authz/users/{userId}/role-assignments
+#### 38. GET /authz/users/{userId}/role-assignments
 
 Asignaciones de rol de un usuario, activas o no
 
@@ -2735,7 +3253,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. POST /authz/users/{userId}/role-assignments
+#### 39. POST /authz/users/{userId}/role-assignments
 
 Asignar un rol a un usuario con vigencia y ámbito
 
@@ -2809,7 +3327,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. DELETE /authz/users/{userId}/role-assignments/{assignmentId}
+#### 40. DELETE /authz/users/{userId}/role-assignments/{assignmentId}
 
 Revocar una asignación de rol (revocación lógica: la fila queda como historia)
 

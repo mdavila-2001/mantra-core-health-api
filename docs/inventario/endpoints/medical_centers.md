@@ -44,7 +44,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/medical_centers/controllers/medical-centers.controller.ts:45` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/medical_centers/controllers/medical-centers.controller.ts:45` |
 | PARAMETRO_QUERY | procedureConceptIds (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -154,9 +154,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/medical_centers/controllers/medical-centers.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | serviceRequestIds (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -169,7 +169,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `practice.practice_sites` | LEE | LEE | DIRECTA | MedicalCentersController.searchForMyOrders → MedicalCentersForMyOrdersService.searchForOrders → MedicalCentersSearchService.searchAll → MedicalCenterOffersRepository.findSiteOffers | `src/modules/medical_centers/repositories/medical-center-offers.repository.ts:51` |
 | `practice.practices` | LEE | LEE | DIRECTA | MedicalCentersController.searchForMyOrders → MedicalCentersForMyOrdersService.searchForOrders → MedicalCentersSearchService.searchAll → MedicalCenterOffersRepository.findSiteOffers | `src/modules/medical_centers/repositories/medical-center-offers.repository.ts:56` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | MedicalCentersController.searchForMyOrders → MedicalCentersForMyOrdersService.searchForOrders → PractitionerAffiliationsRepository.findActiveSites | `src/modules/medical_centers/repositories/practitioner-affiliations.repository.ts:29` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | MedicalCentersController.searchForMyOrders → MedicalCentersForMyOrdersService.searchForOrders → OwnServiceRequestsRepository.resolveOwnPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | MedicalCentersController.searchForMyOrders → MedicalCentersForMyOrdersService.searchForOrders → OwnServiceRequestsRepository.resolveOwnPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | MedicalCentersController.searchForMyOrders → MedicalCentersForMyOrdersService.searchForOrders → OwnServiceRequestsRepository.resolveOwnPatientProfileId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | MedicalCentersController.searchForMyOrders → MedicalCentersForMyOrdersService.searchForOrders → MedicalCentersSearchService.searchAll → MedicalCenterOffersRepository.findSiteOffers | `src/modules/medical_centers/repositories/medical-center-offers.repository.ts:76` |
 | `terminology.concept_properties` | LEE | LEE | POR_SQL | MedicalCentersController.searchForMyOrders → MedicalCentersForMyOrdersService.searchForOrders → MedicalCentersSearchService.searchAll → ProcedureReferenceReader.referencesFor | `src/modules/billing/services/procedure-reference.reader.ts:78` |

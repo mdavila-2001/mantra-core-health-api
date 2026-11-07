@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `directory`
 
-Referencia exhaustiva de 26 operación(es) del módulo `directory`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 31 operación(es) del módulo `directory`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `directory-admin-tenants`, `directory-tenants`
-- **Controladores:** `AdminTenantsController`, `OrganizationLogoController`, `TenantsController`
+- **Controladores:** `AdminTenantsController`, `BranchLocationController`, `MembershipInvitationsController`, `OrganizationLogoController`, `TenantRepresentativesController`, `TenantsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -22,21 +22,26 @@ Referencia exhaustiva de 26 operación(es) del módulo `directory`, derivada del
 9. [GET /tenants/{tenantId}/branches](#9-get-tenants-tenantid-branches) — Sucursales de la organización
 10. [POST /tenants/{tenantId}/branches](#10-post-tenants-tenantid-branches) — Crear una branch / sede física con geolocalización
 11. [PATCH /tenants/{tenantId}/branches/{branchId}](#11-patch-tenants-tenantid-branches-branchid) — Editar una sucursal
-12. [GET /tenants/{tenantId}/child-tenants](#12-get-tenants-tenantid-child-tenants) — Sub-organizaciones de una organización
-13. [POST /tenants/{tenantId}/child-tenants](#13-post-tenants-tenantid-child-tenants) — Crear una organización hija / sub-tenant
-14. [GET /tenants/{tenantId}/laboratory-readiness](#14-get-tenants-tenantid-laboratory-readiness) — Requisitos pendientes para que el laboratorio opere
-15. [GET /tenants/{tenantId}/logo](#15-get-tenants-tenantid-logo) — Logo de la propia organización
-16. [PUT /tenants/{tenantId}/logo](#16-put-tenants-tenantid-logo) — Cambiar o quitar el logo como administrador de la organización
-17. [GET /tenants/{tenantId}/logo/content](#17-get-tenants-tenantid-logo-content) — Imagen del logo para miembros de la organización
-18. [GET /tenants/{tenantId}/memberships](#18-get-tenants-tenantid-memberships) — Plantilla de la organización
-19. [POST /tenants/{tenantId}/memberships](#19-post-tenants-tenantid-memberships) — Incorporar un usuario al tenant (membership)
-20. [GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#20-get-tenants-tenantid-memberships-membershipid-branch-assignments) — Sucursales asignadas a una membresía
-21. [POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#21-post-tenants-tenantid-memberships-membershipid-branch-assignments) — Asignar la membresía a una branch
-22. [POST /tenants/{tenantId}/memberships/{membershipId}/offboard](#22-post-tenants-tenantid-memberships-membershipid-offboard) — Revocar / offboarding de un miembro
-23. [PATCH /tenants/{tenantId}/memberships/{membershipId}/role](#23-patch-tenants-tenantid-memberships-membershipid-role) — Cambiar rol / scope de la membresía
-24. [POST /tenants/{tenantId}/memberships/{membershipId}/transfer](#24-post-tenants-tenantid-memberships-membershipid-transfer) — Transferir la membresía entre branches
-25. [GET /tenants/{tenantId}/pharmacy-readiness](#25-get-tenants-tenantid-pharmacy-readiness) — Requisitos pendientes para que la farmacia opere
-26. [GET /tenants/me](#26-get-tenants-me) — Las organizaciones del actor, con su rol en cada una
+12. [POST /tenants/{tenantId}/branches/location-preview](#12-post-tenants-tenantid-branches-location-preview) — Coordenadas de un enlace de Google Maps u OpenStreetMap
+13. [GET /tenants/{tenantId}/child-tenants](#13-get-tenants-tenantid-child-tenants) — Sub-organizaciones de una organización
+14. [POST /tenants/{tenantId}/child-tenants](#14-post-tenants-tenantid-child-tenants) — Crear una organización hija / sub-tenant
+15. [GET /tenants/{tenantId}/laboratory-readiness](#15-get-tenants-tenantid-laboratory-readiness) — Requisitos pendientes para que el laboratorio opere
+16. [GET /tenants/{tenantId}/logo](#16-get-tenants-tenantid-logo) — Logo de la propia organización
+17. [PUT /tenants/{tenantId}/logo](#17-put-tenants-tenantid-logo) — Cambiar o quitar el logo como administrador de la organización
+18. [GET /tenants/{tenantId}/logo/content](#18-get-tenants-tenantid-logo-content) — Imagen del logo para miembros de la organización
+19. [GET /tenants/{tenantId}/memberships](#19-get-tenants-tenantid-memberships) — Plantilla de la organización
+20. [POST /tenants/{tenantId}/memberships](#20-post-tenants-tenantid-memberships) — Incorporar un usuario al tenant (membership)
+21. [GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#21-get-tenants-tenantid-memberships-membershipid-branch-assignments) — Sucursales asignadas a una membresía
+22. [POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#22-post-tenants-tenantid-memberships-membershipid-branch-assignments) — Asignar la membresía a una branch
+23. [POST /tenants/{tenantId}/memberships/{membershipId}/offboard](#23-post-tenants-tenantid-memberships-membershipid-offboard) — Revocar / offboarding de un miembro
+24. [PATCH /tenants/{tenantId}/memberships/{membershipId}/role](#24-patch-tenants-tenantid-memberships-membershipid-role) — Cambiar rol / scope de la membresía
+25. [POST /tenants/{tenantId}/memberships/{membershipId}/transfer](#25-post-tenants-tenantid-memberships-membershipid-transfer) — Transferir la membresía entre branches
+26. [GET /tenants/{tenantId}/pharmacy-readiness](#26-get-tenants-tenantid-pharmacy-readiness) — Requisitos pendientes para que la farmacia opere
+27. [PATCH /tenants/{tenantId}/representatives/{role}/name](#27-patch-tenants-tenantid-representatives-role-name) — Corregir el nombre del representante legal o de una gerencia
+28. [GET /tenants/me](#28-get-tenants-me) — Las organizaciones del actor, con su rol en cada una
+29. [GET /tenants/me/membership-invitations](#29-get-tenants-me-membership-invitations) — Pending organization invitations of the caller
+30. [POST /tenants/me/membership-invitations/{membershipId}/accept](#30-post-tenants-me-membership-invitations-membershipid-accept) — Accept an invitation: the membership turns active
+31. [POST /tenants/me/membership-invitations/{membershipId}/decline](#31-post-tenants-me-membership-invitations-membershipid-decline) — Decline an invitation: the membership ends
 
 ---
 
@@ -1358,6 +1363,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "locationUrl": "valor-ejemplo",
       "latitude": 1,
       "longitude": 1,
+      "category": {},
       "createdAt": "2026-07-31T12:00:00.000Z"
     }
   ],
@@ -1369,7 +1375,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<BranchListItemDto>` | Sin restricción adicional declarada | Sucursales, ordenadas por código. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","branchTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo","latitude":1,"longitude":1,"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<BranchListItemDto>` | Sin restricción adicional declarada | Sucursales, ordenadas por código. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","branchTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo","latitude":1,"longitude":1,"category":{},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la sucursal. | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código de la sucursal dentro de la organización. | `CODIGO_EJEMPLO` |
 | `items[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sucursal. | `Nombre de ejemplo` |
@@ -1380,6 +1386,7 @@ Campos de la respuesta:
 | `items[].locationUrl` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].latitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `items[].longitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].category` | Sí | `object` | Sin restricción adicional declarada | Categoría de la sede (v4.2.92): `default`, `head_office` (casa matriz) o `branch`. | `{}` |
 | `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas sucursales trae la respuesta. | `1` |
 
@@ -1469,6 +1476,7 @@ Content-Type: application/json
 | `longitude` | No | `number` | mínimo -180; máximo 180 | Longitud geográfica | `-77.0428` |
 | `description` | No | `string` | longitud máxima 1000 | Descripción: horario, piso… | `Texto descriptivo de ejemplo` |
 | `locationUrl` | No | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Enlace de ubicación (http/https) | `valor-ejemplo` |
+| `category` | No | `string` | valores: `default`, `head_office`, `branch` | Categoría de la sede: default (sin clasificar), head_office (casa matriz, una por organización) o branch (sucursal). Por omisión, default. | `default` |
 
 ### Payload completo de ejemplo
 
@@ -1488,7 +1496,8 @@ Content-Type: application/json
   "latitude": -12.0464,
   "longitude": -77.0428,
   "description": "Texto descriptivo de ejemplo",
-  "locationUrl": "valor-ejemplo"
+  "locationUrl": "valor-ejemplo",
+  "category": "default"
 }
 ```
 
@@ -1524,7 +1533,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "description": "Texto descriptivo de ejemplo",
   "locationUrl": "valor-ejemplo",
   "latitude": 1,
-  "longitude": 1
+  "longitude": 1,
+  "category": {}
 }
 ```
 
@@ -1545,6 +1555,7 @@ Campos de la respuesta:
 | `locationUrl` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `latitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `longitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `category` | Sí | `object` | Sin restricción adicional declarada | Categoría de la sede (default, head_office o branch). | `{}` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1558,6 +1569,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 404 | `NOT_FOUND` | Tenant no encontrado | Excepción explícita en src/modules/directory/services/directory-branches.service.ts |
 | 409 | `CONFLICT` | Ya existe una branch con ese código en el tenant | Excepción explícita en src/modules/directory/services/directory-branches.service.ts |
+| 409 | `CONFLICT` | SECOND_HEAD_OFFICE | Excepción explícita en src/modules/directory/services/directory-branches.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El tenant no está activo | Excepción explícita en src/modules/directory/services/directory-branches.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1631,6 +1643,7 @@ Content-Type: application/json
 | `locationUrl` | No | `object` | longitud máxima 2000; patrón runtime `/^https?:\/\//i`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `latitude` | No | `object` | mínimo -90; máximo 90; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `longitude` | No | `object` | mínimo -180; máximo 180; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `category` | No | `string` | valores: `default`, `head_office`, `branch` | Categoría de la sede: default, head_office (casa matriz, una por organización) o branch. | `default` |
 
 ### Payload completo de ejemplo
 
@@ -1647,7 +1660,8 @@ Content-Type: application/json
   "description": {},
   "locationUrl": {},
   "latitude": {},
-  "longitude": {}
+  "longitude": {},
+  "category": "default"
 }
 ```
 
@@ -1683,7 +1697,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "description": "Texto descriptivo de ejemplo",
   "locationUrl": "valor-ejemplo",
   "latitude": 1,
-  "longitude": 1
+  "longitude": 1,
+  "category": {}
 }
 ```
 
@@ -1704,6 +1719,7 @@ Campos de la respuesta:
 | `locationUrl` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `latitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `longitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `category` | Sí | `object` | Sin restricción adicional declarada | Categoría de la sede (default, head_office o branch). | `{}` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1716,6 +1732,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/directory/services/directory-branches.service.ts |
+| 409 | `CONFLICT` | SECOND_HEAD_OFFICE | Excepción explícita en src/modules/directory/services/directory-branches.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1734,7 +1751,135 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /tenants/{tenantId}/child-tenants
+## 12. POST /tenants/{tenantId}/branches/location-preview
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Coordenadas de un enlace de Google Maps u OpenStreetMap
+- **Operation ID:** `BranchLocationController_preview`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BranchLocationController.preview](../../src/modules/directory/controllers/branch-location.controller.ts)
+
+### Descripción de negocio
+
+Acepta enlaces largos y los cortos maps.app.goo.gl. No guarda nada: sirve para mostrar el pin antes de crear la sucursal.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /tenants/{tenantId}/branches/location-preview` en `BranchLocationController_preview`. El controlador delega en `ResolveMapLinkUseCase.execute`. Valida el body como `ResolveMapLinkDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResolveMapLinkResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ResolveMapLinkDto`; los campos opcionales se omiten.
+
+```http
+POST /tenants/00000000-0000-4000-8000-000000000001/branches/location-preview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "url": "https://maps.app.goo.gl/uwjxPfc6SYBhtQ3e7"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `tenantId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `url` | Sí | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Sin descripción específica en el contrato OpenAPI. | `https://maps.app.goo.gl/uwjxPfc6SYBhtQ3e7` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /tenants/00000000-0000-4000-8000-000000000001/branches/location-preview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "url": "https://maps.app.goo.gl/uwjxPfc6SYBhtQ3e7"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResolveMapLinkResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResolveMapLinkResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "resolved": true,
+  "latitude": 1,
+  "longitude": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `resolved` | Sí | `boolean` | Sin restricción adicional declarada | `false` when the link carries no coordinates the server could read. | `true` |
+| `latitude` | No | `number` | Sin restricción adicional declarada | Latitude (-90 to 90), when resolved. | `1` |
+| `longitude` | No | `number` | Sin restricción adicional declarada | Longitude (-180 to 180), when resolved. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/{tenantId}/branches/location-preview"
+}
+```
+
+---
+
+## 13. GET /tenants/{tenantId}/child-tenants
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1872,7 +2017,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /tenants/{tenantId}/child-tenants
+## 14. POST /tenants/{tenantId}/child-tenants
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2139,7 +2284,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /tenants/{tenantId}/laboratory-readiness
+## 15. GET /tenants/{tenantId}/laboratory-readiness
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2253,7 +2398,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /tenants/{tenantId}/logo
+## 16. GET /tenants/{tenantId}/logo
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2349,7 +2494,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. PUT /tenants/{tenantId}/logo
+## 17. PUT /tenants/{tenantId}/logo
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2468,7 +2613,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /tenants/{tenantId}/logo/content
+## 18. GET /tenants/{tenantId}/logo/content
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2572,7 +2717,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /tenants/{tenantId}/memberships
+## 19. GET /tenants/{tenantId}/memberships
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2711,7 +2856,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /tenants/{tenantId}/memberships
+## 20. POST /tenants/{tenantId}/memberships
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2832,7 +2977,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 403 | `FORBIDDEN` | Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 409 | `CONFLICT` | El usuario ya tiene una membresía activa en el tenant | Excepción explícita en src/modules/directory/services/directory-memberships.service.ts |
+| 409 | `CONFLICT` | El usuario ya tiene una membresía activa en el tenant | Excepción explícita en src/modules/directory/services/membership-invite.service.ts |
+| 409 | `CONFLICT` | El usuario ya tiene una invitación pendiente en el tenant | Excepción explícita en src/modules/directory/services/membership-invite.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2851,7 +2997,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+## 21. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2977,7 +3123,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+## 22. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3117,7 +3263,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
+## 23. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3231,7 +3377,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
+## 24. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3369,7 +3515,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
+## 25. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3502,7 +3648,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /tenants/{tenantId}/pharmacy-readiness
+## 26. GET /tenants/{tenantId}/pharmacy-readiness
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3616,7 +3762,151 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /tenants/me
+## 27. PATCH /tenants/{tenantId}/representatives/{role}/name
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Corregir el nombre del representante legal o de una gerencia
+- **Operation ID:** `TenantRepresentativesController_rename`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TenantRepresentativesController.rename](../../src/modules/directory/controllers/tenant-representatives.controller.ts)
+
+### Descripción de negocio
+
+role: LEGAL_REPRESENTATIVE, GENERAL_MANAGER, COMMERCIAL_MANAGER o MARKETING_MANAGER. Recibe las mismas cuatro partes que el registro.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /tenants/{tenantId}/representatives/{role}/name` en `TenantRepresentativesController_rename`. El controlador delega en `TenantRepresentativeNameService.update`. Valida el body como `UpdateRepresentativeNameDto` y consume `application/json`. El tipo de retorno estático es `Promise<RepresentativeNameResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `role` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateRepresentativeNameDto`; los campos opcionales se omiten.
+
+```http
+PATCH /tenants/00000000-0000-4000-8000-000000000001/representatives/valor-ejemplo/name HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Wendy",
+  "lastName": "Dávila"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `tenantId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Wendy` |
+| `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Jennyfer` |
+| `lastName` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Dávila` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Yamal` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /tenants/00000000-0000-4000-8000-000000000001/representatives/valor-ejemplo/name HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Wendy",
+  "middleName": "Jennyfer",
+  "lastName": "Dávila",
+  "motherLastName": "Yamal"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RepresentativeNameResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RepresentativeNameResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "role": "valor-ejemplo",
+  "fullName": "Nombre de ejemplo",
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `role` | Sí | `string` | Sin restricción adicional declarada | Canonical role: `LEGAL_REPRESENTATIVE`, `GENERAL_MANAGER`, … | `valor-ejemplo` |
+| `fullName` | Sí | `string` | Sin restricción adicional declarada | Composed full name (`persons.display_name`). | `Nombre de ejemplo` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Given name. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | Sin restricción adicional declarada | Second given name, if any. | `Nombre de ejemplo` |
+| `lastName` | Sí | `string` | Sin restricción adicional declarada | Paternal surname. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | Sin restricción adicional declarada | Maternal surname, if any. | `Nombre de ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 404 | `NOT_FOUND` | La organización no tiene registrado a ese representante | Excepción explícita en src/modules/directory/services/tenant-representative-name.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code.toUpperCase()} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/{tenantId}/representatives/{role}/name"
+}
+```
+
+---
+
+## 28. GET /tenants/me
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3820,6 +4110,349 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/tenants/me"
+}
+```
+
+---
+
+## 29. GET /tenants/me/membership-invitations
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Pending organization invitations of the caller
+- **Operation ID:** `MembershipInvitationsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MembershipInvitationsController.list](../../src/modules/directory/controllers/membership-invitations.controller.ts)
+
+### Descripción de negocio
+
+Pending organization invitations of the caller. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /tenants/me/membership-invitations` en `MembershipInvitationsController_list`. El controlador delega en `MembershipInvitationsService.list`. No recibe body. El tipo de retorno estático es `Promise<MembershipInvitationListDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /tenants/me/membership-invitations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /tenants/me/membership-invitations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MembershipInvitationListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MembershipInvitationListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MembershipInvitationListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MembershipInvitationListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MembershipInvitationListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MembershipInvitationListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MembershipInvitationListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MembershipInvitationListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "tenantName": "Nombre de ejemplo",
+      "role": "OWNER",
+      "invitedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MembershipInvitationDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","tenantName":"Nombre de ejemplo","role":"OWNER","invitedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | The pending membership | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].role` | Sí | `string` | valores: `OWNER`, `ADMIN`, `STAFF`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `OWNER` |
+| `items[].invitedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/me/membership-invitations"
+}
+```
+
+---
+
+## 30. POST /tenants/me/membership-invitations/{membershipId}/accept
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Accept an invitation: the membership turns active
+- **Operation ID:** `MembershipInvitationsController_accept`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MembershipInvitationsController.accept](../../src/modules/directory/controllers/membership-invitations.controller.ts)
+
+### Descripción de negocio
+
+Accept an invitation: the membership turns active. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /tenants/me/membership-invitations/{membershipId}/accept` en `MembershipInvitationsController_accept`. El controlador delega en `MembershipInvitationsService.accept`. No recibe body. El tipo de retorno estático es `Promise<MembershipInvitationDecisionDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `membershipId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /tenants/me/membership-invitations/00000000-0000-4000-8000-000000000001/accept HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `membershipId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /tenants/me/membership-invitations/00000000-0000-4000-8000-000000000001/accept HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MembershipInvitationDecisionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "status": "ACTIVE"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `DECLINED` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Invitación no encontrada | Excepción explícita en src/modules/directory/services/membership-invitations.service.ts |
+| 409 | `CONFLICT` | Ya es miembro activo de esta organización | Excepción explícita en src/modules/directory/services/membership-invitations.service.ts |
+| 409 | `CONFLICT` | La invitación ya no está pendiente | Excepción explícita en src/modules/directory/services/membership-invitations.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/me/membership-invitations/{membershipId}/accept"
+}
+```
+
+---
+
+## 31. POST /tenants/me/membership-invitations/{membershipId}/decline
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Decline an invitation: the membership ends
+- **Operation ID:** `MembershipInvitationsController_decline`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MembershipInvitationsController.decline](../../src/modules/directory/controllers/membership-invitations.controller.ts)
+
+### Descripción de negocio
+
+Decline an invitation: the membership ends. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /tenants/me/membership-invitations/{membershipId}/decline` en `MembershipInvitationsController_decline`. El controlador delega en `MembershipInvitationsService.decline`. No recibe body. El tipo de retorno estático es `Promise<MembershipInvitationDecisionDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `membershipId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /tenants/me/membership-invitations/00000000-0000-4000-8000-000000000001/decline HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `membershipId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /tenants/me/membership-invitations/00000000-0000-4000-8000-000000000001/decline HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MembershipInvitationDecisionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "status": "ACTIVE"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `DECLINED` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Invitación no encontrada | Excepción explícita en src/modules/directory/services/membership-invitations.service.ts |
+| 409 | `CONFLICT` | La invitación ya no está pendiente | Excepción explícita en src/modules/directory/services/membership-invitations.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/me/membership-invitations/{membershipId}/decline"
 }
 ```
 

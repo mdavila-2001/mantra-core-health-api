@@ -443,7 +443,7 @@ Representa la identidad y el estado actual de una nota clínica dentro del exped
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_clinical_note_headers_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_clinical_note_headers_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_clinical_note_headers_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_clinical_note_headers_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_clinical_note_headers_encounter_id` | no | encounter_id | Soporta la clave foránea fk_clinical_note_headers_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_clinical_note_headers_note_type_concept_id` | no | note_type_concept_id | Soporta la clave foránea fk_clinical_note_headers_note_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_note_headers_lifecycle_status_concept_id` | no | lifecycle_status_concept_id | Soporta la clave foránea fk_clinical_note_headers_lifecycle_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -631,7 +631,7 @@ Preserva versiones sucesivas de notas clínicas para mantener trazabilidad de su
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_clinical_note_versions_clinical_note_id` | no | clinical_note_id | Soporta la clave foránea fk_clinical_note_versions_clinical_note_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «clinical_note_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_clinical_note_versions_author_profile_id` | no | author_profile_id | Soporta la clave foránea fk_clinical_note_versions_author_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_clinical_note_versions_author_profile_id` | no | author_profile_id | Soporta la clave foránea fk_clinical_note_versions_author_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «author_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_clinical_note_versions_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_clinical_note_versions_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_note_versions_supersedes_version_id` | no | supersedes_version_id | Soporta la clave foránea fk_clinical_note_versions_supersedes_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_note_versions_amendment_reason_concept_id` | no | amendment_reason_concept_id | Soporta la clave foránea fk_clinical_note_versions_amendment_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |

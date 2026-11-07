@@ -2,11 +2,11 @@
 
 # Inventario de endpoints
 
-Se inventarían **1942 operaciones HTTP** en **78 módulos**: 1930 publicadas en el contrato OpenAPI y 12 que existen sólo en el código.
+Se inventarían **2033 operaciones HTTP** en **78 módulos**: 2022 publicadas en el contrato OpenAPI y 11 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1850
-- Riesgo ALTO 260 · MEDIO 948 · BAJO 734
-- Mencionadas por al menos una prueba: 1047
+- Con al menos una tabla identificada: 1933
+- Riesgo ALTO 295 · MEDIO 961 · BAJO 777
+- Mencionadas por al menos una prueba: 1105
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
@@ -18,24 +18,24 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `audio_assets` | 10 | 2 | [audio_assets.md](audio_assets.md) |
 | `audit` | 18 | 1 | [audit.md](audit.md) |
 | `auth_providers` | 12 | 1 | [auth_providers.md](auth_providers.md) |
-| `authz` | 45 | 0 | [authz.md](authz.md) |
+| `authz` | 49 | 0 | [authz.md](authz.md) |
 | `automation` | 17 | 0 | [automation.md](automation.md) |
-| `billing` | 53 | 9 | [billing.md](billing.md) |
+| `billing` | 56 | 9 | [billing.md](billing.md) |
 | `bulk_import` | 7 | 0 | [bulk_import.md](bulk_import.md) |
 | `chart` | 23 | 3 | [chart.md](chart.md) |
 | `clinical` | 62 | 10 | [clinical.md](clinical.md) |
 | `clinical_ext` | 34 | 2 | [clinical_ext.md](clinical_ext.md) |
 | `common` | 19 | 6 | [common.md](common.md) |
-| `community` | 104 | 29 | [community.md](community.md) |
-| `consent` | 27 | 0 | [consent.md](consent.md) |
+| `community` | 106 | 32 | [community.md](community.md) |
+| `consent` | 28 | 0 | [consent.md](consent.md) |
 | `content_packs` | 2 | 1 | [content_packs.md](content_packs.md) |
 | `crm` | 16 | 0 | [crm.md](crm.md) |
 | `cross_store_consistency` | 16 | 0 | [cross_store_consistency.md](cross_store_consistency.md) |
 | `data_catalog` | 50 | 3 | [data_catalog.md](data_catalog.md) |
-| `delegated_access` | 41 | 6 | [delegated_access.md](delegated_access.md) |
-| `diagnostic_units` | 24 | 2 | [diagnostic_units.md](diagnostic_units.md) |
-| `diagnostics` | 33 | 9 | [diagnostics.md](diagnostics.md) |
-| `directory` | 26 | 10 | [directory.md](directory.md) |
+| `delegated_access` | 45 | 8 | [delegated_access.md](delegated_access.md) |
+| `diagnostic_units` | 47 | 15 | [diagnostic_units.md](diagnostic_units.md) |
+| `diagnostics` | 63 | 20 | [diagnostics.md](diagnostics.md) |
+| `directory` | 31 | 12 | [directory.md](directory.md) |
 | `document_store` | 5 | 0 | [document_store.md](document_store.md) |
 | `education` | 14 | 0 | [education.md](education.md) |
 | `erp` | 17 | 0 | [erp.md](erp.md) |
@@ -45,8 +45,8 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `graph_intelligence` | 15 | 4 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 16 | 0 | [health_data.md](health_data.md) |
-| `iam` | 46 | 21 | [iam.md](iam.md) |
-| `identity_assurance` | 28 | 7 | [identity_assurance.md](identity_assurance.md) |
+| `iam` | 50 | 23 | [iam.md](iam.md) |
+| `identity_assurance` | 28 | 8 | [identity_assurance.md](identity_assurance.md) |
 | `insurance` | 78 | 29 | [insurance.md](insurance.md) |
 | `integration_contracts` | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 15 | 1 | [integrations.md](integrations.md) |
@@ -54,7 +54,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `marketing` | 31 | 4 | [marketing.md](marketing.md) |
 | `medical_centers` | 2 | 0 | [medical_centers.md](medical_centers.md) |
 | `medical_groups` | 14 | 2 | [medical_groups.md](medical_groups.md) |
-| `messaging` | 21 | 1 | [messaging.md](messaging.md) |
+| `messaging` | 24 | 1 | [messaging.md](messaging.md) |
 | `object_storage` | 14 | 0 | [object_storage.md](object_storage.md) |
 | `observability` | 14 | 0 | [observability.md](observability.md) |
 | `ops_console` | 11 | 0 | [ops_console.md](ops_console.md) |
@@ -63,12 +63,12 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `payments` | 18 | 2 | [payments.md](payments.md) |
 | `pharma_lab` | 76 | 6 | [pharma_lab.md](pharma_lab.md) |
 | `pharmacy` | 39 | 4 | [pharmacy.md](pharmacy.md) |
-| `pharmacy_inventory` | 43 | 2 | [pharmacy_inventory.md](pharmacy_inventory.md) |
+| `pharmacy_inventory` | 47 | 2 | [pharmacy_inventory.md](pharmacy_inventory.md) |
 | `platform_ops` | 20 | 0 | [platform_ops.md](platform_ops.md) |
 | `polyglot_storage` | 15 | 0 | [polyglot_storage.md](polyglot_storage.md) |
 | `practice` | 84 | 25 | [practice.md](practice.md) |
 | `procedures_perioperative` | 42 | 3 | [procedures_perioperative.md](procedures_perioperative.md) |
-| `profiles` | 85 | 29 | [profiles.md](profiles.md) |
+| `profiles` | 86 | 30 | [profiles.md](profiles.md) |
 | `promotions` | 20 | 0 | [promotions.md](promotions.md) |
 | `public` | 4 | 0 | [public.md](public.md) |
 | `qa_execution` | 9 | 0 | [qa_execution.md](qa_execution.md) |
@@ -77,10 +77,10 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `read_models` | 15 | 1 | [read_models.md](read_models.md) |
 | `redis_runtime` | 6 | 0 | [redis_runtime.md](redis_runtime.md) |
 | `reporting` | 13 | 0 | [reporting.md](reporting.md) |
-| `scheduling` | 67 | 3 | [scheduling.md](scheduling.md) |
+| `scheduling` | 70 | 3 | [scheduling.md](scheduling.md) |
 | `search_platform` | 4 | 0 | [search_platform.md](search_platform.md) |
 | `study_catalog` | 2 | 0 | [study_catalog.md](study_catalog.md) |
-| `surveys` | 19 | 2 | [surveys.md](surveys.md) |
+| `surveys` | 23 | 2 | [surveys.md](surveys.md) |
 | `system_context` | 13 | 0 | [system_context.md](system_context.md) |
 | `system_ops` | 35 | 1 | [system_ops.md](system_ops.md) |
 | `telemetry` | 35 | 10 | [telemetry.md](telemetry.md) |

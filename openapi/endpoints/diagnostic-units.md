@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `diagnostic_units`
 
-Referencia exhaustiva de 24 operación(es) del módulo `diagnostic_units`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 47 operación(es) del módulo `diagnostic_units`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units`
-- **Controladores:** `DiagnosticEquipmentController`, `DiagnosticPricingController`, `DiagnosticUnitAccreditationsController`, `DiagnosticUnitSitesController`, `DiagnosticUnitsController`
+- **Etiquetas OpenAPI:** `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units`, `diagnostics-lab-portal`, `diagnostics-patient-results`
+- **Controladores:** `CenterScheduleController`, `DiagnosticEquipmentController`, `DiagnosticPricingController`, `DiagnosticUnitAccreditationsController`, `DiagnosticUnitSitesController`, `DiagnosticUnitsController`, `LabPortalServicesController`, `OrderBookingController`, `StudyAvailabilityController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -15,26 +15,49 @@ Referencia exhaustiva de 24 operación(es) del módulo `diagnostic_units`, deriv
 2. [PATCH /diagnostic-equipment/{id}](#2-patch-diagnostic-equipment-id) — Actualizar estado/calibración de un equipo
 3. [GET /diagnostic-equipment/{id}/mwl-station](#3-get-diagnostic-equipment-id-mwl-station) — Estación MWL del equipo (F5a)
 4. [POST /diagnostic-equipment/{id}/resource](#4-post-diagnostic-equipment-id-resource) — Crear el recurso agendable del equipo (F5a)
-5. [DELETE /diagnostic-study-offerings/{id}](#5-delete-diagnostic-study-offerings-id) — Retirar (soft-delete) una oferta de estudio
-6. [POST /diagnostic-unit-accreditations/{id}/renew](#6-post-diagnostic-unit-accreditations-id-renew) — Renovar/registrar acreditación con evidencia
-7. [PATCH /diagnostic-unit-sites/{siteId}](#7-patch-diagnostic-unit-sites-siteid) — Actualizar un sitio operativo de la unidad
-8. [POST /diagnostic-unit-sites/{siteId}/equipment](#8-post-diagnostic-unit-sites-siteid-equipment) — Registrar equipamiento y calibración del sitio
-9. [GET /diagnostic-units](#9-get-diagnostic-units) — Listar unidades diagnósticas publicadas
-10. [POST /diagnostic-units](#10-post-diagnostic-units) — Alta de unidad diagnóstica con sitios y acreditaciones
-11. [GET /diagnostic-units/{id}](#11-get-diagnostic-units-id) — Consultar el perfil de una unidad diagnóstica
-12. [POST /diagnostic-units/{id}/accreditations](#12-post-diagnostic-units-id-accreditations) — Registrar una acreditación con evidencia
-13. [GET /diagnostic-units/{id}/administration](#13-get-diagnostic-units-id-administration) — Consola de administración de una unidad diagnóstica
-14. [POST /diagnostic-units/{id}/practitioner-assignments](#14-post-diagnostic-units-id-practitioner-assignments) — Asignar un especialista a la unidad/sitio
-15. [POST /diagnostic-units/{id}/price-schedules](#15-post-diagnostic-units-id-price-schedules) — Crear un cronograma de precios
-16. [POST /diagnostic-units/{id}/reproject](#16-post-diagnostic-units-id-reproject) — Reconstruir la proyección del perfil público
-17. [POST /diagnostic-units/{id}/sites](#17-post-diagnostic-units-id-sites) — Registrar un sitio operativo de la unidad
-18. [PUT /diagnostic-units/{id}/specialties](#18-put-diagnostic-units-id-specialties) — Declarar las especialidades de la unidad
-19. [POST /diagnostic-units/{id}/study-offerings](#19-post-diagnostic-units-id-study-offerings) — Publicar oferta de estudio con componentes (panel)
-20. [POST /diagnostic-units/{id}/verify-and-publish](#20-post-diagnostic-units-id-verify-and-publish) — Verificar la unidad y publicar su perfil público
-21. [GET /diagnostic-units/administration](#21-get-diagnostic-units-administration) — Listar las unidades del tenant, publicadas o no
-22. [GET /diagnostic-units/search](#22-get-diagnostic-units-search) — Buscar centros de diagnóstico, laboratorio e imagen
-23. [POST /price-schedules/{scheduleId}/study-prices](#23-post-price-schedules-scheduleid-study-prices) — Fijar/versionar el precio de un estudio (append-only)
-24. [POST /study-prices/{priceId}/close](#24-post-study-prices-priceid-close) — Cerrar una versión de precio vigente
+5. [DELETE /diagnostic-results/me/orders/{orderId}/booking](#5-delete-diagnostic-results-me-orders-orderid-booking) — Cancel the appointment of my order
+6. [POST /diagnostic-results/me/orders/{orderId}/booking](#6-post-diagnostic-results-me-orders-orderid-booking) — Book my order at a center, confirmed
+7. [GET /diagnostic-results/me/orders/{orderId}/booking-options](#7-get-diagnostic-results-me-orders-orderid-booking-options) — Centers that perform the study of my order
+8. [DELETE /diagnostic-study-offerings/{id}](#8-delete-diagnostic-study-offerings-id) — Retirar (soft-delete) una oferta de estudio
+9. [POST /diagnostic-unit-accreditations/{id}/renew](#9-post-diagnostic-unit-accreditations-id-renew) — Renovar/registrar acreditación con evidencia
+10. [PATCH /diagnostic-unit-sites/{siteId}](#10-patch-diagnostic-unit-sites-siteid) — Actualizar un sitio operativo de la unidad
+11. [POST /diagnostic-unit-sites/{siteId}/equipment](#11-post-diagnostic-unit-sites-siteid-equipment) — Registrar equipamiento y calibración del sitio
+12. [GET /diagnostic-units](#12-get-diagnostic-units) — Listar unidades diagnósticas publicadas
+13. [POST /diagnostic-units](#13-post-diagnostic-units) — Alta de unidad diagnóstica con sitios y acreditaciones
+14. [GET /diagnostic-units/{id}](#14-get-diagnostic-units-id) — Consultar el perfil de una unidad diagnóstica
+15. [POST /diagnostic-units/{id}/accreditations](#15-post-diagnostic-units-id-accreditations) — Registrar una acreditación con evidencia
+16. [GET /diagnostic-units/{id}/administration](#16-get-diagnostic-units-id-administration) — Consola de administración de una unidad diagnóstica
+17. [POST /diagnostic-units/{id}/practitioner-assignments](#17-post-diagnostic-units-id-practitioner-assignments) — Asignar un especialista a la unidad/sitio
+18. [POST /diagnostic-units/{id}/price-schedules](#18-post-diagnostic-units-id-price-schedules) — Crear un cronograma de precios
+19. [POST /diagnostic-units/{id}/reproject](#19-post-diagnostic-units-id-reproject) — Reconstruir la proyección del perfil público
+20. [POST /diagnostic-units/{id}/sites](#20-post-diagnostic-units-id-sites) — Registrar un sitio operativo de la unidad
+21. [PUT /diagnostic-units/{id}/specialties](#21-put-diagnostic-units-id-specialties) — Declarar las especialidades de la unidad
+22. [POST /diagnostic-units/{id}/study-offerings](#22-post-diagnostic-units-id-study-offerings) — Publicar oferta de estudio con componentes (panel)
+23. [POST /diagnostic-units/{id}/verify-and-publish](#23-post-diagnostic-units-id-verify-and-publish) — Verificar la unidad y publicar su perfil público
+24. [POST /diagnostic-units/{unitId}/equipment](#24-post-diagnostic-units-unitid-equipment) — Register a device (a production line)
+25. [DELETE /diagnostic-units/{unitId}/equipment/{equipmentId}](#25-delete-diagnostic-units-unitid-equipment-equipmentid) — Remove a device registered by mistake
+26. [PATCH /diagnostic-units/{unitId}/equipment/{equipmentId}](#26-patch-diagnostic-units-unitid-equipment-equipmentid) — Mark a device operational or not
+27. [PUT /diagnostic-units/{unitId}/equipment/{equipmentId}](#27-put-diagnostic-units-unitid-equipment-equipmentid) — Edit a device: name, maker, serial, modality
+28. [GET /diagnostic-units/{unitId}/schedule](#28-get-diagnostic-units-unitid-schedule) — Schedule, studies and equipment of a center
+29. [PUT /diagnostic-units/{unitId}/schedule](#29-put-diagnostic-units-unitid-schedule) — Publish the whole schedule of a center
+30. [GET /diagnostic-units/{unitId}/study-availability](#30-get-diagnostic-units-unitid-study-availability) — Free starts of a study in a center
+31. [GET /diagnostic-units/administration](#31-get-diagnostic-units-administration) — Listar las unidades del tenant, publicadas o no
+32. [GET /diagnostic-units/me/bookings](#32-get-diagnostic-units-me-bookings) — Appointments booked at my center, by start
+33. [GET /diagnostic-units/me/schedule](#33-get-diagnostic-units-me-schedule) — Schedule, studies and equipment of my center
+34. [GET /diagnostic-units/search](#34-get-diagnostic-units-search) — Buscar centros de diagnóstico, laboratorio e imagen
+35. [GET /diagnostics/lab/catalog](#35-get-diagnostics-lab-catalog) — Catálogo de análisis (LOINC) con componentes y precio sugerido
+36. [POST /diagnostics/lab/catalog/import](#36-post-diagnostics-lab-catalog-import) — Sumar análisis del catálogo, con sus componentes y precio sugerido
+37. [GET /diagnostics/lab/categories](#37-get-diagnostics-lab-categories) — Categorías del laboratorio, con su conteo
+38. [POST /diagnostics/lab/categories](#38-post-diagnostics-lab-categories) — Crear una categoría (409 si el nombre ya existe, sin importar mayúsculas)
+39. [DELETE /diagnostics/lab/categories/{id}](#39-delete-diagnostics-lab-categories-id) — Eliminar una categoría (409 mientras agrupe servicios no retirados)
+40. [PATCH /diagnostics/lab/categories/{id}](#40-patch-diagnostics-lab-categories-id) — Renombrar una categoría (409 si el nombre ya existe)
+41. [GET /diagnostics/lab/services](#41-get-diagnostics-lab-services) — Catálogo de servicios del laboratorio
+42. [POST /diagnostics/lab/services](#42-post-diagnostics-lab-services) — Dar de alta un servicio con su precio
+43. [DELETE /diagnostics/lab/services/{id}](#43-delete-diagnostics-lab-services-id) — Retirar un servicio (no se borra)
+44. [PATCH /diagnostics/lab/services/{id}](#44-patch-diagnostics-lab-services-id) — Editar un servicio (un precio nuevo es una versión nueva)
+45. [POST /diagnostics/lab/services/import](#45-post-diagnostics-lab-services-import) — Carga masiva por código, fila por fila
+46. [POST /price-schedules/{scheduleId}/study-prices](#46-post-price-schedules-scheduleid-study-prices) — Fijar/versionar el precio de un estudio (append-only)
+47. [POST /study-prices/{priceId}/close](#47-post-study-prices-priceid-close) — Cerrar una versión de precio vigente
 
 ---
 
@@ -491,7 +514,403 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. DELETE /diagnostic-study-offerings/{id}
+## 5. DELETE /diagnostic-results/me/orders/{orderId}/booking
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-patient-results`
+- **Nombre:** Cancel the appointment of my order
+- **Operation ID:** `OrderBookingController_cancel`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OrderBookingController.cancel](../../src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts)
+
+### Descripción de negocio
+
+Cancel the appointment of my order. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /diagnostic-results/me/orders/{orderId}/booking` en `OrderBookingController_cancel`. El controlador delega en `CancelOrderBookingUseCase.execute`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `orderId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /diagnostic-results/me/orders/00000000-0000-4000-8000-000000000001/booking HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `orderId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /diagnostic-results/me/orders/00000000-0000-4000-8000-000000000001/booking HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La orden no tiene cita | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/cancel-order-booking.use-case.ts |
+| 404 | `NOT_FOUND` | Orden no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 409 | `CONFLICT` | Esta orden ya tiene su resultado: no hace falta reservar. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese turno ya pasó. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/cancel-order-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-results/me/orders/{orderId}/booking"
+}
+```
+
+---
+
+## 6. POST /diagnostic-results/me/orders/{orderId}/booking
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-patient-results`
+- **Nombre:** Book my order at a center, confirmed
+- **Operation ID:** `OrderBookingController_book`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OrderBookingController.book](../../src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts)
+
+### Descripción de negocio
+
+Book my order at a center, confirmed. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostic-results/me/orders/{orderId}/booking` en `OrderBookingController_book`. El controlador delega en `BookOrderUseCase.execute`. Valida el body como `BookOrderDto` y consume `application/json`. El tipo de retorno estático es `Promise<OrderAppointmentDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `orderId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `BookOrderDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostic-results/me/orders/00000000-0000-4000-8000-000000000001/booking HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "startAt": "2026-11-05T12:00:00.000Z"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `orderId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `startAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2026-11-05T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostic-results/me/orders/00000000-0000-4000-8000-000000000001/booking HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "startAt": "2026-11-05T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<OrderAppointmentDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OrderAppointmentDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OrderAppointmentDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OrderAppointmentDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OrderAppointmentDto>` | No |
+| 409 | `details.slotTaken`: the start filled up meanwhile; without it, the order already has an appointment. | `Promise<OrderAppointmentDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OrderAppointmentDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OrderAppointmentDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OrderAppointmentDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OrderAppointmentDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OrderAppointmentDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OrderAppointmentDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "bookingId": "00000000-0000-4000-8000-000000000001",
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "unitName": "Nombre de ejemplo",
+  "addressText": "valor-ejemplo",
+  "startAt": "valor-ejemplo",
+  "endAt": "valor-ejemplo",
+  "studyName": "Nombre de ejemplo",
+  "price": 1,
+  "currency": "BOB",
+  "preparation": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `bookingId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `startAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `endAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `price` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Centro no encontrado | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/book-order.use-case.ts |
+| 404 | `NOT_FOUND` | El centro no hace ese estudio | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/book-order.use-case.ts |
+| 404 | `NOT_FOUND` | Orden no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 409 | `CONFLICT` | Esta orden ya tiene un turno. Cancélelo para elegir otro. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/book-order.use-case.ts |
+| 409 | `CONFLICT` | Ese horario se acaba de ocupar. Elija otro. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/book-order.use-case.ts |
+| 409 | `CONFLICT` | Esta orden ya tiene su resultado: no hace falta reservar. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-results/me/orders/{orderId}/booking"
+}
+```
+
+---
+
+## 7. GET /diagnostic-results/me/orders/{orderId}/booking-options
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-patient-results`
+- **Nombre:** Centers that perform the study of my order
+- **Operation ID:** `OrderBookingController_bookingOptions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OrderBookingController.bookingOptions](../../src/modules/diagnostic_units/center-schedule/presentation/order-booking.controller.ts)
+
+### Descripción de negocio
+
+Centers that perform the study of my order. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-results/me/orders/{orderId}/booking-options` en `OrderBookingController_bookingOptions`. El controlador delega en `GetBookingOptionsUseCase.execute`. No recibe body. El tipo de retorno estático es `Promise<OrderBookingOptionsDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `orderId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-results/me/orders/00000000-0000-4000-8000-000000000001/booking-options HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `orderId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-results/me/orders/00000000-0000-4000-8000-000000000001/booking-options HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OrderBookingOptionsDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<OrderBookingOptionsDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<OrderBookingOptionsDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<OrderBookingOptionsDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<OrderBookingOptionsDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<OrderBookingOptionsDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<OrderBookingOptionsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<OrderBookingOptionsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OrderBookingOptionsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "orderId": "00000000-0000-4000-8000-000000000001",
+  "studyCode": "CODIGO_EJEMPLO",
+  "studyName": "Nombre de ejemplo",
+  "modalityCode": "ECO",
+  "modalityLabel": "valor-ejemplo",
+  "options": [
+    {
+      "unitId": "00000000-0000-4000-8000-000000000001",
+      "unitName": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "price": 1,
+      "currency": "BOB",
+      "distanceKm": 1,
+      "nextStartAt": "valor-ejemplo",
+      "preparation": "valor-ejemplo",
+      "operationalEquipment": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `orderId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `studyCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `modalityLabel` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `options` | Sí | `array<OrderBookingOptionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"unitId":"00000000-0000-4000-8000-000000000001","unitName":"Nombre de ejemplo","addressText":"valor-ejemplo","price":1,"currency":"BOB","distanceKm":1,"nextStartAt":"valor-ejemplo","preparation":"valor-ejemplo","operationalEquipment":1}]` |
+| `options[].unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `options[].unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `options[].addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `options[].price` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `options[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `options[].distanceKm` | Sí | `number` | admite null | Straight line from the patient home; `null` if a location is missing. | `1` |
+| `options[].nextStartAt` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `options[].preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `options[].operationalEquipment` | Sí | `number` | Sin restricción adicional declarada | Patients per slot for the modality. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Orden no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 409 | `CONFLICT` | Esta orden ya tiene su resultado: no hace falta reservar. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esta orden no es de un estudio que se reserve en un centro. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-booking-options.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-results/me/orders/{orderId}/booking-options"
+}
+```
+
+---
+
+## 8. DELETE /diagnostic-study-offerings/{id}
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-pricing`
@@ -601,7 +1020,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /diagnostic-unit-accreditations/{id}/renew
+## 9. POST /diagnostic-unit-accreditations/{id}/renew
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-unit-accreditations`
@@ -735,7 +1154,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. PATCH /diagnostic-unit-sites/{siteId}
+## 10. PATCH /diagnostic-unit-sites/{siteId}
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-unit-sites`
@@ -873,7 +1292,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /diagnostic-unit-sites/{siteId}/equipment
+## 11. POST /diagnostic-unit-sites/{siteId}/equipment
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-unit-sites`
@@ -1023,7 +1442,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. GET /diagnostic-units
+## 12. GET /diagnostic-units
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1155,7 +1574,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /diagnostic-units
+## 13. POST /diagnostic-units
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1334,7 +1753,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /diagnostic-units/{id}
+## 14. GET /diagnostic-units/{id}
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1599,7 +2018,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /diagnostic-units/{id}/accreditations
+## 15. POST /diagnostic-units/{id}/accreditations
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1743,7 +2162,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /diagnostic-units/{id}/administration
+## 16. GET /diagnostic-units/{id}/administration
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2130,7 +2549,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /diagnostic-units/{id}/practitioner-assignments
+## 17. POST /diagnostic-units/{id}/practitioner-assignments
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2273,7 +2692,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /diagnostic-units/{id}/price-schedules
+## 18. POST /diagnostic-units/{id}/price-schedules
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2420,7 +2839,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /diagnostic-units/{id}/reproject
+## 19. POST /diagnostic-units/{id}/reproject
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2531,7 +2950,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /diagnostic-units/{id}/sites
+## 20. POST /diagnostic-units/{id}/sites
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2674,7 +3093,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. PUT /diagnostic-units/{id}/specialties
+## 21. PUT /diagnostic-units/{id}/specialties
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2813,7 +3232,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /diagnostic-units/{id}/study-offerings
+## 22. POST /diagnostic-units/{id}/study-offerings
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -2988,7 +3407,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /diagnostic-units/{id}/verify-and-publish
+## 23. POST /diagnostic-units/{id}/verify-and-publish
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -3114,7 +3533,1786 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /diagnostic-units/administration
+## 24. POST /diagnostic-units/{unitId}/equipment
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Register a device (a production line)
+- **Operation ID:** `CenterScheduleController_addEquipment`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CenterScheduleController.addEquipment](../../src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts)
+
+### Descripción de negocio
+
+Register a device (a production line). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostic-units/{unitId}/equipment` en `CenterScheduleController_addEquipment`. El controlador delega en `ManageCenterEquipmentUseCase.create`. Valida el body como `CenterEquipmentInputDto` y consume `application/json`. El tipo de retorno estático es `Promise<CenterScheduleViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CenterEquipmentInputDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostic-units/00000000-0000-4000-8000-000000000001/equipment HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Ecógrafo sala 2"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `unitId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Ecógrafo sala 2` |
+| `manufacturer` | No | `string` | longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `serialNumber` | No | `string` | longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `modalityCode` | No | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB`; admite null | `null`: an analyzer, which never limits appointments. | `ECO` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostic-units/00000000-0000-4000-8000-000000000001/equipment HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Ecógrafo sala 2",
+  "manufacturer": "valor-ejemplo",
+  "serialNumber": "valor-ejemplo",
+  "modalityCode": "ECO"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CenterScheduleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "unitName": "Nombre de ejemplo",
+  "kind": "LABORATORY",
+  "schedule": {
+    "general": {
+      "windows": [
+        {
+          "dayOfWeek": 1,
+          "startTime": "08:00",
+          "endTime": "12:00"
+        }
+      ],
+      "slotMinutes": 30
+    },
+    "modalities": [
+      {
+        "modalityCode": "ECO",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "studies": [
+      {
+        "studyCode": "STUDY-ECO-OBSTETRICA",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "equipment": [
+      {
+        "equipmentId": "00000000-0000-4000-8000-000000000001",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ]
+  },
+  "studies": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "modalityCode": "ECO",
+      "price": 1,
+      "currency": "BOB",
+      "preparation": "valor-ejemplo"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "manufacturer": "valor-ejemplo",
+      "model": "valor-ejemplo",
+      "modalityCode": "ECO",
+      "status": "OPERATIONAL",
+      "glossaryConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "updatedAt": "valor-ejemplo",
+  "bookingsWithoutEquipment": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
+| `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `studies[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `studies[].price` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `studies[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `studies[].preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment` | Sí | `array<CenterEquipmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","manufacturer":"valor-ejemplo","model":"valor-ejemplo","modalityCode":"ECO","status":"OPERATIONAL","glossaryConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `equipment[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipment[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `equipment[].manufacturer` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].model` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB`; admite null | `null`: does not limit appointments (an analyzer). | `ECO` |
+| `equipment[].status` | Sí | `string` | valores: `OPERATIONAL`, `MAINTENANCE`, `OUT_OF_SERVICE` | Sin descripción específica en el contrato OpenAPI. | `OPERATIONAL` |
+| `equipment[].glossaryConceptId` | Sí | `string` | admite null | Always `null` for now. | `00000000-0000-4000-8000-000000000001` |
+| `updatedAt` | Sí | `string` | admite null | `null` while the center has never published a schedule. | `valor-ejemplo` |
+| `bookingsWithoutEquipment` | No | `number` | Sin restricción adicional declarada | Future bookings left without an operational device. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El centro no tiene una sucursal activa donde registrar el equipo. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo todavía no tiene un tipo de equipo para esa modalidad. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units/{unitId}/equipment"
+}
+```
+
+---
+
+## 25. DELETE /diagnostic-units/{unitId}/equipment/{equipmentId}
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Remove a device registered by mistake
+- **Operation ID:** `CenterScheduleController_removeEquipment`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CenterScheduleController.removeEquipment](../../src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts)
+
+### Descripción de negocio
+
+Remove a device registered by mistake. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /diagnostic-units/{unitId}/equipment/{equipmentId}` en `CenterScheduleController_removeEquipment`. El controlador delega en `ManageCenterEquipmentUseCase.remove`. No recibe body. El tipo de retorno estático es `Promise<CenterScheduleViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipmentId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /diagnostic-units/00000000-0000-4000-8000-000000000001/equipment/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `unitId`, `equipmentId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /diagnostic-units/00000000-0000-4000-8000-000000000001/equipment/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 409 | Already referenced: mark it out of service instead. | `Promise<CenterScheduleViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CenterScheduleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "unitName": "Nombre de ejemplo",
+  "kind": "LABORATORY",
+  "schedule": {
+    "general": {
+      "windows": [
+        {
+          "dayOfWeek": 1,
+          "startTime": "08:00",
+          "endTime": "12:00"
+        }
+      ],
+      "slotMinutes": 30
+    },
+    "modalities": [
+      {
+        "modalityCode": "ECO",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "studies": [
+      {
+        "studyCode": "STUDY-ECO-OBSTETRICA",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "equipment": [
+      {
+        "equipmentId": "00000000-0000-4000-8000-000000000001",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ]
+  },
+  "studies": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "modalityCode": "ECO",
+      "price": 1,
+      "currency": "BOB",
+      "preparation": "valor-ejemplo"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "manufacturer": "valor-ejemplo",
+      "model": "valor-ejemplo",
+      "modalityCode": "ECO",
+      "status": "OPERATIONAL",
+      "glossaryConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "updatedAt": "valor-ejemplo",
+  "bookingsWithoutEquipment": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
+| `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `studies[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `studies[].price` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `studies[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `studies[].preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment` | Sí | `array<CenterEquipmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","manufacturer":"valor-ejemplo","model":"valor-ejemplo","modalityCode":"ECO","status":"OPERATIONAL","glossaryConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `equipment[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipment[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `equipment[].manufacturer` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].model` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB`; admite null | `null`: does not limit appointments (an analyzer). | `ECO` |
+| `equipment[].status` | Sí | `string` | valores: `OPERATIONAL`, `MAINTENANCE`, `OUT_OF_SERVICE` | Sin descripción específica en el contrato OpenAPI. | `OPERATIONAL` |
+| `equipment[].glossaryConceptId` | Sí | `string` | admite null | Always `null` for now. | `00000000-0000-4000-8000-000000000001` |
+| `updatedAt` | Sí | `string` | admite null | `null` while the center has never published a schedule. | `valor-ejemplo` |
+| `bookingsWithoutEquipment` | No | `number` | Sin restricción adicional declarada | Future bookings left without an operational device. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Equipo no encontrado | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
+| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 409 | `CONFLICT` | El equipo ya tiene registros asociados: márquelo «Fuera de servicio» en lugar de quitarlo. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units/{unitId}/equipment/{equipmentId}"
+}
+```
+
+---
+
+## 26. PATCH /diagnostic-units/{unitId}/equipment/{equipmentId}
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Mark a device operational or not
+- **Operation ID:** `CenterScheduleController_setEquipmentStatus`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CenterScheduleController.setEquipmentStatus](../../src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts)
+
+### Descripción de negocio
+
+Mark a device operational or not. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /diagnostic-units/{unitId}/equipment/{equipmentId}` en `CenterScheduleController_setEquipmentStatus`. El controlador delega en `SetEquipmentStatusUseCase.execute`. Valida el body como `SetEquipmentStatusDto` y consume `application/json`. El tipo de retorno estático es `Promise<CenterScheduleViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipmentId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SetEquipmentStatusDto`; los campos opcionales se omiten.
+
+```http
+PATCH /diagnostic-units/00000000-0000-4000-8000-000000000001/equipment/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "status": "OPERATIONAL"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `unitId`, `equipmentId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `status` | Sí | `string` | valores: `OPERATIONAL`, `MAINTENANCE`, `OUT_OF_SERVICE` | Sin descripción específica en el contrato OpenAPI. | `OPERATIONAL` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /diagnostic-units/00000000-0000-4000-8000-000000000001/equipment/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "status": "OPERATIONAL"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CenterScheduleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "unitName": "Nombre de ejemplo",
+  "kind": "LABORATORY",
+  "schedule": {
+    "general": {
+      "windows": [
+        {
+          "dayOfWeek": 1,
+          "startTime": "08:00",
+          "endTime": "12:00"
+        }
+      ],
+      "slotMinutes": 30
+    },
+    "modalities": [
+      {
+        "modalityCode": "ECO",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "studies": [
+      {
+        "studyCode": "STUDY-ECO-OBSTETRICA",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "equipment": [
+      {
+        "equipmentId": "00000000-0000-4000-8000-000000000001",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ]
+  },
+  "studies": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "modalityCode": "ECO",
+      "price": 1,
+      "currency": "BOB",
+      "preparation": "valor-ejemplo"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "manufacturer": "valor-ejemplo",
+      "model": "valor-ejemplo",
+      "modalityCode": "ECO",
+      "status": "OPERATIONAL",
+      "glossaryConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "updatedAt": "valor-ejemplo",
+  "bookingsWithoutEquipment": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
+| `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `studies[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `studies[].price` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `studies[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `studies[].preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment` | Sí | `array<CenterEquipmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","manufacturer":"valor-ejemplo","model":"valor-ejemplo","modalityCode":"ECO","status":"OPERATIONAL","glossaryConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `equipment[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipment[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `equipment[].manufacturer` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].model` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB`; admite null | `null`: does not limit appointments (an analyzer). | `ECO` |
+| `equipment[].status` | Sí | `string` | valores: `OPERATIONAL`, `MAINTENANCE`, `OUT_OF_SERVICE` | Sin descripción específica en el contrato OpenAPI. | `OPERATIONAL` |
+| `equipment[].glossaryConceptId` | Sí | `string` | admite null | Always `null` for now. | `00000000-0000-4000-8000-000000000001` |
+| `updatedAt` | Sí | `string` | admite null | `null` while the center has never published a schedule. | `valor-ejemplo` |
+| `bookingsWithoutEquipment` | No | `number` | Sin restricción adicional declarada | Future bookings left without an operational device. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Equipo no encontrado | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/set-equipment-status.use-case.ts |
+| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units/{unitId}/equipment/{equipmentId}"
+}
+```
+
+---
+
+## 27. PUT /diagnostic-units/{unitId}/equipment/{equipmentId}
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Edit a device: name, maker, serial, modality
+- **Operation ID:** `CenterScheduleController_editEquipment`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CenterScheduleController.editEquipment](../../src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts)
+
+### Descripción de negocio
+
+Edit a device: name, maker, serial, modality. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /diagnostic-units/{unitId}/equipment/{equipmentId}` en `CenterScheduleController_editEquipment`. El controlador delega en `ManageCenterEquipmentUseCase.update`. Valida el body como `CenterEquipmentInputDto` y consume `application/json`. El tipo de retorno estático es `Promise<CenterScheduleViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipmentId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CenterEquipmentInputDto`; los campos opcionales se omiten.
+
+```http
+PUT /diagnostic-units/00000000-0000-4000-8000-000000000001/equipment/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Ecógrafo sala 2"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `unitId`, `equipmentId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Ecógrafo sala 2` |
+| `manufacturer` | No | `string` | longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `serialNumber` | No | `string` | longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `modalityCode` | No | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB`; admite null | `null`: an analyzer, which never limits appointments. | `ECO` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /diagnostic-units/00000000-0000-4000-8000-000000000001/equipment/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Ecógrafo sala 2",
+  "manufacturer": "valor-ejemplo",
+  "serialNumber": "valor-ejemplo",
+  "modalityCode": "ECO"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CenterScheduleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "unitName": "Nombre de ejemplo",
+  "kind": "LABORATORY",
+  "schedule": {
+    "general": {
+      "windows": [
+        {
+          "dayOfWeek": 1,
+          "startTime": "08:00",
+          "endTime": "12:00"
+        }
+      ],
+      "slotMinutes": 30
+    },
+    "modalities": [
+      {
+        "modalityCode": "ECO",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "studies": [
+      {
+        "studyCode": "STUDY-ECO-OBSTETRICA",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "equipment": [
+      {
+        "equipmentId": "00000000-0000-4000-8000-000000000001",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ]
+  },
+  "studies": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "modalityCode": "ECO",
+      "price": 1,
+      "currency": "BOB",
+      "preparation": "valor-ejemplo"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "manufacturer": "valor-ejemplo",
+      "model": "valor-ejemplo",
+      "modalityCode": "ECO",
+      "status": "OPERATIONAL",
+      "glossaryConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "updatedAt": "valor-ejemplo",
+  "bookingsWithoutEquipment": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
+| `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `studies[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `studies[].price` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `studies[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `studies[].preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment` | Sí | `array<CenterEquipmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","manufacturer":"valor-ejemplo","model":"valor-ejemplo","modalityCode":"ECO","status":"OPERATIONAL","glossaryConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `equipment[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipment[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `equipment[].manufacturer` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].model` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB`; admite null | `null`: does not limit appointments (an analyzer). | `ECO` |
+| `equipment[].status` | Sí | `string` | valores: `OPERATIONAL`, `MAINTENANCE`, `OUT_OF_SERVICE` | Sin descripción específica en el contrato OpenAPI. | `OPERATIONAL` |
+| `equipment[].glossaryConceptId` | Sí | `string` | admite null | Always `null` for now. | `00000000-0000-4000-8000-000000000001` |
+| `updatedAt` | Sí | `string` | admite null | `null` while the center has never published a schedule. | `valor-ejemplo` |
+| `bookingsWithoutEquipment` | No | `number` | Sin restricción adicional declarada | Future bookings left without an operational device. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Equipo no encontrado | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
+| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El catálogo todavía no tiene un tipo de equipo para esa modalidad. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units/{unitId}/equipment/{equipmentId}"
+}
+```
+
+---
+
+## 28. GET /diagnostic-units/{unitId}/schedule
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Schedule, studies and equipment of a center
+- **Operation ID:** `CenterScheduleController_schedule`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CenterScheduleController.schedule](../../src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts)
+
+### Descripción de negocio
+
+Schedule, studies and equipment of a center. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-units/{unitId}/schedule` en `CenterScheduleController_schedule`. El controlador delega en `GetCenterScheduleUseCase.forUnit`. No recibe body. El tipo de retorno estático es `Promise<CenterScheduleViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-units/00000000-0000-4000-8000-000000000001/schedule HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `unitId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-units/00000000-0000-4000-8000-000000000001/schedule HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CenterScheduleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "unitName": "Nombre de ejemplo",
+  "kind": "LABORATORY",
+  "schedule": {
+    "general": {
+      "windows": [
+        {
+          "dayOfWeek": 1,
+          "startTime": "08:00",
+          "endTime": "12:00"
+        }
+      ],
+      "slotMinutes": 30
+    },
+    "modalities": [
+      {
+        "modalityCode": "ECO",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "studies": [
+      {
+        "studyCode": "STUDY-ECO-OBSTETRICA",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "equipment": [
+      {
+        "equipmentId": "00000000-0000-4000-8000-000000000001",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ]
+  },
+  "studies": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "modalityCode": "ECO",
+      "price": 1,
+      "currency": "BOB",
+      "preparation": "valor-ejemplo"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "manufacturer": "valor-ejemplo",
+      "model": "valor-ejemplo",
+      "modalityCode": "ECO",
+      "status": "OPERATIONAL",
+      "glossaryConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "updatedAt": "valor-ejemplo",
+  "bookingsWithoutEquipment": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
+| `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `studies[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `studies[].price` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `studies[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `studies[].preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment` | Sí | `array<CenterEquipmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","manufacturer":"valor-ejemplo","model":"valor-ejemplo","modalityCode":"ECO","status":"OPERATIONAL","glossaryConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `equipment[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipment[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `equipment[].manufacturer` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].model` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB`; admite null | `null`: does not limit appointments (an analyzer). | `ECO` |
+| `equipment[].status` | Sí | `string` | valores: `OPERATIONAL`, `MAINTENANCE`, `OUT_OF_SERVICE` | Sin descripción específica en el contrato OpenAPI. | `OPERATIONAL` |
+| `equipment[].glossaryConceptId` | Sí | `string` | admite null | Always `null` for now. | `00000000-0000-4000-8000-000000000001` |
+| `updatedAt` | Sí | `string` | admite null | `null` while the center has never published a schedule. | `valor-ejemplo` |
+| `bookingsWithoutEquipment` | No | `number` | Sin restricción adicional declarada | Future bookings left without an operational device. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units/{unitId}/schedule"
+}
+```
+
+---
+
+## 29. PUT /diagnostic-units/{unitId}/schedule
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Publish the whole schedule of a center
+- **Operation ID:** `CenterScheduleController_saveSchedule`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CenterScheduleController.saveSchedule](../../src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts)
+
+### Descripción de negocio
+
+Publish the whole schedule of a center. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /diagnostic-units/{unitId}/schedule` en `CenterScheduleController_saveSchedule`. El controlador delega en `SaveCenterScheduleUseCase.execute`. Valida el body como `SaveCenterScheduleDto` y consume `application/json`. El tipo de retorno estático es `Promise<CenterScheduleViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SaveCenterScheduleDto`; los campos opcionales se omiten.
+
+```http
+PUT /diagnostic-units/00000000-0000-4000-8000-000000000001/schedule HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "general": {
+    "windows": [
+      {
+        "dayOfWeek": 1,
+        "startTime": "08:00",
+        "endTime": "12:00"
+      }
+    ],
+    "slotMinutes": 30
+  },
+  "modalities": [
+    {
+      "modalityCode": "ECO",
+      "schedule": {
+        "windows": [
+          {
+            "dayOfWeek": 1,
+            "startTime": "08:00",
+            "endTime": "12:00"
+          }
+        ],
+        "slotMinutes": 30
+      }
+    }
+  ],
+  "studies": [
+    {
+      "studyCode": "STUDY-ECO-OBSTETRICA",
+      "schedule": {
+        "windows": [
+          {
+            "dayOfWeek": 1,
+            "startTime": "08:00",
+            "endTime": "12:00"
+          }
+        ],
+        "slotMinutes": 30
+      }
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `unitId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
+| `studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /diagnostic-units/00000000-0000-4000-8000-000000000001/schedule HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "general": {
+    "windows": [
+      {
+        "dayOfWeek": 1,
+        "startTime": "08:00",
+        "endTime": "12:00"
+      }
+    ],
+    "slotMinutes": 30
+  },
+  "modalities": [
+    {
+      "modalityCode": "ECO",
+      "schedule": {
+        "windows": [
+          {
+            "dayOfWeek": 1,
+            "startTime": "08:00",
+            "endTime": "12:00"
+          }
+        ],
+        "slotMinutes": 30
+      }
+    }
+  ],
+  "studies": [
+    {
+      "studyCode": "STUDY-ECO-OBSTETRICA",
+      "schedule": {
+        "windows": [
+          {
+            "dayOfWeek": 1,
+            "startTime": "08:00",
+            "endTime": "12:00"
+          }
+        ],
+        "slotMinutes": 30
+      }
+    }
+  ],
+  "equipment": [
+    {
+      "equipmentId": "00000000-0000-4000-8000-000000000001",
+      "schedule": {
+        "windows": [
+          {
+            "dayOfWeek": 1,
+            "startTime": "08:00",
+            "endTime": "12:00"
+          }
+        ],
+        "slotMinutes": 30
+      }
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 409 | `details.affectedBookings`: booked appointments left outside. | `Promise<CenterScheduleViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CenterScheduleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "unitName": "Nombre de ejemplo",
+  "kind": "LABORATORY",
+  "schedule": {
+    "general": {
+      "windows": [
+        {
+          "dayOfWeek": 1,
+          "startTime": "08:00",
+          "endTime": "12:00"
+        }
+      ],
+      "slotMinutes": 30
+    },
+    "modalities": [
+      {
+        "modalityCode": "ECO",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "studies": [
+      {
+        "studyCode": "STUDY-ECO-OBSTETRICA",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "equipment": [
+      {
+        "equipmentId": "00000000-0000-4000-8000-000000000001",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ]
+  },
+  "studies": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "modalityCode": "ECO",
+      "price": 1,
+      "currency": "BOB",
+      "preparation": "valor-ejemplo"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "manufacturer": "valor-ejemplo",
+      "model": "valor-ejemplo",
+      "modalityCode": "ECO",
+      "status": "OPERATIONAL",
+      "glossaryConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "updatedAt": "valor-ejemplo",
+  "bookingsWithoutEquipment": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
+| `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `studies[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `studies[].price` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `studies[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `studies[].preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment` | Sí | `array<CenterEquipmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","manufacturer":"valor-ejemplo","model":"valor-ejemplo","modalityCode":"ECO","status":"OPERATIONAL","glossaryConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `equipment[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipment[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `equipment[].manufacturer` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].model` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB`; admite null | `null`: does not limit appointments (an analyzer). | `ECO` |
+| `equipment[].status` | Sí | `string` | valores: `OPERATIONAL`, `MAINTENANCE`, `OUT_OF_SERVICE` | Sin descripción específica en el contrato OpenAPI. | `OPERATIONAL` |
+| `equipment[].glossaryConceptId` | Sí | `string` | admite null | Always `null` for now. | `00000000-0000-4000-8000-000000000001` |
+| `updatedAt` | Sí | `string` | admite null | `null` while the center has never published a schedule. | `valor-ejemplo` |
+| `bookingsWithoutEquipment` | No | `number` | Sin restricción adicional declarada | Future bookings left without an operational device. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 409 | `CONFLICT` | affected === 1             ? 'Hay 1 turno reservado que quedaría fuera del horario nuevo.'             : `Hay ${affected} turnos reservados que quedarían fuera del horario nuevo.` | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/save-center-schedule.use-case.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El horario tiene datos incompletos. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/save-center-schedule.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units/{unitId}/schedule"
+}
+```
+
+---
+
+## 30. GET /diagnostic-units/{unitId}/study-availability
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Free starts of a study in a center
+- **Operation ID:** `StudyAvailabilityController_studyAvailability`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [StudyAvailabilityController.studyAvailability](../../src/modules/diagnostic_units/center-schedule/presentation/study-availability.controller.ts)
+
+### Descripción de negocio
+
+Free starts of a study in a center. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-units/{unitId}/study-availability` en `StudyAvailabilityController_studyAvailability`. El controlador delega en `GetStudyAvailabilityUseCase.execute`. No recibe body. El tipo de retorno estático es `Promise<StudyAvailabilityDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `studyCode` | query | Sí | `string` | longitud máxima 100 | Sin descripción específica en OpenAPI. | `STUDY-ECO-ABD` |
+| `from` | query | No | `string` | Sin restricción adicional declarada | ISO instant; defaults to now. | `valor-ejemplo` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | ISO instant; defaults to from + 14 days. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-units/00000000-0000-4000-8000-000000000001/study-availability?studyCode=STUDY-ECO-ABD HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `unitId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-units/00000000-0000-4000-8000-000000000001/study-availability?studyCode=STUDY-ECO-ABD&from=valor-ejemplo&to=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<StudyAvailabilityDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<StudyAvailabilityDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<StudyAvailabilityDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<StudyAvailabilityDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<StudyAvailabilityDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<StudyAvailabilityDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<StudyAvailabilityDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<StudyAvailabilityDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StudyAvailabilityDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "studyCode": "CODIGO_EJEMPLO",
+  "origin": "STUDY",
+  "items": [
+    {
+      "startAt": "2026-11-05T12:00:00.000Z",
+      "endAt": "2026-11-05T12:30:00.000Z",
+      "remaining": 1,
+      "capacity": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `studyCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `origin` | Sí | `string` | valores: `STUDY`, `MODALITY`, `GENERAL` | Sin descripción específica en el contrato OpenAPI. | `STUDY` |
+| `items` | Sí | `array<StudyStartDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"startAt":"2026-11-05T12:00:00.000Z","endAt":"2026-11-05T12:30:00.000Z","remaining":1,"capacity":1}]` |
+| `items[].startAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2026-11-05T12:00:00.000Z` |
+| `items[].endAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2026-11-05T12:30:00.000Z` |
+| `items[].remaining` | Sí | `number` | Sin restricción adicional declarada | Places left in this slot. | `1` |
+| `items[].capacity` | Sí | `number` | Sin restricción adicional declarada | Patients per slot. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Centro no encontrado | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-study-availability.use-case.ts |
+| 404 | `NOT_FOUND` | El centro no hace ese estudio | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-study-availability.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Pida una ventana de hasta ${MAX_WINDOW_DAYS} días, con «to» posterior a «from». | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-study-availability.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units/{unitId}/study-availability"
+}
+```
+
+---
+
+## 31. GET /diagnostic-units/administration
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -3263,7 +5461,371 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /diagnostic-units/search
+## 32. GET /diagnostic-units/me/bookings
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Appointments booked at my center, by start
+- **Operation ID:** `CenterScheduleController_myBookings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CenterScheduleController.myBookings](../../src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts)
+
+### Descripción de negocio
+
+Appointments booked at my center, by start. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-units/me/bookings` en `CenterScheduleController_myBookings`. El controlador delega en `ListCenterBookingsUseCase.execute`. No recibe body. El tipo de retorno estático es `Promise<CenterBookingsDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-11-04T04:00:00.000Z` |
+| `to` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-11-05T04:00:00.000Z` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-units/me/bookings?from=2026-11-04T04%3A00%3A00.000Z&to=2026-11-05T04%3A00%3A00.000Z HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-units/me/bookings?from=2026-11-04T04%3A00%3A00.000Z&to=2026-11-05T04%3A00%3A00.000Z HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CenterBookingsDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CenterBookingsDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CenterBookingsDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CenterBookingsDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CenterBookingsDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CenterBookingsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CenterBookingsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CenterBookingsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "bookingId": "00000000-0000-4000-8000-000000000001",
+      "orderId": "00000000-0000-4000-8000-000000000001",
+      "patientName": "Nombre de ejemplo",
+      "studyName": "Nombre de ejemplo",
+      "startsAt": "valor-ejemplo",
+      "endsAt": "valor-ejemplo",
+      "siteName": "Nombre de ejemplo",
+      "status": "REQUESTED",
+      "equipmentId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<CenterBookingDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"bookingId":"00000000-0000-4000-8000-000000000001","orderId":"00000000-0000-4000-8000-000000000001","patientName":"Nombre de ejemplo","studyName":"Nombre de ejemplo","startsAt":"valor-ejemplo","endsAt":"valor-ejemplo","siteName":"Nombre de ejemplo","status":"REQUESTED","equipmentId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].bookingId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].orderId` | Sí | `string` | admite null | `null` for a booking made outside the order flow. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].studyName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].startsAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].endsAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].siteName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].status` | Sí | `string` | valores: `REQUESTED`, `PENDING_CONFIRMATION`, `CONFIRMED`, `CHECKED_IN`, `IN_PROGRESS`, `COMPLETED` | Sin descripción específica en el contrato OpenAPI. | `REQUESTED` |
+| `items[].equipmentId` | Sí | `string` | formato `uuid`; admite null | Device (production line) that attends it; `null` when no open line can. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Su organización no tiene un centro de diagnóstico con agenda. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Pida una ventana de hasta 31 días, con «to» posterior a «from». | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/list-center-bookings.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units/me/bookings"
+}
+```
+
+---
+
+## 33. GET /diagnostic-units/me/schedule
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Schedule, studies and equipment of my center
+- **Operation ID:** `CenterScheduleController_mySchedule`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CenterScheduleController.mySchedule](../../src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts)
+
+### Descripción de negocio
+
+Schedule, studies and equipment of my center. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-units/me/schedule` en `CenterScheduleController_mySchedule`. El controlador delega en `GetCenterScheduleUseCase.forMe`. No recibe body. El tipo de retorno estático es `Promise<CenterScheduleViewDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-units/me/schedule HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-units/me/schedule HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CenterScheduleViewDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CenterScheduleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CenterScheduleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "unitId": "00000000-0000-4000-8000-000000000001",
+  "unitName": "Nombre de ejemplo",
+  "kind": "LABORATORY",
+  "schedule": {
+    "general": {
+      "windows": [
+        {
+          "dayOfWeek": 1,
+          "startTime": "08:00",
+          "endTime": "12:00"
+        }
+      ],
+      "slotMinutes": 30
+    },
+    "modalities": [
+      {
+        "modalityCode": "ECO",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "studies": [
+      {
+        "studyCode": "STUDY-ECO-OBSTETRICA",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ],
+    "equipment": [
+      {
+        "equipmentId": "00000000-0000-4000-8000-000000000001",
+        "schedule": {
+          "windows": [
+            {
+              "dayOfWeek": 1,
+              "startTime": "08:00",
+              "endTime": "12:00"
+            }
+          ],
+          "slotMinutes": 30
+        }
+      }
+    ]
+  },
+  "studies": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "modalityCode": "ECO",
+      "price": 1,
+      "currency": "BOB",
+      "preparation": "valor-ejemplo"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "manufacturer": "valor-ejemplo",
+      "model": "valor-ejemplo",
+      "modalityCode": "ECO",
+      "status": "OPERATIONAL",
+      "glossaryConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "updatedAt": "valor-ejemplo",
+  "bookingsWithoutEquipment": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
+| `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
+| `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `studies[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
+| `studies[].price` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `studies[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `studies[].preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment` | Sí | `array<CenterEquipmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","manufacturer":"valor-ejemplo","model":"valor-ejemplo","modalityCode":"ECO","status":"OPERATIONAL","glossaryConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `equipment[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipment[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `equipment[].manufacturer` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].model` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB`; admite null | `null`: does not limit appointments (an analyzer). | `ECO` |
+| `equipment[].status` | Sí | `string` | valores: `OPERATIONAL`, `MAINTENANCE`, `OUT_OF_SERVICE` | Sin descripción específica en el contrato OpenAPI. | `OPERATIONAL` |
+| `equipment[].glossaryConceptId` | Sí | `string` | admite null | Always `null` for now. | `00000000-0000-4000-8000-000000000001` |
+| `updatedAt` | Sí | `string` | admite null | `null` while the center has never published a schedule. | `valor-ejemplo` |
+| `bookingsWithoutEquipment` | No | `number` | Sin restricción adicional declarada | Future bookings left without an operational device. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Su organización no tiene un centro de diagnóstico con agenda. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units/me/schedule"
+}
+```
+
+---
+
+## 34. GET /diagnostic-units/search
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -3444,7 +6006,1658 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /price-schedules/{scheduleId}/study-prices
+## 35. GET /diagnostics/lab/catalog
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Catálogo de análisis (LOINC) con componentes y precio sugerido
+- **Operation ID:** `LabPortalServicesController_studyCatalogItems`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.studyCatalogItems](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Catálogo de análisis (LOINC) con componentes y precio sugerido. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/lab/catalog` en `LabPortalServicesController_studyCatalogItems`. El controlador delega en `LabPortalStudyCatalogService.catalog`. No recibe body. El tipo de retorno estático es `Promise<LabCatalogDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/lab/catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/lab/catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabCatalogDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<LabCatalogDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LabCatalogDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LabCatalogDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LabCatalogDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LabCatalogDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LabCatalogDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabCatalogDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "sections": [
+    {
+      "code": "HEMATO",
+      "name": "Hematología",
+      "items": [
+        {
+          "conceptId": "00000000-0000-4000-8000-000000000001",
+          "code": "HEMOGRAMA",
+          "name": "Nombre de ejemplo",
+          "loinc": "valor-ejemplo",
+          "specimen": "valor-ejemplo",
+          "sampleType": "BLOOD",
+          "suggestedPrice": {
+            "source": "INLASA",
+            "sourceCode": "LAC-030",
+            "sourceName": "Nombre de ejemplo",
+            "priceBs": "60.00"
+          },
+          "offeredServiceId": "00000000-0000-4000-8000-000000000001",
+          "components": [
+            {
+              "conceptId": "00000000-0000-4000-8000-000000000001",
+              "code": "HEMOGRAMA.HB",
+              "name": "Nombre de ejemplo",
+              "loinc": "valor-ejemplo",
+              "unit": "valor-ejemplo",
+              "suggestedPrice": {
+                "source": "INLASA",
+                "sourceCode": "LAC-030",
+                "sourceName": "Nombre de ejemplo",
+                "priceBs": "60.00"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sampleTypes": [
+    {
+      "code": "BLOOD",
+      "name": "Análisis de sangre"
+    }
+  ],
+  "count": 1,
+  "priceRule": "valor-ejemplo",
+  "catalogVersion": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `sections` | Sí | `array<LabCatalogSectionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"HEMATO","name":"Hematología","items":[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"HEMOGRAMA","name":"Nombre de ejemplo","loinc":"valor-ejemplo","specimen":"valor-ejemplo","sampleType":"BLOOD","suggestedPrice":{"source":"INLASA","sourceCode":"LAC-030","sourceName":"Nombre de ejemplo","priceBs":"60.00"},"offeredServiceId":"00000000-0000-4000-8000-000000000001","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"HEMOGRAMA.HB","name":"Nombre de ejemplo","loinc":"valor-ejemplo","unit":"valor-ejemplo","suggestedPrice":{"source":"INLASA","sourceCode":"LAC-030","sourceName":"Nombre de ejemplo","priceBs":"60.00"}}]}]}]` |
+| `sections[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `HEMATO` |
+| `sections[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Hematología` |
+| `sections[].items` | Sí | `array<LabCatalogItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"HEMOGRAMA","name":"Nombre de ejemplo","loinc":"valor-ejemplo","specimen":"valor-ejemplo","sampleType":"BLOOD","suggestedPrice":{"source":"INLASA","sourceCode":"LAC-030","sourceName":"Nombre de ejemplo","priceBs":"60.00"},"offeredServiceId":"00000000-0000-4000-8000-000000000001","components":[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"HEMOGRAMA.HB","name":"Nombre de ejemplo","loinc":"valor-ejemplo","unit":"valor-ejemplo","suggestedPrice":{"source":"INLASA","sourceCode":"LAC-030","sourceName":"Nombre de ejemplo","priceBs":"60.00"}}]}]` |
+| `sections[].items[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `sections[].items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `HEMOGRAMA` |
+| `sections[].items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sections[].items[].loinc` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sections[].items[].specimen` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sections[].items[].sampleType` | Sí | `string` | valores: `BLOOD`, `URINE`, `STOOL`, `FLUID`, `SWAB`, `OTHER` | What is drawn from the patient, to browse by sample type | `BLOOD` |
+| `sections[].items[].suggestedPrice` | Sí | `LabSuggestedPriceDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"source":"INLASA","sourceCode":"LAC-030","sourceName":"Nombre de ejemplo","priceBs":"60.00"}` |
+| `sections[].items[].suggestedPrice.source` | Sí | `string` | valores: `INLASA`, `FONASA` | Sin descripción específica en el contrato OpenAPI. | `INLASA` |
+| `sections[].items[].suggestedPrice.sourceCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `LAC-030` |
+| `sections[].items[].suggestedPrice.sourceName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sections[].items[].suggestedPrice.priceBs` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `60.00` |
+| `sections[].items[].offeredServiceId` | Sí | `string` | formato `uuid`; admite null | The lab service already made from this item, if any | `00000000-0000-4000-8000-000000000001` |
+| `sections[].items[].components` | Sí | `array<LabCatalogComponentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"HEMOGRAMA.HB","name":"Nombre de ejemplo","loinc":"valor-ejemplo","unit":"valor-ejemplo","suggestedPrice":{"source":"INLASA","sourceCode":"LAC-030","sourceName":"Nombre de ejemplo","priceBs":"60.00"}}]` |
+| `sections[].items[].components[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `sections[].items[].components[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `HEMOGRAMA.HB` |
+| `sections[].items[].components[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sections[].items[].components[].loinc` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sections[].items[].components[].unit` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sections[].items[].components[].suggestedPrice` | Sí | `LabSuggestedPriceDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"source":"INLASA","sourceCode":"LAC-030","sourceName":"Nombre de ejemplo","priceBs":"60.00"}` |
+| `sections[].items[].components[].suggestedPrice.source` | Sí | `string` | valores: `INLASA`, `FONASA` | Sin descripción específica en el contrato OpenAPI. | `INLASA` |
+| `sections[].items[].components[].suggestedPrice.sourceCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `LAC-030` |
+| `sections[].items[].components[].suggestedPrice.sourceName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sections[].items[].components[].suggestedPrice.priceBs` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `60.00` |
+| `sampleTypes` | Sí | `array<LabSampleTypeDto>` | Sin restricción adicional declarada | Sample types in display order (blood first) | `[{"code":"BLOOD","name":"Análisis de sangre"}]` |
+| `sampleTypes[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BLOOD` |
+| `sampleTypes[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Análisis de sangre` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `priceRule` | Sí | `string` | Sin restricción adicional declarada | How suggested prices were chosen | `valor-ejemplo` |
+| `catalogVersion` | Sí | `string` | admite null | Version of the LOINC study catalog loaded in this database (laboratorio.json), or null when only the basic boot análisis are there: no sections, LOINC nor components until `yarn catalog:studies:load` runs | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/catalog"
+}
+```
+
+---
+
+## 36. POST /diagnostics/lab/catalog/import
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Sumar análisis del catálogo, con sus componentes y precio sugerido
+- **Operation ID:** `LabPortalServicesController_importCatalog`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.importCatalog](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Sumar análisis del catálogo, con sus componentes y precio sugerido. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/catalog/import` en `LabPortalServicesController_importCatalog`. El controlador delega en `LabPortalStudyCatalogService.importCatalog`. Valida el body como `LabCatalogImportDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabCatalogImportResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabCatalogImportDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/lab/catalog/import HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "conceptIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conceptIds` | Sí | `array<string>` | formato `uuid`; mínimo 1 elemento(s); máximo 600 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/lab/catalog/import HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "conceptIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabCatalogImportResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<LabCatalogImportResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabCatalogImportResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabCatalogImportResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabCatalogImportResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabCatalogImportResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabCatalogImportResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabCatalogImportResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabCatalogImportResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabCatalogImportResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabCatalogImportResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "created": 1,
+  "republished": 1,
+  "linked": 1,
+  "skipped": 1,
+  "rejected": 1,
+  "rows": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "outcome": "CREATED",
+      "serviceId": "00000000-0000-4000-8000-000000000001",
+      "reason": "Texto descriptivo de ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `created` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `republished` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `linked` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `skipped` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `rows` | Sí | `array<LabCatalogImportRowDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","outcome":"CREATED","serviceId":"00000000-0000-4000-8000-000000000001","reason":"Texto descriptivo de ejemplo"}]` |
+| `rows[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `rows[].outcome` | Sí | `string` | valores: `CREATED`, `LINKED`, `REPUBLISHED`, `SKIPPED`, `REJECTED` | LINKED: a free-form service with the same code now points to the catalog item | `CREATED` |
+| `rows[].serviceId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `rows[].reason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 409 | `CONFLICT` | El tarifario público del laboratorio existe pero no está vigente | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-pricing.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/catalog/import"
+}
+```
+
+---
+
+## 37. GET /diagnostics/lab/categories
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Categorías del laboratorio, con su conteo
+- **Operation ID:** `LabPortalServicesController_listCategories`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.listCategories](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Categorías del laboratorio, con su conteo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/lab/categories` en `LabPortalServicesController_listCategories`. El controlador delega en `LabPortalCategoriesService.list`. No recibe body. El tipo de retorno estático es `Promise<LabCategoryPageDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/lab/categories HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/lab/categories HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabCategoryPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<LabCategoryPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LabCategoryPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LabCategoryPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LabCategoryPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LabCategoryPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LabCategoryPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabCategoryPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "serviceCount": 1
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<LabCategoryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","serviceCount":1}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].serviceCount` | Sí | `number` | Sin restricción adicional declarada | Services of the category that are not withdrawn | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/categories"
+}
+```
+
+---
+
+## 38. POST /diagnostics/lab/categories
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Crear una categoría (409 si el nombre ya existe, sin importar mayúsculas)
+- **Operation ID:** `LabPortalServicesController_createCategory`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.createCategory](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Crear una categoría (409 si el nombre ya existe, sin importar mayúsculas). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/categories` en `LabPortalServicesController_createCategory`. El controlador delega en `LabPortalCategoriesService.create`. Valida el body como `LabCategoryNameDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabCategoryDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabCategoryNameDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/lab/categories HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Hematología"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud máxima 60; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `Hematología` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/lab/categories HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Hematología"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabCategoryDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabCategoryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "name": "Nombre de ejemplo",
+  "serviceCount": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `serviceCount` | Sí | `number` | Sin restricción adicional declarada | Services of the category that are not withdrawn | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/categories"
+}
+```
+
+---
+
+## 39. DELETE /diagnostics/lab/categories/{id}
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Eliminar una categoría (409 mientras agrupe servicios no retirados)
+- **Operation ID:** `LabPortalServicesController_deleteCategory`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.deleteCategory](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Eliminar una categoría (409 mientras agrupe servicios no retirados). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /diagnostics/lab/categories/{id}` en `LabPortalServicesController_deleteCategory`. El controlador delega en `LabPortalCategoriesService.remove`. No recibe body. El tipo de retorno estático es `Promise<{ ok: true }>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /diagnostics/lab/categories/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /diagnostics/lab/categories/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<{ ok: true }>` | No |
+| 400 | Operación completada correctamente. | `Promise<{ ok: true }>` | No |
+| 401 | Operación completada correctamente. | `Promise<{ ok: true }>` | No |
+| 403 | Operación completada correctamente. | `Promise<{ ok: true }>` | No |
+| 404 | Operación completada correctamente. | `Promise<{ ok: true }>` | No |
+| 409 | Operación completada correctamente. | `Promise<{ ok: true }>` | No |
+| 422 | Operación completada correctamente. | `Promise<{ ok: true }>` | No |
+| 429 | Operación completada correctamente. | `Promise<{ ok: true }>` | No |
+| 500 | Operación completada correctamente. | `Promise<{ ok: true }>` | No |
+| 504 | Operación completada correctamente. | `Promise<{ ok: true }>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ ok: true }`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: true | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 404 | `NOT_FOUND` | Categoría no encontrada | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 409 | `CONFLICT` | «${category.name}» tiene ${live.length} servicios. Muévalos a otra categoría antes de borrarla. | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-categories.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/categories/{id}"
+}
+```
+
+---
+
+## 40. PATCH /diagnostics/lab/categories/{id}
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Renombrar una categoría (409 si el nombre ya existe)
+- **Operation ID:** `LabPortalServicesController_renameCategory`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.renameCategory](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Renombrar una categoría (409 si el nombre ya existe). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /diagnostics/lab/categories/{id}` en `LabPortalServicesController_renameCategory`. El controlador delega en `LabPortalCategoriesService.rename`. Valida el body como `LabCategoryNameDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabCategoryDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabCategoryNameDto`; los campos opcionales se omiten.
+
+```http
+PATCH /diagnostics/lab/categories/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Hematología"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud máxima 60; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `Hematología` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /diagnostics/lab/categories/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Hematología"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabCategoryDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabCategoryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabCategoryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "name": "Nombre de ejemplo",
+  "serviceCount": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `serviceCount` | Sí | `number` | Sin restricción adicional declarada | Services of the category that are not withdrawn | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 404 | `NOT_FOUND` | Categoría no encontrada | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/categories/{id}"
+}
+```
+
+---
+
+## 41. GET /diagnostics/lab/services
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Catálogo de servicios del laboratorio
+- **Operation ID:** `LabPortalServicesController_listServices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.listServices](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Catálogo de servicios del laboratorio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/lab/services` en `LabPortalServicesController_listServices`. El controlador delega en `LabPortalCatalogService.list`. No recibe body. El tipo de retorno estático es `Promise<LabServicePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `categoryId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | query | No | `string` | valores: `PUBLISHED`, `DRAFT`, `WITHDRAWN` | Sin descripción específica en OpenAPI. | `PUBLISHED` |
+| `available` | query | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `true` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/lab/services HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/lab/services?q=valor-ejemplo&categoryId=00000000-0000-4000-8000-000000000001&status=PUBLISHED&available=true HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabServicePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<LabServicePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LabServicePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LabServicePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LabServicePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LabServicePageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LabServicePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabServicePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "HEMOGRAMA",
+      "name": "Nombre de ejemplo",
+      "kind": "SERVICE",
+      "parentId": "00000000-0000-4000-8000-000000000001",
+      "catalogConceptId": "00000000-0000-4000-8000-000000000001",
+      "hasPrice": true,
+      "categoryId": "00000000-0000-4000-8000-000000000001",
+      "categoryName": "Nombre de ejemplo",
+      "sampleType": "valor-ejemplo",
+      "preparation": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "turnaroundHours": 1,
+      "requiresMedicalOrder": true,
+      "homeCollection": true,
+      "price": "45.00",
+      "alovidaDiscountPercent": 10,
+      "alovidaPrice": "40.50",
+      "currency": "BOB",
+      "status": "PUBLISHED",
+      "available": true,
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<LabServiceDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"HEMOGRAMA","name":"Nombre de ejemplo","kind":"SERVICE","parentId":"00000000-0000-4000-8000-000000000001","catalogConceptId":"00000000-0000-4000-8000-000000000001","hasPrice":true,"categoryId":"00000000-0000-4000-8000-000000000001","categoryName":"Nombre de ejemplo","sampleType":"valor-ejemplo","preparation":"valor-ejemplo","description":"Texto descriptivo de ejemplo","turnaroundHours":1,"requiresMedicalOrder":true,"homeCollection":true,"price":"45.00","alovidaDiscountPercent":10,"alovidaPrice":"40.50","currency":"BOB","status":"PUBLISHED","available":true,"updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `HEMOGRAMA` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].kind` | Sí | `string` | valores: `SERVICE`, `MODALITY` | MODALITY: the generic placeholder created per modality at registration; it is not priced. | `SERVICE` |
+| `items[].parentId` | Sí | `string` | formato `uuid`; admite null | Panel this service is a component of | `00000000-0000-4000-8000-000000000001` |
+| `items[].catalogConceptId` | Sí | `string` | formato `uuid`; admite null | Study catalog concept; null for free-form services | `00000000-0000-4000-8000-000000000001` |
+| `items[].hasPrice` | Sí | `boolean` | Sin restricción adicional declarada | False until a price version exists | `true` |
+| `items[].categoryId` | Sí | `string` | admite null | Category of the lab, or null when the service has none | `00000000-0000-4000-8000-000000000001` |
+| `items[].categoryName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].sampleType` | Sí | `string` | admite null | The lab's free text (`specimen_description`); falls back to the display of the specimen concept | `valor-ejemplo` |
+| `items[].preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].description` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].turnaroundHours` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].requiresMedicalOrder` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].homeCollection` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].price` | Sí | `string` | admite null | null when the service has no current price | `45.00` |
+| `items[].alovidaDiscountPercent` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `10` |
+| `items[].alovidaPrice` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `40.50` |
+| `items[].currency` | Sí | `string` | valores: `BOB` | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `items[].status` | Sí | `string` | valores: `PUBLISHED`, `DRAFT`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `PUBLISHED` |
+| `items[].available` | Sí | `boolean` | Sin restricción adicional declarada | "Available today" switch of the service | `true` |
+| `items[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/services"
+}
+```
+
+---
+
+## 42. POST /diagnostics/lab/services
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Dar de alta un servicio con su precio
+- **Operation ID:** `LabPortalServicesController_createService`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.createService](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Dar de alta un servicio con su precio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/services` en `LabPortalServicesController_createService`. El controlador delega en `LabPortalCatalogService.create`. Valida el body como `LabServiceDraftDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabServiceDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabServiceDraftDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/lab/services HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "HEMOGRAMA",
+  "name": "Nombre de ejemplo",
+  "price": "45.00"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `categoryId` | No | `string` | formato `uuid`; admite null | A category of this lab (`GET /diagnostics/lab/categories`); null clears it. Another lab's id is rejected as non-existent. | `00000000-0000-4000-8000-000000000001` |
+| `sampleType` | No | `string` | admite null | Sample type as free text, stored in `specimen_description`; blank or null clears it | `valor-ejemplo` |
+| `preparation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `turnaroundHours` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requiresMedicalOrder` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `homeCollection` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `alovidaDiscountPercent` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `10` |
+| `available` | No | `boolean` | Sin restricción adicional declarada | "Available today": false hides the service from the public directory, the coverage search and order booking; it keeps its status and price | `true` |
+| `code` | Sí | `string` | longitud máxima 40; patrón runtime `NOT_BLANK` | Sin descripción específica en el contrato OpenAPI. | `HEMOGRAMA` |
+| `name` | Sí | `string` | longitud máxima 200; patrón runtime `NOT_BLANK` | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `price` | Sí | `string` | patrón runtime `PRICE` | Sin descripción específica en el contrato OpenAPI. | `45.00` |
+| `status` | No | `string` | valores: `PUBLISHED`, `DRAFT` | Sin descripción específica en el contrato OpenAPI. | `PUBLISHED` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/lab/services HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "categoryId": "00000000-0000-4000-8000-000000000001",
+  "sampleType": "valor-ejemplo",
+  "preparation": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "turnaroundHours": 1,
+  "requiresMedicalOrder": true,
+  "homeCollection": true,
+  "alovidaDiscountPercent": 10,
+  "available": true,
+  "code": "HEMOGRAMA",
+  "name": "Nombre de ejemplo",
+  "price": "45.00",
+  "status": "PUBLISHED"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabServiceDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabServiceDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "HEMOGRAMA",
+  "name": "Nombre de ejemplo",
+  "kind": "SERVICE",
+  "parentId": "00000000-0000-4000-8000-000000000001",
+  "catalogConceptId": "00000000-0000-4000-8000-000000000001",
+  "hasPrice": true,
+  "categoryId": "00000000-0000-4000-8000-000000000001",
+  "categoryName": "Nombre de ejemplo",
+  "sampleType": "valor-ejemplo",
+  "preparation": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "turnaroundHours": 1,
+  "requiresMedicalOrder": true,
+  "homeCollection": true,
+  "price": "45.00",
+  "alovidaDiscountPercent": 10,
+  "alovidaPrice": "40.50",
+  "currency": "BOB",
+  "status": "PUBLISHED",
+  "available": true,
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `HEMOGRAMA` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `SERVICE`, `MODALITY` | MODALITY: the generic placeholder created per modality at registration; it is not priced. | `SERVICE` |
+| `parentId` | Sí | `string` | formato `uuid`; admite null | Panel this service is a component of | `00000000-0000-4000-8000-000000000001` |
+| `catalogConceptId` | Sí | `string` | formato `uuid`; admite null | Study catalog concept; null for free-form services | `00000000-0000-4000-8000-000000000001` |
+| `hasPrice` | Sí | `boolean` | Sin restricción adicional declarada | False until a price version exists | `true` |
+| `categoryId` | Sí | `string` | admite null | Category of the lab, or null when the service has none | `00000000-0000-4000-8000-000000000001` |
+| `categoryName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sampleType` | Sí | `string` | admite null | The lab's free text (`specimen_description`); falls back to the display of the specimen concept | `valor-ejemplo` |
+| `preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `description` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `turnaroundHours` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requiresMedicalOrder` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `homeCollection` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `price` | Sí | `string` | admite null | null when the service has no current price | `45.00` |
+| `alovidaDiscountPercent` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `10` |
+| `alovidaPrice` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `40.50` |
+| `currency` | Sí | `string` | valores: `BOB` | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `status` | Sí | `string` | valores: `PUBLISHED`, `DRAFT`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `PUBLISHED` |
+| `available` | Sí | `boolean` | Sin restricción adicional declarada | "Available today" switch of the service | `true` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 409 | `CONFLICT` | problem.message | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-catalog.service.ts |
+| 409 | `CONFLICT` | El tarifario público del laboratorio existe pero no está vigente | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-pricing.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | problem.message | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-catalog.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/services"
+}
+```
+
+---
+
+## 43. DELETE /diagnostics/lab/services/{id}
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Retirar un servicio (no se borra)
+- **Operation ID:** `LabPortalServicesController_withdrawService`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.withdrawService](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Retirar un servicio (no se borra). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /diagnostics/lab/services/{id}` en `LabPortalServicesController_withdrawService`. El controlador delega en `LabPortalCatalogService.withdraw`. No recibe body. El tipo de retorno estático es `Promise<LabServiceDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /diagnostics/lab/services/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /diagnostics/lab/services/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabServiceDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabServiceDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "HEMOGRAMA",
+  "name": "Nombre de ejemplo",
+  "kind": "SERVICE",
+  "parentId": "00000000-0000-4000-8000-000000000001",
+  "catalogConceptId": "00000000-0000-4000-8000-000000000001",
+  "hasPrice": true,
+  "categoryId": "00000000-0000-4000-8000-000000000001",
+  "categoryName": "Nombre de ejemplo",
+  "sampleType": "valor-ejemplo",
+  "preparation": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "turnaroundHours": 1,
+  "requiresMedicalOrder": true,
+  "homeCollection": true,
+  "price": "45.00",
+  "alovidaDiscountPercent": 10,
+  "alovidaPrice": "40.50",
+  "currency": "BOB",
+  "status": "PUBLISHED",
+  "available": true,
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `HEMOGRAMA` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `SERVICE`, `MODALITY` | MODALITY: the generic placeholder created per modality at registration; it is not priced. | `SERVICE` |
+| `parentId` | Sí | `string` | formato `uuid`; admite null | Panel this service is a component of | `00000000-0000-4000-8000-000000000001` |
+| `catalogConceptId` | Sí | `string` | formato `uuid`; admite null | Study catalog concept; null for free-form services | `00000000-0000-4000-8000-000000000001` |
+| `hasPrice` | Sí | `boolean` | Sin restricción adicional declarada | False until a price version exists | `true` |
+| `categoryId` | Sí | `string` | admite null | Category of the lab, or null when the service has none | `00000000-0000-4000-8000-000000000001` |
+| `categoryName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sampleType` | Sí | `string` | admite null | The lab's free text (`specimen_description`); falls back to the display of the specimen concept | `valor-ejemplo` |
+| `preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `description` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `turnaroundHours` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requiresMedicalOrder` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `homeCollection` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `price` | Sí | `string` | admite null | null when the service has no current price | `45.00` |
+| `alovidaDiscountPercent` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `10` |
+| `alovidaPrice` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `40.50` |
+| `currency` | Sí | `string` | valores: `BOB` | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `status` | Sí | `string` | valores: `PUBLISHED`, `DRAFT`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `PUBLISHED` |
+| `available` | Sí | `boolean` | Sin restricción adicional declarada | "Available today" switch of the service | `true` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 404 | `NOT_FOUND` | Servicio no encontrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 409 | `CONFLICT` | La oferta ya está retirada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-studies.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/services/{id}"
+}
+```
+
+---
+
+## 44. PATCH /diagnostics/lab/services/{id}
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Editar un servicio (un precio nuevo es una versión nueva)
+- **Operation ID:** `LabPortalServicesController_updateService`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.updateService](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Editar un servicio (un precio nuevo es una versión nueva). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /diagnostics/lab/services/{id}` en `LabPortalServicesController_updateService`. El controlador delega en `LabPortalCatalogService.update`. Valida el body como `LabServiceChangesDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabServiceDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabServiceChangesDto`; los campos opcionales se omiten.
+
+```http
+PATCH /diagnostics/lab/services/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `categoryId` | No | `string` | formato `uuid`; admite null | A category of this lab (`GET /diagnostics/lab/categories`); null clears it. Another lab's id is rejected as non-existent. | `00000000-0000-4000-8000-000000000001` |
+| `sampleType` | No | `string` | admite null | Sample type as free text, stored in `specimen_description`; blank or null clears it | `valor-ejemplo` |
+| `preparation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `turnaroundHours` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requiresMedicalOrder` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `homeCollection` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `alovidaDiscountPercent` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `10` |
+| `available` | No | `boolean` | Sin restricción adicional declarada | "Available today": false hides the service from the public directory, the coverage search and order booking; it keeps its status and price | `true` |
+| `code` | No | `string` | longitud máxima 40; patrón runtime `NOT_BLANK` | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `name` | No | `string` | longitud máxima 200; patrón runtime `NOT_BLANK` | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `price` | No | `string` | patrón runtime `PRICE` | Sin descripción específica en el contrato OpenAPI. | `45.00` |
+| `status` | No | `string` | valores: `PUBLISHED`, `DRAFT`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `PUBLISHED` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /diagnostics/lab/services/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "categoryId": "00000000-0000-4000-8000-000000000001",
+  "sampleType": "valor-ejemplo",
+  "preparation": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "turnaroundHours": 1,
+  "requiresMedicalOrder": true,
+  "homeCollection": true,
+  "alovidaDiscountPercent": 10,
+  "available": true,
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "price": "45.00",
+  "status": "PUBLISHED"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabServiceDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabServiceDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabServiceDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "HEMOGRAMA",
+  "name": "Nombre de ejemplo",
+  "kind": "SERVICE",
+  "parentId": "00000000-0000-4000-8000-000000000001",
+  "catalogConceptId": "00000000-0000-4000-8000-000000000001",
+  "hasPrice": true,
+  "categoryId": "00000000-0000-4000-8000-000000000001",
+  "categoryName": "Nombre de ejemplo",
+  "sampleType": "valor-ejemplo",
+  "preparation": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "turnaroundHours": 1,
+  "requiresMedicalOrder": true,
+  "homeCollection": true,
+  "price": "45.00",
+  "alovidaDiscountPercent": 10,
+  "alovidaPrice": "40.50",
+  "currency": "BOB",
+  "status": "PUBLISHED",
+  "available": true,
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `HEMOGRAMA` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `SERVICE`, `MODALITY` | MODALITY: the generic placeholder created per modality at registration; it is not priced. | `SERVICE` |
+| `parentId` | Sí | `string` | formato `uuid`; admite null | Panel this service is a component of | `00000000-0000-4000-8000-000000000001` |
+| `catalogConceptId` | Sí | `string` | formato `uuid`; admite null | Study catalog concept; null for free-form services | `00000000-0000-4000-8000-000000000001` |
+| `hasPrice` | Sí | `boolean` | Sin restricción adicional declarada | False until a price version exists | `true` |
+| `categoryId` | Sí | `string` | admite null | Category of the lab, or null when the service has none | `00000000-0000-4000-8000-000000000001` |
+| `categoryName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sampleType` | Sí | `string` | admite null | The lab's free text (`specimen_description`); falls back to the display of the specimen concept | `valor-ejemplo` |
+| `preparation` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `description` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `turnaroundHours` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `requiresMedicalOrder` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `homeCollection` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `price` | Sí | `string` | admite null | null when the service has no current price | `45.00` |
+| `alovidaDiscountPercent` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `10` |
+| `alovidaPrice` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `40.50` |
+| `currency` | Sí | `string` | valores: `BOB` | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `status` | Sí | `string` | valores: `PUBLISHED`, `DRAFT`, `WITHDRAWN` | Sin descripción específica en el contrato OpenAPI. | `PUBLISHED` |
+| `available` | Sí | `boolean` | Sin restricción adicional declarada | "Available today" switch of the service | `true` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 404 | `NOT_FOUND` | Servicio no encontrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 409 | `CONFLICT` | problem.message | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-catalog.service.ts |
+| 409 | `CONFLICT` | El tarifario público del laboratorio existe pero no está vigente | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-pricing.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | problem.message | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-catalog.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/services/{id}"
+}
+```
+
+---
+
+## 45. POST /diagnostics/lab/services/import
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostics-lab-portal`
+- **Nombre:** Carga masiva por código, fila por fila
+- **Operation ID:** `LabPortalServicesController_importServices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LabPortalServicesController.importServices](../../src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts)
+
+### Descripción de negocio
+
+Carga masiva por código, fila por fila. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/lab/services/import` en `LabPortalServicesController_importServices`. El controlador delega en `LabPortalImportService.import`. Valida el body como `LabImportDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabImportResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabImportDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/lab/services/import HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mode": "CREATE_OR_UPDATE",
+  "rows": [
+    {
+      "line": 1,
+      "service": {}
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `mode` | Sí | `string` | valores: `CREATE_OR_UPDATE`, `UPDATE_ONLY` | Sin descripción específica en el contrato OpenAPI. | `CREATE_OR_UPDATE` |
+| `rows` | Sí | `array<LabImportRowDto>` | mínimo 1 elemento(s); máximo 2000 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"line":1,"service":{}}]` |
+| `rows[].line` | Sí | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `rows[].service` | Sí | `object` | Sin restricción adicional declarada | A LabServiceDraft | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/lab/services/import HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mode": "CREATE_OR_UPDATE",
+  "rows": [
+    {
+      "line": 1,
+      "service": {}
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabImportResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<LabImportResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabImportResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabImportResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabImportResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabImportResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabImportResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabImportResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabImportResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LabImportResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabImportResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "created": 1,
+  "updated": 1,
+  "unchanged": 1,
+  "rejected": 1,
+  "rows": [
+    {
+      "line": 1,
+      "code": "CODIGO_EJEMPLO",
+      "outcome": "CREATED",
+      "reason": "Texto descriptivo de ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `created` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updated` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `unchanged` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `rejected` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `rows` | Sí | `array<LabImportRowResultDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"line":1,"code":"CODIGO_EJEMPLO","outcome":"CREATED","reason":"Texto descriptivo de ejemplo"}]` |
+| `rows[].line` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `rows[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `rows[].outcome` | Sí | `string` | valores: `CREATED`, `UPDATED`, `UNCHANGED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `CREATED` |
+| `rows[].reason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La organización activa no tiene un laboratorio registrado | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-context.service.ts |
+| 409 | `CONFLICT` | El tarifario público del laboratorio existe pero no está vigente | Excepción explícita en src/modules/diagnostic_units/services/lab-portal-pricing.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/lab/services/import"
+}
+```
+
+---
+
+## 46. POST /price-schedules/{scheduleId}/study-prices
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-pricing`
@@ -3591,7 +7804,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /study-prices/{priceId}/close
+## 47. POST /study-prices/{priceId}/close
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-pricing`

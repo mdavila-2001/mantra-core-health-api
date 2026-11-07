@@ -37,11 +37,11 @@ _Fuente: `src/modules/identity_assurance/README.md:3`_
 |  |  | POST /identity/verification-cases/expire-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 11 |
 | `ctrl:IdentityChecksController` | Operaciones de IdentityChecksController que el README no asigna a un caso de uso | POST /identity/checks/{id}/attempts | SECURITY_ADMIN | MEDIO | 8 |
 |  |  | POST /identity/checks/{id}/results | SECURITY_ADMIN | ALTO | 50 |
-| `ctrl:IdentityManualReviewController` | Operaciones de IdentityManualReviewController que el README no asigna a un caso de uso | POST /identity/manual-review/{id}/decision | SECURITY_ADMIN | MEDIO | 31 |
+| `ctrl:IdentityManualReviewController` | Operaciones de IdentityManualReviewController que el README no asigna a un caso de uso | POST /identity/manual-review/{id}/decision | SECURITY_ADMIN | ALTO | 52 |
 | `ctrl:IdentityPoliciesController` | Operaciones de IdentityPoliciesController que el README no asigna a un caso de uso | POST /identity/verification-policies | SECURITY_ADMIN | MEDIO | 1 |
 | `ctrl:IdentitySelfServiceController` | Operaciones de IdentitySelfServiceController que el README no asigna a un caso de uso | POST /identity/me/identity-verification | Cualquier sesión válida | ALTO | 15 |
-|  |  | POST /identity/me/practitioner/identity-verification | Cualquier sesión válida | ALTO | 16 |
-|  |  | POST /identity/me/practitioner/license-verification | Cualquier sesión válida | ALTO | 17 |
+|  |  | POST /identity/me/practitioner/identity-verification | Cualquier sesión válida | ALTO | 15 |
+|  |  | POST /identity/me/practitioner/license-verification | Cualquier sesión válida | ALTO | 16 |
 |  |  | POST /identity/me/tenants/{tenantId}/verification | Cualquier sesión válida | ALTO | 15 |
 |  |  | GET /identity/me/verification-cases | Cualquier sesión válida | BAJO | 7 |
 |  |  | GET /identity/me/verification-cases/{caseId} | Cualquier sesión válida | BAJO | 8 |
@@ -117,7 +117,7 @@ flowchart LR
     o41["POST /identity/checks/{id}/attempts"]:::op
     o44["POST /identity/checks/{id}/results"]:::op
   end
-  t50[("+25 tablas más")]
+  t50[("+46 tablas más")]
   subgraph s4["ctrl:IdentityManualReviewController · Operaciones de IdentityManualReviewContro…"]
     o49["POST /identity/manual-review/{id}/decision"]:::op
   end
@@ -125,8 +125,8 @@ flowchart LR
     o51["POST /identity/verification-policies"]:::op
   end
   t56[("+9 tablas más")]
-  t58[("+10 tablas más")]
-  t60[("+11 tablas más")]
+  t58[("+9 tablas más")]
+  t60[("+10 tablas más")]
   t62[("+9 tablas más")]
   t65[("+1 tablas más")]
   t67[("+2 tablas más")]
@@ -237,10 +237,10 @@ flowchart LR
   a2 --> o49
   o49 -->|"CREA"| t3
   o49 -->|"LEE"| t45
-  o49 -->|"ACTUALIZA"| t4
-  o49 -->|"LEE"| t4
-  o49 -->|"ACTUALIZA"| t5
-  o49 -->|"CREA"| t5
+  o49 -->|"LEE"| t46
+  o49 -->|"LEE"| t29
+  o49 -->|"LEE"| t30
+  o49 -->|"LEE"| t47
   o49 -.-> t50
   a2 --> o51
   o51 -->|"CREA"| t19
@@ -937,7 +937,7 @@ Solicitar la verificación de la propia identidad (profesional)
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
@@ -960,131 +960,121 @@ flowchart TD
   n7 --> n8
   n9(["422 PRECONDITION_FAILED La cuenta no tiene una persona vinculada"]):::error
   n8 -->|"sí"| n9
-  n10["Llama a IdentitySelfServiceService.assertIsPractitioner"]:::llamada
+  n10["Llama a IdentitySelfServiceService.openVerification"]:::llamada
   n8 -->|"no"| n10
-  n11["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n11["Llama a IdentitySelfServiceService.resolveEvidence"]:::llamada
   n10 --> n11
-  n12[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n12{"dto.evidenceFileId && supplied.length"}:::decision
   n11 --> n12
-  n13{"!practitioner"}:::decision
-  n12 --> n13
-  n14(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a IdentitySelfServiceService.openVerification"]:::llamada
-  n13 -->|"no"| n15
-  n16["Llama a IdentitySelfServiceService.resolveEvidence"]:::llamada
-  n15 --> n16
-  n17{"dto.evidenceFileId && supplied.length"}:::decision
-  n16 --> n17
-  n18(["422 PRECONDITION_FAILED Envía el archivo histórico o las cinco evidencias nuevas, no ambos"]):::error
-  n17 -->|"sí"| n18
-  n19{"supplied.length !== values.length"}:::decision
-  n17 -->|"no"| n19
-  n20(["422 PRECONDITION_FAILED La verificación requiere las cinco evidencias en el orden solicitado"]):::error
-  n19 -->|"sí"| n20
-  n21{"!evidence.length"}:::decision
-  n19 -->|"no"| n21
-  n22(["422 PRECONDITION_FAILED Adjunta el frente, el reverso y las tres capturas de prueba de vida"]):::error
+  n13(["422 PRECONDITION_FAILED Envía el archivo histórico o las cinco evidencias nuevas, no ambos"]):::error
+  n12 -->|"sí"| n13
+  n14{"supplied.length !== values.length"}:::decision
+  n12 -->|"no"| n14
+  n15(["422 PRECONDITION_FAILED La verificación requiere las cinco evidencias en el orden solicitado"]):::error
+  n14 -->|"sí"| n15
+  n16{"!evidence.length"}:::decision
+  n14 -->|"no"| n16
+  n17(["422 PRECONDITION_FAILED Adjunta el frente, el reverso y las tres capturas de prueba de vida"]):::error
+  n16 -->|"sí"| n17
+  n18["Repite: por cada const item de evidence"]:::bucle
+  n16 -->|"no"| n18
+  n19["Llama a FilesRepository.findById"]:::llamada
+  n18 -->|"cada elemento"| n19
+  n20[("LEE common.files")]:::efecto
+  n19 --> n20
+  n21{"!file || file.createdByUserId !== actor.id || file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI || file.…"}:::decision
+  n20 --> n21
+  n22(["422 PRECONDITION_FAILED Una evidencia no existe, no pertenece a esta cuenta o no está protegida"]):::error
   n21 -->|"sí"| n22
-  n23["Repite: por cada const item de evidence"]:::bucle
+  n23["Llama a IdentityVerificationCasesRepository.countLiveForSubject"]:::llamada
   n21 -->|"no"| n23
-  n24["Llama a FilesRepository.findById"]:::llamada
-  n23 -->|"cada elemento"| n24
-  n25[("LEE common.files")]:::efecto
+  n18 -->|"al terminar"| n23
+  n24[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n23 --> n24
+  n25{"live › 0"}:::decision
   n24 --> n25
-  n26{"!file || file.createdByUserId !== actor.id || file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI || file.…"}:::decision
-  n25 --> n26
-  n27(["422 PRECONDITION_FAILED Una evidencia no existe, no pertenece a esta cuenta o no está protegida"]):::error
-  n26 -->|"sí"| n27
-  n28["Llama a IdentityVerificationCasesRepository.countLiveForSubject"]:::llamada
-  n26 -->|"no"| n28
-  n23 -->|"al terminar"| n28
-  n29[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n26(["409 CONFLICT Ya hay una verificación en curso para este sujeto"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a IdentityVerificationCasesRepository.create"]:::llamada
+  n25 -->|"no"| n27
+  n28[("CREA identity_assurance.identity_verification_cases")]:::efecto
+  n27 --> n28
+  n29["Repite: por cada const item de evidence"]:::bucle
   n28 --> n29
-  n30{"live › 0"}:::decision
-  n29 --> n30
-  n31(["409 CONFLICT Ya hay una verificación en curso para este sujeto"]):::error
-  n30 -->|"sí"| n31
-  n32["Llama a IdentityVerificationCasesRepository.create"]:::llamada
-  n30 -->|"no"| n32
-  n33[("CREA identity_assurance.identity_verification_cases")]:::efecto
+  n30["Llama a IdentityEvidenceRecordsRepository.create"]:::llamada
+  n29 -->|"cada elemento"| n30
+  n31{"data.evidenceFileId"}:::decision
+  n30 --> n31
+  n32["Llama a StoragePublicationService.guardFile"]:::llamada
+  n31 -->|"sí"| n32
+  n33[("LEE common.files")]:::efecto
   n32 --> n33
-  n34["Repite: por cada const item de evidence"]:::bucle
+  n34{"!file || file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED || !file.currentVersionId"}:::decision
   n33 --> n34
-  n35["Llama a IdentityEvidenceRecordsRepository.create"]:::llamada
-  n34 -->|"cada elemento"| n35
-  n36{"data.evidenceFileId"}:::decision
-  n35 --> n36
-  n37["Llama a StoragePublicationService.guardFile"]:::llamada
-  n36 -->|"sí"| n37
-  n38[("LEE common.files")]:::efecto
-  n37 --> n38
-  n39{"!file || file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED || !file.currentVersionId"}:::decision
-  n38 --> n39
-  n40(["500 INTERNAL FILE_NOT_LIVE"]):::error
-  n39 -->|"sí"| n40
-  n41[("LEE common.file_versions")]:::efecto
-  n39 -->|"no"| n41
-  n42{"!versions.some((version) =› version.id === file.currentVersionId)"}:::decision
-  n41 --> n42
-  n43(["500 INTERNAL VERSION_UNKNOWN"]):::error
-  n42 -->|"sí"| n43
-  n44["Repite: por cada const version de versions"]:::bucle
-  n42 -->|"no"| n44
-  n45{"!identity || identity.kind === 'UNKNOWN'"}:::decision
-  n44 -->|"cada elemento"| n45
-  n46(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
-  n45 -->|"sí"| n46
-  n47[("CREA identity_assurance.identity_evidence_records")]:::efecto
-  n45 -->|"no"| n47
-  n44 -->|"al terminar"| n47
-  n36 -->|"no"| n47
-  n48["Llama a IdentityChecksRepository.create"]:::llamada
+  n35(["500 INTERNAL FILE_NOT_LIVE"]):::error
+  n34 -->|"sí"| n35
+  n36[("LEE common.file_versions")]:::efecto
+  n34 -->|"no"| n36
+  n37{"!versions.some((version) =› version.id === file.currentVersionId)"}:::decision
+  n36 --> n37
+  n38(["500 INTERNAL VERSION_UNKNOWN"]):::error
+  n37 -->|"sí"| n38
+  n39["Repite: por cada const version de versions"]:::bucle
+  n37 -->|"no"| n39
+  n40{"!identity || identity.kind === 'UNKNOWN'"}:::decision
+  n39 -->|"cada elemento"| n40
+  n41(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
+  n40 -->|"sí"| n41
+  n42[("CREA identity_assurance.identity_evidence_records")]:::efecto
+  n40 -->|"no"| n42
+  n39 -->|"al terminar"| n42
+  n31 -->|"no"| n42
+  n43["Llama a IdentityChecksRepository.create"]:::llamada
+  n42 --> n43
+  n29 -->|"al terminar"| n43
+  n44[("CREA identity_assurance.identity_checks")]:::efecto
+  n43 --> n44
+  n45["Llama a IdentitySelfServiceService.sendConfirmationEmail"]:::llamada
+  n44 --> n45
+  n46["Intenta"]:::intento
+  n45 --> n46
+  n47["Llama a IdentitySelfServiceService.findEmailForUser"]:::llamada
+  n46 --> n47
+  n48[("LEE iam.authentication_credentials · LEE iam.email_verifications")]:::efecto
   n47 --> n48
-  n34 -->|"al terminar"| n48
-  n49[("CREA identity_assurance.identity_checks")]:::efecto
+  n49["Llama a NotificationsService.createRequest"]:::llamada
   n48 --> n49
-  n50["Llama a IdentitySelfServiceService.sendConfirmationEmail"]:::llamada
+  n50{"!recipientUserId"}:::decision
   n49 --> n50
-  n51["Intenta"]:::intento
-  n50 --> n51
-  n52["Llama a IdentitySelfServiceService.findEmailForUser"]:::llamada
-  n51 --> n52
-  n53[("LEE iam.authentication_credentials · LEE iam.email_verifications")]:::efecto
+  n51(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n50 -->|"sí"| n51
+  n52["Transacción: transactional(…)"]:::transaccion
+  n50 -->|"no"| n52
+  n53{"!channel"}:::decision
   n52 --> n53
-  n54["Llama a NotificationsService.createRequest"]:::llamada
-  n53 --> n54
-  n55{"!recipientUserId"}:::decision
-  n54 --> n55
-  n56(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n54(["404 NOT_FOUND Canal no encontrado"]):::error
+  n53 -->|"sí"| n54
+  n55{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n53 -->|"no"| n55
+  n56(["422 PRECONDITION_FAILED El canal no está activo"]):::error
   n55 -->|"sí"| n56
-  n57["Transacción: transactional(…)"]:::transaccion
+  n57{"dto.templateId"}:::decision
   n55 -->|"no"| n57
-  n58{"!channel"}:::decision
-  n57 --> n58
-  n59(["404 NOT_FOUND Canal no encontrado"]):::error
+  n58{"!template"}:::decision
+  n57 -->|"sí"| n58
+  n59(["404 NOT_FOUND Plantilla no encontrada"]):::error
   n58 -->|"sí"| n59
-  n60{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n60{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
   n58 -->|"no"| n60
-  n61(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n61(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
   n60 -->|"sí"| n61
-  n62{"dto.templateId"}:::decision
+  n62{"template.channelId !== dto.channelId"}:::decision
   n60 -->|"no"| n62
-  n63{"!template"}:::decision
+  n63(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
   n62 -->|"sí"| n63
-  n64(["404 NOT_FOUND Plantilla no encontrada"]):::error
-  n63 -->|"sí"| n64
-  n65{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n63 -->|"no"| n65
-  n66(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
-  n65 -->|"sí"| n66
-  n67{"template.channelId !== dto.channelId"}:::decision
-  n65 -->|"no"| n67
-  n68(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
-  n67 -->|"sí"| n68
-  n69(("201 Responde con éxito")):::ok
-  n67 -->|"no"| n69
-  n62 -->|"no"| n69
+  n64(("201 Responde con éxito")):::ok
+  n62 -->|"no"| n64
+  n57 -->|"no"| n64
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1105,7 +1095,7 @@ Solicitar la verificación de la propia matrícula
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Matrícula no encontrada; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional; PreconditionFailedException: Indique qué matrícula quiere verificar; PreconditionFailedException: La matrícula pertenece a otro profesional; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: Indique qué matrícula quiere verificar; PreconditionFailedException: La matrícula pertenece a otro profesional; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
@@ -1128,133 +1118,133 @@ flowchart TD
   n7 --> n8
   n9(["422 PRECONDITION_FAILED La cuenta no tiene una persona vinculada"]):::error
   n8 -->|"sí"| n9
-  n10["Llama a IdentitySelfServiceService.assertIsPractitioner"]:::llamada
+  n10{"!dto.jurisdictionAuthorizationId"}:::decision
   n8 -->|"no"| n10
-  n11["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n10 --> n11
-  n12[("LEE profiles.health_practitioner_profiles")]:::efecto
-  n11 --> n12
-  n13{"!practitioner"}:::decision
+  n11(["422 PRECONDITION_FAILED Indique qué matrícula quiere verificar"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a JurisdictionAuthorizationsRepository.findById"]:::llamada
+  n10 -->|"no"| n12
+  n13[("LEE profiles.jurisdiction_authorizations")]:::efecto
   n12 --> n13
-  n14(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional"]):::error
-  n13 -->|"sí"| n14
-  n15{"!dto.jurisdictionAuthorizationId"}:::decision
-  n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED Indique qué matrícula quiere verificar"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a JurisdictionAuthorizationsRepository.findById"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE profiles.jurisdiction_authorizations")]:::efecto
-  n17 --> n18
-  n19{"!authorization"}:::decision
+  n14{"!authorization"}:::decision
+  n13 --> n14
+  n15(["404 NOT_FOUND Matrícula no encontrada"]):::error
+  n14 -->|"sí"| n15
+  n16{"authorization.practitionerProfileId !== personId"}:::decision
+  n14 -->|"no"| n16
+  n17(["422 PRECONDITION_FAILED La matrícula pertenece a otro profesional"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a IdentitySelfServiceService.openVerification"]:::llamada
+  n16 -->|"no"| n18
+  n19["Llama a IdentitySelfServiceService.resolveEvidence"]:::llamada
   n18 --> n19
-  n20(["404 NOT_FOUND Matrícula no encontrada"]):::error
-  n19 -->|"sí"| n20
-  n21{"authorization.practitionerProfileId !== personId"}:::decision
-  n19 -->|"no"| n21
-  n22(["422 PRECONDITION_FAILED La matrícula pertenece a otro profesional"]):::error
-  n21 -->|"sí"| n22
-  n23["Llama a IdentitySelfServiceService.openVerification"]:::llamada
-  n21 -->|"no"| n23
-  n24["Llama a IdentitySelfServiceService.resolveEvidence"]:::llamada
-  n23 --> n24
-  n25{"dto.evidenceFileId && supplied.length"}:::decision
-  n24 --> n25
-  n26(["422 PRECONDITION_FAILED Envía el archivo histórico o las cinco evidencias nuevas, no ambos"]):::error
-  n25 -->|"sí"| n26
-  n27{"supplied.length !== values.length"}:::decision
-  n25 -->|"no"| n27
-  n28(["422 PRECONDITION_FAILED La verificación requiere las cinco evidencias en el orden solicitado"]):::error
-  n27 -->|"sí"| n28
-  n29{"!evidence.length"}:::decision
-  n27 -->|"no"| n29
-  n30(["422 PRECONDITION_FAILED Adjunta el frente, el reverso y las tres capturas de prueba de vida"]):::error
+  n20{"dto.evidenceFileId && supplied.length"}:::decision
+  n19 --> n20
+  n21(["422 PRECONDITION_FAILED Envía el archivo histórico o las cinco evidencias nuevas, no ambos"]):::error
+  n20 -->|"sí"| n21
+  n22{"supplied.length !== values.length"}:::decision
+  n20 -->|"no"| n22
+  n23(["422 PRECONDITION_FAILED La verificación requiere las cinco evidencias en el orden solicitado"]):::error
+  n22 -->|"sí"| n23
+  n24{"!evidence.length"}:::decision
+  n22 -->|"no"| n24
+  n25(["422 PRECONDITION_FAILED Adjunta el frente, el reverso y las tres capturas de prueba de vida"]):::error
+  n24 -->|"sí"| n25
+  n26["Repite: por cada const item de evidence"]:::bucle
+  n24 -->|"no"| n26
+  n27["Llama a FilesRepository.findById"]:::llamada
+  n26 -->|"cada elemento"| n27
+  n28[("LEE common.files")]:::efecto
+  n27 --> n28
+  n29{"!file || file.createdByUserId !== actor.id || file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI || file.…"}:::decision
+  n28 --> n29
+  n30(["422 PRECONDITION_FAILED Una evidencia no existe, no pertenece a esta cuenta o no está protegida"]):::error
   n29 -->|"sí"| n30
-  n31["Repite: por cada const item de evidence"]:::bucle
+  n31["Llama a IdentityVerificationCasesRepository.countLiveForSubject"]:::llamada
   n29 -->|"no"| n31
-  n32["Llama a FilesRepository.findById"]:::llamada
-  n31 -->|"cada elemento"| n32
-  n33[("LEE common.files")]:::efecto
+  n26 -->|"al terminar"| n31
+  n32[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n31 --> n32
+  n33{"live › 0"}:::decision
   n32 --> n33
-  n34{"!file || file.createdByUserId !== actor.id || file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI || file.…"}:::decision
-  n33 --> n34
-  n35(["422 PRECONDITION_FAILED Una evidencia no existe, no pertenece a esta cuenta o no está protegida"]):::error
-  n34 -->|"sí"| n35
-  n36["Llama a IdentityVerificationCasesRepository.countLiveForSubject"]:::llamada
-  n34 -->|"no"| n36
-  n31 -->|"al terminar"| n36
-  n37[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n34(["409 CONFLICT Ya hay una verificación en curso para este sujeto"]):::error
+  n33 -->|"sí"| n34
+  n35["Llama a IdentityVerificationCasesRepository.create"]:::llamada
+  n33 -->|"no"| n35
+  n36[("CREA identity_assurance.identity_verification_cases")]:::efecto
+  n35 --> n36
+  n37["Repite: por cada const item de evidence"]:::bucle
   n36 --> n37
-  n38{"live › 0"}:::decision
-  n37 --> n38
-  n39(["409 CONFLICT Ya hay una verificación en curso para este sujeto"]):::error
-  n38 -->|"sí"| n39
-  n40["Llama a IdentityVerificationCasesRepository.create"]:::llamada
-  n38 -->|"no"| n40
-  n41[("CREA identity_assurance.identity_verification_cases")]:::efecto
+  n38["Llama a IdentityEvidenceRecordsRepository.create"]:::llamada
+  n37 -->|"cada elemento"| n38
+  n39{"data.evidenceFileId"}:::decision
+  n38 --> n39
+  n40["Llama a StoragePublicationService.guardFile"]:::llamada
+  n39 -->|"sí"| n40
+  n41[("LEE common.files")]:::efecto
   n40 --> n41
-  n42["Repite: por cada const item de evidence"]:::bucle
+  n42{"!file || file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED || !file.currentVersionId"}:::decision
   n41 --> n42
-  n43["Llama a IdentityEvidenceRecordsRepository.create"]:::llamada
-  n42 -->|"cada elemento"| n43
-  n44{"data.evidenceFileId"}:::decision
-  n43 --> n44
-  n45["Llama a StoragePublicationService.guardFile"]:::llamada
-  n44 -->|"sí"| n45
-  n46[("LEE common.files")]:::efecto
-  n45 --> n46
-  n47{"!file || file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED || !file.currentVersionId"}:::decision
-  n46 --> n47
-  n48(["500 INTERNAL FILE_NOT_LIVE"]):::error
-  n47 -->|"sí"| n48
-  n49[("LEE common.file_versions")]:::efecto
-  n47 -->|"no"| n49
-  n50{"!versions.some((version) =› version.id === file.currentVersionId)"}:::decision
-  n49 --> n50
-  n51(["500 INTERNAL VERSION_UNKNOWN"]):::error
-  n50 -->|"sí"| n51
-  n52["Repite: por cada const version de versions"]:::bucle
-  n50 -->|"no"| n52
-  n53{"!identity || identity.kind === 'UNKNOWN'"}:::decision
-  n52 -->|"cada elemento"| n53
-  n54(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
-  n53 -->|"sí"| n54
-  n55[("CREA identity_assurance.identity_evidence_records")]:::efecto
-  n53 -->|"no"| n55
-  n52 -->|"al terminar"| n55
-  n44 -->|"no"| n55
-  n56["Llama a IdentityChecksRepository.create"]:::llamada
+  n43(["500 INTERNAL FILE_NOT_LIVE"]):::error
+  n42 -->|"sí"| n43
+  n44[("LEE common.file_versions")]:::efecto
+  n42 -->|"no"| n44
+  n45{"!versions.some((version) =› version.id === file.currentVersionId)"}:::decision
+  n44 --> n45
+  n46(["500 INTERNAL VERSION_UNKNOWN"]):::error
+  n45 -->|"sí"| n46
+  n47["Repite: por cada const version de versions"]:::bucle
+  n45 -->|"no"| n47
+  n48{"!identity || identity.kind === 'UNKNOWN'"}:::decision
+  n47 -->|"cada elemento"| n48
+  n49(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
+  n48 -->|"sí"| n49
+  n50[("CREA identity_assurance.identity_evidence_records")]:::efecto
+  n48 -->|"no"| n50
+  n47 -->|"al terminar"| n50
+  n39 -->|"no"| n50
+  n51["Llama a IdentityChecksRepository.create"]:::llamada
+  n50 --> n51
+  n37 -->|"al terminar"| n51
+  n52[("CREA identity_assurance.identity_checks")]:::efecto
+  n51 --> n52
+  n53["Llama a IdentitySelfServiceService.sendConfirmationEmail"]:::llamada
+  n52 --> n53
+  n54["Intenta"]:::intento
+  n53 --> n54
+  n55["Llama a IdentitySelfServiceService.findEmailForUser"]:::llamada
+  n54 --> n55
+  n56[("LEE iam.authentication_credentials · LEE iam.email_verifications")]:::efecto
   n55 --> n56
-  n42 -->|"al terminar"| n56
-  n57[("CREA identity_assurance.identity_checks")]:::efecto
+  n57["Llama a NotificationsService.createRequest"]:::llamada
   n56 --> n57
-  n58["Llama a IdentitySelfServiceService.sendConfirmationEmail"]:::llamada
+  n58{"!recipientUserId"}:::decision
   n57 --> n58
-  n59["Intenta"]:::intento
-  n58 --> n59
-  n60["Llama a IdentitySelfServiceService.findEmailForUser"]:::llamada
-  n59 --> n60
-  n61[("LEE iam.authentication_credentials · LEE iam.email_verifications")]:::efecto
+  n59(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n58 -->|"sí"| n59
+  n60["Transacción: transactional(…)"]:::transaccion
+  n58 -->|"no"| n60
+  n61{"!channel"}:::decision
   n60 --> n61
-  n62["Llama a NotificationsService.createRequest"]:::llamada
-  n61 --> n62
-  n63{"!recipientUserId"}:::decision
-  n62 --> n63
-  n64(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n62(["404 NOT_FOUND Canal no encontrado"]):::error
+  n61 -->|"sí"| n62
+  n63{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n61 -->|"no"| n63
+  n64(["422 PRECONDITION_FAILED El canal no está activo"]):::error
   n63 -->|"sí"| n64
-  n65["Transacción: transactional(…)"]:::transaccion
+  n65{"dto.templateId"}:::decision
   n63 -->|"no"| n65
-  n66{"!channel"}:::decision
-  n65 --> n66
-  n67(["404 NOT_FOUND Canal no encontrado"]):::error
+  n66{"!template"}:::decision
+  n65 -->|"sí"| n66
+  n67(["404 NOT_FOUND Plantilla no encontrada"]):::error
   n66 -->|"sí"| n67
-  n68{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n68{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
   n66 -->|"no"| n68
-  n69(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n69(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
   n68 -->|"sí"| n69
-  n70{"dto.templateId"}:::decision
+  n70{"template.channelId !== dto.channelId"}:::decision
   n68 -->|"no"| n70
-  n71["… el resto del árbol (6 nodos) está en el JSON del inventario"]:::corte
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
   n70 -->|"sí"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33

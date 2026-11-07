@@ -3,12 +3,12 @@
 # Flujos del módulo `iam`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 46 (40 con decisiones propias, 6 sin ellas)
+- **Operaciones:** 50 (42 con decisiones propias, 8 sin ellas)
 - Inventario de endpoints del módulo: [iam](../endpoints/iam.md)
 
 ## Proceso: IAM
 
-- **Código:** `iam` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 46
+- **Código:** `iam` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 50
 - **Actores:** CLINICIAN · Cualquier sesión válida · Público (sin sesión) · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/iam/README.md`
@@ -29,12 +29,12 @@ _Fuente: `src/modules/iam/README.md:3`_
 | `ctrl:IamAuthController` | Operaciones de IamAuthController que el README no asigna a un caso de uso | DESCONOCIDO /iam/auth | Cualquier sesión válida | BAJO | 0 |
 |  |  | POST /iam/auth/activate | Público (sin sesión) | ALTO | 7 |
 |  |  | POST /iam/auth/forgot-password | Público (sin sesión) | ALTO | 11 |
-|  |  | POST /iam/auth/login | Público (sin sesión) | ALTO | 23 |
+|  |  | POST /iam/auth/login | Público (sin sesión) | ALTO | 26 |
 |  |  | POST /iam/auth/logout | Cualquier sesión válida | ALTO | 4 |
 |  |  | POST /iam/auth/logout-all | Cualquier sesión válida | ALTO | 4 |
-|  |  | POST /iam/auth/register-organization | Público (sin sesión) | ALTO | 40 |
+|  |  | POST /iam/auth/register-organization | Público (sin sesión) | ALTO | 43 |
 |  |  | POST /iam/auth/register-patient | Público (sin sesión) | ALTO | 21 |
-|  |  | POST /iam/auth/register-practitioner | Público (sin sesión) | ALTO | 76 |
+|  |  | POST /iam/auth/register-practitioner | Público (sin sesión) | ALTO | 73 |
 |  |  | POST /iam/auth/register-support-staff | Público (sin sesión) | ALTO | 21 |
 |  |  | POST /iam/auth/resend-verification | Público (sin sesión) | ALTO | 9 |
 |  |  | POST /iam/auth/reset-password | Público (sin sesión) | ALTO | 8 |
@@ -44,6 +44,10 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/auth/upload-registration-logo | Público (sin sesión) | ALTO | 6 |
 |  |  | POST /iam/auth/upload-registration-signature-image | Público (sin sesión) | ALTO | 6 |
 |  |  | POST /iam/auth/verify-email | Público (sin sesión) | ALTO | 4 |
+| `ctrl:IamIdentifierExistsController` | Operaciones de IamIdentifierExistsController que el README no asigna a un caso de uso | GET /iam/auth/identifier-exists | Público (sin sesión) | BAJO | 2 |
+| `ctrl:IamMyDevicesController` | Operaciones de IamMyDevicesController que el README no asigna a un caso de uso | GET /iam/me/devices | Cualquier sesión válida | BAJO | 2 |
+|  |  | POST /iam/me/devices/{id}/confirm | Cualquier sesión válida | ALTO | 6 |
+|  |  | POST /iam/me/devices/{id}/confirm-code | Cualquier sesión válida | ALTO | 10 |
 | `ctrl:IamOnboardingDraftsController` | Operaciones de IamOnboardingDraftsController que el README no asigna a un caso de uso | DELETE /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
 |  |  | GET /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
 |  |  | PUT /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
@@ -56,27 +60,27 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/users/{id}/credentials/federated | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /iam/users/{id}/deactivate | SECURITY_ADMIN | MEDIO | 14 |
 |  |  | GET /iam/users/{id}/devices | SECURITY_ADMIN | BAJO | 2 |
-|  |  | POST /iam/users/{id}/devices | Cualquier sesión válida | ALTO | 3 |
+|  |  | POST /iam/users/{id}/devices | Cualquier sesión válida | ALTO | 4 |
 |  |  | GET /iam/users/{id}/global-roles | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users/{id}/global-roles | SECURITY_ADMIN | MEDIO | 8 |
 |  |  | GET /iam/users/{id}/lifecycle | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users/{id}/lock | SECURITY_ADMIN | MEDIO | 7 |
 |  |  | GET /iam/users/{id}/mfa-factors | SECURITY_ADMIN | BAJO | 2 |
-|  |  | POST /iam/users/{id}/mfa-factors | Cualquier sesión válida | ALTO | 6 |
+|  |  | POST /iam/users/{id}/mfa-factors | Cualquier sesión válida | ALTO | 8 |
 |  |  | POST /iam/users/{id}/reactivate | SECURITY_ADMIN | MEDIO | 14 |
 |  |  | GET /iam/users/{id}/sessions | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users/{id}/suspend | SECURITY_ADMIN | MEDIO | 14 |
-|  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | ALTO | 79 |
-|  |  | POST /iam/users/assisted-registration | CLINICIAN · SECURITY_ADMIN | MEDIO | 10 |
+|  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | ALTO | 70 |
+|  |  | POST /iam/users/assisted-registration | CLINICIAN · SECURITY_ADMIN | MEDIO | 9 |
 |  |  | POST /iam/users/search | SECURITY_ADMIN | BAJO | 2 |
 
-### Diagrama 1 de 2 — etapas `ctrl:IamAccountSecurityController`, `ctrl:IamAuthController`, `ctrl:IamOnboardingDraftsController`
+### Diagrama 1 de 2 — etapas `ctrl:IamAccountSecurityController`, `ctrl:IamAuthController`, `ctrl:IamIdentifierExistsController`…
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a11(["Público (sin sesión)"]):::actor
-  a50(["SECURITY_ADMIN"]):::actor
+  a48(["SECURITY_ADMIN"]):::actor
   t3[("iam.authentication_credentials")]:::tabla
   t4[("iam.refresh_tokens")]:::tabla
   t5[("iam.security_events")]:::tabla
@@ -94,13 +98,12 @@ flowchart LR
   t30[("common.addresses")]:::tabla
   t31[("common.file_versions")]:::tabla
   t32[("common.files")]:::tabla
-  t33[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t34[("diagnostic_units.diagnostic_unit_sites")]:::tabla
-  t37[("common.identifiers")]:::tabla
-  t44[("messaging.message_channels")]:::tabla
-  t45[("messaging.message_templates")]:::tabla
-  t54[("messaging.message_queues")]:::tabla
-  t55[("messaging.queued_jobs")]:::tabla
+  t33[("common.identifiers")]:::tabla
+  t42[("messaging.message_channels")]:::tabla
+  t43[("messaging.message_templates")]:::tabla
+  t52[("messaging.message_queues")]:::tabla
+  t53[("messaging.queued_jobs")]:::tabla
+  t59[("iam.devices")]:::tabla
   subgraph s0["ctrl:IamAccountSecurityController · Operaciones de IamAccountSecurityController…"]
     o1["POST /iam/auth/change-password"]:::op
     o7["GET /iam/me/sessions"]:::op
@@ -108,14 +111,14 @@ flowchart LR
   end
   t14[("+1 tablas más")]
   t18[("+5 tablas más")]
-  t26[("+17 tablas más")]
-  t35[("+34 tablas más")]
-  t38[("+15 tablas más")]
-  t40[("+70 tablas más")]
-  t42[("+15 tablas más")]
-  t46[("+3 tablas más")]
-  t48[("+2 tablas más")]
-  t52[("+9 tablas más")]
+  t26[("+20 tablas más")]
+  t34[("+37 tablas más")]
+  t36[("+15 tablas más")]
+  t38[("+67 tablas más")]
+  t40[("+15 tablas más")]
+  t44[("+3 tablas más")]
+  t46[("+2 tablas más")]
+  t50[("+9 tablas más")]
   subgraph s1["ctrl:IamAuthController · Operaciones de IamAuthController que el README no asig…"]
     o9["DESCONOCIDO /iam/auth"]:::op
     o10["POST /iam/auth/activate"]:::op
@@ -124,22 +127,26 @@ flowchart LR
     o27["POST /iam/auth/logout"]:::op
     o28["POST /iam/auth/logout-all"]:::op
     o29["POST /iam/auth/register-organization"]:::op
-    o36["POST /iam/auth/register-patient"]:::op
-    o39["POST /iam/auth/register-practitioner"]:::op
-    o41["POST /iam/auth/register-support-staff"]:::op
-    o43["POST /iam/auth/resend-verification"]:::op
-    o47["POST /iam/auth/reset-password"]:::op
-    o49["POST /iam/auth/sessions/purge"]:::op
-    o51["POST /iam/auth/token/refresh"]:::op
-    o53["POST /iam/auth/upload-registration-document"]:::op
-    o56["POST /iam/auth/upload-registration-logo"]:::op
-    o57["POST /iam/auth/upload-registration-signature-image"]:::op
-    o58["POST /iam/auth/verify-email"]:::op
+    o35["POST /iam/auth/register-patient"]:::op
+    o37["POST /iam/auth/register-practitioner"]:::op
+    o39["POST /iam/auth/register-support-staff"]:::op
+    o41["POST /iam/auth/resend-verification"]:::op
+    o45["POST /iam/auth/reset-password"]:::op
+    o47["POST /iam/auth/sessions/purge"]:::op
+    o49["POST /iam/auth/token/refresh"]:::op
+    o51["POST /iam/auth/upload-registration-document"]:::op
+    o54["POST /iam/auth/upload-registration-logo"]:::op
+    o55["POST /iam/auth/upload-registration-signature-image"]:::op
+    o56["POST /iam/auth/verify-email"]:::op
   end
-  subgraph s2["ctrl:IamOnboardingDraftsController · Operaciones de IamOnboardingDraftsControll…"]
-    o59["DELETE /iam/onboarding-drafts/{formType}/{draftId}"]:::op
-    o60["GET /iam/onboarding-drafts/{formType}/{draftId}"]:::op
-    o61["PUT /iam/onboarding-drafts/{formType}/{draftId}"]:::op
+  subgraph s2["ctrl:IamIdentifierExistsController · Operaciones de IamIdentifierExistsControll…"]
+    o57["GET /iam/auth/identifier-exists"]:::op
+  end
+  t62[("+4 tablas más")]
+  subgraph s3["ctrl:IamMyDevicesController · Operaciones de IamMyDevicesController que el READ…"]
+    o58["GET /iam/me/devices"]:::op
+    o60["POST /iam/me/devices/{id}/confirm"]:::op
+    o61["POST /iam/me/devices/{id}/confirm-code"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
@@ -196,265 +203,296 @@ flowchart LR
   o29 -->|"ACTUALIZA"| t32
   o29 -->|"LEE"| t32
   o29 -->|"CREA"| t33
-  o29 -->|"CREA"| t34
-  o29 -.-> t35
-  a11 --> o36
-  o36 -->|"CREA"| t22
-  o36 -->|"CREA"| t37
-  o36 -->|"CREA"| t23
-  o36 -->|"CREA"| t3
-  o36 -->|"LEE"| t3
-  o36 -->|"CREA"| t16
-  o36 -.-> t38
+  o29 -->|"LEE"| t33
+  o29 -.-> t34
+  a11 --> o35
+  o35 -->|"CREA"| t22
+  o35 -->|"CREA"| t33
+  o35 -->|"CREA"| t23
+  o35 -->|"CREA"| t3
+  o35 -->|"LEE"| t3
+  o35 -->|"CREA"| t16
+  o35 -.-> t36
+  a11 --> o37
+  o37 -->|"LEE"| t20
+  o37 -->|"CREA"| t21
+  o37 -->|"LEE"| t21
+  o37 -->|"CREA"| t30
+  o37 -->|"LEE"| t30
+  o37 -->|"CREA"| t22
+  o37 -.-> t38
   a11 --> o39
-  o39 -->|"LEE"| t20
-  o39 -->|"CREA"| t21
-  o39 -->|"LEE"| t21
-  o39 -->|"CREA"| t30
-  o39 -->|"LEE"| t30
   o39 -->|"CREA"| t22
+  o39 -->|"CREA"| t33
+  o39 -->|"CREA"| t23
+  o39 -->|"CREA"| t3
+  o39 -->|"LEE"| t3
+  o39 -->|"CREA"| t16
   o39 -.-> t40
   a11 --> o41
-  o41 -->|"CREA"| t22
-  o41 -->|"CREA"| t37
-  o41 -->|"CREA"| t23
-  o41 -->|"CREA"| t3
   o41 -->|"LEE"| t3
   o41 -->|"CREA"| t16
-  o41 -.-> t42
-  a11 --> o43
-  o43 -->|"LEE"| t3
-  o43 -->|"CREA"| t16
-  o43 -->|"LEE"| t16
-  o43 -->|"LEE"| t13
-  o43 -->|"LEE"| t44
-  o43 -->|"LEE"| t45
-  o43 -.-> t46
-  a11 --> o47
-  o47 -->|"ACTUALIZA"| t3
-  o47 -->|"LEE"| t3
-  o47 -->|"ACTUALIZA"| t17
-  o47 -->|"LEE"| t17
+  o41 -->|"LEE"| t16
+  o41 -->|"LEE"| t13
+  o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t43
+  o41 -.-> t44
+  a11 --> o45
+  o45 -->|"ACTUALIZA"| t3
+  o45 -->|"LEE"| t3
+  o45 -->|"ACTUALIZA"| t17
+  o45 -->|"LEE"| t17
+  o45 -->|"ACTUALIZA"| t4
+  o45 -->|"CREA"| t5
+  o45 -.-> t46
+  a48 --> o47
   o47 -->|"ACTUALIZA"| t4
   o47 -->|"CREA"| t5
-  o47 -.-> t48
-  a50 --> o49
+  o47 -->|"ACTUALIZA"| t6
+  a11 --> o49
+  o49 -->|"LEE"| t20
+  o49 -->|"LEE"| t21
+  o49 -->|"LEE"| t23
+  o49 -->|"LEE"| t24
   o49 -->|"ACTUALIZA"| t4
-  o49 -->|"CREA"| t5
-  o49 -->|"ACTUALIZA"| t6
+  o49 -->|"CREA"| t4
+  o49 -.-> t50
   a11 --> o51
-  o51 -->|"LEE"| t20
-  o51 -->|"LEE"| t21
-  o51 -->|"LEE"| t23
-  o51 -->|"LEE"| t24
-  o51 -->|"ACTUALIZA"| t4
-  o51 -->|"CREA"| t4
-  o51 -.-> t52
-  a11 --> o53
-  o53 -->|"CREA"| t31
-  o53 -->|"CREA"| t32
-  o53 -->|"LEE"| t54
-  o53 -->|"CREA"| t55
-  o53 -->|"ACTUALIZA"| t55
-  o53 -->|"LEE"| t55
+  o51 -->|"CREA"| t31
+  o51 -->|"CREA"| t32
+  o51 -->|"LEE"| t52
+  o51 -->|"CREA"| t53
+  o51 -->|"ACTUALIZA"| t53
+  o51 -->|"LEE"| t53
+  a11 --> o54
+  o54 -->|"CREA"| t31
+  o54 -->|"CREA"| t32
+  o54 -->|"LEE"| t52
+  o54 -->|"CREA"| t53
+  o54 -->|"ACTUALIZA"| t53
+  o54 -->|"LEE"| t53
+  a11 --> o55
+  o55 -->|"CREA"| t31
+  o55 -->|"CREA"| t32
+  o55 -->|"LEE"| t52
+  o55 -->|"CREA"| t53
+  o55 -->|"ACTUALIZA"| t53
+  o55 -->|"LEE"| t53
   a11 --> o56
-  o56 -->|"CREA"| t31
-  o56 -->|"CREA"| t32
-  o56 -->|"LEE"| t54
-  o56 -->|"CREA"| t55
-  o56 -->|"ACTUALIZA"| t55
-  o56 -->|"LEE"| t55
+  o56 -->|"ACTUALIZA"| t16
+  o56 -->|"LEE"| t16
+  o56 -->|"ACTUALIZA"| t13
+  o56 -->|"LEE"| t13
   a11 --> o57
-  o57 -->|"CREA"| t31
-  o57 -->|"CREA"| t32
-  o57 -->|"LEE"| t54
-  o57 -->|"CREA"| t55
-  o57 -->|"ACTUALIZA"| t55
-  o57 -->|"LEE"| t55
-  a11 --> o58
-  o58 -->|"ACTUALIZA"| t16
-  o58 -->|"LEE"| t16
-  o58 -->|"ACTUALIZA"| t13
-  o58 -->|"LEE"| t13
-  a11 --> o59
-  a11 --> o60
-  a11 --> o61
+  o57 -->|"LEE"| t24
+  o57 -->|"LEE"| t3
+  a2 --> o58
+  o58 -->|"LEE"| t59
+  o58 -->|"LEE"| t6
+  a2 --> o60
+  o60 -->|"ACTUALIZA"| t59
+  o60 -->|"LEE"| t59
+  o60 -->|"ACTUALIZA"| t16
+  o60 -->|"LEE"| t16
+  o60 -->|"CREA"| t5
+  o60 -->|"LEE"| t6
+  a2 --> o61
+  o61 -->|"LEE"| t3
+  o61 -->|"LEE"| t59
+  o61 -->|"CREA"| t16
+  o61 -->|"LEE"| t16
+  o61 -->|"LEE"| t13
+  o61 -->|"LEE"| t42
+  o61 -.-> t62
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:IamUsersController`
+### Diagrama 2 de 2 — etapas `ctrl:IamOnboardingDraftsController`, `ctrl:IamUsersController`
 
 ```mermaid
 flowchart LR
-  a2(["SECURITY_ADMIN"]):::actor
-  a24(["Cualquier sesión válida"]):::actor
-  a44(["CLINICIAN · SECURITY_ADMIN"]):::actor
-  t3[("iam.authentication_credentials")]:::tabla
-  t4[("iam.users")]:::tabla
-  t6[("common.contact_points")]:::tabla
-  t7[("iam.security_events")]:::tabla
-  t8[("iam.user_global_roles")]:::tabla
-  t11[("iam.refresh_tokens")]:::tabla
-  t12[("iam.sessions")]:::tabla
-  t18[("authz.user_role_assignments")]:::tabla
-  t19[("iam.account_lockouts")]:::tabla
-  t22[("iam.devices")]:::tabla
-  t32[("iam.mfa_factors")]:::tabla
-  t40[("authz.roles")]:::tabla
-  t41[("common.addresses")]:::tabla
-  t45[("iam.account_activations")]:::tabla
-  t13[("+2 tablas más")]
-  t20[("+8 tablas más")]
-  t27[("+2 tablas más")]
-  t30[("+1 tablas más")]
-  t35[("+8 tablas más")]
-  t38[("+8 tablas más")]
-  t42[("+73 tablas más")]
-  t46[("+4 tablas más")]
-  subgraph s0["ctrl:IamUsersController · Operaciones de IamUsersController que el README no as…"]
-    o1["GET /iam/users"]:::op
-    o5["POST /iam/users"]:::op
-    o9["GET /iam/users/{id}"]:::op
-    o10["POST /iam/users/{id}/anonymize"]:::op
-    o14["GET /iam/users/{id}/credentials"]:::op
-    o15["POST /iam/users/{id}/credentials/{cid}/revoke"]:::op
-    o16["POST /iam/users/{id}/credentials/federated"]:::op
-    o17["POST /iam/users/{id}/deactivate"]:::op
-    o21["GET /iam/users/{id}/devices"]:::op
-    o23["POST /iam/users/{id}/devices"]:::op
-    o25["GET /iam/users/{id}/global-roles"]:::op
-    o26["POST /iam/users/{id}/global-roles"]:::op
-    o28["GET /iam/users/{id}/lifecycle"]:::op
-    o29["POST /iam/users/{id}/lock"]:::op
-    o31["GET /iam/users/{id}/mfa-factors"]:::op
-    o33["POST /iam/users/{id}/mfa-factors"]:::op
-    o34["POST /iam/users/{id}/reactivate"]:::op
-    o36["GET /iam/users/{id}/sessions"]:::op
-    o37["POST /iam/users/{id}/suspend"]:::op
-    o39["POST /iam/users/assisted-practitioner-registration"]:::op
-    o43["POST /iam/users/assisted-registration"]:::op
-    o47["POST /iam/users/search"]:::op
+  a2(["Público (sin sesión)"]):::actor
+  a6(["SECURITY_ADMIN"]):::actor
+  a28(["Cualquier sesión válida"]):::actor
+  a49(["CLINICIAN · SECURITY_ADMIN"]):::actor
+  t7[("iam.authentication_credentials")]:::tabla
+  t8[("iam.users")]:::tabla
+  t10[("common.contact_points")]:::tabla
+  t11[("iam.security_events")]:::tabla
+  t12[("iam.user_global_roles")]:::tabla
+  t15[("iam.refresh_tokens")]:::tabla
+  t16[("iam.sessions")]:::tabla
+  t22[("authz.user_role_assignments")]:::tabla
+  t23[("iam.account_lockouts")]:::tabla
+  t26[("iam.devices")]:::tabla
+  t36[("iam.mfa_factors")]:::tabla
+  t45[("authz.roles")]:::tabla
+  t46[("common.addresses")]:::tabla
+  t50[("iam.account_activations")]:::tabla
+  t51[("profiles.patient_profiles")]:::tabla
+  subgraph s0["ctrl:IamOnboardingDraftsController · Operaciones de IamOnboardingDraftsControll…"]
+    o1["DELETE /iam/onboarding-drafts/{formType}/{draftId}"]:::op
+    o3["GET /iam/onboarding-drafts/{formType}/{draftId}"]:::op
+    o4["PUT /iam/onboarding-drafts/{formType}/{draftId}"]:::op
+  end
+  t17[("+2 tablas más")]
+  t24[("+8 tablas más")]
+  t31[("+2 tablas más")]
+  t34[("+1 tablas más")]
+  t38[("+2 tablas más")]
+  t40[("+8 tablas más")]
+  t43[("+8 tablas más")]
+  t47[("+64 tablas más")]
+  t52[("+3 tablas más")]
+  subgraph s1["ctrl:IamUsersController · Operaciones de IamUsersController que el README no as…"]
+    o5["GET /iam/users"]:::op
+    o9["POST /iam/users"]:::op
+    o13["GET /iam/users/{id}"]:::op
+    o14["POST /iam/users/{id}/anonymize"]:::op
+    o18["GET /iam/users/{id}/credentials"]:::op
+    o19["POST /iam/users/{id}/credentials/{cid}/revoke"]:::op
+    o20["POST /iam/users/{id}/credentials/federated"]:::op
+    o21["POST /iam/users/{id}/deactivate"]:::op
+    o25["GET /iam/users/{id}/devices"]:::op
+    o27["POST /iam/users/{id}/devices"]:::op
+    o29["GET /iam/users/{id}/global-roles"]:::op
+    o30["POST /iam/users/{id}/global-roles"]:::op
+    o32["GET /iam/users/{id}/lifecycle"]:::op
+    o33["POST /iam/users/{id}/lock"]:::op
+    o35["GET /iam/users/{id}/mfa-factors"]:::op
+    o37["POST /iam/users/{id}/mfa-factors"]:::op
+    o39["POST /iam/users/{id}/reactivate"]:::op
+    o41["GET /iam/users/{id}/sessions"]:::op
+    o42["POST /iam/users/{id}/suspend"]:::op
+    o44["POST /iam/users/assisted-practitioner-registration"]:::op
+    o48["POST /iam/users/assisted-registration"]:::op
+    o53["POST /iam/users/search"]:::op
   end
   a2 --> o1
-  o1 -->|"LEE"| t3
-  o1 -->|"LEE"| t4
-  a2 --> o5
-  o5 -->|"CREA"| t6
-  o5 -->|"CREA"| t3
-  o5 -->|"LEE"| t3
-  o5 -->|"CREA"| t7
-  o5 -->|"CREA"| t8
-  o5 -->|"CREA"| t4
-  a2 --> o9
-  o9 -->|"LEE"| t4
-  a2 --> o10
-  o10 -->|"ACTUALIZA"| t3
-  o10 -->|"ACTUALIZA"| t11
-  o10 -->|"CREA"| t7
-  o10 -->|"ACTUALIZA"| t12
-  o10 -->|"LEE"| t12
-  o10 -->|"ACTUALIZA"| t8
-  o10 -.-> t13
-  a2 --> o14
-  o14 -->|"LEE"| t3
-  o14 -->|"LEE"| t4
-  a2 --> o15
-  o15 -->|"ACTUALIZA"| t3
-  o15 -->|"LEE"| t3
-  o15 -->|"CREA"| t7
-  a2 --> o16
-  o16 -->|"CREA"| t3
-  o16 -->|"LEE"| t3
-  o16 -->|"CREA"| t7
-  o16 -->|"LEE"| t4
-  a2 --> o17
-  o17 -->|"ACTUALIZA"| t18
-  o17 -->|"ACTUALIZA"| t19
-  o17 -->|"CREA"| t19
-  o17 -->|"LEE"| t19
-  o17 -->|"ACTUALIZA"| t3
-  o17 -->|"ACTUALIZA"| t11
-  o17 -.-> t20
-  a2 --> o21
-  o21 -->|"LEE"| t22
-  o21 -->|"LEE"| t4
-  a24 --> o23
-  o23 -->|"CREA"| t22
-  o23 -->|"CREA"| t7
-  o23 -->|"LEE"| t4
-  a2 --> o25
+  a2 --> o3
+  a2 --> o4
+  a6 --> o5
+  o5 -->|"LEE"| t7
+  o5 -->|"LEE"| t8
+  a6 --> o9
+  o9 -->|"CREA"| t10
+  o9 -->|"CREA"| t7
+  o9 -->|"LEE"| t7
+  o9 -->|"CREA"| t11
+  o9 -->|"CREA"| t12
+  o9 -->|"CREA"| t8
+  a6 --> o13
+  o13 -->|"LEE"| t8
+  a6 --> o14
+  o14 -->|"ACTUALIZA"| t7
+  o14 -->|"ACTUALIZA"| t15
+  o14 -->|"CREA"| t11
+  o14 -->|"ACTUALIZA"| t16
+  o14 -->|"LEE"| t16
+  o14 -->|"ACTUALIZA"| t12
+  o14 -.-> t17
+  a6 --> o18
+  o18 -->|"LEE"| t7
+  o18 -->|"LEE"| t8
+  a6 --> o19
+  o19 -->|"ACTUALIZA"| t7
+  o19 -->|"LEE"| t7
+  o19 -->|"CREA"| t11
+  a6 --> o20
+  o20 -->|"CREA"| t7
+  o20 -->|"LEE"| t7
+  o20 -->|"CREA"| t11
+  o20 -->|"LEE"| t8
+  a6 --> o21
+  o21 -->|"ACTUALIZA"| t22
+  o21 -->|"ACTUALIZA"| t23
+  o21 -->|"CREA"| t23
+  o21 -->|"LEE"| t23
+  o21 -->|"ACTUALIZA"| t7
+  o21 -->|"ACTUALIZA"| t15
+  o21 -.-> t24
+  a6 --> o25
+  o25 -->|"LEE"| t26
   o25 -->|"LEE"| t8
-  o25 -->|"LEE"| t4
-  a2 --> o26
-  o26 -->|"ACTUALIZA"| t11
-  o26 -->|"CREA"| t7
-  o26 -->|"ACTUALIZA"| t12
-  o26 -->|"LEE"| t12
-  o26 -->|"ACTUALIZA"| t8
-  o26 -->|"CREA"| t8
-  o26 -.-> t27
-  a2 --> o28
-  o28 -->|"LEE"| t7
-  o28 -->|"LEE"| t4
-  a2 --> o29
-  o29 -->|"CREA"| t19
-  o29 -->|"ACTUALIZA"| t11
-  o29 -->|"CREA"| t7
-  o29 -->|"ACTUALIZA"| t12
+  a28 --> o27
+  o27 -->|"CREA"| t26
+  o27 -->|"LEE"| t26
+  o27 -->|"CREA"| t11
+  o27 -->|"LEE"| t8
+  a6 --> o29
   o29 -->|"LEE"| t12
-  o29 -->|"ACTUALIZA"| t4
-  o29 -.-> t30
-  a2 --> o31
-  o31 -->|"LEE"| t32
-  o31 -->|"LEE"| t4
-  a24 --> o33
-  o33 -->|"ACTUALIZA"| t32
-  o33 -->|"CREA"| t32
-  o33 -->|"LEE"| t32
-  o33 -->|"CREA"| t7
-  o33 -->|"ACTUALIZA"| t4
-  o33 -->|"LEE"| t4
-  a2 --> o34
-  o34 -->|"ACTUALIZA"| t18
-  o34 -->|"ACTUALIZA"| t19
-  o34 -->|"CREA"| t19
-  o34 -->|"LEE"| t19
-  o34 -->|"ACTUALIZA"| t3
-  o34 -->|"ACTUALIZA"| t11
-  o34 -.-> t35
-  a2 --> o36
-  o36 -->|"LEE"| t12
-  o36 -->|"LEE"| t4
-  a2 --> o37
-  o37 -->|"ACTUALIZA"| t18
-  o37 -->|"ACTUALIZA"| t19
-  o37 -->|"CREA"| t19
-  o37 -->|"LEE"| t19
-  o37 -->|"ACTUALIZA"| t3
-  o37 -->|"ACTUALIZA"| t11
+  o29 -->|"LEE"| t8
+  a6 --> o30
+  o30 -->|"ACTUALIZA"| t15
+  o30 -->|"CREA"| t11
+  o30 -->|"ACTUALIZA"| t16
+  o30 -->|"LEE"| t16
+  o30 -->|"ACTUALIZA"| t12
+  o30 -->|"CREA"| t12
+  o30 -.-> t31
+  a6 --> o32
+  o32 -->|"LEE"| t11
+  o32 -->|"LEE"| t8
+  a6 --> o33
+  o33 -->|"CREA"| t23
+  o33 -->|"ACTUALIZA"| t15
+  o33 -->|"CREA"| t11
+  o33 -->|"ACTUALIZA"| t16
+  o33 -->|"LEE"| t16
+  o33 -->|"ACTUALIZA"| t8
+  o33 -.-> t34
+  a6 --> o35
+  o35 -->|"LEE"| t36
+  o35 -->|"LEE"| t8
+  a28 --> o37
+  o37 -->|"LEE"| t7
+  o37 -->|"ACTUALIZA"| t36
+  o37 -->|"CREA"| t36
+  o37 -->|"LEE"| t36
+  o37 -->|"CREA"| t11
+  o37 -->|"LEE"| t11
   o37 -.-> t38
-  a2 --> o39
-  o39 -->|"LEE"| t40
-  o39 -->|"CREA"| t18
-  o39 -->|"LEE"| t18
-  o39 -->|"CREA"| t41
-  o39 -->|"LEE"| t41
-  o39 -->|"CREA"| t6
-  o39 -.-> t42
-  a44 --> o43
-  o43 -->|"CREA"| t45
-  o43 -->|"CREA"| t3
-  o43 -->|"LEE"| t3
-  o43 -->|"CREA"| t7
-  o43 -->|"CREA"| t8
-  o43 -->|"CREA"| t4
-  o43 -.-> t46
-  a2 --> o47
-  o47 -->|"LEE"| t3
-  o47 -->|"LEE"| t4
+  a6 --> o39
+  o39 -->|"ACTUALIZA"| t22
+  o39 -->|"ACTUALIZA"| t23
+  o39 -->|"CREA"| t23
+  o39 -->|"LEE"| t23
+  o39 -->|"ACTUALIZA"| t7
+  o39 -->|"ACTUALIZA"| t15
+  o39 -.-> t40
+  a6 --> o41
+  o41 -->|"LEE"| t16
+  o41 -->|"LEE"| t8
+  a6 --> o42
+  o42 -->|"ACTUALIZA"| t22
+  o42 -->|"ACTUALIZA"| t23
+  o42 -->|"CREA"| t23
+  o42 -->|"LEE"| t23
+  o42 -->|"ACTUALIZA"| t7
+  o42 -->|"ACTUALIZA"| t15
+  o42 -.-> t43
+  a6 --> o44
+  o44 -->|"LEE"| t45
+  o44 -->|"CREA"| t22
+  o44 -->|"LEE"| t22
+  o44 -->|"CREA"| t46
+  o44 -->|"LEE"| t46
+  o44 -->|"CREA"| t10
+  o44 -.-> t47
+  a49 --> o48
+  o48 -->|"CREA"| t50
+  o48 -->|"CREA"| t7
+  o48 -->|"CREA"| t11
+  o48 -->|"CREA"| t12
+  o48 -->|"CREA"| t8
+  o48 -->|"CREA"| t51
+  o48 -.-> t52
+  a6 --> o53
+  o53 -->|"LEE"| t7
+  o53 -->|"LEE"| t8
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -746,7 +784,55 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /iam/auth/login
+#### 4. GET /iam/auth/identifier-exists
+
+Whether a national id, email or organization name has an account
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · parámetros de consulta (400) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a IdentifierExistsUseCase.execute"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5{"kind === 'NATIONAL_ID'"}:::decision
+  n4 --> n5
+  n6["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n5 -->|"sí"| n6
+  n7[("LEE iam.authentication_credentials")]:::efecto
+  n6 --> n7
+  n8{"kind === 'EMAIL'"}:::decision
+  n7 --> n8
+  n5 -->|"no"| n8
+  n9["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
+  n8 -->|"sí"| n9
+  n10[("LEE iam.authentication_credentials")]:::efecto
+  n9 --> n10
+  n11["Llama a DirectoryRegistrationAdapter.tenantNameExists"]:::llamada
+  n10 --> n11
+  n8 -->|"no"| n11
+  n12[("LEE directory.tenants")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. POST /iam/auth/login
 
 Iniciar sesión con email o documento de identidad y contraseña
 
@@ -900,7 +986,7 @@ flowchart TD
   n68 --> n69
   n70[("LEE directory.tenants")]:::efecto
   n69 --> n70
-  n71["… el resto del árbol (10 nodos) está en el JSON del inventario"]:::corte
+  n71["… el resto del árbol (18 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -910,7 +996,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /iam/auth/logout
+#### 6. POST /iam/auth/logout
 
 Cerrar la sesión actual del usuario
 
@@ -966,7 +1052,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /iam/auth/register-organization
+#### 7. POST /iam/auth/register-organization
 
 Registrar una organización con su cuenta owner
 
@@ -1122,7 +1208,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /iam/auth/register-patient
+#### 8. POST /iam/auth/register-patient
 
 Registrarse como paciente con documento de identidad
 
@@ -1259,7 +1345,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /iam/auth/register-practitioner
+#### 9. POST /iam/auth/register-practitioner
 
 Registrarse como profesional de salud con su matrícula
 
@@ -1393,32 +1479,33 @@ flowchart TD
   n56 --> n57
   n58(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
   n57 -->|"sí"| n58
-  n59{"!file || // `!= null` a propósito: MikroORM hidrata una FK nullable sin valor // como `null` (verificado cont…"}:::decision
+  n59["Transacción: withSystemRlsInTransaction(…)"]:::transaccion
   n57 -->|"no"| n59
-  n60(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
-  n59 -->|"sí"| n60
-  n61{"options.allowedCategoryConceptId && file.categoryConceptId !== options.allowedCategoryConceptId"}:::decision
-  n59 -->|"no"| n61
-  n62(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
-  n61 -->|"sí"| n62
-  n63[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
-  n61 -->|"no"| n63
-  n64{"file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI || BigInt(version.sizeBytes) › BigInt(2 * 1024 * 1024)"}:::decision
+  n60{"options.allowedCategoryConceptId && file.categoryConceptId !== options.allowedCategoryConceptId"}:::decision
+  n59 --> n60
+  n61(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
+  n60 -->|"sí"| n61
+  n62{"isRlsEnforced()"}:::decision
+  n60 -->|"no"| n62
+  n63[("ACTUALIZA common.files")]:::efecto
+  n62 -->|"sí"| n63
+  n64[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
   n63 --> n64
-  n65(["422 PRECONDITION_FAILED La firma y el sello requieren una imagen privada de hasta 2 MB"]):::error
-  n64 -->|"sí"| n65
-  n66["Llama a ProfilesRegistrationAdapter.createPractitionerProfile"]:::llamada
-  n64 -->|"no"| n66
-  n54 -->|"al terminar"| n66
-  n67["Llama a HealthPractitionerProfilesRepository.create"]:::llamada
-  n66 --> n67
-  n68[("CREA profiles.health_practitioner_profiles")]:::efecto
+  n62 -->|"no"| n64
+  n65{"file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI || BigInt(version.sizeBytes) › BigInt(2 * 1024 * 1024)"}:::decision
+  n64 --> n65
+  n66(["422 PRECONDITION_FAILED La firma y el sello requieren una imagen privada de hasta 2 MB"]):::error
+  n65 -->|"sí"| n66
+  n67["Llama a ProfilesRegistrationAdapter.createPractitionerProfile"]:::llamada
+  n65 -->|"no"| n67
+  n54 -->|"al terminar"| n67
+  n68["Llama a HealthPractitionerProfilesRepository.create"]:::llamada
   n67 --> n68
-  n69["Llama a ProfilesRegistrationAdapter.createJurisdictionAuthorization"]:::llamada
+  n69[("CREA profiles.health_practitioner_profiles")]:::efecto
   n68 --> n69
-  n70["Llama a JurisdictionAuthorizationsRepository.create"]:::llamada
+  n70["Llama a ProfilesRegistrationAdapter.createJurisdictionAuthorization"]:::llamada
   n69 --> n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n71["… el resto del árbol (2 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -1428,7 +1515,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /iam/auth/register-support-staff
+#### 10. POST /iam/auth/register-support-staff
 
 Registrarse como secretaria (personal de apoyo hospitalario)
 
@@ -1590,7 +1677,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /iam/auth/resend-verification
+#### 11. POST /iam/auth/resend-verification
 
 Reenviar el enlace de verificación del correo
 
@@ -1678,7 +1765,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /iam/auth/reset-password
+#### 12. POST /iam/auth/reset-password
 
 Fijar una contraseña nueva con el token recibido por correo
 
@@ -1755,7 +1842,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /iam/auth/token/refresh
+#### 13. POST /iam/auth/token/refresh
 
 Rotar el refresh token
 
@@ -1885,7 +1972,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /iam/auth/upload-registration-document
+#### 14. POST /iam/auth/upload-registration-document
 
 Pre-cargar un PDF para un registro de organización o profesional
 
@@ -1964,7 +2051,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /iam/auth/upload-registration-logo
+#### 15. POST /iam/auth/upload-registration-logo
 
 Pre-cargar el logo del consultorio propio para el registro
 
@@ -2047,7 +2134,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /iam/auth/upload-registration-signature-image
+#### 16. POST /iam/auth/upload-registration-signature-image
 
 Pre-cargar una imagen de firma o sello para el registro
 
@@ -2130,7 +2217,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /iam/auth/verify-email
+#### 17. POST /iam/auth/verify-email
 
 Verificar el correo con el token recibido
 
@@ -2191,7 +2278,200 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /iam/me/sessions/{id}/revoke
+#### 18. POST /iam/me/devices/{id}/confirm
+
+Verificar un dispositivo con el código del correo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dispositivo no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Para verificar este dispositivo hace falta el código enviado a su correo; PreconditionFailedException: El código no es válido o ya se usó |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a IamMyDevicesService.confirm"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a IamMyDevicesService.ownDevice"]:::llamada
+  n4 --> n5
+  n6["Llama a DevicesRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE iam.devices")]:::efecto
+  n6 --> n7
+  n8{"!device || device.userId !== actor.id"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Dispositivo no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"code === undefined"}:::decision
+  n8 -->|"no"| n10
+  n11["Llama a IamMyDevicesService.fromOtherTrustedDevice"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a SessionsRepository.findActiveByTokenId"]:::llamada
+  n11 --> n12
+  n13[("LEE iam.sessions")]:::efecto
+  n12 --> n13
+  n14["Llama a DevicesRepository.findById"]:::llamada
+  n13 --> n14
+  n15[("LEE iam.devices")]:::efecto
+  n14 --> n15
+  n16{"!(await this.fromOtherTrustedDevice(tx, actor, deviceId))"}:::decision
+  n15 --> n16
+  n17(["422 PRECONDITION_FAILED Para verificar este dispositivo hace falta el código enviado a su correo"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a EmailVerificationsRepository.findByTokenHash"]:::llamada
+  n10 -->|"no"| n18
+  n19[("LEE iam.email_verifications")]:::efecto
+  n18 --> n19
+  n20{"!pending || pending.userId !== actor.id || pending.consumedAt || pending.stateConceptId !== CONCEPTS.STATE_AC…"}:::decision
+  n19 --> n20
+  n21(["422 PRECONDITION_FAILED El código no es válido o ya se usó"]):::error
+  n20 -->|"sí"| n21
+  n22[("ACTUALIZA iam.email_verifications")]:::efecto
+  n20 -->|"no"| n22
+  n23[("ACTUALIZA iam.devices")]:::efecto
+  n16 -->|"no"| n23
+  n22 --> n23
+  n24["Llama a SecurityEventsRepository.record"]:::llamada
+  n23 --> n24
+  n25[("CREA iam.security_events")]:::efecto
+  n24 --> n25
+  n26(("200 Responde con éxito")):::ok
+  n25 --> n26
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 19. POST /iam/me/devices/{id}/confirm-code
+
+Enviar a mi correo el código para verificar un dispositivo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dispositivo no encontrado; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un correo verificado al que enviar el código; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a IamMyDevicesService.requestCode"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a IamMyDevicesService.ownDevice"]:::llamada
+  n4 --> n5
+  n6["Llama a DevicesRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE iam.devices")]:::efecto
+  n6 --> n7
+  n8{"!device || device.userId !== actor.id"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Dispositivo no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a IamMyDevicesService.verifiedEmail"]:::llamada
+  n8 -->|"no"| n10
+  n11["Llama a UsersRepository.findById"]:::llamada
+  n10 --> n11
+  n12[("LEE iam.users")]:::efecto
+  n11 --> n12
+  n13["Llama a CredentialsRepository.findActivePasswordByUser"]:::llamada
+  n12 --> n13
+  n14[("LEE iam.authentication_credentials")]:::efecto
+  n13 --> n14
+  n15["Llama a EmailVerificationsRepository.findLatestByUser"]:::llamada
+  n14 --> n15
+  n16[("LEE iam.email_verifications")]:::efecto
+  n15 --> n16
+  n17{"user?.emailVerified !== true || !email"}:::decision
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED La cuenta no tiene un correo verificado al que enviar el código"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a EmailVerificationsRepository.create"]:::llamada
+  n17 -->|"no"| n19
+  n20[("CREA iam.email_verifications")]:::efecto
+  n19 --> n20
+  n21["Llama a MessagingEmailNoticeAdapter.enqueueEmail"]:::llamada
+  n20 --> n21
+  n22["Llama a NotificationsService.createRequest"]:::llamada
+  n21 --> n22
+  n23{"!recipientUserId"}:::decision
+  n22 --> n23
+  n24(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n23 -->|"sí"| n24
+  n25["Transacción: transactional(…)"]:::transaccion
+  n23 -->|"no"| n25
+  n26["Llama a NotificationsRepository.findChannelById"]:::llamada
+  n25 --> n26
+  n27[("LEE messaging.message_channels")]:::efecto
+  n26 --> n27
+  n28{"!channel"}:::decision
+  n27 --> n28
+  n29(["404 NOT_FOUND Canal no encontrado"]):::error
+  n28 -->|"sí"| n29
+  n30{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n30 -->|"sí"| n31
+  n32{"dto.templateId"}:::decision
+  n30 -->|"no"| n32
+  n33["Llama a NotificationsRepository.findTemplateById"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("LEE messaging.message_templates")]:::efecto
+  n33 --> n34
+  n35{"!template"}:::decision
+  n34 --> n35
+  n36(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n35 -->|"sí"| n36
+  n37{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n35 -->|"no"| n37
+  n38(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n37 -->|"sí"| n38
+  n39{"template.channelId !== dto.channelId"}:::decision
+  n37 -->|"no"| n39
+  n40(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
+  n39 -->|"sí"| n40
+  n41{"dto.debounceKey"}:::decision
+  n39 -->|"no"| n41
+  n32 -->|"no"| n41
+  n42["Llama a NotificationsRepository.findLiveRequestByDebounceKey"]:::llamada
+  n41 -->|"sí"| n42
+  n43[("LEE messaging.notification_requests")]:::efecto
+  n42 --> n43
+  n44["Llama a NotificationsRepository.createNotificationRequest"]:::llamada
+  n43 --> n44
+  n41 -->|"no"| n44
+  n45[("CREA messaging.notification_requests")]:::efecto
+  n44 --> n45
+  n46(("200 Responde con éxito")):::ok
+  n45 --> n46
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. POST /iam/me/sessions/{id}/revoke
 
 Cerrar una de mis sesiones
 
@@ -2243,7 +2523,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+#### 21. DELETE /iam/onboarding-drafts/{formType}/{draftId}
 
 Elimina el borrador al completar el alta exitosamente o por descarte del usuario
 
@@ -2276,7 +2556,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /iam/onboarding-drafts/{formType}/{draftId}
+#### 22. GET /iam/onboarding-drafts/{formType}/{draftId}
 
 Recupera un borrador de alta guardado por identificador y tipo de formulario
 
@@ -2309,7 +2589,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. PUT /iam/onboarding-drafts/{formType}/{draftId}
+#### 23. PUT /iam/onboarding-drafts/{formType}/{draftId}
 
 Guarda o actualiza el avance del formulario de alta en borrador
 
@@ -2379,7 +2659,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /iam/users
+#### 24. POST /iam/users
 
 Crear un usuario con credencial de contraseña y rol inicial
 
@@ -2444,7 +2724,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /iam/users/{id}
+#### 25. GET /iam/users/{id}
 
 Ficha de un usuario
 
@@ -2482,7 +2762,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /iam/users/{id}/anonymize
+#### 26. POST /iam/users/{id}/anonymize
 
 Anonimizar (DSAR) la cuenta
 
@@ -2548,7 +2828,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. GET /iam/users/{id}/credentials
+#### 27. GET /iam/users/{id}/credentials
 
 Credenciales del usuario
 
@@ -2592,7 +2872,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /iam/users/{id}/credentials/{cid}/revoke
+#### 28. POST /iam/users/{id}/credentials/{cid}/revoke
 
 Revocar una credencial del usuario
 
@@ -2638,7 +2918,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /iam/users/{id}/credentials/federated
+#### 29. POST /iam/users/{id}/credentials/federated
 
 Enlazar una credencial de identidad federada
 
@@ -2695,7 +2975,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /iam/users/{id}/deactivate
+#### 30. POST /iam/users/{id}/deactivate
 
 Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
 
@@ -2829,7 +3109,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. GET /iam/users/{id}/devices
+#### 31. GET /iam/users/{id}/devices
 
 Dispositivos del usuario
 
@@ -2873,7 +3153,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /iam/users/{id}/devices
+#### 32. POST /iam/users/{id}/devices
 
 Registrar un dispositivo del usuario
 
@@ -2907,19 +3187,23 @@ flowchart TD
   n8 --> n9
   n10(["404 NOT_FOUND Usuario no encontrado"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a DevicesRepository.create"]:::llamada
+  n11["Llama a DevicesRepository.findOwnByFingerprint"]:::llamada
   n9 -->|"no"| n11
-  n12[("CREA iam.devices")]:::efecto
+  n12[("LEE iam.devices")]:::efecto
   n11 --> n12
-  n13{"trusted"}:::decision
+  n13["Llama a DevicesRepository.create"]:::llamada
   n12 --> n13
-  n14["Llama a SecurityEventsRepository.record"]:::llamada
-  n13 -->|"sí"| n14
-  n15[("CREA iam.security_events")]:::efecto
+  n14[("CREA iam.devices")]:::efecto
+  n13 --> n14
+  n15{"trusted"}:::decision
   n14 --> n15
-  n16(("201 Responde con éxito")):::ok
-  n15 --> n16
-  n13 -->|"no"| n16
+  n16["Llama a SecurityEventsRepository.record"]:::llamada
+  n15 -->|"sí"| n16
+  n17[("CREA iam.security_events")]:::efecto
+  n16 --> n17
+  n18(("201 Responde con éxito")):::ok
+  n17 --> n18
+  n15 -->|"no"| n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2928,7 +3212,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. GET /iam/users/{id}/global-roles
+#### 33. GET /iam/users/{id}/global-roles
 
 Roles globales del usuario
 
@@ -2972,7 +3256,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. POST /iam/users/{id}/global-roles
+#### 34. POST /iam/users/{id}/global-roles
 
 Conceder o revocar un rol global
 
@@ -3054,7 +3338,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. GET /iam/users/{id}/lifecycle
+#### 35. GET /iam/users/{id}/lifecycle
 
 Estado de ciclo de vida de la cuenta y su historia, paginada
 
@@ -3106,7 +3390,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. POST /iam/users/{id}/lock
+#### 36. POST /iam/users/{id}/lock
 
 Bloquear la cuenta y revocar sus sesiones
 
@@ -3168,7 +3452,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. GET /iam/users/{id}/mfa-factors
+#### 37. GET /iam/users/{id}/mfa-factors
 
 Factores de MFA del usuario
 
@@ -3212,7 +3496,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. POST /iam/users/{id}/mfa-factors
+#### 38. POST /iam/users/{id}/mfa-factors
 
 Enrolar o verificar un factor MFA
 
@@ -3223,7 +3507,7 @@ Enrolar o verificar un factor MFA
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No tiene acceso a los factores MFA de esta cuenta |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado; ResourceNotFoundException: Factor MFA no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: factorId es obligatorio para verificar; PreconditionFailedException: code es obligatorio para verificar; PreconditionFailedException: El factor no tiene un secreto TOTP asociado; PreconditionFailedException: Código MFA inválido; PreconditionFailedException: factorType es obligatorio para enrolar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Para añadir o quitar un factor confirme su contraseña actual o un código de su app autenticadora; PreconditionFailedException: La contraseña o el código no coinciden; PreconditionFailedException: factorId es obligatorio para verificar; PreconditionFailedException: code es obligatorio para verificar; PreconditionFailedException: El factor no tiene un secreto TOTP asociado; PreconditionFailedException: Código MFA inválido; PreconditionFailedException: factorType es obligatorio para enrolar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3237,72 +3521,98 @@ flowchart TD
   n3 --> n4
   n5(["403 FORBIDDEN No tiene acceso a los factores MFA de esta cuenta"]):::error
   n4 -->|"sí"| n5
-  n6["Transacción: transactional(…)"]:::transaccion
+  n6{"!dto.verify && actor.id === userId"}:::decision
   n4 -->|"no"| n6
-  n7["Llama a UsersRepository.findById"]:::llamada
-  n6 --> n7
-  n8[("LEE iam.users")]:::efecto
+  n7["Llama a IamMfaService.assertReauthenticated"]:::llamada
+  n6 -->|"sí"| n7
+  n8{"!proof.currentPassword && !proof.mfaCode"}:::decision
   n7 --> n8
-  n9{"!user"}:::decision
-  n8 --> n9
-  n10(["404 NOT_FOUND Usuario no encontrado"]):::error
-  n9 -->|"sí"| n10
-  n11{"dto.verify"}:::decision
-  n9 -->|"no"| n11
-  n12{"!dto.factorId"}:::decision
-  n11 -->|"sí"| n12
-  n13(["422 PRECONDITION_FAILED factorId es obligatorio para verificar"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a MfaFactorsRepository.findByIdAndUser"]:::llamada
-  n12 -->|"no"| n14
+  n9(["422 PRECONDITION_FAILED Para añadir o quitar un factor confirme su contraseña actual o un código de su app au…"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a IamMfaService.passwordMatches"]:::llamada
+  n8 -->|"no"| n10
+  n11["Llama a CredentialsRepository.findActivePasswordByUser"]:::llamada
+  n10 --> n11
+  n12[("LEE iam.authentication_credentials")]:::efecto
+  n11 --> n12
+  n13["Llama a IamMfaService.codeMatches"]:::llamada
+  n12 --> n13
+  n14["Llama a MfaFactorsRepository.findVerifiedByUser"]:::llamada
+  n13 --> n14
   n15[("LEE iam.mfa_factors")]:::efecto
   n14 --> n15
-  n16{"!factor"}:::decision
+  n16["Llama a SecurityEventsRepository.record"]:::llamada
   n15 --> n16
-  n17(["404 NOT_FOUND Factor MFA no encontrado"]):::error
-  n16 -->|"sí"| n17
-  n18{"!dto.code"}:::decision
-  n16 -->|"no"| n18
-  n19(["422 PRECONDITION_FAILED code es obligatorio para verificar"]):::error
-  n18 -->|"sí"| n19
-  n20{"!factor.secretEncrypted"}:::decision
-  n18 -->|"no"| n20
-  n21(["422 PRECONDITION_FAILED El factor no tiene un secreto TOTP asociado"]):::error
-  n20 -->|"sí"| n21
-  n22{"!result.valid"}:::decision
-  n20 -->|"no"| n22
-  n23["Llama a SecurityEventsRepository.record"]:::llamada
+  n17[("CREA iam.security_events")]:::efecto
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED La contraseña o el código no coinciden"]):::error
+  n17 --> n18
+  n19["Transacción: transactional(…)"]:::transaccion
+  n6 -->|"no"| n19
+  n20["Llama a UsersRepository.findById"]:::llamada
+  n19 --> n20
+  n21[("LEE iam.users")]:::efecto
+  n20 --> n21
+  n22{"!user"}:::decision
+  n21 --> n22
+  n23(["404 NOT_FOUND Usuario no encontrado"]):::error
   n22 -->|"sí"| n23
-  n24[("CREA iam.security_events")]:::efecto
-  n23 --> n24
-  n25(["422 PRECONDITION_FAILED Código MFA inválido"]):::error
-  n24 --> n25
-  n26[("ACTUALIZA iam.mfa_factors · ACTUALIZA iam.mfa_factors · ACTUALIZA iam.users")]:::efecto
-  n22 -->|"no"| n26
-  n27["Llama a SecurityEventsRepository.record"]:::llamada
-  n26 --> n27
-  n28[("CREA iam.security_events")]:::efecto
+  n24{"dto.verify"}:::decision
+  n22 -->|"no"| n24
+  n25{"!dto.factorId"}:::decision
+  n24 -->|"sí"| n25
+  n26(["422 PRECONDITION_FAILED factorId es obligatorio para verificar"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a MfaFactorsRepository.findByIdAndUser"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE iam.mfa_factors")]:::efecto
   n27 --> n28
-  n29{"!dto.factorType"}:::decision
+  n29{"!factor"}:::decision
   n28 --> n29
-  n11 -->|"no"| n29
-  n30(["422 PRECONDITION_FAILED factorType es obligatorio para enrolar"]):::error
+  n30(["404 NOT_FOUND Factor MFA no encontrado"]):::error
   n29 -->|"sí"| n30
-  n31["Llama a MfaFactorsRepository.create"]:::llamada
+  n31{"!dto.code"}:::decision
   n29 -->|"no"| n31
-  n32[("CREA iam.mfa_factors")]:::efecto
-  n31 --> n32
-  n33{"dto.factorType === 'TOTP'"}:::decision
-  n32 --> n33
-  n34[("ACTUALIZA iam.mfa_factors")]:::efecto
+  n32(["422 PRECONDITION_FAILED code es obligatorio para verificar"]):::error
+  n31 -->|"sí"| n32
+  n33{"!factor.secretEncrypted"}:::decision
+  n31 -->|"no"| n33
+  n34(["422 PRECONDITION_FAILED El factor no tiene un secreto TOTP asociado"]):::error
   n33 -->|"sí"| n34
-  n35["Llama a SecurityEventsRepository.record"]:::llamada
-  n34 --> n35
+  n35{"!result.valid"}:::decision
   n33 -->|"no"| n35
-  n36[("CREA iam.security_events")]:::efecto
-  n35 --> n36
-  n37(("201 Responde con éxito")):::ok
+  n36["Llama a SecurityEventsRepository.record"]:::llamada
+  n35 -->|"sí"| n36
+  n37[("CREA iam.security_events")]:::efecto
   n36 --> n37
+  n38(["422 PRECONDITION_FAILED Código MFA inválido"]):::error
+  n37 --> n38
+  n39[("ACTUALIZA iam.mfa_factors · ACTUALIZA iam.mfa_factors · ACTUALIZA iam.users")]:::efecto
+  n35 -->|"no"| n39
+  n40["Llama a SecurityEventsRepository.record"]:::llamada
+  n39 --> n40
+  n41[("CREA iam.security_events")]:::efecto
+  n40 --> n41
+  n42{"!dto.factorType"}:::decision
+  n41 --> n42
+  n24 -->|"no"| n42
+  n43(["422 PRECONDITION_FAILED factorType es obligatorio para enrolar"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a MfaFactorsRepository.create"]:::llamada
+  n42 -->|"no"| n44
+  n45[("CREA iam.mfa_factors")]:::efecto
+  n44 --> n45
+  n46{"dto.factorType === 'TOTP'"}:::decision
+  n45 --> n46
+  n47[("ACTUALIZA iam.mfa_factors")]:::efecto
+  n46 -->|"sí"| n47
+  n48["Llama a SecurityEventsRepository.record"]:::llamada
+  n47 --> n48
+  n46 -->|"no"| n48
+  n49[("CREA iam.security_events")]:::efecto
+  n48 --> n49
+  n50(("201 Responde con éxito")):::ok
+  n49 --> n50
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3311,7 +3621,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. POST /iam/users/{id}/reactivate
+#### 39. POST /iam/users/{id}/reactivate
 
 Reactivar una cuenta suspendida con motivo (idempotente)
 
@@ -3445,7 +3755,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. GET /iam/users/{id}/sessions
+#### 40. GET /iam/users/{id}/sessions
 
 Sesiones del usuario
 
@@ -3489,7 +3799,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. POST /iam/users/{id}/suspend
+#### 41. POST /iam/users/{id}/suspend
 
 Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
 
@@ -3623,7 +3933,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. POST /iam/users/assisted-practitioner-registration
+#### 42. POST /iam/users/assisted-practitioner-registration
 
 Alta administrativa de un profesional (devuelve token de activación)
 
@@ -3758,117 +4068,34 @@ flowchart TD
   n56 --> n57
   n58(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
   n57 -->|"sí"| n58
-  n59{"!file || // `!= null` a propósito: MikroORM hidrata una FK nullable sin valor // como `null` (verificado cont…"}:::decision
+  n59["Transacción: withSystemRlsInTransaction(…)"]:::transaccion
   n57 -->|"no"| n59
-  n60(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
-  n59 -->|"sí"| n60
-  n61{"options.allowedCategoryConceptId && file.categoryConceptId !== options.allowedCategoryConceptId"}:::decision
-  n59 -->|"no"| n61
-  n62(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
-  n61 -->|"sí"| n62
-  n63[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
-  n61 -->|"no"| n63
-  n64{"file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI || BigInt(version.sizeBytes) › BigInt(2 * 1024 * 1024)"}:::decision
+  n60{"options.allowedCategoryConceptId && file.categoryConceptId !== options.allowedCategoryConceptId"}:::decision
+  n59 --> n60
+  n61(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
+  n60 -->|"sí"| n61
+  n62{"isRlsEnforced()"}:::decision
+  n60 -->|"no"| n62
+  n63[("ACTUALIZA common.files")]:::efecto
+  n62 -->|"sí"| n63
+  n64[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
   n63 --> n64
-  n65(["422 PRECONDITION_FAILED La firma y el sello requieren una imagen privada de hasta 2 MB"]):::error
-  n64 -->|"sí"| n65
-  n66["Llama a ProfilesRegistrationAdapter.createPractitionerProfile"]:::llamada
-  n64 -->|"no"| n66
-  n54 -->|"al terminar"| n66
-  n67["Llama a HealthPractitionerProfilesRepository.create"]:::llamada
-  n66 --> n67
-  n68[("CREA profiles.health_practitioner_profiles")]:::efecto
+  n62 -->|"no"| n64
+  n65{"file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI || BigInt(version.sizeBytes) › BigInt(2 * 1024 * 1024)"}:::decision
+  n64 --> n65
+  n66(["422 PRECONDITION_FAILED La firma y el sello requieren una imagen privada de hasta 2 MB"]):::error
+  n65 -->|"sí"| n66
+  n67["Llama a ProfilesRegistrationAdapter.createPractitionerProfile"]:::llamada
+  n65 -->|"no"| n67
+  n54 -->|"al terminar"| n67
+  n68["Llama a HealthPractitionerProfilesRepository.create"]:::llamada
   n67 --> n68
-  n69["Llama a ProfilesRegistrationAdapter.createJurisdictionAuthorization"]:::llamada
+  n69[("CREA profiles.health_practitioner_profiles")]:::efecto
   n68 --> n69
-  n70["Llama a JurisdictionAuthorizationsRepository.create"]:::llamada
+  n70["Llama a ProfilesRegistrationAdapter.createJurisdictionAuthorization"]:::llamada
   n69 --> n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n71["… el resto del árbol (2 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 40. POST /iam/users/assisted-registration
-
-Registro asistido de un paciente (devuelve token de activación)
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese identificador; prefiera invitar en lugar de crear un duplicado |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a IamAssistedRegistrationService.assistedRegistration"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
-  n4 --> n5
-  n6[("LEE iam.authentication_credentials")]:::efecto
-  n5 --> n6
-  n7{"existing"}:::decision
-  n6 --> n7
-  n8(["409 CONFLICT Ya existe una cuenta con ese identificador; prefiera invitar en lugar de crear un duplicado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a UsersRepository.create"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA iam.users")]:::efecto
-  n9 --> n10
-  n11["Llama a CredentialsRepository.createPendingPassword"]:::llamada
-  n10 --> n11
-  n12[("CREA iam.authentication_credentials")]:::efecto
-  n11 --> n12
-  n13["Llama a UserGlobalRolesRepository.create"]:::llamada
-  n12 --> n13
-  n14[("CREA iam.user_global_roles")]:::efecto
-  n13 --> n14
-  n15["Llama a ProfilesRegistrationAdapter.createPerson"]:::llamada
-  n14 --> n15
-  n16["Llama a PersonsRepository.create"]:::llamada
-  n15 --> n16
-  n17[("CREA profiles.persons")]:::efecto
-  n16 --> n17
-  n18["Llama a ProfilesRegistrationAdapter.createPersonProfile"]:::llamada
-  n17 --> n18
-  n19["Llama a PersonProfilesRepository.create"]:::llamada
-  n18 --> n19
-  n20[("CREA profiles.person_profiles")]:::efecto
-  n19 --> n20
-  n21["Llama a ProfilesRegistrationAdapter.createPatientProfile"]:::llamada
-  n20 --> n21
-  n22["Llama a PatientProfilesRepository.create"]:::llamada
-  n21 --> n22
-  n23[("CREA profiles.patient_profiles")]:::efecto
-  n22 --> n23
-  n24["Llama a ProfilesRegistrationAdapter.createAccountLink"]:::llamada
-  n23 --> n24
-  n25["Llama a PersonAccountLinksRepository.create"]:::llamada
-  n24 --> n25
-  n26[("CREA profiles.person_account_links")]:::efecto
-  n25 --> n26
-  n27["Llama a AccountActivationsRepository.create"]:::llamada
-  n26 --> n27
-  n28[("CREA iam.account_activations")]:::efecto
-  n27 --> n28
-  n29["Llama a SecurityEventsRepository.record"]:::llamada
-  n28 --> n29
-  n30[("CREA iam.security_events")]:::efecto
-  n29 --> n30
-  n31(("201 Responde con éxito")):::ok
-  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3886,6 +4113,8 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | DESCONOCIDO /iam/auth | 200, 401, 403, 429 | 0 |
 | POST /iam/auth/logout-all | 200, 401, 403, 429 | 4 |
 | POST /iam/auth/sessions/purge | 200, 401, 403, 429 | 3 |
+| GET /iam/me/devices | 200, 401, 403, 429 | 2 |
 | GET /iam/me/sessions | 200, 401, 403, 429 | 1 |
 | GET /iam/users | 200, 401, 403, 429 | 2 |
+| POST /iam/users/assisted-registration | 201, 400, 401, 403, 429 | 9 |
 | POST /iam/users/search | 200, 400, 401, 403, 429 | 2 |

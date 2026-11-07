@@ -47,15 +47,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN | `src/modules/bulk_import/controllers/bulk-import.controller.ts:117` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
 | `authz.clinical_access_grants` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
@@ -128,7 +128,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN | `src/modules/bulk_import/controllers/bulk-import.controller.ts:127` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | multipart/form-data (obligatorio); el tamaño del archivo lo define la ruta, no el límite global | `contrato (requestBody)` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/bulk_import/controllers/bulk-import.controller.ts:127` |
@@ -138,7 +138,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
 | `authz.clinical_access_grants` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
@@ -240,18 +240,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN | `src/modules/bulk_import/controllers/bulk-import.controller.ts:191` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/bulk_import/controllers/bulk-import.controller.ts:191` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
 | `authz.clinical_access_grants` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
@@ -261,7 +261,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
-| `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 
@@ -326,19 +326,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN | `src/modules/bulk_import/controllers/bulk-import.controller.ts:170` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CABECERA | Idempotency-Key (obligatoria) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/bulk_import/controllers/bulk-import.controller.ts:170` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportProcessor.enqueue → BulkImportProcessor.process → BulkImportProcessor.processRow → BulkImportProcessor.provisionUser → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportProcessor.enqueue → BulkImportProcessor.process → BulkImportProcessor.processRow → BulkImportProcessor.provisionUser → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportProcessor.enqueue → BulkImportProcessor.process → BulkImportProcessor.processRow → BulkImportProcessor.provisionUser → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportProcessor.enqueue → BulkImportProcessor.process → BulkImportProcessor.processRow → BulkImportProcessor.provisionUser → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
 | `authz.clinical_access_grants` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
@@ -348,7 +348,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
-| `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → BulkImportProcessor.enqueue → BulkImportProcessor.process → BulkImportProcessor.processRow → BulkImportProcessor.provisionUser → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → BulkImportProcessor.enqueue → BulkImportProcessor.process → BulkImportProcessor.processRow → BulkImportProcessor.provisionUser → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 
@@ -415,18 +415,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN | `src/modules/bulk_import/controllers/bulk-import.controller.ts:208` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/bulk_import/controllers/bulk-import.controller.ts:208` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
 | `authz.clinical_access_grants` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
@@ -436,7 +436,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.roles` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
-| `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 
@@ -502,8 +502,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN | `src/modules/bulk_import/controllers/bulk-import.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -563,8 +563,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN | `src/modules/bulk_import/controllers/bulk-import.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 

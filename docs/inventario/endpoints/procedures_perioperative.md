@@ -5,15 +5,15 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 42 (42 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 3 · MEDIO 29 · BAJO 10
-- **Tablas distintas que tocan:** 102
+- **Tablas distintas que tocan:** 104
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/procedures-perioperative.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/dental-procedures` | Histórico odontológico del paciente | BAJO | 22 | CLINICIAN, PRACTITIONER |
-| 2 | POST | `/dental-procedures` | Registrar un procedimiento odontológico | MEDIO | 26 | CLINICIAN, PRACTITIONER |
+| 1 | GET | `/dental-procedures` | Histórico odontológico del paciente | BAJO | 24 | CLINICIAN, PRACTITIONER |
+| 2 | POST | `/dental-procedures` | Registrar un procedimiento odontológico | MEDIO | 28 | CLINICIAN, PRACTITIONER |
 | 3 | GET | `/dental-procedures/catalog` | Catálogo odontológico: códigos, piezas (FDI) y cuadrantes | BAJO | 0 | CLINICIAN, PRACTITIONER |
 | 4 | POST | `/internal/periop/or-blocks-release-tick` | Liberar bloques vencidos (worker) | MEDIO | 3 | SYSTEM, SYSTEM_WORKER |
 | 5 | POST | `/or-blocks/{id}/cancel` | Cancelar un bloque | ALTO | 10 | sesión (sin roles) |
@@ -22,14 +22,14 @@
 | 8 | POST | `/pacu-stays/{stayId}/discharge` | Dar el alta de recuperación | MEDIO | 6 | ANESTHESIOLOGIST, PERIOP_ADMIN |
 | 9 | GET | `/procedure-cases` | Listar casos quirúrgicos (agenda) | BAJO | 5 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
 | 10 | POST | `/procedure-cases` | Programar un caso quirúrgico y reservar el quirófano | MEDIO | 14 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
-| 11 | GET | `/procedure-cases/{id}` | Detalle completo del caso quirúrgico | BAJO | 44 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
-| 12 | PATCH | `/procedure-cases/{id}` | Modificar el caso quirúrgico | MEDIO | 16 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
+| 11 | GET | `/procedure-cases/{id}` | Detalle completo del caso quirúrgico | BAJO | 46 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
+| 12 | PATCH | `/procedure-cases/{id}` | Modificar el caso quirúrgico | MEDIO | 26 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
 | 13 | POST | `/procedure-cases/{id}/anesthesia-events` | Anotar un evento intraoperatorio de anestesia | MEDIO | 6 | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN |
 | 14 | POST | `/procedure-cases/{id}/anesthesia-plans` | Registrar el plan de anestesia y la valoración de vía aérea | MEDIO | 3 | ANESTHESIOLOGIST, PERIOP_ADMIN |
 | 15 | POST | `/procedure-cases/{id}/anesthesia-plans/{planId}/approve` | Aprobar el plan de anestesia | MEDIO | 2 | ANESTHESIOLOGIST, PERIOP_ADMIN |
 | 16 | POST | `/procedure-cases/{id}/cancel` | Cancelar el caso quirúrgico | MEDIO | 3 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
 | 17 | POST | `/procedure-cases/{id}/charge-items/post` | Generar los cargos y consolidar el uso del quirófano | MEDIO | 3 | PERIOP_ADMIN, BILLING |
-| 18 | POST | `/procedure-cases/{id}/confirm` | Confirmar la intervención verificando las credenciales del equipo | MEDIO | 9 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
+| 18 | POST | `/procedure-cases/{id}/confirm` | Confirmar la intervención verificando las credenciales del equipo | MEDIO | 19 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
 | 19 | POST | `/procedure-cases/{id}/diagnoses` | Registrar los diagnósticos del caso | MEDIO | 11 | SURGEON, PERIOP_ADMIN |
 | 20 | POST | `/procedure-cases/{id}/findings` | Registrar un hallazgo operatorio | MEDIO | 4 | SURGEON, PERIOP_ADMIN |
 | 21 | POST | `/procedure-cases/{id}/implants` | Registrar un implante con su trazabilidad UDI, lote o serie | MEDIO | 3 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
@@ -38,7 +38,7 @@
 | 24 | POST | `/procedure-cases/{id}/operative-reports/{reportId}/sign` | Firmar el reporte operatorio | MEDIO | 7 | SURGEON, PERIOP_ADMIN |
 | 25 | POST | `/procedure-cases/{id}/operative-steps` | Registrar un paso operatorio | MEDIO | 2 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
 | 26 | POST | `/procedure-cases/{id}/pacu-stays` | Admitir al paciente en recuperación | MEDIO | 3 | PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN |
-| 27 | POST | `/procedure-cases/{id}/preoperative-assessments` | Registrar la valoración preoperatoria y sus puntuaciones de riesgo | MEDIO | 11 | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN |
+| 27 | POST | `/procedure-cases/{id}/preoperative-assessments` | Registrar la valoración preoperatoria y sus puntuaciones de riesgo | MEDIO | 21 | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN |
 | 28 | POST | `/procedure-cases/{id}/preoperative-orders` | Indicar una orden preoperatoria para el caso | MEDIO | 37 | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN |
 | 29 | POST | `/procedure-cases/{id}/preoperative-orders/verify` | Verificar las órdenes preoperatorias | MEDIO | 2 | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN |
 | 30 | POST | `/procedure-cases/{id}/room-events` | Registrar un evento de sala | MEDIO | 12 | PERIOP_ADMIN, PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST |
@@ -47,9 +47,9 @@
 | 33 | POST | `/procedure-cases/{id}/safety-checklists/{checklistId}/responses` | Responder una fase del checklist quirúrgico | MEDIO | 6 | PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN |
 | 34 | POST | `/procedure-cases/{id}/specimens` | Registrar una muestra tomada en la intervención | MEDIO | 2 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
 | 35 | GET | `/procedure-cases/{id}/team-members` | Listar el equipo del caso quirúrgico | BAJO | 2 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
-| 36 | POST | `/procedure-cases/{id}/team-members` | Asignar un miembro al equipo quirúrgico | MEDIO | 8 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
+| 36 | POST | `/procedure-cases/{id}/team-members` | Asignar un miembro al equipo quirúrgico | MEDIO | 18 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
 | 37 | POST | `/procedure-cases/{id}/team-members/{memberId}/accept` | Aceptar la participación en el equipo quirúrgico | BAJO | 2 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
-| 38 | POST | `/procedure-cases/{id}/team-members/{memberId}/respond` | Rechazar, pedir cambios o informar indisponibilidad | MEDIO | 7 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
+| 38 | POST | `/procedure-cases/{id}/team-members/{memberId}/respond` | Rechazar, pedir cambios o informar indisponibilidad | MEDIO | 17 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
 | 39 | GET | `/sites/{siteId}/operating-rooms` | Quirófanos de una sede | BAJO | 12 | sesión (sin roles) |
 | 40 | GET | `/sites/{siteId}/or-blocks` | Bloques de quirófano | BAJO | 10 | sesión (sin roles) |
 | 41 | POST | `/sites/{siteId}/or-blocks` | Crear un bloque de quirófano | ALTO | 12 | sesión (sin roles) |
@@ -74,7 +74,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /dental-procedures` la atiende `DentalController.listByPatient` (src/modules/procedures_perioperative/controllers/dental.controller.ts:75). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `PeriopDentalService.listByPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
+`GET /dental-procedures` la atiende `DentalController.listByPatient` (src/modules/procedures_perioperative/controllers/dental.controller.ts:75). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `PeriopDentalService.listByPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 16 más.
 
 ### Requerimientos
 
@@ -82,36 +82,38 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/procedures_perioperative/controllers/dental.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.procedures` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → PeriopDentalRepository.findByPatient | `src/modules/procedures_perioperative/repositories/periop-dental.repository.ts:168` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `procedures_perioperative.procedure_body_sites` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → PeriopDentalRepository.findSitesByProcedures | `src/modules/procedures_perioperative/repositories/periop-dental.repository.ts:217` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | DentalController.listByPatient → PeriopDentalService.listByPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -186,7 +188,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /dental-procedures` la atiende `DentalController.record` (src/modules/procedures_perioperative/controllers/dental.controller.ts:90). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateDentalProcedureDto` (8 campos, 2 obligatorios). Delega en `PeriopDentalService.record`. Crea filas en audit.audit_log, clinical.procedures, clinical.received_services, procedures_perioperative.procedure_body_sites. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 14 más.
+`POST /dental-procedures` la atiende `DentalController.record` (src/modules/procedures_perioperative/controllers/dental.controller.ts:90). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateDentalProcedureDto` (8 campos, 2 obligatorios). Delega en `PeriopDentalService.record`. Crea filas en audit.audit_log, clinical.procedures, clinical.received_services, procedures_perioperative.procedure_body_sites. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 16 más.
 
 ### Requerimientos
 
@@ -194,20 +196,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/procedures_perioperative/controllers/dental.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | DentalController.record → PeriopDentalService.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | DentalController.record → PeriopDentalService.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -216,19 +218,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `clinical.procedures` | ESCRIBE | CREA | DIRECTA | DentalController.record → PeriopDentalService.record → PeriopDentalRepository.createProcedure | `src/modules/procedures_perioperative/repositories/periop-dental.repository.ts:101` |
 | `clinical.received_services` | ESCRIBE | CREA | DIRECTA | DentalController.record → PeriopDentalService.record → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.upsert | `src/modules/clinical/repositories/received-services.repository.ts:146` |
 | `clinical.received_services` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.upsert → ReceivedServicesRepository.findBySourceProcedure | `src/modules/clinical/repositories/received-services.repository.ts:54` |
-| `iam.sessions` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `procedures_perioperative.procedure_body_sites` | ESCRIBE | CREA | DIRECTA | DentalController.record → PeriopDentalService.record → PeriopDentalRepository.createSite | `src/modules/procedures_perioperative/repositories/periop-dental.repository.ts:133` |
 | `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.findCaseByPrimaryProcedure | `src/modules/clinical/repositories/received-services.repository.ts:71` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Cuerpo — DTO `CreateDentalProcedureDto` · `application/json`
 
@@ -329,8 +333,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/procedures_perioperative/controllers/dental.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -406,8 +410,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SYSTEM_WORKER | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:352` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -473,12 +477,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:305` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CABECERA | If-Match (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:305` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -486,7 +490,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PeriopOrController.cancel → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
@@ -581,12 +585,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:276` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CABECERA | If-Match (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -594,7 +598,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PeriopOrController.release → OrBlocksUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
@@ -689,11 +693,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:662` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: stayId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:662` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -802,11 +806,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:683` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: stayId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:683` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -933,8 +937,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:105` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1041,10 +1045,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:146` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1179,7 +1183,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /procedure-cases/{id}` la atiende `PeriopController.getCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:124). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Delega en `PeriopCasesService.getCaseDetail`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 36 más.
+`GET /procedure-cases/{id}` la atiende `PeriopController.getCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:124). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Delega en `PeriopCasesService.getCaseDetail`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 38 más.
 
 ### Requerimientos
 
@@ -1187,30 +1191,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:124` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:124` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail → InfrastructureAccessService.actionsOn → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail → InfrastructureAccessService.actionsOn → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail → InfrastructureAccessService.actionsOn → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail → InfrastructureAccessService.actionsOn → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail → InfrastructureAccessService.actionsOn → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.cleaning_orders` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail | `src/modules/procedures_perioperative/services/or/case-or-view.ts:216` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail → InfrastructureAccessService.actionsOn → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
@@ -1231,13 +1237,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findCaseById | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:193` |
 | `procedures_perioperative.procedure_implants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopIntraopRepository.findImplantsByCase | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:724` |
 | `procedures_perioperative.surgical_safety_checklists` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.detail | `src/modules/procedures_perioperative/services/or/case-or-view.ts:186` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → CaseOrViewBuilder.fields | `src/modules/procedures_perioperative/services/or/case-or-view.ts:87` |
 
 ### Parámetros
@@ -1367,7 +1373,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1402,7 +1408,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /procedure-cases/{id}` la atiende `PeriopController.updateCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:167). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `UpdateCaseDto` (5 campos, 0 obligatorios). Delega en `PeriopCasesService.updateCase`. Crea filas en messaging.domain_events, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee clinical.encounter_locations, messaging.outbox_messages, practice.care_space_blocks, practice.care_spaces, practice.practice_settings, practice.practice_sites, procedures_perioperative.operating_room_blocks, procedures_perioperative.procedure_case_diagnoses y 3 más. Publica periop.case.reacceptance_required.
+`PATCH /procedure-cases/{id}` la atiende `PeriopController.updateCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:167). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `UpdateCaseDto` (5 campos, 0 obligatorios). Delega en `PeriopCasesService.updateCase`. Crea filas en messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history. Actualiza messaging.in_app_notifications, procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee clinical.encounter_locations, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.outbox_messages, messaging.provider_channel_configs, messaging.recipient_preferences, practice.care_space_blocks y 9 más. Publica periop.case.reacceptance_required, un evento calculado (null).
 
 ### Requerimientos
 
@@ -1410,20 +1416,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:167` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:167` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `clinical.encounter_locations` | LEE | LEE | POR_SQL | PeriopController.updateCase → PeriopCasesService.updateCase → OperatingRoomValidator.validate → PracticeCareSpaceOpsAdapter.getOperationalState → CareSpaceOpsCore.snapshot → CareSpaceOpsCore.occupancy → CareSpaceOpsRepository.occupancy | `src/modules/practice/repositories/care-space-ops.repository.ts:178` |
-| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `practice.care_space_blocks` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → OperatingRoomValidator.validate → PracticeCareSpaceOpsAdapter.assertBookable → CareSpaceOpsRepository.openBlocks | `src/modules/practice/repositories/care-space-ops.repository.ts:223` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → OperatingRoomValidator.validate → PracticeCareSpaceOpsAdapter.getOperationalState → PracticeCareSpaceOpsAdapter.load → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.practice_settings` | LEE | LEE | POR_SQL | PeriopController.updateCase → PeriopCasesService.updateCase → OperatingRoomValidator.validate → PracticeCareSpaceOpsAdapter.getOperationalState → CareSpaceOpsCore.snapshot → CareSpaceOpsCore.settings → CareSpaceOpsRepository.settings | `src/modules/practice/repositories/care-space-ops.repository.ts:431` |
@@ -1435,6 +1450,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesService.caseHasBlockingDependencies → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
 | `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:115` |
 | `procedures_perioperative.procedure_cases` | LEE | LEE | POR_SQL | PeriopController.updateCase → PeriopCasesService.updateCase → OperatingRoomValidator.validate | `src/modules/procedures_perioperative/services/or/operating-room.validator.ts:152` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → PeriopEventPublisher.recipientsOf → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 | `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | PeriopController.updateCase → PeriopCasesService.updateCase → OperatingRoomValidator.validate | `src/modules/procedures_perioperative/services/or/operating-room.validator.ts:107` |
 
 ### Eventos y trabajos
@@ -1442,6 +1458,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Nombre | Fuente |
 |---|---|---|
 | Evento de dominio | `periop.case.reacceptance_required` | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:121` |
+| Evento de dominio | calculado: `null` | `src/modules/procedures_perioperative/services/periop-event-publisher.ts:66` |
 
 ### Parámetros
 
@@ -1542,11 +1559,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:480` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:480` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1662,11 +1679,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:440` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:440` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1796,9 +1813,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:462` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, planId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:462` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1878,11 +1895,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:704` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:704` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1992,11 +2009,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PERIOP_ADMIN, BILLING | `src/modules/procedures_perioperative/controllers/periop.controller.ts:725` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:725` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2112,7 +2129,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/confirm` la atiende `PeriopController.confirmCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:189). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Delega en `PeriopCasesService.confirmCase`. Crea filas en audit.audit_log, messaging.domain_events, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history. Lee audit.audit_log, iam.sessions, messaging.outbox_messages, procedures_perioperative.procedure_case_team_members, profiles.professional_credentials. Publica periop.case.confirmation_blocked.
+`POST /procedure-cases/{id}/confirm` la atiende `PeriopController.confirmCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:189). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Delega en `PeriopCasesService.confirmCase`. Crea filas en audit.audit_log, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history. Actualiza messaging.in_app_notifications. Lee audit.audit_log, iam.sessions, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.outbox_messages, messaging.provider_channel_configs, messaging.recipient_preferences y 3 más. Publica periop.case.confirmation_blocked, un evento calculado (null).
 
 ### Requerimientos
 
@@ -2120,22 +2137,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:189` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:189` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PeriopController.confirmCase → PeriopCasesService.confirmCase → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
-| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PeriopController.confirmCase → PeriopCasesService.confirmCase → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
 | `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → PeriopEventPublisher.recipientsOf → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → ProfessionalCredentialsRepository.hasCurrentCredential | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:155` |
 
 ### Eventos y trabajos
@@ -2143,6 +2170,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Nombre | Fuente |
 |---|---|---|
 | Evento de dominio | `periop.case.confirmation_blocked` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:660` |
+| Evento de dominio | calculado: `null` | `src/modules/procedures_perioperative/services/periop-event-publisher.ts:66` |
 
 ### Parámetros
 
@@ -2212,25 +2240,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:211` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:211` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `audit.conditions_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:275` |
-| `audit.conditions_history` | ESCRIBE | CREA | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:275` |
-| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:275` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `audit.conditions_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:272` |
+| `audit.conditions_history` | ESCRIBE | CREA | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:272` |
+| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:272` |
 | `clinical.conditions` | ESCRIBE | CREA | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → ConditionsRepository.create | `src/modules/clinical/repositories/conditions.repository.ts:153` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → ConditionsRepository.findActiveByCode | `src/modules/clinical/repositories/conditions.repository.ts:137` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → ConditionsService.assertEncounterBelongsToPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `procedures_perioperative.procedure_case_diagnoses` | ESCRIBE | CREA | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.createDiagnosis | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:564` |
 | `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:589` |
 
@@ -2340,11 +2368,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:520` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:520` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2458,11 +2486,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:542` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:542` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2596,11 +2624,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:563` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:563` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2703,11 +2731,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:601` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:601` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2718,7 +2746,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `clinical.received_services` | ESCRIBE | CREA | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.upsert | `src/modules/clinical/repositories/received-services.repository.ts:146` |
 | `clinical.received_services` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.upsert → ReceivedServicesRepository.findBySourceProcedure | `src/modules/clinical/repositories/received-services.repository.ts:54` |
 | `clinical.service_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create | `src/modules/clinical/services/procedures.service.ts:81` |
-| `clinical.service_requests` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ServiceRequestsRepository.findById | `src/modules/clinical/repositories/service-requests.repository.ts:107` |
+| `clinical.service_requests` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ServiceRequestsRepository.findById | `src/modules/clinical/repositories/service-requests.repository.ts:117` |
 | `procedures_perioperative.operative_reports` | ESCRIBE | CREA | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopRepository.createReport | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:620` |
 | `procedures_perioperative.operative_reports` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopRepository.findLastReport | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:688` |
 | `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.findCaseByPrimaryProcedure | `src/modules/clinical/repositories/received-services.repository.ts:71` |
@@ -2851,11 +2879,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:622` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, reportId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:622` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2962,11 +2990,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:502` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:502` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3074,11 +3102,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:644` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:644` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3171,7 +3199,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/preoperative-assessments` la atiende `PeriopController.createAssessment` (src/modules/procedures_perioperative/controllers/periop.controller.ts:250). Exige sesión con alguno de los roles ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CreatePreopAssessmentDto` (15 campos, 5 obligatorios). Delega en `PeriopPreopService.createAssessment`. Crea filas en messaging.domain_events, messaging.outbox_messages, procedures_perioperative.preoperative_assessments, procedures_perioperative.preoperative_risk_scores, procedures_perioperative.procedure_case_milestones, procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee messaging.outbox_messages, procedures_perioperative.preoperative_assessments, procedures_perioperative.procedure_case_team_members. Publica periop.case.reacceptance_required.
+`POST /procedure-cases/{id}/preoperative-assessments` la atiende `PeriopController.createAssessment` (src/modules/procedures_perioperative/controllers/periop.controller.ts:250). Exige sesión con alguno de los roles ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CreatePreopAssessmentDto` (15 campos, 5 obligatorios). Delega en `PeriopPreopService.createAssessment`. Crea filas en messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages, procedures_perioperative.preoperative_assessments, procedures_perioperative.preoperative_risk_scores, procedures_perioperative.procedure_case_milestones y 1 más. Actualiza messaging.in_app_notifications, procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.outbox_messages, messaging.provider_channel_configs, messaging.recipient_preferences, procedures_perioperative.preoperative_assessments, procedures_perioperative.procedure_case_team_members y 1 más. Publica periop.case.reacceptance_required, un evento calculado (null).
 
 ### Requerimientos
 
@@ -3179,19 +3207,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:250` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:250` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `procedures_perioperative.preoperative_assessments` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopPreopRepository.createAssessment | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:144` |
 | `procedures_perioperative.preoperative_assessments` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopPreopRepository.findAssessmentByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:178` |
 | `procedures_perioperative.preoperative_risk_scores` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopPreopRepository.createRiskScore | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:215` |
@@ -3200,12 +3237,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `procedures_perioperative.procedure_case_team_members` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:97` |
 | `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
 | `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:115` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → PeriopEventPublisher.recipientsOf → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
 | Evento de dominio | `periop.case.reacceptance_required` | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:121` |
+| Evento de dominio | calculado: `null` | `src/modules/procedures_perioperative/services/periop-event-publisher.ts:66` |
 
 ### Parámetros
 
@@ -3324,7 +3363,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/preoperative-orders` la atiende `PeriopController.createPreoperativeOrder` (src/modules/procedures_perioperative/controllers/periop.controller.ts:279). Exige sesión con alguno de los roles ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CreatePreoperativeOrderDto` (4 campos, 1 obligatorio). Delega en `PeriopPreopService.createOrder`. Crea filas en clinical.service_request_components, clinical.service_request_notes, clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages y 1 más. Actualiza iam.devices. Lee billing.service_catalog, chart.clinical_note_headers, clinical.diagnostic_reports, clinical.encounters, clinical.service_request_components, clinical.service_requests, diagnostics.diagnostic_report_versions, directory.tenants y 19 más. Publica ServiceRequestPlaced, clinical.service_request.collection_point_suggested.
+`POST /procedure-cases/{id}/preoperative-orders` la atiende `PeriopController.createPreoperativeOrder` (src/modules/procedures_perioperative/controllers/periop.controller.ts:279). Exige sesión con alguno de los roles ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CreatePreoperativeOrderDto` (4 campos, 1 obligatorio). Delega en `PeriopPreopService.createOrder`. Crea filas en clinical.service_request_components, clinical.service_request_notes, clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages y 1 más. Actualiza messaging.in_app_notifications. Lee billing.service_catalog, chart.clinical_note_headers, clinical.conditions, clinical.diagnostic_reports, clinical.encounters, clinical.service_request_components, clinical.service_requests, diagnostics.diagnostic_report_versions y 19 más. Publica ServiceRequestPlaced, clinical.service_request.collection_point_suggested.
 
 ### Requerimientos
 
@@ -3332,11 +3371,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:279` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:279` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3344,19 +3383,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → PerformerSelectionValidator.resolve → PerformerSiteDbReader.offersProcedureWithPrice | `src/modules/clinical/services/performer-site-db.reader.ts:40` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestNotesService.assertUsable | `src/modules/clinical/services/service-request-notes.service.ts:57` |
+| `clinical.conditions` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.assertReasonConditionBelongsToPatient | `src/modules/clinical/services/service-requests.service.ts:276` |
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:191` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestNotesService.assertUsable | `src/modules/clinical/services/service-request-notes.service.ts:80` |
-| `clinical.service_request_components` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestDetailService.writeComponents | `src/modules/clinical/services/service-request-detail.service.ts:365` |
-| `clinical.service_request_components` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:466` |
+| `clinical.service_request_components` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestDetailService.writeComponents | `src/modules/clinical/services/service-request-detail.service.ts:377` |
+| `clinical.service_request_components` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:462` |
 | `clinical.service_request_notes` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestNotesService.link | `src/modules/clinical/services/service-request-notes.service.ts:136` |
-| `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:118` |
+| `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:128` |
 | `clinical.service_requests` | LEE | LEE | POR_SQL | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:163` |
 | `diagnostics.diagnostic_report_versions` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate → DuplicateStudyDetector.releasedVersionOf | `src/modules/clinical/services/duplicate-study-detector.ts:438` |
 | `directory.tenants` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.describe → DuplicateStudyDetector.providerName | `src/modules/clinical/services/duplicate-study-detector.ts:488` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → FormInstanceOriginValidator.assertUsableOrigin | `src/modules/forms/services/form-instance-origin.validator.ts:43` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
@@ -3372,7 +3411,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → PerformerSelectionValidator.resolve → PerformerSiteDbReader.isActivelyAffiliated | `src/modules/clinical/services/performer-site-db.reader.ts:55` |
 | `procedures_perioperative.preoperative_orders` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → PeriopPreopRepository.createOrder | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:266` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays | `src/modules/clinical/services/service-request-detail.service.ts:493` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays | `src/modules/clinical/services/service-request-detail.service.ts:491` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
 | `terminology.concept_properties` | LEE | LEE | POR_SQL | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestDetailService.prepare → TerminologyStudyCatalogAdapter.findStudy → TerminologyStudyCatalogAdapter.property | `src/modules/clinical/services/terminology-study-catalog.adapter.ts:132` |
 | `terminology.concept_relationships` | LEE | LEE | POR_SQL | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestDetailService.prepare → TerminologyStudyCatalogAdapter.panelComponentIds | `src/modules/clinical/services/terminology-study-catalog.adapter.ts:69` |
@@ -3384,8 +3423,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:436` |
-| Evento de dominio | `clinical.service_request.collection_point_suggested` | `src/modules/clinical/services/service-requests.service.ts:448` |
+| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:467` |
+| Evento de dominio | `clinical.service_request.collection_point_suggested` | `src/modules/clinical/services/service-requests.service.ts:479` |
 
 ### Parámetros
 
@@ -3440,7 +3479,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: {message}; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar; PreconditionFailedException: El punto de toma no es un punto disponible de la sede sugerida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: El diagnóstico indicado no existe o no es de esta persona; PreconditionFailedException: {message}; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar; PreconditionFailedException: El punto de toma no es un punto disponible de la sede sugerida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
@@ -3480,11 +3519,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:396` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:396` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3590,11 +3629,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PERIOP_ADMIN, PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:206` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:206` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3707,9 +3746,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PERIOP_ADMIN, PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, SURGERY_SCHEDULER | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:169` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:169` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3785,9 +3824,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PERIOP_ADMIN, PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, SURGERY_SCHEDULER | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:195` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, checklistId | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:195` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3860,11 +3899,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:417` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, checklistId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:417` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3994,11 +4033,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:583` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:583` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4108,9 +4147,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:309` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:309` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4177,7 +4216,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/team-members` la atiende `PeriopController.assignTeamMember` (src/modules/procedures_perioperative/controllers/periop.controller.ts:232). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `AssignTeamMemberDto` (2 campos, 2 obligatorios). Delega en `PeriopCasesService.assignTeamMember`. Crea filas en messaging.domain_events, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history, procedures_perioperative.procedure_case_team_members. Actualiza procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee messaging.outbox_messages, procedures_perioperative.procedure_case_team_members. Publica periop.case.reacceptance_required.
+`POST /procedure-cases/{id}/team-members` la atiende `PeriopController.assignTeamMember` (src/modules/procedures_perioperative/controllers/periop.controller.ts:232). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `AssignTeamMemberDto` (2 campos, 2 obligatorios). Delega en `PeriopCasesService.assignTeamMember`. Crea filas en messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history, procedures_perioperative.procedure_case_team_members. Actualiza messaging.in_app_notifications, procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.outbox_messages, messaging.provider_channel_configs, messaging.recipient_preferences, procedures_perioperative.procedure_case_team_members, profiles.person_account_links. Publica periop.case.reacceptance_required, un evento calculado (null).
 
 ### Requerimientos
 
@@ -4185,30 +4224,41 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:232` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:232` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
 | `procedures_perioperative.procedure_case_team_members` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:97` |
 | `procedures_perioperative.procedure_case_team_members` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.createTeamMember | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:628` |
 | `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
 | `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:115` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → PeriopEventPublisher.recipientsOf → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
 | Evento de dominio | `periop.case.reacceptance_required` | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:121` |
+| Evento de dominio | calculado: `null` | `src/modules/procedures_perioperative/services/periop-event-publisher.ts:66` |
 
 ### Parámetros
 
@@ -4303,9 +4353,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:332` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, memberId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:332` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4375,7 +4425,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/team-members/{memberId}/respond` la atiende `PeriopController.respondTeamMember` (src/modules/procedures_perioperative/controllers/periop.controller.ts:367). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Valida el cuerpo como `RespondTeamMemberDto` (2 campos, 2 obligatorios). Delega en `PeriopCasesService.respondTeamMember`. Crea filas en audit.audit_log, messaging.domain_events, messaging.outbox_messages. Lee audit.audit_log, iam.sessions, messaging.outbox_messages, procedures_perioperative.procedure_case_team_members. Publica periop.case.team_participation_declined.
+`POST /procedure-cases/{id}/team-members/{memberId}/respond` la atiende `PeriopController.respondTeamMember` (src/modules/procedures_perioperative/controllers/periop.controller.ts:367). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Valida el cuerpo como `RespondTeamMemberDto` (2 campos, 2 obligatorios). Delega en `PeriopCasesService.respondTeamMember`. Crea filas en audit.audit_log, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages. Actualiza messaging.in_app_notifications. Lee audit.audit_log, iam.sessions, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.outbox_messages, messaging.provider_channel_configs, messaging.recipient_preferences y 2 más. Publica periop.case.team_participation_declined, un evento calculado (null).
 
 ### Requerimientos
 
@@ -4383,29 +4433,40 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:367` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, memberId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:367` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
-| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopEventPublisher.publishDomainEvent → PeriopEventPublisher.notify → PeriopEventPublisher.recipientsOf → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
 | Evento de dominio | `periop.case.team_participation_declined` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:1549` |
+| Evento de dominio | calculado: `null` | `src/modules/procedures_perioperative/services/periop-event-publisher.ts:66` |
 
 ### Parámetros
 
@@ -4501,9 +4562,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:228` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:228` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4512,7 +4573,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounter_locations` | LEE | LEE | POR_SQL | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → PracticeCareSpaceOpsAdapter.getOperationalState → CareSpaceOpsCore.snapshot → CareSpaceOpsCore.occupancy → CareSpaceOpsRepository.occupancy | `src/modules/practice/repositories/care-space-ops.repository.ts:178` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → PracticeCareSpaceOpsAdapter.getOperationalState → PracticeCareSpaceOpsAdapter.load → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_settings` | LEE | LEE | POR_SQL | PeriopOrController.operatingRooms → OperatingRoomsReadUseCases.list → PracticeCareSpaceOpsAdapter.getOperationalState → CareSpaceOpsCore.snapshot → CareSpaceOpsCore.settings → CareSpaceOpsRepository.settings | `src/modules/practice/repositories/care-space-ops.repository.ts:431` |
@@ -4587,9 +4648,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:238` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:238` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4597,7 +4658,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PeriopOrController.listBlocks → OrBlocksUseCases.list → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
@@ -4671,11 +4732,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:255` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:255` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4683,7 +4744,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_space_blocks` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → PracticeCareSpaceOpsAdapter.assertBookable → CareSpaceOpsRepository.openBlocks | `src/modules/practice/repositories/care-space-ops.repository.ts:223` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.createBlocks → OrBlocksUseCases.create → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
@@ -4806,11 +4867,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:334` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/procedures_perioperative/controllers/periop-or.controller.ts:334` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -4818,7 +4879,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PeriopOrController.utilization → OperatingRoomsReadUseCases.utilization → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
