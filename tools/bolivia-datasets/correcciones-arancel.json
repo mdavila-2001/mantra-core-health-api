@@ -1,0 +1,151 @@
+{
+  "_nota": "Correcciones revisadas a mano sobre el arancel escaneado (07/11/2026): ortografía de Cardiología, filas pegadas recortadas al procedimiento al que corresponde el importe, y la palabra «invasivo» fuera de los nombres. Clave: el código estable. No cambian códigos ni importes.",
+  "conceptos": {
+    "BO_ARM_CARDIOLOGIA_EVALUACION_CARDIOLOGICA_PREOPERA": "Riesgo quirúrgico preoperatorio cardiológico programado en consultorio, incluye ECG",
+    "BO_ARM_CARDIOLOGIA_EVALUACION_CARDIOLOGICA_PREOPERA_947D9A": "Riesgo quirúrgico preoperatorio cardiológico programado en clínica u hospital, incluye ECG",
+    "BO_ARM_CARDIOLOGIA_EVALUACION_CARDIOLOGICA_PREOPERA_0BD6FE": "Riesgo quirúrgico preoperatorio cardiológico no programado o de emergencia en consultorio, clínica u hospital, incluye ECG",
+    "BO_ARM_CARDIOLOGIA_INTERCONSULTAS_INTERCONSULTA_EN_": "Interconsulta en centro de salud privado, por visita",
+    "BO_ARM_CARDIOLOGIA_INTERCONSULTAS_INTERCONSULTA_EN__85558C": "Interconsulta en unidad de terapia/cuidados intensivos y/o intermedios, por visita",
+    "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP": "Electrocardiograma (ECG) en consultorio",
+    "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_01B75F": "Electrocardiograma (ECG) a paciente hospitalizado (internado)",
+    "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_138869": "Holter de 24 horas por especialista en arritmias",
+    "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_B38E8F": "Detector de eventos tipo Kardia (por electro enviado)",
+    "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_7796AC": "Mapa de 24 horas (monitoreo ambulatorio de la presión arterial)",
+    "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_762B82": "Evaluación de resincronizadores",
+    "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_13F358": "Evaluación de desfibriladores",
+    "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_593179": "Estimulación cardiaca transesofágica",
+    "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_A729E3": "Índice tobillo-brazo (ITB)",
+    "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOCARDIOGRAMA_T": "Ecocardiograma transesofágico (ETE), no incluye honorarios de anestesiólogo",
+    "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOCARDIOGRAMA_C": "Ecocardiograma con estrés",
+    "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOCARDIOGRAMA_P": "Ecocardiograma pediátrico",
+    "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOGRAFIA_DOPPLE": "Ecografía doppler para fístulas arteriovenosas",
+    "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOCARDIOGRATIA_": "Ecocardiografía fetal",
+    "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_EOOCARDIOGRAMA_I": "Ecocardiograma intraoperatorio o en sala de hemodinamia",
+    "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_DOPPLER_VENASO_P": "Doppler venoso periférico de un miembro",
+    "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECO_DOPPLER_DE_A": "Eco doppler de arterias renales, unilateral o bilateral",
+    "BO_ARM_CARDIOLOGIA_TOMOGRAFIA_RESONANCIA_MAGNETICA_": "Angiotomografía cardiaca, con o sin reconstrucción 3D",
+    "BO_ARM_CARDIOLOGIA_TOMOGRAFIA_RESONANCIA_MAGNETICA__65B7A1": "Tomografía computarizada por emisión de fotón simple (SPECT o cámara gamma) cardiaca, con o sin viabilidad miocárdica",
+    "BO_ARM_CARDIOLOGIA_TOMOGRAFIA_RESONANCIA_MAGNETICA__BB1BD6": "Tomografía por emisión de positrones (PET) cardiaca, con o sin viabilidad miocárdica",
+    "BO_ARM_CARDIOLOGIA_CORONARIOGRAFIA_CON_O_SIN_VENTRI_5D84D9": "Coronariografía con o sin ventriculografía y cateterismo derecho (cateterismo derecho e izquierdo)",
+    "BO_ARM_CARDIOLOGIA_CORONARIOGRAFIA_CON_O_SIN_VENTRI_9C8FD0": "Biopsia endomiocárdica",
+    "BO_ARM_CARDIOLOGIA_ARTERIAS_Y_VASOS_CEREBRALES_Y_PE_951534": "Angiografía de vasos cerebrales, unilateral o bilateral",
+    "BO_ARM_CARDIOLOGIA_ARTERIAS_Y_VASOS_CEREBRALES_Y_PE_4362B4": "Flebografía de vena cava inferior",
+    "BO_ARM_CARDIOLOGIA_ARTERIAS_Y_VASOS_CEREBRALES_Y_PE_A4B802": "Angiografía de vasos esplácnicos, con o sin aortografía",
+    "BO_ARM_CARDIOLOGIA_ANGIOPLASTIA_CORONARIA_ANGIOPLAS_AC621C": "Angioplastia coronaria por lesión adicional tratada por balón y/o con implante de STENT",
+    "BO_ARM_CARDIOLOGIA_ANGIOPLASTIA_CORONARIA_ANGLOPLAS": "Angioplastia primaria en infarto agudo de miocardio",
+    "BO_ARM_CARDIOLOGIA_ANGIOPLASTIA_CORONARIA_ANGIOPLAS_64A4C6": "Angioplastia de rescate o facilitada en infarto agudo de miocardio, posterior a uso de fibrinolíticos",
+    "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_TRATAMIEN": "Tratamiento mediante trombólisis dirigida por catéter, por miembro",
+    "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_IMPLANTE_": "Implante de filtro de vena cava inferior",
+    "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_TRATAMIEN_1106C2": "Tratamiento mediante trombólisis mecánica del tromboembolismo pulmonar (TEP)",
+    "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_TRATAMIEN_F807AA": "Tratamiento mediante trombólisis dirigida por catéter del tromboembolismo pulmonar (TEP)",
+    "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_ANGIOPLAS_ED08D4": "Angioplastia por balón y/o con implante de STENT en fístula arteriovenosa para hemodiálisis",
+    "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_EMBOLZACI": "Embolizaciones (pulmonar, hepática, renal, malformaciones vasculares)",
+    "BO_ARM_CARDIOLOGIA_VALVULOPLASTIAS_VALVULOPLASTIA_M": "Valvuloplastia mitral o tricúspide por balón",
+    "BO_ARM_CARDIOLOGIA_VALVULOPLASTIAS_IMPLANTE_REEMPLA": "Implante/reemplazo percutáneo de válvula aórtica (TAVI o TAVR)",
+    "BO_ARM_CARDIOLOGIA_CARDIOPATIAS_CONGENITAS_INTERVEN": "Intervencionismo en oclusión de persistencia del conducto arterioso (PCA)",
+    "BO_ARM_CARDIOLOGIA_CARDIOPATIAS_CONGENITAS_INTERVEN_3DB38C": "Intervencionismo en oclusión de comunicación interauricular (CIA)",
+    "BO_ARM_CARDIOLOGIA_CARDIOPATIAS_CONGENITAS_IMPLANTE": "Implante de dispositivo auricular, cierre de orejuela izquierda",
+    "BO_ARM_CARDIOLOGIA_CARDIOPATIAS_CONGENITAS_RASCHKIN": "Rashkind intervencionista en ruptura del septum interauricular (SIA)",
+    "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE": "Implante de marcapaso transitorio",
+    "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_937DA8": "Estimulación del sistema de conducción",
+    "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_90EA7E": "Ablación de arritmia supraventricular sin mapeo electroanatómico",
+    "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_62A9AC": "Ablación de arritmia supraventricular con mapeo electroanatómico",
+    "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_F58D25": "Ablación de arritmia ventricular con mapeo electroanatómico",
+    "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_B08FF3": "Estudio electrofisiológico con evaluación de la conducción AV con droga",
+    "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_8D9154": "Cardioneuroablación",
+    "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_06CBF1": "Implante de marcapaso tipo VVI",
+    "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_D8C98F": "Implante de marcapaso tricameral (resincronizador)",
+    "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_23DDEB": "Implante de desfibrilador cardiaco automático tricameral",
+    "BO_ARM_CARDIOLOGIA_MIOCARDIOPATIAS_TRATAMIENTO_DE_L": "Tratamiento de la insuficiencia cardiaca aguda, hasta 7 días",
+    "BO_ARM_CARDIOLOGIA_MIOCARDIOPATIAS_ATENCION_MEDICA_": "Atención médica de edema agudo de pulmón",
+    "BO_ARM_CARDIOLOGIA_CORONARIOPATIAS_SINDROME_CORONAR": "Síndrome coronario agudo y/o infarto agudo de miocardio, hasta 5 días (no incluye administración de fibrinolíticos)",
+    "BO_ARM_CARDIOLOGIA_CORONARIOPATIAS_TRATAMIENTO_CON_": "Tratamiento con fibrinolíticos en infarto agudo de miocardio con supradesnivel del segmento ST",
+    "BO_ARM_CARDIOLOGIA_CORONARIOPATIAS_ANGINA_POST_INFA": "Angina post infarto, hasta 3 días",
+    "BO_ARM_CARDIOLOGIA_ARRITMIAS_CARDIACAS_ATENCIEN_MED": "Atención médica de arritmias severas, hasta 7 días",
+    "BO_ARM_CARDIOLOGIA_ARRITMIAS_CARDIACAS_REANIMACIEN_": "Reanimación cardiopulmonar en paro cardiaco",
+    "BO_ARM_CARDIOLOGIA_ACOMPANAMIENTO_CLINICO_QUIRERGIC": "Acompañamiento intraoperatorio hasta 2 horas",
+    "BO_ARM_CARDIOLOGIA_ACOMPANAMIENTO_CLINICO_QUIRERGIC_126008": "Acompañamiento intraoperatorio por hora adicional",
+    "BO_ARM_NEFROLOGIA_ENTIDADES_ESPECIALES_DEALTO_RIESG_8F9718": "Asistencia ventilatoria mecánica con mascarilla, sin intubación (no incluye equipamiento)",
+    "BO_ARM_OFTALMOLOGIA_ESTRABISMO_CIRUGLA_MINIMAMENTE_": "Cirugía de estrabismo por microincisiones (MISS)",
+    "BO_ARM_TERAPIA_INTENSIVA_PEDIATRICA_DIAGNOSTICO_O_P_5D9455": "Monitorización con catéter de presiones (PIC/PIA/PVC/POAP), por cada parámetro por día",
+    "BO_ARM_TERAPIA_INTENSIVA_PEDIATRICA_NEUMOLOGIA_Y_AS_FCC357": "Ventilación mecánica con mascarilla, sin intubación",
+    "BO_ARO_ODONTOPEDIATRIA_3_APLICACION_DE_SELLANTE_TEC": "Aplicación de sellante con ameloplastia, por elemento"
+  },
+  "grupos": [
+    {
+      "especialidad": "Cardiología",
+      "grupo": "EVALUACION CARDIOLÓGICA PREOPERATORIA",
+      "nuevo": "EVALUACIÓN CARDIOLÓGICA PREOPERATORIA"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "Procedimientos diagnósticos complementarios no invasivos",
+      "nuevo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "TOMOGRAFIA,RESONANCIA MAGNÉTICA NUCLEAR,SPECT,PET",
+      "nuevo": "TOMOGRAFÍA, RESONANCIA MAGNÉTICA NUCLEAR, SPECT, PET"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "Coronariografia con o sin ventriculografía (cateterismo cardiaco) 100,",
+      "nuevo": "CATETERISMO CARDIACO"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "EN CARDIOPATÍAS CONGÉNITAS:",
+      "nuevo": "EN CARDIOPATÍAS CONGÉNITAS"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "ANGIOPLASTIAPERIFERICA.",
+      "nuevo": "ANGIOPLASTIA PERIFÉRICA"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "VALVULOPLASTIAS.",
+      "nuevo": "VALVULOPLASTIAS"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "CARDIOPATÍAS CONGÉNITAS:",
+      "nuevo": "CARDIOPATÍAS CONGÉNITAS"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
+      "nuevo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "Interconsultas",
+      "nuevo": "INTERCONSULTAS"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "Angioplastia coronaria",
+      "nuevo": "ANGIOPLASTIA CORONARIA"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "Hipertensión arterial",
+      "nuevo": "HIPERTENSIÓN ARTERIAL"
+    },
+    {
+      "especialidad": "Cardiología",
+      "grupo": "ACOMPANAMIENTO CLINICO QUIRERGICO",
+      "nuevo": "ACOMPAÑAMIENTO CLÍNICO QUIRÚRGICO"
+    },
+    {
+      "especialidad": "Cirugía General",
+      "grupo": "CIRUGIA MÍNIMAMENTE INVASIVO PERCUTÁNEO:",
+      "nuevo": "CIRUGÍA PERCUTÁNEA"
+    },
+    {
+      "especialidad": "Dermatología",
+      "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+      "nuevo": "PROCEDIMIENTOS QUIRÚRGICOS"
+    }
+  ]
+}
