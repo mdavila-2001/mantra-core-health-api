@@ -99,16 +99,15 @@ export class LabPortalStudyCatalogService {
     const rows = await this.em.transactional(async (tx) => {
       const ctx = await this.context.load(tx);
       const out: LabCatalogImportRowDto[] = [];
+      const skip = new Set(dto.skipComponentIds);
       for (const conceptId of new Set(dto.conceptIds)) {
-        out.push(
-          await this.importOne(
-            tx,
-            ctx,
-            items.get(conceptId),
-            conceptId,
-            actor.id,
-          ),
-        );
+        const item = items.get(conceptId);
+        // Unticked components are not offered: no service, no panel link.
+        const offered = item && {
+          ...item,
+          components: item.components.filter((c) => !skip.has(c.conceptId)),
+        };
+        out.push(await this.importOne(tx, ctx, offered, conceptId, actor.id));
       }
       return out;
     });
