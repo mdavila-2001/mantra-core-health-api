@@ -4,3 +4,6 @@ export * from './forms-assignments.controller';
 export * from './forms-instances.controller';
 export * from './forms-me.controller';
 export * from './forms-values.controller';
+export * from './forms-question-scripts.controller';
+export * from './forms-faqs.controller';
+export * from './forms-faqs-public.controller';
