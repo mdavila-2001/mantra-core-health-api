@@ -183,3 +183,36 @@ export function assertPermanentResidueTarget(
     );
   }
 }
+
+/**
+ * Preflight de una prueba que CREA su propia base descartable en un servidor y
+ * la borra al terminar (`CREATE DATABASE` / `DROP DATABASE`). No toca ninguna
+ * base existente, así que no exige `ALLOW_DESTRUCTIVE_DB_RESET`; sí exige que el
+ * servidor sea local (o figure en `TEST_DB_ALLOWED_HOSTS`) y que el nombre que se
+ * va a crear y borrar se declare descartable. No envía SQL; el mensaje nunca
+ * incluye credenciales.
+ *
+ * @param host - Host del servidor donde se crea la base.
+ * @param database - Nombre de la base que la prueba va a crear y borrar.
+ * @param env - Variables de entorno.
+ * @throws UnsafeResetTargetError si el host o el nombre no son seguros.
+ */
+export function assertOwnDisposableDatabase(
+  host: string,
+  database: string,
+  env: NodeJS.ProcessEnv,
+): void {
+  if (!allowedHosts(env).has(host.toLowerCase())) {
+    throw new UnsafeResetTargetError(
+      `Base propia rechazada: el host "${host}" no es local ni figura en ` +
+        `${ALLOWED_HOSTS_VARIABLE}.`,
+    );
+  }
+  if (!isDisposableDatabaseName(database)) {
+    throw new UnsafeResetTargetError(
+      `Base propia rechazada: "${database}" no se declara descartable (el ` +
+        'nombre debe contener test, smoke, ci, tmp, scratch o disposable ' +
+        'como palabra).',
+    );
+  }
+}
