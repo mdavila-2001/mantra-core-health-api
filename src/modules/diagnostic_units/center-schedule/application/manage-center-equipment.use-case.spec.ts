@@ -29,7 +29,9 @@ function build(device: Record<string, unknown> | null = null) {
     staffUnit: jest.fn(async () => UNIT),
     view: jest.fn(async () => ({ tag: 'view' })),
   };
-  const context = { load: jest.fn(async () => ({})) };
+  const context = {
+    load: jest.fn(async () => ({ site: { site_id: 'site-1' } })),
+  };
   const useCase = new ManageCenterEquipmentUseCase(
     em as never,
     context as never,

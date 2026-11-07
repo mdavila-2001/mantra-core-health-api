@@ -13,7 +13,10 @@ import type {
   CenterBookingsDto,
   CenterBookingsQueryDto,
 } from '../presentation/dto/center-bookings.dto';
-import { CenterContextService } from './center-context.service';
+import {
+  CenterContextService,
+  type CenterContext,
+} from './center-context.service';
 import { GetCenterScheduleUseCase } from './get-center-schedule.use-case';
 
 const STATUS: Readonly<Record<string, string>> = {
@@ -62,15 +65,34 @@ export class ListCenterBookingsUseCase {
     }
     const em = this.em.fork();
     const unit = await this.reader.myUnit(em);
-    const resource = await this.scheduleRepo.findResource(em, unit.id);
-    if (!resource) return { items: [], count: 0 };
-    const [[site], ctx] = await Promise.all([
-      this.scheduleRepo.findMainSites(em, [unit.id]),
-      this.context.load(em, unit),
-    ]);
+    const main = await this.context.load(em, unit, query.siteId ?? null);
+    // One site when asked; otherwise every site, each on its own resource.
+    const contexts = query.siteId
+      ? [main]
+      : await Promise.all(
+          main.sites
+            .slice(1)
+            .map((s) => this.context.load(em, unit, s.site_id)),
+        ).then((rest) => [main, ...rest]);
+    const items: CenterBookingsDto['items'] = [];
+    for (const ctx of contexts) {
+      if (ctx.resourceId)
+        items.push(...(await this.forSite(em, ctx, from, to)));
+    }
+    items.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+    return { items, count: items.length };
+  }
+
+  /** One site's bookings, each laid on the device (line) that attends it. */
+  private async forSite(
+    em: EntityManager,
+    ctx: CenterContext,
+    from: Date,
+    to: Date,
+  ): Promise<CenterBookingsDto['items']> {
     const rows = await this.bookingsRepo.listForResource(
       em,
-      resource.id,
+      ctx.resourceId!,
       from,
       to,
     );
@@ -93,17 +115,16 @@ export class ListCenterBookingsUseCase {
     for (const [equipmentId, ids] of byEquipment) {
       for (const id of ids) lineOf.set(id, equipmentId);
     }
-    const items = rows.map((row) => ({
+    return rows.map((row) => ({
       bookingId: row.id,
       orderId: row.snapshot?.serviceRequestId ?? null,
       patientName: row.patient_name,
       studyName: row.snapshot?.studyName ?? null,
       startsAt: new Date(row.start_at).toISOString(),
       endsAt: new Date(row.end_at).toISOString(),
-      siteName: row.snapshot?.siteName ?? site?.site_name ?? null,
+      siteName: row.snapshot?.siteName ?? ctx.site?.site_name ?? null,
       status: STATUS[row.status_concept_id] ?? 'CONFIRMED',
       equipmentId: lineOf.get(row.id) ?? null,
     }));
-    return { items, count: items.length };
   }
 }

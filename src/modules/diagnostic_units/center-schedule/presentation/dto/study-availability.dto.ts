@@ -1,9 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsISO8601, IsOptional, IsString, MaxLength } from 'class-validator';
+import { CenterSiteQueryDto } from './center-site-query.dto';
 import type { ScheduleOrigin } from '../../domain/center-schedule.model';
 
 /** Query of `GET /diagnostic-units/{unitId}/study-availability`. */
-export class StudyAvailabilityQueryDto {
+export class StudyAvailabilityQueryDto extends CenterSiteQueryDto {
   @ApiProperty({ example: 'STUDY-ECO-ABD', maxLength: 100 })
   @IsString()
   @MaxLength(100)
@@ -32,6 +33,8 @@ export class StudyStartDto {
 /** Response of `GET /diagnostic-units/{unitId}/study-availability`. */
 export class StudyAvailabilityDto {
   @ApiProperty({ format: 'uuid' }) unitId!: string;
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  siteId!: string | null;
   @ApiProperty() studyCode!: string;
   @ApiProperty({ enum: ['STUDY', 'MODALITY', 'GENERAL'] })
   origin!: ScheduleOrigin;

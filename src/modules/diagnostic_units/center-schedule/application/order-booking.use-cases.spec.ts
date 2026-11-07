@@ -11,6 +11,7 @@ import {
   RESOURCE_ID,
   TENANT,
   UNIT_ID,
+  SITE_ID,
   unitRow,
 } from './center-schedule.testing';
 
@@ -48,6 +49,7 @@ describe('GetStudyAvailabilityUseCase', () => {
     );
     expect(res).toEqual({
       unitId: UNIT_ID,
+      siteId: SITE_ID,
       studyCode: 'STUDY-ECO-ABD',
       origin: 'MODALITY',
       items: [

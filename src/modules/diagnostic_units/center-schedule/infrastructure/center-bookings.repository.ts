@@ -13,6 +13,8 @@ export interface OrderBookingSnapshot {
   serviceRequestId: string;
   diagnosticUnitId: string;
   unitName: string;
+  /** The site (branch) booked; `null` in bookings made before per-site schedules. */
+  diagnosticUnitSiteId?: string | null;
   siteName: string | null;
   addressText: string | null;
   studyCode: string;

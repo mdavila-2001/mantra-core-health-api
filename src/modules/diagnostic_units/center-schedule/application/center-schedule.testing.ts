@@ -61,6 +61,23 @@ export function studyRow(overrides: Partial<StudyRow> = {}): StudyRow {
   };
 }
 
+export const SITE_ID = '7a0f8f3a-2d55-4b3e-9a51-000000000001';
+
+/** The main (primary) site of the test center. */
+export function mainSite(overrides: Record<string, unknown> = {}) {
+  return {
+    unit_id: UNIT_ID,
+    site_id: SITE_ID,
+    site_name: 'Sede central',
+    is_primary: true,
+    time_zone: 'America/La_Paz',
+    address_text: 'Av. Busch 100, Santa Cruz',
+    latitude: '-17.78',
+    longitude: '-63.18',
+    ...overrides,
+  };
+}
+
 export function build() {
   const em = {
     fork: (): unknown => em,
@@ -72,16 +89,8 @@ export function build() {
   const scheduleRepo = {
     findUnit: mockFn(async () => unitRow()),
     findUnitOfTenant: mockFn(async () => unitRow()),
-    findMainSites: mockFn(async () => [
-      {
-        unit_id: UNIT_ID,
-        site_name: 'Sede central',
-        time_zone: 'America/La_Paz',
-        address_text: 'Av. Busch 100, Santa Cruz',
-        latitude: '-17.78',
-        longitude: '-63.18',
-      },
-    ]),
+    findMainSites: mockFn(async () => [mainSite()]),
+    findSites: mockFn(async () => [mainSite()]),
     findResource: mockFn(async () => ({
       id: RESOURCE_ID,
       time_zone: 'America/La_Paz',

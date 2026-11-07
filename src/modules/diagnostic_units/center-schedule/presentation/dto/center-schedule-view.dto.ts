@@ -37,10 +37,30 @@ export class CenterEquipmentDto {
   glossaryConceptId!: string | null;
 }
 
+/** One active site (branch) of the center. */
+export class CenterSiteDto {
+  @ApiProperty({ format: 'uuid', description: '`diagnostic_unit_sites.id`.' })
+  siteId!: string;
+  @ApiProperty() name!: string;
+  @ApiProperty({ type: String, nullable: true }) addressText!: string | null;
+  @ApiProperty({ description: 'The main site: the one used without `siteId`.' })
+  main!: boolean;
+}
+
 /** Response of `GET|PUT /diagnostic-units/{unitId}/schedule`. */
 export class CenterScheduleViewDto {
   @ApiProperty({ format: 'uuid' }) unitId!: string;
   @ApiProperty() unitName!: string;
+  @ApiProperty({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description: 'The site this schedule and equipment belong to.',
+  })
+  siteId!: string | null;
+  @ApiProperty({ type: String, nullable: true }) siteName!: string | null;
+  @ApiProperty({ type: [CenterSiteDto], description: 'Main site first.' })
+  sites!: CenterSiteDto[];
   @ApiProperty({ enum: ['LABORATORY', 'IMAGING'] })
   kind!: 'LABORATORY' | 'IMAGING';
   @ApiProperty({ type: SaveCenterScheduleDto })

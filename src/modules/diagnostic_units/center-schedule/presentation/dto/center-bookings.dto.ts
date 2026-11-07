@@ -1,8 +1,10 @@
+import { CenterSiteQueryDto } from './center-site-query.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsISO8601 } from 'class-validator';
 
 /** Query of `GET /diagnostic-units/me/bookings`. */
-export class CenterBookingsQueryDto {
+/** `?from&to`, and `siteId` to list one site only (absent: every site). */
+export class CenterBookingsQueryDto extends CenterSiteQueryDto {
   @ApiProperty({ example: '2026-11-04T04:00:00.000Z' })
   @IsISO8601()
   from!: string;

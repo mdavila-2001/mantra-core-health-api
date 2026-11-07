@@ -37,6 +37,7 @@ import {
 import { CenterEquipmentInputDto } from './dto/center-equipment.dto';
 import { SaveCenterScheduleDto } from './dto/center-schedule.dto';
 import { CenterScheduleViewDto } from './dto/center-schedule-view.dto';
+import { CenterSiteQueryDto } from './dto/center-site-query.dto';
 import { SetEquipmentStatusDto } from './dto/equipment-status.dto';
 
 /**
@@ -63,8 +64,10 @@ export class CenterScheduleController {
   @Get('me/schedule')
   @ApiOperation({ summary: 'Schedule, studies and equipment of my center' })
   @ApiOkResponse({ type: CenterScheduleViewDto })
-  mySchedule(): Promise<CenterScheduleViewDto> {
-    return this.reader.forMe();
+  mySchedule(
+    @Query() query: CenterSiteQueryDto,
+  ): Promise<CenterScheduleViewDto> {
+    return this.reader.forMe(query.siteId ?? null);
   }
 
   @Get('me/bookings')
@@ -82,8 +85,9 @@ export class CenterScheduleController {
   @ApiOkResponse({ type: CenterScheduleViewDto })
   schedule(
     @Param('unitId', ParseUUIDPipe) unitId: string,
+    @Query() query: CenterSiteQueryDto,
   ): Promise<CenterScheduleViewDto> {
-    return this.reader.forUnit(unitId);
+    return this.reader.forUnit(unitId, query.siteId ?? null);
   }
 
   @Put(':unitId/schedule')
@@ -102,8 +106,9 @@ export class CenterScheduleController {
     @Param('unitId', ParseUUIDPipe) unitId: string,
     @Body() dto: SaveCenterScheduleDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Query() query: CenterSiteQueryDto,
   ): Promise<CenterScheduleViewDto> {
-    return this.saver.execute(unitId, dto, actor);
+    return this.saver.execute(unitId, dto, actor, query.siteId ?? null);
   }
 
   @Patch(':unitId/equipment/:equipmentId')
@@ -135,8 +140,9 @@ export class CenterScheduleController {
     @Param('unitId', ParseUUIDPipe) unitId: string,
     @Body() dto: CenterEquipmentInputDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Query() query: CenterSiteQueryDto,
   ): Promise<CenterScheduleViewDto> {
-    return this.devices.create(unitId, dto, actor);
+    return this.devices.create(unitId, dto, actor, query.siteId ?? null);
   }
 
   @Put(':unitId/equipment/:equipmentId')

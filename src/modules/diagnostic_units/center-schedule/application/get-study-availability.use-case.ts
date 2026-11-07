@@ -53,7 +53,7 @@ export class GetStudyAvailabilityUseCase {
         DiagnosticUnitsErrorReason.DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE,
       );
     }
-    const ctx = await this.context.load(em, unit);
+    const ctx = await this.context.load(em, unit, query.siteId ?? null);
     const study = ctx.studies.find((s) => s.code === query.studyCode);
     if (!study) {
       throw new ResourceNotFoundException('El centro no hace ese estudio', {
@@ -81,6 +81,12 @@ export class GetStudyAvailabilityUseCase {
       from,
       to,
     );
-    return { unitId: unit.id, studyCode: study.code, origin, items };
+    return {
+      unitId: unit.id,
+      siteId: ctx.site?.site_id ?? null,
+      studyCode: study.code,
+      origin,
+      items,
+    };
   }
 }
