@@ -24,7 +24,11 @@ import {
   BULK_IMPORT_PATIENT_RESOLVER,
   BULK_IMPORT_USER_PROVISIONER,
 } from './ports/bulk-import.ports';
-import { InMemoryBatchRepository } from './repositories/in-memory-batch.repository';
+import {
+  BULK_IMPORT_SQL_RUNNER,
+  MikroBulkImportSqlRunner,
+} from './repositories/bulk-import-sql.port';
+import { PostgresBatchRepository } from './repositories/postgres-batch.repository';
 import {
   BULK_IMPORT_TIMEOUTS_TOKEN,
   BulkImportProcessor,
@@ -41,9 +45,9 @@ import { BulkImportValidationService } from './services/validation.service';
  */
 const ENGINE_STATUS: BulkImportEngineStatus = {
   persistence: {
-    durable: false,
-    adapter: 'in-memory (doble declarado)',
-    note: 'Los lotes viven en la memoria del proceso: no sobreviven a un reinicio ni se comparten entre réplicas. Falta la tabla del lote en mantra-core-health-model.',
+    durable: true,
+    adapter: 'postgres (system_ops.bulk_import_batches)',
+    note: 'Los lotes se guardan en Postgres y se comparten entre réplicas. El procesamiento corre en el proceso que confirma: un lote EN_COLA o PROCESANDO no se reanuda solo tras un reinicio.',
   },
   executors: {
     users: { connected: false, adapter: 'not-connected' },
@@ -63,7 +67,8 @@ const ENGINE_STATUS: BulkImportEngineStatus = {
  *
  * Los colaboradores (persistencia del lote, alta de usuarios, escritura clínica,
  * resolución de pacientes y de códigos) son puertos; ver `README.md` para el
- * estado de cada adaptador. No usa tablas nuevas.
+ * estado de cada adaptador. Persiste en `system_ops.bulk_import_batches` y
+ * `bulk_import_batch_rows` (creadas por el modelo, parche v4.2.81).
  */
 @Module({
   imports: [
@@ -80,9 +85,10 @@ const ENGINE_STATUS: BulkImportEngineStatus = {
     TemplateService,
     { provide: BULK_IMPORT_TIMEOUTS_TOKEN, useValue: BULK_IMPORT_TIMEOUTS },
     { provide: BULK_IMPORT_ENGINE_STATUS, useValue: ENGINE_STATUS },
+    { provide: BULK_IMPORT_SQL_RUNNER, useClass: MikroBulkImportSqlRunner },
     {
       provide: BULK_IMPORT_BATCH_REPOSITORY,
-      useClass: InMemoryBatchRepository,
+      useClass: PostgresBatchRepository,
     },
     {
       provide: BULK_IMPORT_USER_PROVISIONER,

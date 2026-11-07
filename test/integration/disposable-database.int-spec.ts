@@ -4,6 +4,7 @@ import {
   PERMANENT_RESIDUE_FLAG,
   UnsafeResetTargetError,
   assertDisposableResetTarget,
+  assertOwnDisposableDatabase,
   assertPermanentResidueTarget,
   assertServerIdentity,
   isDisposableDatabaseName,
@@ -188,5 +189,33 @@ describe('Residuo permanente — preflight de pruebas que escriben historial de 
     } catch (error) {
       expect((error as Error).message).not.toContain('s3cr3t-value');
     }
+  });
+});
+
+describe('Base propia — preflight de pruebas que crean y borran su propia base', () => {
+  it('Correcto: host local y nombre descartable pasan sin bandera', () => {
+    expect(() =>
+      assertOwnDisposableDatabase('localhost', 'bulk_import_test_ab12cd34', {}),
+    ).not.toThrow();
+  });
+
+  it('Error: un nombre no descartable (la base compartida) se rechaza', () => {
+    expect(() =>
+      assertOwnDisposableDatabase('localhost', 'mantra_redesa_health', {}),
+    ).toThrow(UnsafeResetTargetError);
+  });
+
+  it('Error: un host remoto no declarado se rechaza aunque el nombre sea seguro', () => {
+    expect(() =>
+      assertOwnDisposableDatabase('db.interno.example', 'x_test_1', {}),
+    ).toThrow(/host/);
+  });
+
+  it('Límite: un host remoto declarado en la lista permitida pasa', () => {
+    expect(() =>
+      assertOwnDisposableDatabase('ci-db', 'x_test_1', {
+        [ALLOWED_HOSTS_VARIABLE]: 'ci-db',
+      }),
+    ).not.toThrow();
   });
 });

@@ -1,9 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
   IsInt,
+  IsOptional,
   Matches,
   Max,
   Min,
@@ -27,6 +28,28 @@ export class ScheduleWindowDto {
   @ApiProperty({ example: '12:00', pattern: HH_MM.source })
   @Matches(HH_MM)
   endTime!: string;
+
+  @ApiPropertyOptional({
+    minimum: 5,
+    maximum: 240,
+    description: "This window's appointment length; absent, the block's.",
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(5)
+  @Max(240)
+  slotMinutes?: number;
+
+  @ApiPropertyOptional({
+    minimum: 0,
+    maximum: 120,
+    description: 'Rest after each appointment; absent, none.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(120)
+  gapMinutes?: number;
 }
 
 /** A schedule: its windows and how long each appointment lasts. */

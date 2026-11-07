@@ -10,6 +10,8 @@ import {
   RESOURCE_ID,
   TENANT,
   UNIT_ID,
+  SITE_ID,
+  mainSite,
   unitRow,
 } from './center-schedule.testing';
 
@@ -194,6 +196,7 @@ describe('SaveCenterScheduleUseCase', () => {
     expect(d.scheduleRepo.createResource).toHaveBeenCalledWith(
       d.em,
       expect.objectContaining({ id: UNIT_ID }),
+      expect.objectContaining({ site_id: SITE_ID }),
       'America/La_Paz',
       actor.id,
     );
@@ -209,6 +212,9 @@ describe('SetEquipmentStatusUseCase', () => {
 
   it('stores the status concept and announces the change', async () => {
     const d = build();
+    d.scheduleRepo.findSites.mockResolvedValue([
+      mainSite({ site_id: 'site-1' }),
+    ]);
     const eq: any = equipment();
     d.em.findOne
       .mockResolvedValueOnce(eq)

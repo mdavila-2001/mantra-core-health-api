@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { ResourceNotFoundException } from '../../../../common';
 import { DUNIT } from '../../diagnostic_units.concepts';
+import { DiagnosticUnitsErrorReason } from '../../diagnostic_units.error-reasons';
 import {
   DEFAULT_TIME_ZONE,
   MODALITY_CODES,
@@ -34,7 +36,10 @@ export interface CenterContext {
   readonly kind: CenterKind;
   readonly zone: string;
   readonly resourceId: string | null;
+  /** The site (branch) this context is about: the asked one, or the main one. */
   readonly site: SiteRow | null;
+  /** Every active site of the unit, main first. */
+  readonly sites: readonly SiteRow[];
   readonly schedule: CenterSchedule;
   readonly updatedAt: Date | null;
   /** Patients per slot when a modality has no equipment registered. */
@@ -103,6 +108,12 @@ function scheduleFrom(rows: readonly TemplateRuleRow[], kind: CenterKind) {
             dayOfWeek: row.day_of_week === 0 ? 7 : row.day_of_week,
             startTime: row.start_time.slice(0, 5),
             endTime: row.end_time.slice(0, 5),
+            // Only what differs from the template travels: an old rule reads as before.
+            ...(row.rule_slot_minutes &&
+            row.rule_slot_minutes !== current.block.slotMinutes
+              ? { slotMinutes: row.rule_slot_minutes }
+              : {}),
+            ...(row.gap_minutes ? { gapMinutes: row.gap_minutes } : {}),
           },
         ],
       };
@@ -152,13 +163,36 @@ export class CenterContextService {
     private readonly studiesRepo: CenterStudiesRepository,
   ) {}
 
-  async load(em: EntityManager, unit: UnitRow): Promise<CenterContext> {
+  /**
+   * A unit's schedule, studies and equipment at one of its sites: `siteId`,
+   * or the main site when it is absent. A site of another unit answers 404.
+   */
+  async load(
+    em: EntityManager,
+    unit: UnitRow,
+    siteId: string | null = null,
+  ): Promise<CenterContext> {
     const kind = kindOf(unit);
-    const [resource, [site], studyRows, equipmentRows] = await Promise.all([
-      this.scheduleRepo.findResource(em, unit.id),
-      this.scheduleRepo.findMainSites(em, [unit.id]),
+    const sites = await this.scheduleRepo.findSites(em, [unit.id]);
+    const site =
+      siteId === null
+        ? (sites[0] ?? null)
+        : (sites.find((s) => s.site_id === siteId) ?? null);
+    if (siteId !== null && site === null) {
+      throw new ResourceNotFoundException(
+        'Sucursal no encontrada',
+        undefined,
+        DiagnosticUnitsErrorReason.DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE,
+      );
+    }
+    const [resource, studyRows, equipmentRows] = await Promise.all([
+      this.scheduleRepo.findResource(
+        em,
+        unit.id,
+        site && { site_id: site.site_id, main: site === sites[0] },
+      ),
       this.studiesRepo.findForUnit(em, unit.id),
-      this.scheduleRepo.findEquipment(em, unit.id),
+      this.scheduleRepo.findEquipment(em, unit.id, site?.site_id ?? null),
     ]);
     const rules = resource
       ? await this.scheduleRepo.findTemplateRules(em, resource.id)
@@ -200,7 +234,8 @@ export class CenterContextService {
       kind,
       zone: resource?.time_zone ?? site?.time_zone ?? DEFAULT_TIME_ZONE,
       resourceId: resource?.id ?? null,
-      site: site ?? null,
+      site,
+      sites,
       schedule,
       updatedAt: rules[0]?.updated_at ?? null,
       declaredCapacity: declared?.capacity_per_slot ?? 1,

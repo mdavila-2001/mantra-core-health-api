@@ -28337,7 +28337,14 @@ paths:
   /diagnostic-units/me/schedule:
     get:
       operationId: CenterScheduleController_mySchedule
-      parameters: []
+      parameters:
+        - name: siteId
+          required: false
+          in: query
+          description: '`diagnostic_unit_sites.id`; absent, the main site.'
+          schema:
+            format: uuid
+            type: string
       responses:
         '200':
           description: ''
@@ -28369,6 +28376,13 @@ paths:
     get:
       operationId: CenterScheduleController_myBookings
       parameters:
+        - name: siteId
+          required: false
+          in: query
+          description: '`diagnostic_unit_sites.id`; absent, the main site.'
+          schema:
+            format: uuid
+            type: string
         - name: from
           required: true
           in: query
@@ -28417,6 +28431,13 @@ paths:
           in: path
           schema:
             type: string
+        - name: siteId
+          required: false
+          in: query
+          description: '`diagnostic_unit_sites.id`; absent, the main site.'
+          schema:
+            format: uuid
+            type: string
       responses:
         '200':
           description: ''
@@ -28453,6 +28474,13 @@ paths:
           required: true
           in: path
           schema:
+            type: string
+        - name: siteId
+          required: false
+          in: query
+          description: '`diagnostic_unit_sites.id`; absent, the main site.'
+          schema:
+            format: uuid
             type: string
       requestBody:
         required: true
@@ -28659,6 +28687,13 @@ paths:
           in: path
           schema:
             type: string
+        - name: siteId
+          required: false
+          in: query
+          description: '`diagnostic_unit_sites.id`; absent, the main site.'
+          schema:
+            format: uuid
+            type: string
       requestBody:
         required: true
         content:
@@ -28708,6 +28743,13 @@ paths:
           required: true
           in: path
           schema:
+            type: string
+        - name: siteId
+          required: false
+          in: query
+          description: '`diagnostic_unit_sites.id`; absent, the main site.'
+          schema:
+            format: uuid
             type: string
         - name: studyCode
           required: true
@@ -107537,6 +107579,26 @@ components:
           format: uuid
       required:
         - conversationId
+    CenterSiteDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+          description: '`diagnostic_unit_sites.id`.'
+        name:
+          type: string
+        addressText:
+          type: string
+          nullable: true
+        main:
+          type: boolean
+          description: 'The main site: the one used without `siteId`.'
+      required:
+        - siteId
+        - name
+        - addressText
+        - main
     ScheduleWindowDto:
       type: object
       properties:
@@ -107553,6 +107615,16 @@ components:
           type: string
           example: '12:00'
           pattern: ^([01]\d|2[0-3]):[0-5]\d$
+        slotMinutes:
+          type: number
+          minimum: 5
+          maximum: 240
+          description: This window's appointment length; absent, the block's.
+        gapMinutes:
+          type: number
+          minimum: 0
+          maximum: 120
+          description: Rest after each appointment; absent, none.
       required:
         - dayOfWeek
         - startTime
@@ -107727,6 +107799,19 @@ components:
           format: uuid
         unitName:
           type: string
+        siteId:
+          type: string
+          format: uuid
+          nullable: true
+          description: The site this schedule and equipment belong to.
+        siteName:
+          type: string
+          nullable: true
+        sites:
+          description: Main site first.
+          type: array
+          items:
+            $ref: '#/components/schemas/CenterSiteDto'
         kind:
           type: string
           enum:
@@ -107752,6 +107837,9 @@ components:
       required:
         - unitId
         - unitName
+        - siteId
+        - siteName
+        - sites
         - kind
         - schedule
         - studies
@@ -107884,6 +107972,10 @@ components:
         unitId:
           type: string
           format: uuid
+        siteId:
+          type: string
+          format: uuid
+          nullable: true
         studyCode:
           type: string
         origin:
@@ -107898,6 +107990,7 @@ components:
             $ref: '#/components/schemas/StudyStartDto'
       required:
         - unitId
+        - siteId
         - studyCode
         - origin
         - items
@@ -107909,6 +108002,14 @@ components:
           format: uuid
         unitName:
           type: string
+        siteId:
+          type: string
+          format: uuid
+          nullable: true
+          description: 'The site (branch) of this option: each site has its schedule.'
+        siteName:
+          type: string
+          nullable: true
         addressText:
           type: string
           nullable: true
@@ -107934,6 +108035,8 @@ components:
       required:
         - unitId
         - unitName
+        - siteId
+        - siteName
         - addressText
         - price
         - currency
@@ -107980,6 +108083,10 @@ components:
         unitId:
           type: string
           format: uuid
+        siteId:
+          type: string
+          format: uuid
+          description: The site (branch) chosen; absent, the main site.
         startAt:
           type: string
           example: '2026-11-05T12:00:00.000Z'

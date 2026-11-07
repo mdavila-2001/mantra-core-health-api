@@ -77,7 +77,7 @@ export class BookOrderUseCase {
           DiagnosticUnitsErrorReason.DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE,
         );
       }
-      const loaded = await this.context.load(tx, unit);
+      const loaded = await this.context.load(tx, unit, dto.siteId ?? null);
       const offering = loaded.studyRows.find(
         (row) =>
           row.study_concept_id === order.code_concept_id &&
@@ -92,6 +92,7 @@ export class BookOrderUseCase {
         (await this.scheduleRepo.createResource(
           tx,
           unit,
+          loaded.site,
           loaded.zone,
           actor.id,
         ));
@@ -121,6 +122,7 @@ export class BookOrderUseCase {
         serviceRequestId: order.id,
         diagnosticUnitId: unit.id,
         unitName: unit.name,
+        diagnosticUnitSiteId: ctx.site?.site_id ?? null,
         siteName: ctx.site?.site_name ?? null,
         addressText: ctx.site?.address_text ?? null,
         studyCode: study.code,

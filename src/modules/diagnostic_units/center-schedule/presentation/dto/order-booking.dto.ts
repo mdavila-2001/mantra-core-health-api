@@ -1,11 +1,19 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsISO8601, IsUUID } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsISO8601, IsOptional, IsUUID } from 'class-validator';
 
 /** Body of `POST /diagnostic-results/me/orders/{orderId}/booking`. */
 export class BookOrderDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
   unitId!: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'The site (branch) chosen; absent, the main site.',
+  })
+  @IsOptional()
+  @IsUUID()
+  siteId?: string;
 
   @ApiProperty({ example: '2026-11-05T12:00:00.000Z' })
   @IsISO8601()

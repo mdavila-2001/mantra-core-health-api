@@ -8,6 +8,15 @@ import {
 export class OrderBookingOptionDto {
   @ApiProperty({ format: 'uuid' }) unitId!: string;
   @ApiProperty() unitName!: string;
+  @ApiProperty({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description:
+      'The site (branch) of this option: each site has its schedule.',
+  })
+  siteId!: string | null;
+  @ApiProperty({ type: String, nullable: true }) siteName!: string | null;
   @ApiProperty({ type: String, nullable: true }) addressText!: string | null;
   @ApiProperty({ type: Number, nullable: true }) price!: number | null;
   @ApiProperty({ type: String, nullable: true }) currency!: string | null;

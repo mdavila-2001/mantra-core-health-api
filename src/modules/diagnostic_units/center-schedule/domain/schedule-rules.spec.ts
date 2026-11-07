@@ -105,6 +105,45 @@ describe('validateSchedule', () => {
 });
 
 describe('slotsBetween', () => {
+  it('a window with its own length and rest lays slot, rest, slot (practitioner rule)', () => {
+    // Tuesday 08:00–09:30 La Paz, 20 min appointments with 10 min rest.
+    const block: ScheduleBlock = {
+      windows: [
+        {
+          dayOfWeek: 2,
+          startTime: '08:00',
+          endTime: '09:30',
+          slotMinutes: 20,
+          gapMinutes: 10,
+        },
+      ],
+      slotMinutes: 30,
+    };
+    const slots = slotsBetween(
+      block,
+      new Date('2026-11-10T00:00:00Z'),
+      new Date('2026-11-11T00:00:00Z'),
+      ZONE,
+    );
+    expect(
+      slots.map((s) => [s.startAt.toISOString(), s.endAt.toISOString()]),
+    ).toEqual([
+      ['2026-11-10T12:00:00.000Z', '2026-11-10T12:20:00.000Z'],
+      ['2026-11-10T12:30:00.000Z', '2026-11-10T12:50:00.000Z'],
+      ['2026-11-10T13:00:00.000Z', '2026-11-10T13:20:00.000Z'],
+    ]);
+  });
+
+  it('a window without its own length keeps the block length', () => {
+    const slots = slotsBetween(
+      week('08:00', '09:00', 30, [2]),
+      new Date('2026-11-10T00:00:00Z'),
+      new Date('2026-11-11T00:00:00Z'),
+      ZONE,
+    );
+    expect(slots).toHaveLength(2);
+  });
+
   it('reads windows as wall-clock time of the center, not UTC', () => {
     // Tuesday 2026-11-10 08:00–09:10 in La Paz is 12:00–13:10 UTC.
     const slots = slotsBetween(

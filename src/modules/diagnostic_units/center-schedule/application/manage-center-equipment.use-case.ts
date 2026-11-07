@@ -55,18 +55,19 @@ export class ManageCenterEquipmentUseCase {
     private readonly reader: GetCenterScheduleUseCase,
   ) {}
 
+  /** Registers a device at `siteId`, or at the main site when it is absent. */
   create(
     unitId: string,
     dto: CenterEquipmentInputDto,
     actor: AuthenticatedUser,
+    siteId: string | null = null,
   ): Promise<CenterScheduleViewDto> {
     return this.em.transactional(async (tx) => {
       const unit = await this.reader.staffUnit(tx, unitId);
-      const site = await tx.findOne(
-        DiagnosticUnitSites,
-        { diagnosticUnitId: unit.id, statusConceptId: DUNIT.SITE_ACTIVE },
-        { orderBy: { createdAt: 'asc' } },
-      );
+      const at = (await this.context.load(tx, unit, siteId)).site;
+      const site = at
+        ? await tx.findOne(DiagnosticUnitSites, { id: at.site_id })
+        : null;
       if (!site) {
         throw new PreconditionFailedException(
           'El centro no tiene una sucursal activa donde registrar el equipo.',
@@ -91,7 +92,7 @@ export class ManageCenterEquipmentUseCase {
         touch(site, actor.id);
       }
       await tx.flush();
-      return this.reader.view(tx, await this.context.load(tx, unit));
+      return this.reader.view(tx, await this.context.load(tx, unit, site.id));
     });
   }
 
@@ -107,7 +108,10 @@ export class ManageCenterEquipmentUseCase {
       Object.assign(equipment, this.identity(dto));
       touch(equipment, actor.id);
       await tx.flush();
-      return this.reader.view(tx, await this.context.load(tx, unit));
+      return this.reader.view(
+        tx,
+        await this.context.load(tx, unit, equipment.diagnosticUnitSiteId),
+      );
     });
   }
 
@@ -123,9 +127,10 @@ export class ManageCenterEquipmentUseCase {
       return await this.em.transactional(async (tx) => {
         const unit = await this.reader.staffUnit(tx, unitId);
         const equipment = await this.ownDevice(tx, unit.id, equipmentId);
+        const siteId = equipment.diagnosticUnitSiteId;
         tx.remove(equipment);
         await tx.flush();
-        return this.reader.view(tx, await this.context.load(tx, unit));
+        return this.reader.view(tx, await this.context.load(tx, unit, siteId));
       });
     } catch (error) {
       if (error instanceof ForeignKeyConstraintViolationException) {
