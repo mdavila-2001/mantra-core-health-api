@@ -42497,7 +42497,18 @@
     "/diagnostic-units/me/schedule": {
       "get": {
         "operationId": "CenterScheduleController_mySchedule",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": false,
+            "in": "query",
+            "description": "`diagnostic_unit_sites.id`; absent, the main site.",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -42544,6 +42555,16 @@
       "get": {
         "operationId": "CenterScheduleController_myBookings",
         "parameters": [
+          {
+            "name": "siteId",
+            "required": false,
+            "in": "query",
+            "description": "`diagnostic_unit_sites.id`; absent, the main site.",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
           {
             "name": "from",
             "required": true,
@@ -42616,6 +42637,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "siteId",
+            "required": false,
+            "in": "query",
+            "description": "`diagnostic_unit_sites.id`; absent, the main site.",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -42670,6 +42701,16 @@
             "required": true,
             "in": "path",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteId",
+            "required": false,
+            "in": "query",
+            "description": "`diagnostic_unit_sites.id`; absent, the main site.",
+            "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -42987,6 +43028,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "siteId",
+            "required": false,
+            "in": "query",
+            "description": "`diagnostic_unit_sites.id`; absent, the main site.",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -43062,6 +43113,16 @@
             "required": true,
             "in": "path",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteId",
+            "required": false,
+            "in": "query",
+            "description": "`diagnostic_unit_sites.id`; absent, the main site.",
+            "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -158159,6 +158220,33 @@
           "conversationId"
         ]
       },
+      "CenterSiteDto": {
+        "type": "object",
+        "properties": {
+          "siteId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "`diagnostic_unit_sites.id`."
+          },
+          "name": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "string",
+            "nullable": true
+          },
+          "main": {
+            "type": "boolean",
+            "description": "The main site: the one used without `siteId`."
+          }
+        },
+        "required": [
+          "siteId",
+          "name",
+          "addressText",
+          "main"
+        ]
+      },
       "ScheduleWindowDto": {
         "type": "object",
         "properties": {
@@ -158411,6 +158499,23 @@
           "unitName": {
             "type": "string"
           },
+          "siteId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The site this schedule and equipment belong to."
+          },
+          "siteName": {
+            "type": "string",
+            "nullable": true
+          },
+          "sites": {
+            "description": "Main site first.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CenterSiteDto"
+            }
+          },
           "kind": {
             "type": "string",
             "enum": [
@@ -158446,6 +158551,9 @@
         "required": [
           "unitId",
           "unitName",
+          "siteId",
+          "siteName",
+          "sites",
           "kind",
           "schedule",
           "studies",
@@ -158620,6 +158728,11 @@
             "type": "string",
             "format": "uuid"
           },
+          "siteId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "studyCode": {
             "type": "string"
           },
@@ -158640,6 +158753,7 @@
         },
         "required": [
           "unitId",
+          "siteId",
           "studyCode",
           "origin",
           "items"
@@ -158654,6 +158768,16 @@
           },
           "unitName": {
             "type": "string"
+          },
+          "siteId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The site (branch) of this option: each site has its schedule."
+          },
+          "siteName": {
+            "type": "string",
+            "nullable": true
           },
           "addressText": {
             "type": "string",
@@ -158688,6 +158812,8 @@
         "required": [
           "unitId",
           "unitName",
+          "siteId",
+          "siteName",
           "addressText",
           "price",
           "currency",
@@ -158747,6 +158873,11 @@
           "unitId": {
             "type": "string",
             "format": "uuid"
+          },
+          "siteId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The site (branch) chosen; absent, the main site."
           },
           "startAt": {
             "type": "string",

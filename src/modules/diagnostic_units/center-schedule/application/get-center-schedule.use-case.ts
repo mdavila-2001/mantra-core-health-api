@@ -63,15 +63,19 @@ export class GetCenterScheduleUseCase {
     return unit;
   }
 
-  async forMe(): Promise<CenterScheduleViewDto> {
+  async forMe(siteId: string | null = null): Promise<CenterScheduleViewDto> {
     const em = this.em.fork();
-    return this.view(em, await this.context.load(em, await this.myUnit(em)));
+    const unit = await this.myUnit(em);
+    return this.view(em, await this.context.load(em, unit, siteId));
   }
 
-  async forUnit(unitId: string): Promise<CenterScheduleViewDto> {
+  async forUnit(
+    unitId: string,
+    siteId: string | null = null,
+  ): Promise<CenterScheduleViewDto> {
     const em = this.em.fork();
     const unit = await this.staffUnit(em, unitId);
-    return this.view(em, await this.context.load(em, unit));
+    return this.view(em, await this.context.load(em, unit, siteId));
   }
 
   /** The wire view of a loaded center. */
@@ -93,6 +97,14 @@ export class GetCenterScheduleUseCase {
     return {
       unitId: ctx.unit.id,
       unitName: ctx.unit.name,
+      siteId: ctx.site?.site_id ?? null,
+      siteName: ctx.site?.site_name ?? null,
+      sites: ctx.sites.map((s, i) => ({
+        siteId: s.site_id,
+        name: s.site_name,
+        addressText: s.address_text,
+        main: i === 0,
+      })),
       kind: ctx.kind,
       schedule: ctx.schedule,
       studies: ctx.studies,

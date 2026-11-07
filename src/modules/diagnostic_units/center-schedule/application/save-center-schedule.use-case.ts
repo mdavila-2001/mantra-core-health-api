@@ -37,14 +37,16 @@ export class SaveCenterScheduleUseCase {
     private readonly reader: GetCenterScheduleUseCase,
   ) {}
 
+  /** Publishes the schedule of `siteId`, or of the main site when it is absent. */
   execute(
     unitId: string,
     dto: SaveCenterScheduleDto,
     actor: AuthenticatedUser,
+    siteId: string | null = null,
   ): Promise<CenterScheduleViewDto> {
     return this.em.transactional(async (tx) => {
       const unit = await this.reader.staffUnit(tx, unitId);
-      const ctx = await this.context.load(tx, unit);
+      const ctx = await this.context.load(tx, unit, siteId);
       // Like the frontend rules: a block for a study the center no longer
       // offers, or a repeated modality, is dropped instead of failing.
       const offered = new Map(ctx.studyRows.map((s) => [s.study_code, s]));
@@ -78,7 +80,13 @@ export class SaveCenterScheduleUseCase {
 
       const resourceId =
         ctx.resourceId ??
-        (await this.scheduleRepo.createResource(tx, unit, ctx.zone, actor.id));
+        (await this.scheduleRepo.createResource(
+          tx,
+          unit,
+          ctx.site,
+          ctx.zone,
+          actor.id,
+        ));
       await this.bookingsRepo.lockResource(tx, resourceId);
       const now = new Date();
       const future = (
@@ -140,7 +148,10 @@ export class SaveCenterScheduleUseCase {
           e.schedule,
         );
       }
-      return this.reader.view(tx, await this.context.load(tx, unit));
+      return this.reader.view(
+        tx,
+        await this.context.load(tx, unit, ctx.site?.site_id ?? null),
+      );
     });
   }
 }

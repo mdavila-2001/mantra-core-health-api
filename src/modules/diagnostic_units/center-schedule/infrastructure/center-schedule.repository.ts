@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS } from '../../../../common/constants/concepts';
 import { DUNIT } from '../../diagnostic_units.concepts';
+import { findUnitSites, type SiteRow } from './center-sites.query';
 
 /** The unit as the center screens need it. */
 export interface UnitRow {
@@ -20,15 +21,6 @@ export function isPublished(unit: UnitRow): boolean {
     unit.status_concept_id === DUNIT.UNIT_ACTIVE &&
     unit.verification_status_concept_id === DUNIT.VERIFICATION_VERIFIED
   );
-}
-
-export interface SiteRow {
-  unit_id: string;
-  site_name: string;
-  time_zone: string | null;
-  address_text: string | null;
-  latitude: string | null;
-  longitude: string | null;
 }
 
 export interface TemplateRuleRow {
@@ -53,11 +45,11 @@ export interface EquipmentRow {
   status_concept_id: string;
 }
 
+export type { SiteRow };
+
 const UNIT_COLUMNS = `u.id, u.tenant_id, u.practice_id, u.name,
   u.diagnostic_unit_type_concept_id AS type_concept_id,
   u.status_concept_id, u.verification_status_concept_id`;
-
-const uuidArray = (ids: readonly string[]): string => `{${ids.join(',')}}`;
 
 /**
  * Raw reads/writes of a center's unit, site, scheduling resource, templates
@@ -93,45 +85,53 @@ export class CenterScheduleRepository {
   }
 
   /** Main active site of each unit (primary first), with its address. */
-  findMainSites(
+  async findMainSites(
     em: EntityManager,
     unitIds: readonly string[],
   ): Promise<SiteRow[]> {
-    if (unitIds.length === 0) return Promise.resolve([]);
-    return em.execute<SiteRow[]>(
-      `SELECT DISTINCT ON (s.diagnostic_unit_id) s.diagnostic_unit_id AS unit_id,
-              ps.name AS site_name, coalesce(ps.time_zone, p.time_zone) AS time_zone,
-              nullif(concat_ws(', ', nullif(trim(a.lines), ''), nullif(trim(a.city), '')), '') AS address_text,
-              a.latitude::text AS latitude, a.longitude::text AS longitude
-         FROM diagnostic_units.diagnostic_unit_sites s
-         JOIN practice.practice_sites ps ON ps.id = s.practice_site_id
-         LEFT JOIN practice.practices p ON p.id = ps.practice_id
-         LEFT JOIN common.addresses a ON a.id = ps.address_id
-        WHERE s.diagnostic_unit_id = ANY(?::uuid[]) AND s.status_concept_id = ?
-        ORDER BY s.diagnostic_unit_id, (s.site_role_concept_id = ?) DESC, s.created_at`,
-      [uuidArray(unitIds), DUNIT.SITE_ACTIVE, DUNIT.SITE_ROLE_PRIMARY],
-      'all',
+    const rows = await this.findSites(em, unitIds);
+    return rows.filter(
+      (row, i) => rows.findIndex((r) => r.unit_id === row.unit_id) === i,
     );
   }
 
+  /** Every active site of the units, primary first, then by creation. */
+  findSites(em: EntityManager, unitIds: readonly string[]): Promise<SiteRow[]> {
+    return findUnitSites(em, unitIds);
+  }
+
+  /**
+   * The bookable resource of one site. The main site falls back to the
+   * unit-level resource that predates per-site schedules, so its published
+   * schedule and booked appointments stay where they were.
+   */
   async findResource(
     em: EntityManager,
     unitId: string,
+    site: { site_id: string; main: boolean } | null,
   ): Promise<{ id: string; time_zone: string | null } | null> {
     const [row] = await em.execute<{ id: string; time_zone: string | null }[]>(
       `SELECT id, time_zone FROM scheduling.schedulable_resources
-        WHERE resource_ref_type = 'diagnostic_units' AND resource_ref_id = ?
-          AND state_concept_id = ?
-        ORDER BY created_at LIMIT 1`,
-      [unitId, CONCEPTS.STATE_ACTIVE],
+        WHERE state_concept_id = ?
+          AND ((resource_ref_type = 'diagnostic_unit_sites' AND resource_ref_id = ?)
+            OR (? AND resource_ref_type = 'diagnostic_units' AND resource_ref_id = ?))
+        ORDER BY (resource_ref_type = 'diagnostic_unit_sites') DESC, created_at LIMIT 1`,
+      [
+        CONCEPTS.STATE_ACTIVE,
+        site?.site_id ?? null,
+        site === null || site.main,
+        unitId,
+      ],
       'all',
     );
     return row ?? null;
   }
 
+  /** Creates the site's resource; without a site, the legacy unit-level one. */
   async createResource(
     em: EntityManager,
     unit: UnitRow,
+    site: { site_id: string; site_name: string } | null,
     timeZone: string,
     actorId: string,
   ): Promise<string> {
@@ -139,14 +139,18 @@ export class CenterScheduleRepository {
       `INSERT INTO scheduling.schedulable_resources
          (id, tenant_id, practice_id, resource_type_concept_id, resource_ref_type, resource_ref_id,
           name, time_zone, state_concept_id, created_at, updated_at, created_by_user_id, updated_by_user_id, row_version)
-       VALUES (gen_random_uuid(), ?, ?, ?, 'diagnostic_units', ?, ?, ?, ?, now(), now(), ?, ?, 1)
+       VALUES (gen_random_uuid(), ?, ?, ?, ?, ?, ?, ?, ?, now(), now(), ?, ?, 1)
        RETURNING id`,
       [
         unit.tenant_id,
         unit.practice_id,
         CONCEPTS.RESOURCE_ROOM,
-        unit.id,
-        `Agenda de ${unit.name}`.slice(0, 200),
+        site ? 'diagnostic_unit_sites' : 'diagnostic_units',
+        site?.site_id ?? unit.id,
+        `Agenda de ${site ? `${unit.name} · ${site.site_name}` : unit.name}`.slice(
+          0,
+          200,
+        ),
         timeZone,
         CONCEPTS.STATE_ACTIVE,
         actorId,
@@ -247,7 +251,12 @@ export class CenterScheduleRepository {
     }
   }
 
-  findEquipment(em: EntityManager, unitId: string): Promise<EquipmentRow[]> {
+  /** The unit's devices; with a site, only the ones installed there. */
+  findEquipment(
+    em: EntityManager,
+    unitId: string,
+    siteId: string | null = null,
+  ): Promise<EquipmentRow[]> {
     return em.execute<EquipmentRow[]>(
       `SELECT e.id, e.equipment_type_concept_id AS type_concept_id, c.display AS type_display,
               e.manufacturer, e.model, e.serial_number, e.modality_concept_id,
@@ -255,9 +264,9 @@ export class CenterScheduleRepository {
          FROM diagnostic_units.diagnostic_equipment e
          JOIN diagnostic_units.diagnostic_unit_sites s ON s.id = e.diagnostic_unit_site_id
          LEFT JOIN terminology.catalog_concepts c ON c.id = e.equipment_type_concept_id
-        WHERE s.diagnostic_unit_id = ?
+        WHERE s.diagnostic_unit_id = ? AND (?::uuid IS NULL OR s.id = ?::uuid)
         ORDER BY e.created_at, e.id`,
-      [unitId],
+      [unitId, siteId, siteId],
       'all',
     );
   }

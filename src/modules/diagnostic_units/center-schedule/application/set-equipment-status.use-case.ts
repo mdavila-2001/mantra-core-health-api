@@ -63,7 +63,11 @@ export class SetEquipmentStatusUseCase {
       touch(equipment, actor.id);
       await tx.flush();
       await this.f5a.announceChanges(tx, equipment, before, actor.id);
-      return this.reader.view(tx, await this.context.load(tx, unit));
+      // The view of the device's own site: its schedule is the one it serves.
+      return this.reader.view(
+        tx,
+        await this.context.load(tx, unit, equipment.diagnosticUnitSiteId),
+      );
     });
   }
 }
