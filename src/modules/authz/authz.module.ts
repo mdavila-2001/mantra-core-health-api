@@ -1,3 +1,7 @@
+import { AuthzUsersDirectoryController } from './controllers/authz-users-directory.controller';
+import { AuthzUsersDirectoryService } from './services/authz-users-directory.service';
+import { UsersDirectoryReadAdapter } from './infrastructure/users-directory-read.adapter';
+import { USERS_DIRECTORY_READ } from './ports/users-directory-read.port';
 import { AuthzModulesCatalogController } from './controllers/authz-modules-catalog.controller';
 import { AuthzModulesCatalogService } from './services/authz-modules-catalog.service';
 import { AuthzModulesRouteInventory } from './services/authz-modules-route-inventory';
@@ -106,12 +110,16 @@ import {
     AuthzGovernanceExtController,
     AuthzModulesCatalogController,
     AuthzPractitionerRequestsController,
+    AuthzUsersDirectoryController,
   ],
   providers: [
     IamGlobalRolesAdapter,
     { provide: IAM_PDP_ROLES, useExisting: IamGlobalRolesAdapter },
     AuthzModulesCatalogService,
     AuthzModulesRouteInventory,
+    UsersDirectoryReadAdapter,
+    { provide: USERS_DIRECTORY_READ, useExisting: UsersDirectoryReadAdapter },
+    AuthzUsersDirectoryService,
     // Repositorios
     PermissionCategoriesRepository,
     PermissionsRepository,

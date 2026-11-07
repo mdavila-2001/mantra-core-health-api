@@ -234,6 +234,43 @@ de tipo `OFFICE` con él como administrador). Un médico que atiende en una prá
 recibe 403 (`FISCAL_YEAR_OPEN_NOT_ALLOWED`); una práctica de otra organización sigue respondiendo
 404, antes de mirar el rol.
 
+## Directorio de usuarios por tipo
+
+`GET /authz/users/directory` (`AuthzUsersDirectoryController`) lista cuentas con su tipo, estado,
+roles y un resumen de permisos efectivos. Es de solo lectura, se pagina por cursor (`displayName`,
+`id`) y exige `SECURITY_ADMIN`.
+
+**Alcance.** Solo un `SUPERADMIN` de plataforma (sin `scopedRoles`) cruza organizaciones
+(`scope: PLATFORM`). Cualquier otro rol queda acotado a la organización que resuelve
+`TenantScopeGuard` (`scope: TENANT`): una cuenta aparece si tiene allí una membresía activa o una
+asignación de rol vigente. Los errores de organización son los de la resolución de tenant
+(`403 TENANT_REQUIRED`, `TENANT_AMBIGUOUS`, `TENANT_MEMBERSHIP_REQUIRED`). Sin búsqueda de texto: un
+nombre o un correo en la URL quedaría en los logs de acceso, y un parámetro no declarado responde
+`400`.
+
+**Tipo.** Uno por cuenta, por prioridad: `INTERNAL` (rol global `SECURITY_ADMIN`/`SUPERADMIN` o
+asignación activa de un rol de ámbito global), `PRACTITIONER` (rol global o perfil de profesional
+vinculado), `PHARMACY` y `LABORATORY` (membresía activa en una organización `PHARMACY` o
+`DIAGNOSTIC_CENTER`), `PATIENT` (rol global o perfil de paciente) y `OTHER`.
+
+**Permisos efectivos.** `permissions` cuenta permisos distintos con las reglas del PDP
+(`AuthzPdpService`): asignaciones vigentes con tenant nulo o igual al de la consulta, roles de
+política enlazados a los roles globales de `iam` (`SECURITY_ADMIN`, `PRACTITIONER`), herencia por rol
+padre —se salta un rol inactivo o de otra organización— y concesiones directas; el `deny` gana.
+`unrestricted: true` marca al `SUPERADMIN` de plataforma, que pasa por comodín y no tiene filas de
+permisos. No evalúa ámbito ni condiciones de cada permiso.
+
+**Datos.** Nunca devuelve contraseñas ni documentos. `maskedEmail` solo existe si el sujeto de login
+es un correo (`m***@c***.org`).
+
+**Auditoría.** Cada consulta sella `USERS_DIRECTORY_QUERIED` en `audit.audit_log` en la misma
+transacción que la lectura: si el sello falla, no se devuelve nada. El sello no guarda los filtros.
+
+Fijado por `src/modules/authz/services/authz-users-directory.service.spec.ts`,
+`test/integration/users-directory-read.int-spec.ts` y
+`test/integration/users-directory.http.int-spec.ts`. `POST /iam/users/search` no aplica este
+alcance por organización (hallazgo de seguridad en #1406).
+
 ## Piloto de permisos y catálogos globales
 
 El piloto conserva el modo `shadow`. El PDP vincula concesiones IAM globales
