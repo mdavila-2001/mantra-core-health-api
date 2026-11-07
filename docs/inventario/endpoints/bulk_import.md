@@ -4,19 +4,19 @@
 
 - **Bloque:** —
 - **Operaciones:** 7 (7 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 3 · BAJO 4
-- **Tablas distintas que tocan:** 15
+- **Riesgo:** ALTO 0 · MEDIO 4 · BAJO 3
+- **Tablas distintas que tocan:** 17
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/bulk-import.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/admin/bulk-imports` | Lotes de la organización | BAJO | 13 | SECURITY_ADMIN, PLATFORM_ADMIN |
-| 2 | POST | `/admin/bulk-imports` | Crea un lote: valida el archivo y devuelve la vista previa (VALIDADO o RECHAZADO) | BAJO | 13 | SECURITY_ADMIN, PLATFORM_ADMIN |
-| 3 | GET | `/admin/bulk-imports/{id}` | Estado, vista previa y avance de un lote | MEDIO | 16 | SECURITY_ADMIN, PLATFORM_ADMIN |
-| 4 | POST | `/admin/bulk-imports/{id}/confirm` | Confirma un lote VALIDADO y lo encola (idempotente por Idempotency-Key) | MEDIO | 16 | SECURITY_ADMIN, PLATFORM_ADMIN |
-| 5 | GET | `/admin/bulk-imports/{id}/report` | Informe de un lote: creados, omitidos y rechazados con su motivo | MEDIO | 16 | SECURITY_ADMIN, PLATFORM_ADMIN |
+| 1 | GET | `/admin/bulk-imports` | Lotes de la organización | BAJO | 14 | SECURITY_ADMIN, PLATFORM_ADMIN |
+| 2 | POST | `/admin/bulk-imports` | Crea un lote: valida el archivo y devuelve la vista previa (VALIDADO o RECHAZADO) | MEDIO | 15 | SECURITY_ADMIN, PLATFORM_ADMIN |
+| 3 | GET | `/admin/bulk-imports/{id}` | Estado, vista previa y avance de un lote | MEDIO | 18 | SECURITY_ADMIN, PLATFORM_ADMIN |
+| 4 | POST | `/admin/bulk-imports/{id}/confirm` | Confirma un lote VALIDADO y lo encola (idempotente por Idempotency-Key) | MEDIO | 20 | SECURITY_ADMIN, PLATFORM_ADMIN |
+| 5 | GET | `/admin/bulk-imports/{id}/report` | Informe de un lote: creados, omitidos y rechazados con su motivo | MEDIO | 18 | SECURITY_ADMIN, PLATFORM_ADMIN |
 | 6 | GET | `/admin/bulk-imports/templates` | Catálogo de plantillas, topes y estado declarado del motor | BAJO | 0 | SECURITY_ADMIN, PLATFORM_ADMIN |
 | 7 | GET | `/admin/bulk-imports/templates/{kind}` | Descarga la plantilla de un tipo de carga en CSV o JSON | BAJO | 0 | SECURITY_ADMIN, PLATFORM_ADMIN |
 
@@ -39,7 +39,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/bulk-imports` la atiende `BulkImportController.list` (src/modules/bulk_import/controllers/bulk-import.controller.ts:117). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.list`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 5 más.
+`GET /admin/bulk-imports` la atiende `BulkImportController.list` (src/modules/bulk_import/controllers/bulk-import.controller.ts:117). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.list`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 6 más.
 
 ### Requerimientos
 
@@ -67,6 +67,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | BulkImportController.list → BulkImportService.list → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `system_ops.bulk_import_batches` | LEE | LEE | POR_SQL | BulkImportController.list → BulkImportService.list → PostgresBatchRepository.list | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:98` |
 
 ### Parámetros
 
@@ -108,7 +109,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Crea un lote: valida el archivo y devuelve la vista previa (VALIDADO o RECHAZADO)
 - **Bloque:** —
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `BulkImportController.create` — `src/modules/bulk_import/controllers/bulk-import.controller.ts:127`
 
@@ -120,7 +121,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/bulk-imports` la atiende `BulkImportController.create` (src/modules/bulk_import/controllers/bulk-import.controller.ts:127). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateBulkImportDto` (6 campos, 1 obligatorio). Delega en `BulkImportService.create`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 5 más.
+`POST /admin/bulk-imports` la atiende `BulkImportController.create` (src/modules/bulk_import/controllers/bulk-import.controller.ts:127). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateBulkImportDto` (6 campos, 1 obligatorio). Delega en `BulkImportService.create`. Crea filas en system_ops.bulk_import_batch_rows, system_ops.bulk_import_batches. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 5 más.
 
 ### Requerimientos
 
@@ -150,6 +151,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | BulkImportController.create → BulkImportService.create → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `system_ops.bulk_import_batch_rows` | ESCRIBE | CREA | POR_SQL | BulkImportController.create → BulkImportService.create → PostgresBatchRepository.create → PostgresBatchRepository.insertRows | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:231` |
+| `system_ops.bulk_import_batches` | ESCRIBE | CREA | POR_SQL | BulkImportController.create → BulkImportService.create → PostgresBatchRepository.create | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:71` |
 
 ### Cuerpo — DTO `CreateBulkImportDto` · `multipart/form-data`
 
@@ -232,7 +235,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/bulk-imports/{id}` la atiende `BulkImportController.get` (src/modules/bulk_import/controllers/bulk-import.controller.ts:191). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.get`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 7 más.
+`GET /admin/bulk-imports/{id}` la atiende `BulkImportController.get` (src/modules/bulk_import/controllers/bulk-import.controller.ts:191). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.get`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 9 más.
 
 ### Requerimientos
 
@@ -264,6 +267,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `system_ops.bulk_import_batch_rows` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → PostgresBatchRepository.findById → PostgresBatchRepository.load | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:259` |
+| `system_ops.bulk_import_batches` | LEE | LEE | POR_SQL | BulkImportController.get → BulkImportService.get → BulkImportService.requireBatch → PostgresBatchRepository.findById → PostgresBatchRepository.load | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:249` |
 
 ### Parámetros
 
@@ -318,7 +323,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/bulk-imports/{id}/confirm` la atiende `BulkImportController.confirm` (src/modules/bulk_import/controllers/bulk-import.controller.ts:170). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.confirm`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 7 más.
+`POST /admin/bulk-imports/{id}/confirm` la atiende `BulkImportController.confirm` (src/modules/bulk_import/controllers/bulk-import.controller.ts:170). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.confirm`. Crea filas en audit.audit_log. Actualiza system_ops.bulk_import_batch_rows, system_ops.bulk_import_batches. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 9 más.
 
 ### Requerimientos
 
@@ -351,6 +356,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → BulkImportProcessor.enqueue → BulkImportProcessor.process → BulkImportProcessor.processRow → BulkImportProcessor.provisionUser → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `system_ops.bulk_import_batch_rows` | ESCRIBE | ACTUALIZA | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → PostgresBatchRepository.transition → PostgresBatchRepository.applyTransition → PostgresBatchRepository.closeRows | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:188` |
+| `system_ops.bulk_import_batch_rows` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → PostgresBatchRepository.findByConfirmKey → PostgresBatchRepository.load | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:259` |
+| `system_ops.bulk_import_batches` | ESCRIBE | ACTUALIZA | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → PostgresBatchRepository.transition → PostgresBatchRepository.applyTransition | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:160` |
+| `system_ops.bulk_import_batches` | LEE | LEE | POR_SQL | BulkImportController.confirm → BulkImportService.confirm → PostgresBatchRepository.findByConfirmKey | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:88` |
 
 ### Parámetros
 
@@ -376,7 +385,7 @@ _No se identificó un DTO de respuesta con campos._
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: Tipo de carga desconocido |
+| 500 | `INTERNAL` | Error: transition cannot add rows; Error: transition patch key not persisted: {key}; Error: Tipo de carga desconocido |
 
 El árbol de decisión completo está en [flujos](../flujos/bulk_import.md).
 
@@ -407,7 +416,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/bulk-imports/{id}/report` la atiende `BulkImportController.report` (src/modules/bulk_import/controllers/bulk-import.controller.ts:208). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.report`, `BulkImportService.reportCsv`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 7 más.
+`GET /admin/bulk-imports/{id}/report` la atiende `BulkImportController.report` (src/modules/bulk_import/controllers/bulk-import.controller.ts:208). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Delega en `BulkImportService.report`, `BulkImportService.reportCsv`. Crea filas en audit.audit_log. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 9 más.
 
 ### Requerimientos
 
@@ -439,6 +448,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `iam.sessions` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.auditRead → TrailAuditAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → BulkImportService.assertPermission → PdpAccessPolicyAdapter.isAllowed → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `system_ops.bulk_import_batch_rows` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → PostgresBatchRepository.findById → PostgresBatchRepository.load | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:259` |
+| `system_ops.bulk_import_batches` | LEE | LEE | POR_SQL | BulkImportController.report → BulkImportService.report → BulkImportService.requireBatch → PostgresBatchRepository.findById → PostgresBatchRepository.load | `src/modules/bulk_import/repositories/postgres-batch.repository.ts:249` |
 
 ### Parámetros
 

@@ -17,7 +17,7 @@
 | [delegated_access_approval_requests](#delegated_access_approval_requests) | Gestiona solicitudes de aprobación antes de habilitar permisos delegados sensibles. | 12 | 8 | 5 | COINCIDE |
 | [delegated_access_grants](#delegated_access_grants) | Conserva concesiones de acceso delegado con su sujeto, alcance, permisos y vigencia. | 16 | 11 | 6 | COINCIDE |
 | [delegated_permission_set_items](#delegated_permission_set_items) | Detalla permisos incluidos en conjuntos delegables para limitar acciones otorgadas a representantes. | 6 | 2 | 4 | COINCIDE |
-| [delegated_permission_sets](#delegated_permission_sets) | Define paquetes reutilizables de permisos que pueden concederse a delegados bajo un alcance específico. | 13 | 6 | 9 | COINCIDE |
+| [delegated_permission_sets](#delegated_permission_sets) | Define paquetes reutilizables de permisos que pueden concederse a delegados bajo un alcance específico. | 13 | 6 | 11 | COINCIDE |
 | [delegation_events](#delegation_events) | Mantiene eventos de creación, modificación, uso o revocación de delegaciones para auditoría. | 10 | 6 | 7 | COINCIDE |
 | [effective_support_access](#effective_support_access) | Tabla derivada que expande los permisos de apoyo vigentes a lo que cada persona puede hacer y sobre qué doctor, servicio y espacio, para decidir cada acción sin recalcular. | 9 | 6 | 0 | COINCIDE |
 | [engagement_request_items](#engagement_request_items) | Detalla cada objetivo pedido en una solicitud o invitación de apoyo y la decisión por línea (aprobar, ajustar, rechazar), enlazada con el permiso que nace de ella. | 13 | 9 | 0 | COINCIDE |
@@ -29,7 +29,7 @@
 | [lifecycle_cases](#lifecycle_cases) | Sigue el ingreso, el cambio, la baja, la suspensión y la reactivación de una persona de apoyo con su lista de pasos y su estado. | 18 | 9 | 0 | COINCIDE |
 | [organization_user_assignments](#organization_user_assignments) | Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actuar o administrar acceso delegado. | 36 | 25 | 88 | COINCIDE |
 | [patient_restriction_flags](#patient_restriction_flags) | Marca por organización a los pacientes VIP, confidenciales, familiares del personal o protegidos para limitar quién del equipo de apoyo puede verlos; es una marca de acceso, no un dato clínico. | 13 | 7 | 0 | COINCIDE |
-| [practitioner_delegate_assignments](#practitioner_delegate_assignments) | Relaciona profesionales con delegados autorizados para realizar tareas en su nombre. | 22 | 12 | 8 | COINCIDE |
+| [practitioner_delegate_assignments](#practitioner_delegate_assignments) | Relaciona profesionales con delegados autorizados para realizar tareas en su nombre. | 22 | 12 | 9 | COINCIDE |
 | [role_templates](#role_templates) | Define los paquetes de acciones por defecto de cada rol de apoyo (secretaria, recepción, central telefónica, etc.), de plataforma o propios de una organización, para conceder permisos sin repetirlos uno a uno. | 14 | 6 | 0 | COINCIDE |
 | [shared_access_link_uses](#shared_access_link_uses) | sin propósito | 8 | 4 | 3 | COINCIDE |
 | [shared_access_links](#shared_access_links) | sin propósito | 20 | 13 | 7 | COINCIDE |
@@ -906,7 +906,7 @@ Define paquetes reutilizables de permisos que pueden concederse a delegados bajo
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: delegated_permission_sets`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
 - **Entidad del ORM:** `DelegatedPermissionSets` — `src/modules/delegated_access/entities/delegated_permission_sets.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 2 entrantes · 9 operaciones
+- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 2 entrantes · 11 operaciones
 
 #### Columnas
 
@@ -953,6 +953,7 @@ Define paquetes reutilizables de permisos que pueden concederse a delegados bajo
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /access-requests/{id}/decision | LEE | DIRECTA |
 | POST /authz/effective-actor/evaluate | LEE | DIRECTA |
 | GET /delegated-permission-sets | LEE | DIRECTA |
 | POST /delegated-permission-sets | CREA | DIRECTA |
@@ -960,6 +961,7 @@ Define paquetes reutilizables de permisos que pueden concederse a delegados bajo
 | POST /delegated-permission-sets/{id}/versions | ACTUALIZA | POR_TIPO |
 | POST /delegated-permission-sets/{id}/versions | LEE | DIRECTA |
 | POST /practitioner-delegates | LEE | DIRECTA |
+| POST /practitioner-delegates/{id}/access-requests | LEE | DIRECTA |
 | POST /practitioner-delegates/{id}/grants | LEE | DIRECTA |
 | POST /practitioner-delegates/{id}/revoke | LEE | DIRECTA |
 
@@ -2040,7 +2042,7 @@ Relaciona profesionales con delegados autorizados para realizar tareas en su nom
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: practitioner_delegate_assignments`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
 - **Entidad del ORM:** `PractitionerDelegateAssignments` — `src/modules/delegated_access/entities/practitioner_delegate_assignments.entity.ts`
-- **Resumen:** 22 columnas · 12 índices · 11 FK salientes · 5 entrantes · 8 operaciones
+- **Resumen:** 22 columnas · 12 índices · 11 FK salientes · 5 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -2111,6 +2113,7 @@ Relaciona profesionales con delegados autorizados para realizar tareas en su nom
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /access-requests/{id}/decision | LEE | DIRECTA |
 | POST /authz/effective-actor/evaluate | LEE | DIRECTA |
 | POST /delegated-access/expiry-sweep | ACTUALIZA | POR_TIPO |
 | POST /delegated-access/expiry-sweep | LEE | DIRECTA |

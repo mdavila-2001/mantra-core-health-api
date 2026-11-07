@@ -3,12 +3,12 @@
 # Flujos del módulo `iam`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 50 (42 con decisiones propias, 8 sin ellas)
+- **Operaciones:** 51 (43 con decisiones propias, 8 sin ellas)
 - Inventario de endpoints del módulo: [iam](../endpoints/iam.md)
 
 ## Proceso: IAM
 
-- **Código:** `iam` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 50
+- **Código:** `iam` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 51
 - **Actores:** CLINICIAN · Cualquier sesión válida · Público (sin sesión) · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/iam/README.md`
@@ -48,6 +48,7 @@ _Fuente: `src/modules/iam/README.md:3`_
 | `ctrl:IamMyDevicesController` | Operaciones de IamMyDevicesController que el README no asigna a un caso de uso | GET /iam/me/devices | Cualquier sesión válida | BAJO | 2 |
 |  |  | POST /iam/me/devices/{id}/confirm | Cualquier sesión válida | ALTO | 6 |
 |  |  | POST /iam/me/devices/{id}/confirm-code | Cualquier sesión válida | ALTO | 10 |
+| `ctrl:IamMyNameController` | Operaciones de IamMyNameController que el README no asigna a un caso de uso | PATCH /iam/me/name | Cualquier sesión válida | ALTO | 2 |
 | `ctrl:IamOnboardingDraftsController` | Operaciones de IamOnboardingDraftsController que el README no asigna a un caso de uso | DELETE /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
 |  |  | GET /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
 |  |  | PUT /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
@@ -147,6 +148,9 @@ flowchart LR
     o58["GET /iam/me/devices"]:::op
     o60["POST /iam/me/devices/{id}/confirm"]:::op
     o61["POST /iam/me/devices/{id}/confirm-code"]:::op
+  end
+  subgraph s4["ctrl:IamMyNameController · Operaciones de IamMyNameController que el README no…"]
+    o63["PATCH /iam/me/name"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
@@ -304,6 +308,9 @@ flowchart LR
   o61 -->|"LEE"| t13
   o61 -->|"LEE"| t42
   o61 -.-> t62
+  a2 --> o63
+  o63 -->|"ACTUALIZA"| t13
+  o63 -->|"LEE"| t13
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -2471,7 +2478,61 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /iam/me/sessions/{id}/revoke
+#### 20. PATCH /iam/me/name
+
+Corregir el nombre de la propia cuenta
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Su nombre sale de su perfil verificado: corríjalo en «Mi perfil»; ForbiddenException: La cuenta no está activa |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a UpdateMyNameUseCase.execute"]:::llamada
+  n2 --> n3
+  n4{"actor.practitionerProfileId !== undefined || actor.patientProfileId !== undefined"}:::decision
+  n3 --> n4
+  n5(["403 FORBIDDEN Su nombre sale de su perfil verificado: corríjalo en «Mi perfil»"]):::error
+  n4 -->|"sí"| n5
+  n6{"displayName === undefined"}:::decision
+  n4 -->|"no"| n6
+  n7(["404 NOT_FOUND Cuenta no encontrada"]):::error
+  n6 -->|"sí"| n7
+  n8["Transacción: transactional(…)"]:::transaccion
+  n6 -->|"no"| n8
+  n9["Llama a UsersRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE iam.users")]:::efecto
+  n9 --> n10
+  n11{"!user"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Cuenta no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13{"user.statusConceptId !== CONCEPTS.USER_ACTIVE"}:::decision
+  n11 -->|"no"| n13
+  n14(["403 FORBIDDEN La cuenta no está activa"]):::error
+  n13 -->|"sí"| n14
+  n15[("ACTUALIZA iam.users")]:::efecto
+  n13 -->|"no"| n15
+  n16(("200 Responde con éxito")):::ok
+  n15 --> n16
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 21. POST /iam/me/sessions/{id}/revoke
 
 Cerrar una de mis sesiones
 
@@ -2523,7 +2584,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+#### 22. DELETE /iam/onboarding-drafts/{formType}/{draftId}
 
 Elimina el borrador al completar el alta exitosamente o por descarte del usuario
 
@@ -2556,7 +2617,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /iam/onboarding-drafts/{formType}/{draftId}
+#### 23. GET /iam/onboarding-drafts/{formType}/{draftId}
 
 Recupera un borrador de alta guardado por identificador y tipo de formulario
 
@@ -2589,7 +2650,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. PUT /iam/onboarding-drafts/{formType}/{draftId}
+#### 24. PUT /iam/onboarding-drafts/{formType}/{draftId}
 
 Guarda o actualiza el avance del formulario de alta en borrador
 
@@ -2659,7 +2720,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /iam/users
+#### 25. POST /iam/users
 
 Crear un usuario con credencial de contraseña y rol inicial
 
@@ -2724,7 +2785,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. GET /iam/users/{id}
+#### 26. GET /iam/users/{id}
 
 Ficha de un usuario
 
@@ -2762,7 +2823,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /iam/users/{id}/anonymize
+#### 27. POST /iam/users/{id}/anonymize
 
 Anonimizar (DSAR) la cuenta
 
@@ -2828,7 +2889,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. GET /iam/users/{id}/credentials
+#### 28. GET /iam/users/{id}/credentials
 
 Credenciales del usuario
 
@@ -2872,7 +2933,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /iam/users/{id}/credentials/{cid}/revoke
+#### 29. POST /iam/users/{id}/credentials/{cid}/revoke
 
 Revocar una credencial del usuario
 
@@ -2918,7 +2979,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /iam/users/{id}/credentials/federated
+#### 30. POST /iam/users/{id}/credentials/federated
 
 Enlazar una credencial de identidad federada
 
@@ -2975,7 +3036,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /iam/users/{id}/deactivate
+#### 31. POST /iam/users/{id}/deactivate
 
 Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
 
@@ -3109,7 +3170,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. GET /iam/users/{id}/devices
+#### 32. GET /iam/users/{id}/devices
 
 Dispositivos del usuario
 
@@ -3153,7 +3214,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. POST /iam/users/{id}/devices
+#### 33. POST /iam/users/{id}/devices
 
 Registrar un dispositivo del usuario
 
@@ -3212,7 +3273,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /iam/users/{id}/global-roles
+#### 34. GET /iam/users/{id}/global-roles
 
 Roles globales del usuario
 
@@ -3256,7 +3317,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /iam/users/{id}/global-roles
+#### 35. POST /iam/users/{id}/global-roles
 
 Conceder o revocar un rol global
 
@@ -3338,7 +3399,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. GET /iam/users/{id}/lifecycle
+#### 36. GET /iam/users/{id}/lifecycle
 
 Estado de ciclo de vida de la cuenta y su historia, paginada
 
@@ -3390,7 +3451,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. POST /iam/users/{id}/lock
+#### 37. POST /iam/users/{id}/lock
 
 Bloquear la cuenta y revocar sus sesiones
 
@@ -3452,7 +3513,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. GET /iam/users/{id}/mfa-factors
+#### 38. GET /iam/users/{id}/mfa-factors
 
 Factores de MFA del usuario
 
@@ -3496,7 +3557,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. POST /iam/users/{id}/mfa-factors
+#### 39. POST /iam/users/{id}/mfa-factors
 
 Enrolar o verificar un factor MFA
 
@@ -3621,7 +3682,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. POST /iam/users/{id}/reactivate
+#### 40. POST /iam/users/{id}/reactivate
 
 Reactivar una cuenta suspendida con motivo (idempotente)
 
@@ -3755,7 +3816,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. GET /iam/users/{id}/sessions
+#### 41. GET /iam/users/{id}/sessions
 
 Sesiones del usuario
 
@@ -3799,7 +3860,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 41. POST /iam/users/{id}/suspend
+#### 42. POST /iam/users/{id}/suspend
 
 Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
 
@@ -3933,7 +3994,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. POST /iam/users/assisted-practitioner-registration
+#### 43. POST /iam/users/assisted-practitioner-registration
 
 Alta administrativa de un profesional (devuelve token de activación)
 

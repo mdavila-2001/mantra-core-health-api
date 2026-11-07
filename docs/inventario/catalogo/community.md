@@ -42,7 +42,7 @@
 | [post_shares](#post_shares) | Registra compartidos de publicaciones para conocer cómo circula contenido público entre usuarios. | 11 | 6 | 0 | COINCIDE |
 | [prestige_awards](#prestige_awards) | Registra reconocimientos otorgados a perfiles para comunicar logros o contribuciones comunitarias. | 17 | 6 | 0 | COINCIDE |
 | [prestige_scores](#prestige_scores) | Mantiene puntajes de reputación o participación asociados a perfiles según reglas del producto. | 16 | 4 | 2 | COINCIDE |
-| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 193 | COINCIDE |
+| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 194 | COINCIDE |
 | [reactions](#reactions) | Registra reacciones de usuarios a contenido comunitario para expresar interacción social. | 10 | 6 | 16 | COINCIDE |
 | [reply_templates](#reply_templates) | Conserva respuestas rápidas de una organización o de un profesional para que el equipo conteste mensajes administrativos con textos acordados. | 12 | 6 | 0 | COINCIDE |
 | [review_dimension_scores](#review_dimension_scores) | Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de atención. | 5 | 2 | 4 | COINCIDE |
@@ -3060,7 +3060,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: public_profiles; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `PublicProfiles` — `src/modules/community/entities/public_profiles.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 193 operaciones
+- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 194 operaciones
 
 #### Columnas
 
@@ -3269,6 +3269,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | PUT /tenants/{tenantId}/logo | CREA | DIRECTA |
 | PUT /tenants/{tenantId}/logo | LEE | DIRECTA |
 | GET /tenants/{tenantId}/logo/content | LEE | DIRECTA |
+| GET /public/profiles/p/{slug}/faqs | LEE | POR_SQL |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/assertions/{id}/revoke | ACTUALIZA | POR_TIPO |

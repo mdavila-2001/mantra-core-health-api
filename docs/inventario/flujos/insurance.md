@@ -29,7 +29,7 @@ _Fuente: `src/modules/insurance/README.md:3`_
 |  |  | POST /insurance-claims/{id}/adjudications | BILLING · FINANCE | MEDIO | 19 |
 |  |  | POST /insurance-claims/{id}/disputes | BILLING · FINANCE · BILLING_OPERATOR · SECURITY_ADMIN · PATIENT | MEDIO | 10 |
 |  |  | POST /insurance-claims/{id}/eob | BILLING · FINANCE | MEDIO | 21 |
-|  |  | POST /insurance-claims/{id}/patient-invoice | BILLING · FINANCE | MEDIO | 24 |
+|  |  | POST /insurance-claims/{id}/patient-invoice | BILLING · FINANCE | MEDIO | 25 |
 |  |  | POST /insurance-claims/{id}/reversals | BILLING · FINANCE | MEDIO | 15 |
 |  |  | POST /insurance-claims/quote | BILLING · FINANCE | BAJO | 10 |
 | `ctrl:ClaimsReadController` | Operaciones de ClaimsReadController que el README no asigna a un caso de uso | GET /insurance-claims | BILLING_OPERATOR · SECURITY_ADMIN | BAJO | 11 |
@@ -131,8 +131,8 @@ flowchart LR
   t29[("insurance.claim_line_adjudications")]:::tabla
   t32[("billing.invoice_lines")]:::tabla
   t33[("billing.invoices")]:::tabla
-  t34[("insurance.insurance_plan_benefits")]:::tabla
-  t37[("insurance.claim_reversals")]:::tabla
+  t36[("insurance.claim_reversals")]:::tabla
+  t39[("insurance.insurance_plan_benefits")]:::tabla
   t40[("insurance.insurance_plans")]:::tabla
   t41[("insurance.insurance_products")]:::tabla
   t45[("insurance.insurance_carriers")]:::tabla
@@ -161,8 +161,8 @@ flowchart LR
   t19[("+13 tablas más")]
   t26[("+4 tablas más")]
   t30[("+15 tablas más")]
-  t35[("+18 tablas más")]
-  t38[("+9 tablas más")]
+  t34[("+19 tablas más")]
+  t37[("+9 tablas más")]
   t42[("+4 tablas más")]
   subgraph s2["ctrl:ClaimsController · Operaciones de ClaimsController que el README no asigna…"]
     o9["POST /insurance-claims"]:::op
@@ -170,8 +170,8 @@ flowchart LR
     o20["POST /insurance-claims/{id}/disputes"]:::op
     o28["POST /insurance-claims/{id}/eob"]:::op
     o31["POST /insurance-claims/{id}/patient-invoice"]:::op
-    o36["POST /insurance-claims/{id}/reversals"]:::op
-    o39["POST /insurance-claims/quote"]:::op
+    o35["POST /insurance-claims/{id}/reversals"]:::op
+    o38["POST /insurance-claims/quote"]:::op
   end
   t46[("+5 tablas más")]
   t51[("+14 tablas más")]
@@ -237,27 +237,27 @@ flowchart LR
   o31 -->|"CREA"| t32
   o31 -->|"LEE"| t32
   o31 -->|"CREA"| t33
+  o31 -->|"LEE"| t14
   o31 -->|"LEE"| t15
   o31 -->|"LEE"| t22
-  o31 -->|"LEE"| t34
-  o31 -.-> t35
+  o31 -.-> t34
   o31 -->|"evento"| e27
-  a2 --> o36
-  o36 -->|"LEE"| t11
-  o36 -->|"LEE"| t12
-  o36 -->|"LEE"| t13
-  o36 -->|"LEE"| t14
-  o36 -->|"LEE"| t18
-  o36 -->|"CREA"| t37
-  o36 -.-> t38
-  a2 --> o39
-  o39 -->|"LEE"| t10
-  o39 -->|"LEE"| t15
-  o39 -->|"LEE"| t22
-  o39 -->|"LEE"| t34
-  o39 -->|"LEE"| t40
-  o39 -->|"LEE"| t41
-  o39 -.-> t42
+  a2 --> o35
+  o35 -->|"LEE"| t11
+  o35 -->|"LEE"| t12
+  o35 -->|"LEE"| t13
+  o35 -->|"LEE"| t14
+  o35 -->|"LEE"| t18
+  o35 -->|"CREA"| t36
+  o35 -.-> t37
+  a2 --> o38
+  o38 -->|"LEE"| t10
+  o38 -->|"LEE"| t15
+  o38 -->|"LEE"| t22
+  o38 -->|"LEE"| t39
+  o38 -->|"LEE"| t40
+  o38 -->|"LEE"| t41
+  o38 -.-> t42
   a44 --> o43
   o43 -->|"LEE"| t13
   o43 -->|"LEE"| t18
@@ -3062,8 +3062,7 @@ Facturar al paciente su parte de un servicio reclamado
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cobertura del paciente no corresponde al plan del cobro; PreconditionFailedException: {outcome.message}; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cobertura del paciente no corresponde al plan del cobro; PreconditionFailedException: {outcome.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid

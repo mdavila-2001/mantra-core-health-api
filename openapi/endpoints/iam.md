@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 49 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 50 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `iam-auth`, `iam-onboarding-drafts`, `iam-users`
-- **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamIdentifierExistsController`, `IamMyDevicesController`, `IamOnboardingDraftsController`, `IamUsersController`
+- **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamIdentifierExistsController`, `IamMyDevicesController`, `IamMyNameController`, `IamOnboardingDraftsController`, `IamUsersController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -33,33 +33,34 @@ Referencia exhaustiva de 49 operación(es) del módulo `iam`, derivada del contr
 20. [GET /iam/me/devices](#20-get-iam-me-devices) — Listar los dispositivos donde inicié sesión
 21. [POST /iam/me/devices/{id}/confirm](#21-post-iam-me-devices-id-confirm) — Verificar un dispositivo con el código del correo
 22. [POST /iam/me/devices/{id}/confirm-code](#22-post-iam-me-devices-id-confirm-code) — Enviar a mi correo el código para verificar un dispositivo
-23. [GET /iam/me/sessions](#23-get-iam-me-sessions) — Listar mis sesiones abiertas
-24. [POST /iam/me/sessions/{id}/revoke](#24-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
-25. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#25-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
-26. [GET /iam/onboarding-drafts/{formType}/{draftId}](#26-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
-27. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#27-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
-28. [GET /iam/users](#28-get-iam-users) — Listado paginado de usuarios (obsoleto)
-29. [POST /iam/users](#29-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
-30. [GET /iam/users/{id}](#30-get-iam-users-id) — Ficha de un usuario
-31. [POST /iam/users/{id}/anonymize](#31-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
-32. [GET /iam/users/{id}/credentials](#32-get-iam-users-id-credentials) — Credenciales del usuario
-33. [POST /iam/users/{id}/credentials/{cid}/revoke](#33-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
-34. [POST /iam/users/{id}/credentials/federated](#34-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
-35. [POST /iam/users/{id}/deactivate](#35-post-iam-users-id-deactivate) — Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
-36. [GET /iam/users/{id}/devices](#36-get-iam-users-id-devices) — Dispositivos del usuario
-37. [POST /iam/users/{id}/devices](#37-post-iam-users-id-devices) — Registrar un dispositivo del usuario
-38. [GET /iam/users/{id}/global-roles](#38-get-iam-users-id-global-roles) — Roles globales del usuario
-39. [POST /iam/users/{id}/global-roles](#39-post-iam-users-id-global-roles) — Conceder o revocar un rol global
-40. [GET /iam/users/{id}/lifecycle](#40-get-iam-users-id-lifecycle) — Estado de ciclo de vida de la cuenta y su historia, paginada
-41. [POST /iam/users/{id}/lock](#41-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
-42. [GET /iam/users/{id}/mfa-factors](#42-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
-43. [POST /iam/users/{id}/mfa-factors](#43-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
-44. [POST /iam/users/{id}/reactivate](#44-post-iam-users-id-reactivate) — Reactivar una cuenta suspendida con motivo (idempotente)
-45. [GET /iam/users/{id}/sessions](#45-get-iam-users-id-sessions) — Sesiones del usuario
-46. [POST /iam/users/{id}/suspend](#46-post-iam-users-id-suspend) — Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
-47. [POST /iam/users/assisted-practitioner-registration](#47-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
-48. [POST /iam/users/assisted-registration](#48-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
-49. [POST /iam/users/search](#49-post-iam-users-search) — Listado paginado de usuarios, con los filtros en el cuerpo
+23. [PATCH /iam/me/name](#23-patch-iam-me-name) — Corregir el nombre de la propia cuenta
+24. [GET /iam/me/sessions](#24-get-iam-me-sessions) — Listar mis sesiones abiertas
+25. [POST /iam/me/sessions/{id}/revoke](#25-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
+26. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#26-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
+27. [GET /iam/onboarding-drafts/{formType}/{draftId}](#27-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
+28. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#28-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
+29. [GET /iam/users](#29-get-iam-users) — Listado paginado de usuarios (obsoleto)
+30. [POST /iam/users](#30-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
+31. [GET /iam/users/{id}](#31-get-iam-users-id) — Ficha de un usuario
+32. [POST /iam/users/{id}/anonymize](#32-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
+33. [GET /iam/users/{id}/credentials](#33-get-iam-users-id-credentials) — Credenciales del usuario
+34. [POST /iam/users/{id}/credentials/{cid}/revoke](#34-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
+35. [POST /iam/users/{id}/credentials/federated](#35-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
+36. [POST /iam/users/{id}/deactivate](#36-post-iam-users-id-deactivate) — Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
+37. [GET /iam/users/{id}/devices](#37-get-iam-users-id-devices) — Dispositivos del usuario
+38. [POST /iam/users/{id}/devices](#38-post-iam-users-id-devices) — Registrar un dispositivo del usuario
+39. [GET /iam/users/{id}/global-roles](#39-get-iam-users-id-global-roles) — Roles globales del usuario
+40. [POST /iam/users/{id}/global-roles](#40-post-iam-users-id-global-roles) — Conceder o revocar un rol global
+41. [GET /iam/users/{id}/lifecycle](#41-get-iam-users-id-lifecycle) — Estado de ciclo de vida de la cuenta y su historia, paginada
+42. [POST /iam/users/{id}/lock](#42-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
+43. [GET /iam/users/{id}/mfa-factors](#43-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
+44. [POST /iam/users/{id}/mfa-factors](#44-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
+45. [POST /iam/users/{id}/reactivate](#45-post-iam-users-id-reactivate) — Reactivar una cuenta suspendida con motivo (idempotente)
+46. [GET /iam/users/{id}/sessions](#46-get-iam-users-id-sessions) — Sesiones del usuario
+47. [POST /iam/users/{id}/suspend](#47-post-iam-users-id-suspend) — Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
+48. [POST /iam/users/assisted-practitioner-registration](#48-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
+49. [POST /iam/users/assisted-registration](#49-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+50. [POST /iam/users/search](#50-post-iam-users-search) — Listado paginado de usuarios, con los filtros en el cuerpo
 
 ---
 
@@ -3409,7 +3410,136 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /iam/me/sessions
+## 23. PATCH /iam/me/name
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Corregir el nombre de la propia cuenta
+- **Operation ID:** `IamMyNameController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamMyNameController.update](../../src/modules/iam/presentation/controllers/iam-my-name.controller.ts)
+
+### Descripción de negocio
+
+Recibe las cuatro partes del registro y recompone el nombre. El token lo trae al renovarse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /iam/me/name` en `IamMyNameController_update`. El controlador delega en `UpdateMyNameUseCase.execute`. Valida el body como `UpdateMyNameDto` y consume `application/json`. El tipo de retorno estático es `Promise<MyNameResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateMyNameDto`; los campos opcionales se omiten.
+
+```http
+PATCH /iam/me/name HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Wendy",
+  "lastName": "Dávila"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 1; longitud máxima 100; patrón runtime `NAME_PART` | Sin descripción específica en el contrato OpenAPI. | `Wendy` |
+| `middleName` | No | `string` | longitud máxima 100; patrón runtime `NAME_PART` | Sin descripción específica en el contrato OpenAPI. | `Jennyfer` |
+| `lastName` | Sí | `string` | longitud mínima 1; longitud máxima 100; patrón runtime `NAME_PART` | Sin descripción específica en el contrato OpenAPI. | `Dávila` |
+| `motherLastName` | No | `string` | longitud máxima 100; patrón runtime `NAME_PART` | Sin descripción específica en el contrato OpenAPI. | `Yamal` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /iam/me/name HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Wendy",
+  "middleName": "Jennyfer",
+  "lastName": "Dávila",
+  "motherLastName": "Yamal"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyNameResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MyNameResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MyNameResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MyNameResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MyNameResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<MyNameResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MyNameResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MyNameResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MyNameResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MyNameResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyNameResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "displayName": "Nombre de ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Composed name (`iam.users.display_name`). | `Nombre de ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Su nombre sale de su perfil verificado: corríjalo en «Mi perfil» | Excepción explícita en src/modules/iam/application/use-cases/update-my-name.use-case.ts |
+| 403 | `FORBIDDEN` | La cuenta no está activa | Excepción explícita en src/modules/iam/application/use-cases/update-my-name.use-case.ts |
+| 404 | `NOT_FOUND` | Cuenta no encontrada | Excepción explícita en src/modules/iam/application/use-cases/update-my-name.use-case.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/name"
+}
+```
+
+---
+
+## 24. GET /iam/me/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -3515,7 +3645,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /iam/me/sessions/{id}/revoke
+## 25. POST /iam/me/sessions/{id}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -3625,7 +3755,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+## 26. DELETE /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3729,7 +3859,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /iam/onboarding-drafts/{formType}/{draftId}
+## 27. GET /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3819,7 +3949,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. PUT /iam/onboarding-drafts/{formType}/{draftId}
+## 28. PUT /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3911,7 +4041,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /iam/users
+## 29. GET /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4045,7 +4175,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /iam/users
+## 30. POST /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4184,7 +4314,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /iam/users/{id}
+## 31. GET /iam/users/{id}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4311,7 +4441,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /iam/users/{id}/anonymize
+## 32. POST /iam/users/{id}/anonymize
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4421,7 +4551,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /iam/users/{id}/credentials
+## 33. GET /iam/users/{id}/credentials
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4551,7 +4681,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /iam/users/{id}/credentials/{cid}/revoke
+## 34. POST /iam/users/{id}/credentials/{cid}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4662,7 +4792,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /iam/users/{id}/credentials/federated
+## 35. POST /iam/users/{id}/credentials/federated
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4797,7 +4927,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /iam/users/{id}/deactivate
+## 36. POST /iam/users/{id}/deactivate
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4935,7 +5065,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /iam/users/{id}/devices
+## 37. GET /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5061,7 +5191,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /iam/users/{id}/devices
+## 38. POST /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5196,7 +5326,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. GET /iam/users/{id}/global-roles
+## 39. GET /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5318,7 +5448,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /iam/users/{id}/global-roles
+## 40. POST /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5448,7 +5578,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /iam/users/{id}/lifecycle
+## 41. GET /iam/users/{id}/lifecycle
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5581,7 +5711,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /iam/users/{id}/lock
+## 42. POST /iam/users/{id}/lock
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5704,7 +5834,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. GET /iam/users/{id}/mfa-factors
+## 43. GET /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5828,7 +5958,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. POST /iam/users/{id}/mfa-factors
+## 44. POST /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5981,7 +6111,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /iam/users/{id}/reactivate
+## 45. POST /iam/users/{id}/reactivate
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -6118,7 +6248,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /iam/users/{id}/sessions
+## 46. GET /iam/users/{id}/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -6244,7 +6374,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. POST /iam/users/{id}/suspend
+## 47. POST /iam/users/{id}/suspend
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -6382,7 +6512,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. POST /iam/users/assisted-practitioner-registration
+## 48. POST /iam/users/assisted-practitioner-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -6703,7 +6833,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. POST /iam/users/assisted-registration
+## 49. POST /iam/users/assisted-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -6851,7 +6981,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. POST /iam/users/search
+## 50. POST /iam/users/search
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`

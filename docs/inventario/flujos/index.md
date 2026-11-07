@@ -2,9 +2,9 @@
 
 # Inventario de flujos
 
-**80 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 78 de módulo), **14 máquinas de estado** y **2033 árboles de decisión**.
+**80 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 78 de módulo), **14 máquinas de estado** y **2045 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1802 · sin ellas: 231
+- Operaciones con decisiones propias: 1812 · sin ellas: 233
 - Operaciones sin proceso asignado: 0
 - Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 38 · CASO_DE_USO_README 11 · MIXTO 29 · CURADO_EN_DOCUMENTO 2
 
@@ -39,13 +39,13 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `document_store` | 1 | 5 | 0 | [document_store.md](document_store.md) |
 | `education` | 1 | 14 | 0 | [education.md](education.md) |
 | `erp` | 1 | 17 | 0 | [erp.md](erp.md) |
-| `forms` | 1 | 25 | 0 | [forms.md](forms.md) |
+| `forms` | 1 | 36 | 0 | [forms.md](forms.md) |
 | `geo` | 1 | 11 | 0 | [geo.md](geo.md) |
 | `governance_admin` | 1 | 5 | 0 | [governance_admin.md](governance_admin.md) |
 | `graph_intelligence` | 1 | 15 | 1 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 1 | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 1 | 16 | 0 | [health_data.md](health_data.md) |
-| `iam` | 1 | 50 | 0 | [iam.md](iam.md) |
+| `iam` | 1 | 51 | 0 | [iam.md](iam.md) |
 | `identity_assurance` | 1 | 28 | 0 | [identity_assurance.md](identity_assurance.md) |
 | `insurance` | 1 | 78 | 1 | [insurance.md](insurance.md) |
 | `integration_contracts` | 1 | 12 | 0 | [integration_contracts.md](integration_contracts.md) |

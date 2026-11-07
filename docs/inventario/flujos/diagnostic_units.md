@@ -41,14 +41,14 @@ _Fuente: `src/modules/diagnostic_units/README.md:3`_
 | `UC-23-11` | Renovar acreditación | POST /diagnostic-unit-accreditations/{id}/renew | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /diagnostic-units/{id}/accreditations | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-23-12` | Reconstruir proyección del perfil público | POST /diagnostic-units/{id}/reproject | SECURITY_ADMIN | BAJO | 1 |
-| `ctrl:CenterScheduleController` | Operaciones de CenterScheduleController que el README no asigna a un caso de uso | POST /diagnostic-units/{unitId}/equipment | Cualquier sesión válida | ALTO | 17 |
-|  |  | DELETE /diagnostic-units/{unitId}/equipment/{equipmentId} | Cualquier sesión válida | ALTO | 16 |
-|  |  | PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | Cualquier sesión válida | ALTO | 19 |
-|  |  | PUT /diagnostic-units/{unitId}/equipment/{equipmentId} | Cualquier sesión válida | ALTO | 16 |
-|  |  | GET /diagnostic-units/{unitId}/schedule | Cualquier sesión válida | BAJO | 15 |
-|  |  | PUT /diagnostic-units/{unitId}/schedule | Cualquier sesión válida | ALTO | 19 |
-|  |  | GET /diagnostic-units/me/bookings | Cualquier sesión válida | BAJO | 16 |
-|  |  | GET /diagnostic-units/me/schedule | Cualquier sesión válida | BAJO | 15 |
+| `ctrl:CenterScheduleController` | Operaciones de CenterScheduleController que el README no asigna a un caso de uso | POST /diagnostic-units/{unitId}/equipment | Cualquier sesión válida | ALTO | 13 |
+|  |  | DELETE /diagnostic-units/{unitId}/equipment/{equipmentId} | Cualquier sesión válida | ALTO | 13 |
+|  |  | PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | Cualquier sesión válida | ALTO | 16 |
+|  |  | PUT /diagnostic-units/{unitId}/equipment/{equipmentId} | Cualquier sesión válida | ALTO | 13 |
+|  |  | GET /diagnostic-units/{unitId}/schedule | Cualquier sesión válida | BAJO | 12 |
+|  |  | PUT /diagnostic-units/{unitId}/schedule | Cualquier sesión válida | ALTO | 16 |
+|  |  | GET /diagnostic-units/me/bookings | Cualquier sesión válida | BAJO | 13 |
+|  |  | GET /diagnostic-units/me/schedule | Cualquier sesión válida | BAJO | 12 |
 | `ctrl:DiagnosticEquipmentController` | Operaciones de DiagnosticEquipmentController que el README no asigna a un caso de uso | GET /diagnostic-equipment/{id} | Cualquier sesión válida | BAJO | 12 |
 |  |  | GET /diagnostic-equipment/{id}/mwl-station | Cualquier sesión válida | BAJO | 11 |
 |  |  | POST /diagnostic-equipment/{id}/resource | Cualquier sesión válida | ALTO | 16 |
@@ -67,9 +67,9 @@ _Fuente: `src/modules/diagnostic_units/README.md:3`_
 |  |  | PATCH /diagnostics/lab/services/{id} | Cualquier sesión válida | ALTO | 10 |
 |  |  | POST /diagnostics/lab/services/import | Cualquier sesión válida | ALTO | 11 |
 | `ctrl:OrderBookingController` | Operaciones de OrderBookingController que el README no asigna a un caso de uso | DELETE /diagnostic-results/me/orders/{orderId}/booking | PATIENT | MEDIO | 12 |
-|  |  | POST /diagnostic-results/me/orders/{orderId}/booking | PATIENT | MEDIO | 29 |
-|  |  | GET /diagnostic-results/me/orders/{orderId}/booking-options | PATIENT | BAJO | 25 |
-| `ctrl:StudyAvailabilityController` | Operaciones de StudyAvailabilityController que el README no asigna a un caso de uso | GET /diagnostic-units/{unitId}/study-availability | Cualquier sesión válida | BAJO | 15 |
+|  |  | POST /diagnostic-results/me/orders/{orderId}/booking | PATIENT | MEDIO | 26 |
+|  |  | GET /diagnostic-results/me/orders/{orderId}/booking-options | PATIENT | BAJO | 23 |
+| `ctrl:StudyAvailabilityController` | Operaciones de StudyAvailabilityController que el README no asigna a un caso de uso | GET /diagnostic-units/{unitId}/study-availability | Cualquier sesión válida | BAJO | 12 |
 
 ### Diagrama 1 de 3 — etapas `Directorio P3`, `UC-23-01`, `UC-23-02`…
 
@@ -253,34 +253,34 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a38(["SECURITY_ADMIN"]):::actor
-  t3[("common.addresses")]:::tabla
-  t4[("diagnostic_units.diagnostic_equipment")]:::tabla
-  t5[("diagnostic_units.diagnostic_price_schedules")]:::tabla
-  t6[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t7[("diagnostic_units.diagnostic_study_prices")]:::tabla
+  a37(["SECURITY_ADMIN"]):::actor
+  t3[("diagnostic_units.diagnostic_equipment")]:::tabla
+  t4[("diagnostic_units.diagnostic_price_schedules")]:::tabla
+  t5[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t6[("diagnostic_units.diagnostic_study_prices")]:::tabla
+  t7[("diagnostic_units.diagnostic_unit_sites")]:::tabla
   e13>"diagnostic_units.equipment.located"]:::evento
   e14>"diagnostic_units.equipment.status_changed"]:::evento
-  t18[("diagnostic_units.diagnostic_unit_sites")]:::tabla
+  t18[("diagnostic_units.diagnostic_units")]:::tabla
   t27[("delegated_access.organization_user_assignments")]:::tabla
-  t28[("diagnostic_units.diagnostic_units")]:::tabla
-  t29[("directory.branch_memberships")]:::tabla
-  t30[("directory.tenant_memberships")]:::tabla
-  e36>"diagnostic_units.equipment.resource_linked"]:::evento
-  t39[("diagnostic_units.diagnostic_unit_accreditations")]:::tabla
-  t40[("diagnostic_units.diagnostic_unit_practitioner_ass…")]:::tabla
-  t43[("terminology.catalog_concepts")]:::tabla
+  t28[("directory.branch_memberships")]:::tabla
+  t29[("directory.tenant_memberships")]:::tabla
+  e35>"diagnostic_units.equipment.resource_linked"]:::evento
+  t38[("diagnostic_units.diagnostic_unit_accreditations")]:::tabla
+  t39[("diagnostic_units.diagnostic_unit_practitioner_ass…")]:::tabla
+  t42[("terminology.catalog_concepts")]:::tabla
+  t44[("common.addresses")]:::tabla
   t45[("community.service_reviews")]:::tabla
   t48[("diagnostic_units.diagnostic_service_categories")]:::tabla
   t49[("diagnostic_units.diagnostic_study_components")]:::tabla
-  t8[("+11 tablas más")]
-  t10[("+10 tablas más")]
-  t12[("+13 tablas más")]
-  t16[("+10 tablas más")]
-  t19[("+9 tablas más")]
-  t21[("+13 tablas más")]
-  t23[("+10 tablas más")]
-  t25[("+9 tablas más")]
+  t8[("+7 tablas más")]
+  t10[("+7 tablas más")]
+  t12[("+10 tablas más")]
+  t16[("+7 tablas más")]
+  t19[("+6 tablas más")]
+  t21[("+10 tablas más")]
+  t23[("+7 tablas más")]
+  t25[("+6 tablas más")]
   subgraph s0["ctrl:CenterScheduleController · Operaciones de CenterScheduleController que el…"]
     o1["POST /diagnostic-units/{unitId}/equipment"]:::op
     o9["DELETE /diagnostic-units/{unitId}/equipment/{equipmentId}"]:::op
@@ -291,20 +291,20 @@ flowchart LR
     o22["GET /diagnostic-units/me/bookings"]:::op
     o24["GET /diagnostic-units/me/schedule"]:::op
   end
-  t31[("+6 tablas más")]
-  t33[("+5 tablas más")]
-  t35[("+10 tablas más")]
+  t30[("+6 tablas más")]
+  t32[("+5 tablas más")]
+  t34[("+10 tablas más")]
   subgraph s1["ctrl:DiagnosticEquipmentController · Operaciones de DiagnosticEquipmentControll…"]
     o26["GET /diagnostic-equipment/{id}"]:::op
-    o32["GET /diagnostic-equipment/{id}/mwl-station"]:::op
-    o34["POST /diagnostic-equipment/{id}/resource"]:::op
+    o31["GET /diagnostic-equipment/{id}/mwl-station"]:::op
+    o33["POST /diagnostic-equipment/{id}/resource"]:::op
   end
-  t41[("+5 tablas más")]
+  t40[("+5 tablas más")]
   t46[("+4 tablas más")]
   subgraph s2["ctrl:DiagnosticUnitsController · Operaciones de DiagnosticUnitsController que e…"]
-    o37["GET /diagnostic-units/{id}/administration"]:::op
-    o42["GET /diagnostic-units/administration"]:::op
-    o44["GET /diagnostic-units/search"]:::op
+    o36["GET /diagnostic-units/{id}/administration"]:::op
+    o41["GET /diagnostic-units/administration"]:::op
+    o43["GET /diagnostic-units/search"]:::op
   end
   t50[("+7 tablas más")]
   t52[("+11 tablas más")]
@@ -331,24 +331,24 @@ flowchart LR
     o69["POST /diagnostics/lab/services/import"]:::op
   end
   a2 --> o1
+  o1 -->|"CREA"| t3
   o1 -->|"LEE"| t3
-  o1 -->|"CREA"| t4
   o1 -->|"LEE"| t4
   o1 -->|"LEE"| t5
   o1 -->|"LEE"| t6
   o1 -->|"LEE"| t7
   o1 -.-> t8
   a2 --> o9
+  o9 -->|"BORRA"| t3
   o9 -->|"LEE"| t3
-  o9 -->|"BORRA"| t4
   o9 -->|"LEE"| t4
   o9 -->|"LEE"| t5
   o9 -->|"LEE"| t6
   o9 -->|"LEE"| t7
   o9 -.-> t10
   a2 --> o11
+  o11 -->|"ACTUALIZA"| t3
   o11 -->|"LEE"| t3
-  o11 -->|"ACTUALIZA"| t4
   o11 -->|"LEE"| t4
   o11 -->|"LEE"| t5
   o11 -->|"LEE"| t6
@@ -357,8 +357,8 @@ flowchart LR
   o11 -->|"evento"| e13
   o11 -->|"evento"| e14
   a2 --> o15
+  o15 -->|"ACTUALIZA"| t3
   o15 -->|"LEE"| t3
-  o15 -->|"ACTUALIZA"| t4
   o15 -->|"LEE"| t4
   o15 -->|"LEE"| t5
   o15 -->|"LEE"| t6
@@ -398,138 +398,138 @@ flowchart LR
   o24 -.-> t25
   a2 --> o26
   o26 -->|"LEE"| t27
-  o26 -->|"LEE"| t4
+  o26 -->|"LEE"| t3
+  o26 -->|"LEE"| t7
   o26 -->|"LEE"| t18
   o26 -->|"LEE"| t28
   o26 -->|"LEE"| t29
-  o26 -->|"LEE"| t30
-  o26 -.-> t31
-  a2 --> o32
-  o32 -->|"LEE"| t27
-  o32 -->|"LEE"| t4
-  o32 -->|"LEE"| t18
-  o32 -->|"LEE"| t28
-  o32 -->|"LEE"| t29
-  o32 -->|"LEE"| t30
-  o32 -.-> t33
-  a2 --> o34
-  o34 -->|"LEE"| t27
-  o34 -->|"LEE"| t4
-  o34 -->|"LEE"| t18
-  o34 -->|"LEE"| t28
-  o34 -->|"LEE"| t29
-  o34 -->|"LEE"| t30
-  o34 -.-> t35
-  o34 -->|"evento"| e36
-  a38 --> o37
-  o37 -->|"LEE"| t4
-  o37 -->|"LEE"| t5
-  o37 -->|"LEE"| t6
-  o37 -->|"LEE"| t7
-  o37 -->|"LEE"| t39
-  o37 -->|"LEE"| t40
-  o37 -.-> t41
-  a38 --> o42
-  o42 -->|"LEE"| t4
-  o42 -->|"LEE"| t6
-  o42 -->|"LEE"| t18
-  o42 -->|"LEE"| t28
-  o42 -->|"LEE"| t43
-  a2 --> o44
-  o44 -->|"LEE"| t3
-  o44 -->|"LEE"| t45
-  o44 -->|"LEE"| t4
-  o44 -->|"LEE"| t5
-  o44 -->|"LEE"| t6
-  o44 -->|"LEE"| t7
-  o44 -.-> t46
+  o26 -.-> t30
+  a2 --> o31
+  o31 -->|"LEE"| t27
+  o31 -->|"LEE"| t3
+  o31 -->|"LEE"| t7
+  o31 -->|"LEE"| t18
+  o31 -->|"LEE"| t28
+  o31 -->|"LEE"| t29
+  o31 -.-> t32
+  a2 --> o33
+  o33 -->|"LEE"| t27
+  o33 -->|"LEE"| t3
+  o33 -->|"LEE"| t7
+  o33 -->|"LEE"| t18
+  o33 -->|"LEE"| t28
+  o33 -->|"LEE"| t29
+  o33 -.-> t34
+  o33 -->|"evento"| e35
+  a37 --> o36
+  o36 -->|"LEE"| t3
+  o36 -->|"LEE"| t4
+  o36 -->|"LEE"| t5
+  o36 -->|"LEE"| t6
+  o36 -->|"LEE"| t38
+  o36 -->|"LEE"| t39
+  o36 -.-> t40
+  a37 --> o41
+  o41 -->|"LEE"| t3
+  o41 -->|"LEE"| t5
+  o41 -->|"LEE"| t7
+  o41 -->|"LEE"| t18
+  o41 -->|"LEE"| t42
+  a2 --> o43
+  o43 -->|"LEE"| t44
+  o43 -->|"LEE"| t45
+  o43 -->|"LEE"| t3
+  o43 -->|"LEE"| t4
+  o43 -->|"LEE"| t5
+  o43 -->|"LEE"| t6
+  o43 -.-> t46
   a2 --> o47
-  o47 -->|"LEE"| t5
+  o47 -->|"LEE"| t4
   o47 -->|"LEE"| t48
   o47 -->|"LEE"| t49
+  o47 -->|"LEE"| t5
   o47 -->|"LEE"| t6
-  o47 -->|"LEE"| t7
-  o47 -->|"LEE"| t28
+  o47 -->|"LEE"| t18
   o47 -.-> t50
   a2 --> o51
-  o51 -->|"CREA"| t5
-  o51 -->|"LEE"| t5
+  o51 -->|"CREA"| t4
+  o51 -->|"LEE"| t4
   o51 -->|"LEE"| t48
   o51 -->|"CREA"| t49
   o51 -->|"LEE"| t49
-  o51 -->|"CREA"| t6
+  o51 -->|"CREA"| t5
   o51 -.-> t52
   a2 --> o53
-  o53 -->|"LEE"| t5
+  o53 -->|"LEE"| t4
   o53 -->|"LEE"| t48
   o53 -->|"LEE"| t49
+  o53 -->|"LEE"| t5
   o53 -->|"LEE"| t6
-  o53 -->|"LEE"| t7
-  o53 -->|"LEE"| t28
+  o53 -->|"LEE"| t18
   o53 -.-> t54
   a2 --> o55
-  o55 -->|"LEE"| t5
+  o55 -->|"LEE"| t4
   o55 -->|"CREA"| t48
   o55 -->|"LEE"| t48
   o55 -->|"LEE"| t49
+  o55 -->|"LEE"| t5
   o55 -->|"LEE"| t6
-  o55 -->|"LEE"| t7
   o55 -.-> t56
   a2 --> o57
-  o57 -->|"LEE"| t5
+  o57 -->|"LEE"| t4
   o57 -->|"BORRA"| t48
   o57 -->|"LEE"| t48
   o57 -->|"LEE"| t49
+  o57 -->|"LEE"| t5
   o57 -->|"LEE"| t6
-  o57 -->|"LEE"| t7
   o57 -.-> t58
   a2 --> o59
-  o59 -->|"LEE"| t5
+  o59 -->|"LEE"| t4
   o59 -->|"ACTUALIZA"| t48
   o59 -->|"LEE"| t48
   o59 -->|"LEE"| t49
+  o59 -->|"LEE"| t5
   o59 -->|"LEE"| t6
-  o59 -->|"LEE"| t7
   o59 -.-> t60
   a2 --> o61
-  o61 -->|"LEE"| t5
+  o61 -->|"LEE"| t4
   o61 -->|"LEE"| t48
   o61 -->|"LEE"| t49
+  o61 -->|"LEE"| t5
   o61 -->|"LEE"| t6
-  o61 -->|"LEE"| t7
-  o61 -->|"LEE"| t28
+  o61 -->|"LEE"| t18
   o61 -.-> t62
   a2 --> o63
-  o63 -->|"CREA"| t5
-  o63 -->|"LEE"| t5
+  o63 -->|"CREA"| t4
+  o63 -->|"LEE"| t4
   o63 -->|"LEE"| t48
   o63 -->|"LEE"| t49
-  o63 -->|"CREA"| t6
-  o63 -->|"LEE"| t6
+  o63 -->|"CREA"| t5
+  o63 -->|"LEE"| t5
   o63 -.-> t64
   a2 --> o65
-  o65 -->|"LEE"| t5
+  o65 -->|"LEE"| t4
   o65 -->|"LEE"| t48
   o65 -->|"LEE"| t49
-  o65 -->|"ACTUALIZA"| t6
+  o65 -->|"ACTUALIZA"| t5
+  o65 -->|"LEE"| t5
   o65 -->|"LEE"| t6
-  o65 -->|"LEE"| t7
   o65 -.-> t66
   a2 --> o67
-  o67 -->|"CREA"| t5
-  o67 -->|"LEE"| t5
+  o67 -->|"CREA"| t4
+  o67 -->|"LEE"| t4
   o67 -->|"LEE"| t48
   o67 -->|"LEE"| t49
-  o67 -->|"ACTUALIZA"| t6
-  o67 -->|"LEE"| t6
+  o67 -->|"ACTUALIZA"| t5
+  o67 -->|"LEE"| t5
   o67 -.-> t68
   a2 --> o69
-  o69 -->|"CREA"| t5
-  o69 -->|"LEE"| t5
+  o69 -->|"CREA"| t4
+  o69 -->|"LEE"| t4
   o69 -->|"LEE"| t48
   o69 -->|"LEE"| t49
-  o69 -->|"CREA"| t6
-  o69 -->|"ACTUALIZA"| t6
+  o69 -->|"CREA"| t5
+  o69 -->|"ACTUALIZA"| t5
   o69 -.-> t70
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
@@ -542,7 +542,7 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["PATIENT"]):::actor
-  a19(["Cualquier sesión válida"]):::actor
+  a20(["Cualquier sesión válida"]):::actor
   t3[("clinical.diagnostic_reports")]:::tabla
   t4[("clinical.service_requests")]:::tabla
   t5[("diagnostics.diagnostic_release_events")]:::tabla
@@ -550,23 +550,25 @@ flowchart LR
   t7[("diagnostics.service_request_performer_events")]:::tabla
   t8[("profiles.patient_profiles")]:::tabla
   t11[("clinical.service_request_components")]:::tabla
-  t12[("common.addresses")]:::tabla
-  t13[("diagnostic_units.diagnostic_equipment")]:::tabla
-  t14[("diagnostic_units.diagnostic_price_schedules")]:::tabla
-  t20[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t21[("diagnostic_units.diagnostic_study_prices")]:::tabla
-  t22[("diagnostic_units.diagnostic_unit_sites")]:::tabla
+  t12[("diagnostic_units.diagnostic_equipment")]:::tabla
+  t13[("diagnostic_units.diagnostic_price_schedules")]:::tabla
+  t14[("diagnostic_units.diagnostic_study_components")]:::tabla
+  t17[("common.addresses")]:::tabla
+  t21[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t22[("diagnostic_units.diagnostic_study_prices")]:::tabla
+  t23[("diagnostic_units.diagnostic_unit_sites")]:::tabla
+  t24[("diagnostic_units.diagnostic_units")]:::tabla
   t9[("+6 tablas más")]
-  t15[("+23 tablas más")]
-  t17[("+19 tablas más")]
+  t15[("+20 tablas más")]
+  t18[("+17 tablas más")]
   subgraph s0["ctrl:OrderBookingController · Operaciones de OrderBookingController que el READ…"]
     o1["DELETE /diagnostic-results/me/orders/{orderId}/booking"]:::op
     o10["POST /diagnostic-results/me/orders/{orderId}/booking"]:::op
     o16["GET /diagnostic-results/me/orders/{orderId}/booking-options"]:::op
   end
-  t23[("+9 tablas más")]
+  t25[("+6 tablas más")]
   subgraph s1["ctrl:StudyAvailabilityController · Operaciones de StudyAvailabilityController q…"]
-    o18["GET /diagnostic-units/{unitId}/study-availability"]:::op
+    o19["GET /diagnostic-units/{unitId}/study-availability"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -588,18 +590,18 @@ flowchart LR
   o16 -->|"LEE"| t3
   o16 -->|"LEE"| t11
   o16 -->|"LEE"| t4
+  o16 -->|"LEE"| t17
   o16 -->|"LEE"| t12
   o16 -->|"LEE"| t13
-  o16 -->|"LEE"| t14
-  o16 -.-> t17
-  a19 --> o18
-  o18 -->|"LEE"| t12
-  o18 -->|"LEE"| t13
-  o18 -->|"LEE"| t14
-  o18 -->|"LEE"| t20
-  o18 -->|"LEE"| t21
-  o18 -->|"LEE"| t22
-  o18 -.-> t23
+  o16 -.-> t18
+  a20 --> o19
+  o19 -->|"LEE"| t12
+  o19 -->|"LEE"| t13
+  o19 -->|"LEE"| t21
+  o19 -->|"LEE"| t22
+  o19 -->|"LEE"| t23
+  o19 -->|"LEE"| t24
+  o19 -.-> t25
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1198,7 +1200,7 @@ Book my order at a center, confirmed
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden no encontrada; ResourceNotFoundException: Centro no encontrado; ResourceNotFoundException: El centro no hace ese estudio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden no encontrada; ResourceNotFoundException: Centro no encontrado; ResourceNotFoundException: Sucursal no encontrada; ResourceNotFoundException: El centro no hace ese estudio |
 | 409 | `CONFLICT` | ConflictException: Esta orden ya tiene su resultado: no hace falta reservar.; ConflictException: Esta orden ya tiene un turno. Cancélelo para elegir otro.; ConflictException: Ese horario se acaba de ocupar. Elija otro. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1260,13 +1262,13 @@ flowchart TD
   n26 -->|"sí"| n27
   n28["Llama a CenterContextService.load"]:::llamada
   n26 -->|"no"| n28
-  n29["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n29{"siteId !== null && site === null"}:::decision
   n28 --> n29
-  n30[("LEE scheduling.schedulable_resources")]:::efecto
-  n29 --> n30
-  n31["Llama a CenterScheduleRepository.findMainSites"]:::llamada
-  n30 --> n31
-  n32[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n30(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n29 -->|"no"| n31
+  n32[("LEE scheduling.schedulable_resources")]:::efecto
   n31 --> n32
   n33["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n32 --> n33
@@ -1340,7 +1342,7 @@ Centers that perform the study of my order
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden no encontrada; ResourceNotFoundException: Sucursal no encontrada |
 | 409 | `CONFLICT` | ConflictException: Esta orden ya tiene su resultado: no hace falta reservar. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente; PreconditionFailedException: Esta orden no es de un estudio que se reserve en un centro. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1406,13 +1408,13 @@ flowchart TD
   n28 --> n29
   n30["Llama a CenterContextService.load"]:::llamada
   n29 --> n30
-  n31["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n31{"siteId !== null && site === null"}:::decision
   n30 --> n31
-  n32[("LEE scheduling.schedulable_resources")]:::efecto
-  n31 --> n32
-  n33["Llama a CenterScheduleRepository.findMainSites"]:::llamada
-  n32 --> n33
-  n34[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n32(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n31 -->|"no"| n33
+  n34[("LEE scheduling.schedulable_resources")]:::efecto
   n33 --> n34
   n35["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n34 --> n35
@@ -1426,19 +1428,38 @@ flowchart TD
   n38 --> n39
   n40[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
   n39 --> n40
-  n41["Llama a CenterAvailabilityService.startsFor"]:::llamada
+  n41["Repite: por cada const other de main.sites.slice(1)"]:::bucle
   n40 --> n41
-  n42["Llama a CenterBookingsRepository.findOccupying"]:::llamada
-  n41 --> n42
-  n43[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
+  n42["Llama a CenterContextService.load"]:::llamada
+  n41 -->|"cada elemento"| n42
+  n43{"siteId !== null && site === null"}:::decision
   n42 --> n43
-  n44{"modality === null"}:::decision
-  n43 --> n44
-  n27 -->|"al terminar"| n44
-  n45(["422 PRECONDITION_FAILED Esta orden no es de un estudio que se reserve en un centro."]):::error
-  n44 -->|"sí"| n45
-  n46(("200 Responde con éxito")):::ok
-  n44 -->|"no"| n46
+  n44(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n43 -->|"sí"| n44
+  n45["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n43 -->|"no"| n45
+  n46[("LEE scheduling.schedulable_resources")]:::efecto
+  n45 --> n46
+  n47["Llama a CenterStudiesRepository.findForUnit"]:::llamada
+  n46 --> n47
+  n48[("LEE diagnostic_units.diagnostic_study_offerings · LEE diagnostic_units.diagnostic_units · LEE diagnostic_unit…")]:::efecto
+  n47 --> n48
+  n49["Llama a CenterScheduleRepository.findEquipment"]:::llamada
+  n48 --> n49
+  n50[("LEE diagnostic_units.diagnostic_equipment · LEE diagnostic_units.diagnostic_unit_sites · LEE terminology.cata…")]:::efecto
+  n49 --> n50
+  n51["Llama a CenterScheduleRepository.findTemplateRules"]:::llamada
+  n50 --> n51
+  n52[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
+  n51 --> n52
+  n53{"modality === null"}:::decision
+  n52 --> n53
+  n41 -->|"al terminar"| n53
+  n27 -->|"al terminar"| n53
+  n54(["422 PRECONDITION_FAILED Esta orden no es de un estudio que se reserve en un centro."]):::error
+  n53 -->|"sí"| n54
+  n55(("200 Responde con éxito")):::ok
+  n53 -->|"no"| n55
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2389,7 +2410,7 @@ Register a device (a production line)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Sucursal no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El centro no tiene una sucursal activa donde registrar el equipo.; PreconditionFailedException: El catálogo todavía no tiene un tipo de equipo para esa modalidad. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2412,55 +2433,72 @@ flowchart TD
   n7 --> n8
   n9(["404 NOT_FOUND Unidad no encontrada"]):::error
   n8 -->|"sí"| n9
-  n10[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n10["Llama a CenterContextService.load"]:::llamada
   n8 -->|"no"| n10
-  n11{"!site"}:::decision
+  n11{"siteId !== null && site === null"}:::decision
   n10 --> n11
-  n12(["422 PRECONDITION_FAILED El centro no tiene una sucursal activa donde registrar el equipo."]):::error
+  n12(["404 NOT_FOUND Sucursal no encontrada"]):::error
   n11 -->|"sí"| n12
-  n13[("CREA diagnostic_units.diagnostic_equipment")]:::efecto
+  n13["Llama a CenterScheduleRepository.findResource"]:::llamada
   n11 -->|"no"| n13
-  n14["Llama a ManageCenterEquipmentUseCase.identity"]:::llamada
+  n14[("LEE scheduling.schedulable_resources")]:::efecto
   n13 --> n14
-  n15{"type === undefined"}:::decision
+  n15["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n14 --> n15
-  n16(["422 PRECONDITION_FAILED El catálogo todavía no tiene un tipo de equipo para esa modalidad."]):::error
-  n15 -->|"sí"| n16
-  n17{"dto.modalityCode"}:::decision
-  n15 -->|"no"| n17
-  n18[("ACTUALIZA diagnostic_units.diagnostic_unit_sites")]:::efecto
-  n17 -->|"sí"| n18
-  n19["Llama a GetCenterScheduleUseCase.view"]:::llamada
+  n16[("LEE diagnostic_units.diagnostic_study_offerings · LEE diagnostic_units.diagnostic_units · LEE diagnostic_unit…")]:::efecto
+  n15 --> n16
+  n17["Llama a CenterScheduleRepository.findEquipment"]:::llamada
+  n16 --> n17
+  n18[("LEE diagnostic_units.diagnostic_equipment · LEE diagnostic_units.diagnostic_unit_sites · LEE terminology.cata…")]:::efecto
+  n17 --> n18
+  n19["Llama a CenterScheduleRepository.findTemplateRules"]:::llamada
   n18 --> n19
-  n17 -->|"no"| n19
-  n20["Llama a CenterBookingsRepository.findOccupying"]:::llamada
+  n20[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
   n19 --> n20
-  n21[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
+  n21[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
   n20 --> n21
-  n22["Llama a CenterContextService.load"]:::llamada
+  n22{"!site"}:::decision
   n21 --> n22
-  n23["Llama a CenterScheduleRepository.findResource"]:::llamada
-  n22 --> n23
-  n24[("LEE scheduling.schedulable_resources")]:::efecto
-  n23 --> n24
-  n25["Llama a CenterScheduleRepository.findMainSites"]:::llamada
+  n23(["422 PRECONDITION_FAILED El centro no tiene una sucursal activa donde registrar el equipo."]):::error
+  n22 -->|"sí"| n23
+  n24[("CREA diagnostic_units.diagnostic_equipment")]:::efecto
+  n22 -->|"no"| n24
+  n25["Llama a ManageCenterEquipmentUseCase.identity"]:::llamada
   n24 --> n25
-  n26[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n26{"type === undefined"}:::decision
   n25 --> n26
-  n27["Llama a CenterStudiesRepository.findForUnit"]:::llamada
-  n26 --> n27
-  n28[("LEE diagnostic_units.diagnostic_study_offerings · LEE diagnostic_units.diagnostic_units · LEE diagnostic_unit…")]:::efecto
-  n27 --> n28
-  n29["Llama a CenterScheduleRepository.findEquipment"]:::llamada
+  n27(["422 PRECONDITION_FAILED El catálogo todavía no tiene un tipo de equipo para esa modalidad."]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a GetCenterScheduleUseCase.view"]:::llamada
+  n26 -->|"no"| n28
+  n29["Llama a CenterBookingsRepository.findOccupying"]:::llamada
   n28 --> n29
-  n30[("LEE diagnostic_units.diagnostic_equipment · LEE diagnostic_units.diagnostic_unit_sites · LEE terminology.cata…")]:::efecto
+  n30[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
   n29 --> n30
-  n31["Llama a CenterScheduleRepository.findTemplateRules"]:::llamada
+  n31["Llama a CenterContextService.load"]:::llamada
   n30 --> n31
-  n32[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
+  n32{"siteId !== null && site === null"}:::decision
   n31 --> n32
-  n33(("201 Responde con éxito")):::ok
-  n32 --> n33
+  n33(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n32 -->|"no"| n34
+  n35[("LEE scheduling.schedulable_resources")]:::efecto
+  n34 --> n35
+  n36["Llama a CenterStudiesRepository.findForUnit"]:::llamada
+  n35 --> n36
+  n37[("LEE diagnostic_units.diagnostic_study_offerings · LEE diagnostic_units.diagnostic_units · LEE diagnostic_unit…")]:::efecto
+  n36 --> n37
+  n38["Llama a CenterScheduleRepository.findEquipment"]:::llamada
+  n37 --> n38
+  n39[("LEE diagnostic_units.diagnostic_equipment · LEE diagnostic_units.diagnostic_unit_sites · LEE terminology.cata…")]:::efecto
+  n38 --> n39
+  n40["Llama a CenterScheduleRepository.findTemplateRules"]:::llamada
+  n39 --> n40
+  n41[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
+  n40 --> n41
+  n42(("201 Responde con éxito")):::ok
+  n41 --> n42
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2479,7 +2517,7 @@ Remove a device registered by mistake
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Equipo no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Equipo no encontrado; ResourceNotFoundException: Sucursal no encontrada |
 | 409 | `CONFLICT` | ConflictException: El equipo ya tiene registros asociados: márquelo «Fuera de servicio» en lugar de quitarlo. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2522,13 +2560,13 @@ flowchart TD
   n17 --> n18
   n19["Llama a CenterContextService.load"]:::llamada
   n18 --> n19
-  n20["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n20{"siteId !== null && site === null"}:::decision
   n19 --> n20
-  n21[("LEE scheduling.schedulable_resources")]:::efecto
-  n20 --> n21
-  n22["Llama a CenterScheduleRepository.findMainSites"]:::llamada
-  n21 --> n22
-  n23[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n21(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n20 -->|"no"| n22
+  n23[("LEE scheduling.schedulable_resources")]:::efecto
   n22 --> n23
   n24["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n23 --> n24
@@ -2568,7 +2606,7 @@ Mark a device operational or not
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Equipo no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Equipo no encontrado; ResourceNotFoundException: Sucursal no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2638,13 +2676,13 @@ flowchart TD
   n30 --> n31
   n32["Llama a CenterContextService.load"]:::llamada
   n31 --> n32
-  n33["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n33{"siteId !== null && site === null"}:::decision
   n32 --> n33
-  n34[("LEE scheduling.schedulable_resources")]:::efecto
-  n33 --> n34
-  n35["Llama a CenterScheduleRepository.findMainSites"]:::llamada
-  n34 --> n35
-  n36[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n34(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n33 -->|"sí"| n34
+  n35["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n33 -->|"no"| n35
+  n36[("LEE scheduling.schedulable_resources")]:::efecto
   n35 --> n36
   n37["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n36 --> n37
@@ -2678,7 +2716,7 @@ Edit a device: name, maker, serial, modality
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Equipo no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Equipo no encontrado; ResourceNotFoundException: Sucursal no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo todavía no tiene un tipo de equipo para esa modalidad. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2725,13 +2763,13 @@ flowchart TD
   n19 --> n20
   n21["Llama a CenterContextService.load"]:::llamada
   n20 --> n21
-  n22["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n22{"siteId !== null && site === null"}:::decision
   n21 --> n22
-  n23[("LEE scheduling.schedulable_resources")]:::efecto
-  n22 --> n23
-  n24["Llama a CenterScheduleRepository.findMainSites"]:::llamada
-  n23 --> n24
-  n25[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n23(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n22 -->|"no"| n24
+  n25[("LEE scheduling.schedulable_resources")]:::efecto
   n24 --> n25
   n26["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n25 --> n26
@@ -2765,7 +2803,7 @@ Schedule, studies and equipment of a center
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Sucursal no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2793,13 +2831,13 @@ flowchart TD
   n10 --> n11
   n12["Llama a CenterContextService.load"]:::llamada
   n11 --> n12
-  n13["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n13{"siteId !== null && site === null"}:::decision
   n12 --> n13
-  n14[("LEE scheduling.schedulable_resources")]:::efecto
-  n13 --> n14
-  n15["Llama a CenterScheduleRepository.findMainSites"]:::llamada
-  n14 --> n15
-  n16[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n14(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE scheduling.schedulable_resources")]:::efecto
   n15 --> n16
   n17["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n16 --> n17
@@ -2833,7 +2871,7 @@ Publish the whole schedule of a center
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada; ResourceNotFoundException: Sucursal no encontrada |
 | 409 | `CONFLICT` | ConflictException: Hay 1 turno reservado que quedaría fuera del horario nuevo. / Hay {affected} turnos reservados que quedarían fuera del horario nuevo. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El horario tiene datos incompletos. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2859,13 +2897,13 @@ flowchart TD
   n8 -->|"sí"| n9
   n10["Llama a CenterContextService.load"]:::llamada
   n8 -->|"no"| n10
-  n11["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n11{"siteId !== null && site === null"}:::decision
   n10 --> n11
-  n12[("LEE scheduling.schedulable_resources")]:::efecto
-  n11 --> n12
-  n13["Llama a CenterScheduleRepository.findMainSites"]:::llamada
-  n12 --> n13
-  n14[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n12(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE scheduling.schedulable_resources")]:::efecto
   n13 --> n14
   n15["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n14 --> n15
@@ -2920,13 +2958,13 @@ flowchart TD
   n38 --> n39
   n40["Llama a CenterContextService.load"]:::llamada
   n39 --> n40
-  n41["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n41{"siteId !== null && site === null"}:::decision
   n40 --> n41
-  n42[("LEE scheduling.schedulable_resources")]:::efecto
-  n41 --> n42
-  n43["Llama a CenterScheduleRepository.findMainSites"]:::llamada
-  n42 --> n43
-  n44[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n42(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n41 -->|"sí"| n42
+  n43["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n41 -->|"no"| n43
+  n44[("LEE scheduling.schedulable_resources")]:::efecto
   n43 --> n44
   n45["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n44 --> n45
@@ -2960,7 +2998,7 @@ Free starts of a study in a center
 | 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Centro no encontrado; ResourceNotFoundException: El centro no hace ese estudio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Centro no encontrado; ResourceNotFoundException: Sucursal no encontrada; ResourceNotFoundException: El centro no hace ese estudio |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Pida una ventana de hasta {MAX_WINDOW_DAYS} días, con «to» posterior a «from». |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2981,13 +3019,13 @@ flowchart TD
   n6 -->|"sí"| n7
   n8["Llama a CenterContextService.load"]:::llamada
   n6 -->|"no"| n8
-  n9["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n9{"siteId !== null && site === null"}:::decision
   n8 --> n9
-  n10[("LEE scheduling.schedulable_resources")]:::efecto
-  n9 --> n10
-  n11["Llama a CenterScheduleRepository.findMainSites"]:::llamada
-  n10 --> n11
-  n12[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n10(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE scheduling.schedulable_resources")]:::efecto
   n11 --> n12
   n13["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n12 --> n13
@@ -3035,7 +3073,7 @@ Appointments booked at my center, by start
 | 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Su organización no tiene un centro de diagnóstico con agenda. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Su organización no tiene un centro de diagnóstico con agenda.; ResourceNotFoundException: Sucursal no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Pida una ventana de hasta 31 días, con «to» posterior a «from». |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -3060,42 +3098,64 @@ flowchart TD
   n8 --> n9
   n10(["404 NOT_FOUND Su organización no tiene un centro de diagnóstico con agenda."]):::error
   n9 -->|"sí"| n10
-  n11["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n11["Llama a CenterContextService.load"]:::llamada
   n9 -->|"no"| n11
-  n12[("LEE scheduling.schedulable_resources")]:::efecto
+  n12{"siteId !== null && site === null"}:::decision
   n11 --> n12
-  n13["Llama a CenterScheduleRepository.findMainSites"]:::llamada
-  n12 --> n13
-  n14[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
-  n13 --> n14
-  n15["Llama a CenterContextService.load"]:::llamada
+  n13(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE scheduling.schedulable_resources")]:::efecto
   n14 --> n15
-  n16["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n16["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n15 --> n16
-  n17[("LEE scheduling.schedulable_resources")]:::efecto
+  n17[("LEE diagnostic_units.diagnostic_study_offerings · LEE diagnostic_units.diagnostic_units · LEE diagnostic_unit…")]:::efecto
   n16 --> n17
-  n18["Llama a CenterScheduleRepository.findMainSites"]:::llamada
+  n18["Llama a CenterScheduleRepository.findEquipment"]:::llamada
   n17 --> n18
-  n19[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n19[("LEE diagnostic_units.diagnostic_equipment · LEE diagnostic_units.diagnostic_unit_sites · LEE terminology.cata…")]:::efecto
   n18 --> n19
-  n20["Llama a CenterStudiesRepository.findForUnit"]:::llamada
+  n20["Llama a CenterScheduleRepository.findTemplateRules"]:::llamada
   n19 --> n20
-  n21[("LEE diagnostic_units.diagnostic_study_offerings · LEE diagnostic_units.diagnostic_units · LEE diagnostic_unit…")]:::efecto
+  n21[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
   n20 --> n21
-  n22["Llama a CenterScheduleRepository.findEquipment"]:::llamada
+  n22["Llama a CenterContextService.load"]:::llamada
   n21 --> n22
-  n23[("LEE diagnostic_units.diagnostic_equipment · LEE diagnostic_units.diagnostic_unit_sites · LEE terminology.cata…")]:::efecto
+  n23{"siteId !== null && site === null"}:::decision
   n22 --> n23
-  n24["Llama a CenterScheduleRepository.findTemplateRules"]:::llamada
-  n23 --> n24
-  n25[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
-  n24 --> n25
-  n26["Llama a CenterBookingsRepository.listForResource"]:::llamada
+  n24(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n23 -->|"no"| n25
+  n26[("LEE scheduling.schedulable_resources")]:::efecto
   n25 --> n26
-  n27[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE profiles.persons")]:::efecto
+  n27["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n26 --> n27
-  n28(("200 Responde con éxito")):::ok
+  n28[("LEE diagnostic_units.diagnostic_study_offerings · LEE diagnostic_units.diagnostic_units · LEE diagnostic_unit…")]:::efecto
   n27 --> n28
+  n29["Llama a CenterScheduleRepository.findEquipment"]:::llamada
+  n28 --> n29
+  n30[("LEE diagnostic_units.diagnostic_equipment · LEE diagnostic_units.diagnostic_unit_sites · LEE terminology.cata…")]:::efecto
+  n29 --> n30
+  n31["Llama a CenterScheduleRepository.findTemplateRules"]:::llamada
+  n30 --> n31
+  n32[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
+  n31 --> n32
+  n33["Repite: por cada const ctx de contexts"]:::bucle
+  n32 --> n33
+  n34{"ctx.resourceId"}:::decision
+  n33 -->|"cada elemento"| n34
+  n35["Llama a ListCenterBookingsUseCase.forSite"]:::llamada
+  n34 -->|"sí"| n35
+  n36["Llama a CenterBookingsRepository.listForResource"]:::llamada
+  n35 --> n36
+  n37[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE profiles.persons")]:::efecto
+  n36 --> n37
+  n38(("200 Responde con éxito")):::ok
+  n37 --> n38
+  n34 -->|"no"| n38
+  n33 -->|"al terminar"| n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3113,7 +3173,7 @@ Schedule, studies and equipment of my center
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Su organización no tiene un centro de diagnóstico con agenda. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Su organización no tiene un centro de diagnóstico con agenda.; ResourceNotFoundException: Sucursal no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3123,46 +3183,46 @@ flowchart TD
   n1 --> n2
   n3["Llama a GetCenterScheduleUseCase.forMe"]:::llamada
   n2 --> n3
-  n4["Llama a GetCenterScheduleUseCase.view"]:::llamada
+  n4["Llama a GetCenterScheduleUseCase.myUnit"]:::llamada
   n3 --> n4
-  n5["Llama a CenterBookingsRepository.findOccupying"]:::llamada
+  n5["Llama a CenterScheduleRepository.findUnitOfTenant"]:::llamada
   n4 --> n5
-  n6[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
+  n6[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n5 --> n6
-  n7["Llama a CenterContextService.load"]:::llamada
+  n7{"!unit"}:::decision
   n6 --> n7
-  n8["Llama a CenterScheduleRepository.findResource"]:::llamada
-  n7 --> n8
-  n9[("LEE scheduling.schedulable_resources")]:::efecto
-  n8 --> n9
-  n10["Llama a CenterScheduleRepository.findMainSites"]:::llamada
+  n8(["404 NOT_FOUND Su organización no tiene un centro de diagnóstico con agenda."]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a GetCenterScheduleUseCase.view"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a CenterBookingsRepository.findOccupying"]:::llamada
   n9 --> n10
-  n11[("LEE diagnostic_units.diagnostic_unit_sites · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n11[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
   n10 --> n11
-  n12["Llama a CenterStudiesRepository.findForUnit"]:::llamada
+  n12["Llama a CenterContextService.load"]:::llamada
   n11 --> n12
-  n13[("LEE diagnostic_units.diagnostic_study_offerings · LEE diagnostic_units.diagnostic_units · LEE diagnostic_unit…")]:::efecto
+  n13{"siteId !== null && site === null"}:::decision
   n12 --> n13
-  n14["Llama a CenterScheduleRepository.findEquipment"]:::llamada
-  n13 --> n14
-  n15[("LEE diagnostic_units.diagnostic_equipment · LEE diagnostic_units.diagnostic_unit_sites · LEE terminology.cata…")]:::efecto
-  n14 --> n15
-  n16["Llama a CenterScheduleRepository.findTemplateRules"]:::llamada
+  n14(["404 NOT_FOUND Sucursal no encontrada"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a CenterScheduleRepository.findResource"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE scheduling.schedulable_resources")]:::efecto
   n15 --> n16
-  n17[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
+  n17["Llama a CenterStudiesRepository.findForUnit"]:::llamada
   n16 --> n17
-  n18["Llama a GetCenterScheduleUseCase.myUnit"]:::llamada
+  n18[("LEE diagnostic_units.diagnostic_study_offerings · LEE diagnostic_units.diagnostic_units · LEE diagnostic_unit…")]:::efecto
   n17 --> n18
-  n19["Llama a CenterScheduleRepository.findUnitOfTenant"]:::llamada
+  n19["Llama a CenterScheduleRepository.findEquipment"]:::llamada
   n18 --> n19
-  n20[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n20[("LEE diagnostic_units.diagnostic_equipment · LEE diagnostic_units.diagnostic_unit_sites · LEE terminology.cata…")]:::efecto
   n19 --> n20
-  n21{"!unit"}:::decision
+  n21["Llama a CenterScheduleRepository.findTemplateRules"]:::llamada
   n20 --> n21
-  n22(["404 NOT_FOUND Su organización no tiene un centro de diagnóstico con agenda."]):::error
-  n21 -->|"sí"| n22
+  n22[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
+  n21 --> n22
   n23(("200 Responde con éxito")):::ok
-  n21 -->|"no"| n23
+  n22 --> n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

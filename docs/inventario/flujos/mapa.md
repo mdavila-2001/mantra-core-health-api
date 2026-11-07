@@ -2,7 +2,7 @@
 
 # Mapa de operaciones
 
-2033 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
+2045 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
 
 «Quién la llama» sale del inventario de clientes del frontend (`docs/reports/generated/api-inventory.md`). Una operación sin cliente puede ser interna, móvil o deuda: la columna informa, no concluye.
 
@@ -266,7 +266,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/internal/billing/bed-day-charges/run` | Módulo Billing (17) (ctrl:BillingSpaceChargesController) | billing | MEDIO | SYSTEM · SYSTEM_WORKER | — | ESCRIBE · SIN_PRUEBAS · EVENTO · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/patient-spending/me` | Módulo Billing (17) (ctrl:PatientSpendingController) | billing | BAJO | PATIENT | — | SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/admin/bulk-imports` | bulk_import — motor de cargas masivas (ctrl:BulkImportController) | bulk_import | BAJO | SECURITY_ADMIN · PLATFORM_ADMIN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| POST `/admin/bulk-imports` | bulk_import — motor de cargas masivas (ctrl:BulkImportController) | bulk_import | BAJO | SECURITY_ADMIN · PLATFORM_ADMIN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/admin/bulk-imports` | bulk_import — motor de cargas masivas (ctrl:BulkImportController) | bulk_import | MEDIO | SECURITY_ADMIN · PLATFORM_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/admin/bulk-imports/{id}` | bulk_import — motor de cargas masivas (ctrl:BulkImportController) | bulk_import | MEDIO | SECURITY_ADMIN · PLATFORM_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/admin/bulk-imports/{id}/confirm` | bulk_import — motor de cargas masivas (ctrl:BulkImportController) | bulk_import | MEDIO | SECURITY_ADMIN · PLATFORM_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/admin/bulk-imports/{id}/report` | bulk_import — motor de cargas masivas (ctrl:BulkImportController) | bulk_import | MEDIO | SECURITY_ADMIN · PLATFORM_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -686,7 +686,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/diagnostic-unit-sites/{siteId}/equipment` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (UC-23-09) | diagnostic_units | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/diagnostic-units` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (Directorio P3) | diagnostic_units | BAJO | Sesión sin roles | DiagnosticUnitsClient | SIN_INTEGRACION |
 | POST `/diagnostic-units` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (UC-23-01) | diagnostic_units | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| GET `/diagnostic-units/{id}` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (Directorio P3) | diagnostic_units | BAJO | Sesión sin roles | DiagnosticUnitsClient | SIN_INTEGRACION · CON_DECISIONES |
+| GET `/diagnostic-units/{id}` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (Directorio P3) | diagnostic_units | BAJO | Sesión sin roles | DiagnosticUnitsClient | CON_DECISIONES |
 | POST `/diagnostic-units/{id}/accreditations` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (UC-23-11) | diagnostic_units | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/diagnostic-units/{id}/administration` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:DiagnosticUnitsController) | diagnostic_units | BAJO | SECURITY_ADMIN | DiagnosticUnitsAdminClient | SIN_INTEGRACION · CON_DECISIONES |
 | POST `/diagnostic-units/{id}/practitioner-assignments` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (UC-23-10) | diagnostic_units | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -707,8 +707,8 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/diagnostic-units/me/bookings` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:CenterScheduleController) | diagnostic_units | BAJO | Sesión sin roles | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/diagnostic-units/me/schedule` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:CenterScheduleController) | diagnostic_units | BAJO | Sesión sin roles | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/diagnostic-units/search` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:DiagnosticUnitsController) | diagnostic_units | BAJO | Sesión sin roles | DiagnosticUnitsClient | SIN_INTEGRACION · CON_DECISIONES |
-| GET `/diagnostics/lab/catalog` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:LabPortalServicesController) | diagnostic_units | BAJO | Sesión sin roles | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| POST `/diagnostics/lab/catalog/import` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:LabPortalServicesController) | diagnostic_units | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/diagnostics/lab/catalog` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:LabPortalServicesController) | diagnostic_units | BAJO | Sesión sin roles | — | SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/diagnostics/lab/catalog/import` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:LabPortalServicesController) | diagnostic_units | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/diagnostics/lab/categories` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:LabPortalServicesController) | diagnostic_units | BAJO | Sesión sin roles | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/diagnostics/lab/categories` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:LabPortalServicesController) | diagnostic_units | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | DELETE `/diagnostics/lab/categories/{id}` | Módulo 23 — Diagnostic Units, Studies, Specialists and Prices (ctrl:LabPortalServicesController) | diagnostic_units | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -861,6 +861,11 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/forms/definition-sets/{id}` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsDefinitionSetsController) | forms | BAJO | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/forms/definition-sets/{id}/migrations/{migrationId}/run` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (UC-09-13) | forms | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/forms/definition-sets/{id}/versions/{ver}/publish` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (UC-09-03) | forms | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/forms/faqs` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsFaqsController) | forms | BAJO | PRACTITIONER · CLINICIAN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
+| POST `/forms/faqs` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsFaqsController) | forms | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| DELETE `/forms/faqs/{id}` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsFaqsController) | forms | ALTO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/forms/faqs/{id}` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsFaqsController) | forms | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PUT `/forms/faqs/order` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsFaqsController) | forms | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/forms/field-definitions` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (UC-09-02) | forms | MEDIO | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | FormsClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | PATCH `/forms/field-definitions/{id}` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsFieldsController) | forms | MEDIO | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | FormsClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | POST `/forms/fields/{id}/access-rules` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (UC-09-12) | forms | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -873,8 +878,14 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/forms/instances/{id}/values` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (UC-09-08) | forms | MEDIO | CLINICIAN · PRACTITIONER | FormsClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | GET `/forms/me/instances` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsMeController) | forms | BAJO | Sesión sin roles | FormsClient | SIN_PRUEBAS · CON_DECISIONES |
 | GET `/forms/me/instances/{id}` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsMeController) | forms | BAJO | Sesión sin roles | FormsClient | SIN_PRUEBAS · CON_DECISIONES |
+| GET `/forms/question-scripts` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsQuestionScriptsController) | forms | BAJO | PRACTITIONER · CLINICIAN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
+| POST `/forms/question-scripts` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsQuestionScriptsController) | forms | ALTO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| DELETE `/forms/question-scripts/{id}` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsQuestionScriptsController) | forms | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/forms/question-scripts/{id}` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsQuestionScriptsController) | forms | BAJO | PRACTITIONER · CLINICIAN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/forms/question-scripts/{id}` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsQuestionScriptsController) | forms | ALTO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | PATCH `/forms/values/{id}` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (UC-09-09) | forms | MEDIO | CLINICIAN · PRACTITIONER | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/forms/values/import` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (UC-09-10) | forms | MEDIO | CLINICIAN · PRACTITIONER | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/public/profiles/p/{slug}/faqs` | Módulo Forms (09) — Dynamic Forms & Extensibility Governance (ctrl:FormsFaqsPublicController) | forms | BAJO | Pública | — | PUBLICA · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/geo/geofence-events` | Módulo Geo (13) — Geolocation and Mobile Tracking (ctrl:GeoGeofencesController) | geo | MEDIO | SECURITY_ADMIN | GeoClient | ESCRIBE · SIN_INTEGRACION · CON_DECISIONES |
 | POST `/geo/geofences` | Módulo Geo (13) — Geolocation and Mobile Tracking (ctrl:GeoGeofencesController) | geo | MEDIO | SECURITY_ADMIN | GeoClient | ESCRIBE · SIN_INTEGRACION · CON_DECISIONES |
 | POST `/geo/tracked-subjects` | Módulo Geo (13) — Geolocation and Mobile Tracking (ctrl:GeoTrackedSubjectsController) | geo | MEDIO | SECURITY_ADMIN | GeoClient | ESCRIBE · SIN_INTEGRACION · CON_DECISIONES |
@@ -958,6 +969,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/iam/me/devices` | IAM (ctrl:IamMyDevicesController) | iam | BAJO | Sesión sin roles | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
 | POST `/iam/me/devices/{id}/confirm` | IAM (ctrl:IamMyDevicesController) | iam | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/iam/me/devices/{id}/confirm-code` | IAM (ctrl:IamMyDevicesController) | iam | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/iam/me/name` | IAM (ctrl:IamMyNameController) | iam | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/iam/me/sessions` | IAM (ctrl:IamAccountSecurityController) | iam | BAJO | Sesión sin roles | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
 | POST `/iam/me/sessions/{id}/revoke` | IAM (ctrl:IamAccountSecurityController) | iam | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | DELETE `/iam/onboarding-drafts/{formType}/{draftId}` | IAM (ctrl:IamOnboardingDraftsController) | iam | BAJO | Pública | — | PUBLICA · SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |

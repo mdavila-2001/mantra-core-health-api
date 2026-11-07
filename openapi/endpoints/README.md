@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **2022 de 2022 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **79 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **2034 de 2034 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **79 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -71,13 +71,13 @@ Esta referencia documenta **2022 de 2022 operaciones HTTP** registradas en `open
 | [document_store](document-store.md) | 5 | `document-store` | 1 |
 | [education](education.md) | 14 | `education` | 1 |
 | [erp](erp.md) | 17 | `erp` | 1 |
-| [forms](forms.md) | 25 | `forms-assignments`, `forms-definition-sets`, `forms-fields`, `forms-instances`, `forms-me`, `forms-values` | 6 |
+| [forms](forms.md) | 36 | `forms-assignments`, `forms-definition-sets`, `forms-faqs`, `forms-fields`, `forms-instances`, `forms-me`, `forms-public`, `forms-question-scripts`, `forms-values` | 9 |
 | [geo](geo.md) | 11 | `geo`, `geo-geofences`, `geo-tracked-subjects`, `geo-tracking-sessions`, `geo-trips` | 5 |
 | [governance_admin](governance-admin.md) | 5 | `admin-governance-data-quality` | 1 |
 | [graph_intelligence](graph-intelligence.md) | 15 | `graph_intelligence` | 2 |
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
-| [iam](iam.md) | 49 | `iam-auth`, `iam-onboarding-drafts`, `iam-users` | 6 |
+| [iam](iam.md) | 50 | `iam-auth`, `iam-onboarding-drafts`, `iam-users` | 7 |
 | [identity_assurance](identity-assurance.md) | 28 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
 | [insurance](insurance.md) | 62 | `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-requests`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`, `my-insurance-claims` | 20 |
 | [insurance-campaigns](insurance-campaigns.md) | 16 | `insurance-campaigns` | 0 |
@@ -130,4 +130,4 @@ Esta referencia documenta **2022 de 2022 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 2022 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 2034 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

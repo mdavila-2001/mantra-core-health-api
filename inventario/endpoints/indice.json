@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 2033,
+    "total": 2045,
     "porOrigen": {
-      "CONTRATO": 2022,
+      "CONTRATO": 2034,
       "CONTRATO_AUSENTE": 11
     },
     "porRiesgo": {
-      "BAJO": 777,
-      "MEDIO": 961,
-      "ALTO": 295
+      "BAJO": 780,
+      "MEDIO": 966,
+      "ALTO": 299
     },
-    "conTablas": 1933,
+    "conTablas": 1945,
     "sinTablasSinDeterminar": 29,
     "sinExplicacionDeNegocio": 1,
     "conPruebas": 1105,
-    "conRequerimientos": 2033
+    "conRequerimientos": 2045
   },
   "endpoints": [
     {
@@ -2593,7 +2593,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 16,
+      "tablas": 17,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -2828,7 +2828,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 16,
+      "tablas": 17,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -4667,7 +4667,7 @@
         "SECURITY_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -4680,13 +4680,13 @@
       "modulo": "bulk_import",
       "bloque": null,
       "nombre": "Crea un lote: valida el archivo y devuelve la vista previa (VALIDADO o RECHAZADO)",
-      "riesgo": "BAJO",
+      "riesgo": "MEDIO",
       "publica": false,
       "roles": [
         "SECURITY_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 13,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -4705,7 +4705,7 @@
         "SECURITY_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 16,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -4724,7 +4724,7 @@
         "SECURITY_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 16,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -4743,7 +4743,7 @@
         "SECURITY_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 16,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -5567,7 +5567,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 41,
+      "tablas": 42,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -5672,7 +5672,7 @@
         "SYSTEM",
         "SYSTEM_WORKER"
       ],
-      "tablas": 12,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5856,7 +5856,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 38,
+      "tablas": 39,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -6157,7 +6157,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 37,
+      "tablas": 38,
       "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6176,7 +6176,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 36,
+      "tablas": 37,
       "eventos": 2,
       "pruebas": 8,
       "revision": "AUTO_DETECTADA"
@@ -11152,7 +11152,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -11434,7 +11434,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 36,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -11761,7 +11761,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 26,
+      "tablas": 23,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -11850,7 +11850,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -12039,7 +12039,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 29,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12057,7 +12057,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 25,
+      "tablas": 23,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12181,7 +12181,7 @@
       "roles": [],
       "tablas": 10,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12357,7 +12357,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 17,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12373,7 +12373,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 16,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12389,7 +12389,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 19,
+      "tablas": 16,
       "eventos": 2,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12405,7 +12405,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 16,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12421,7 +12421,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12437,7 +12437,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 19,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12453,7 +12453,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12487,7 +12487,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 16,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12503,7 +12503,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -12537,7 +12537,7 @@
       "roles": [],
       "tablas": 13,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12553,7 +12553,7 @@
       "roles": [],
       "tablas": 17,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12633,7 +12633,7 @@
       "roles": [],
       "tablas": 7,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12975,7 +12975,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 16,
+      "tablas": 17,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -13562,7 +13562,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 17,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15208,6 +15208,101 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "FormsFaqsController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/forms/faqs",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Listar mis preguntas frecuentes, en orden",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "FormsFaqsController_create",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/forms/faqs",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Agregar una pregunta frecuente al final",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "FormsFaqsController_remove",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/forms/faqs/{id}",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Borrar una pregunta frecuente propia",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "FormsFaqsController_update",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/forms/faqs/{id}",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Editar una pregunta frecuente propia",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "FormsFaqsController_reorder",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/forms/faqs/order",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Reordenar mis preguntas frecuentes (lista completa)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "FormsFieldsController_createFieldDefinition",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -15433,6 +15528,101 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "FormsQuestionScriptsController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/forms/question-scripts",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Listar mis guiones de preguntas activos",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "FormsQuestionScriptsController_create",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/forms/question-scripts",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Crear un guion de preguntas",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "FormsQuestionScriptsController_archive",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/forms/question-scripts/{id}",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Archivar un guion propio",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "FormsQuestionScriptsController_get",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/forms/question-scripts/{id}",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Leer un guion de preguntas propio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "FormsQuestionScriptsController_update",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/forms/question-scripts/{id}",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Editar un guion propio (items reemplaza la lista; 409 si version no coincide)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "FormsValuesController_correctValue",
       "origen": "CONTRATO",
       "metodo": "PATCH",
@@ -15466,6 +15656,22 @@
         "PRACTITIONER"
       ],
       "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "FormsFaqsPublicController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/public/profiles/p/{slug}/faqs",
+      "modulo": "forms",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Preguntas frecuentes publicadas de un profesional",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16787,7 +16993,7 @@
       "roles": [],
       "tablas": 43,
       "eventos": 0,
-      "pruebas": 31,
+      "pruebas": 33,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -17012,6 +17218,22 @@
       "publica": false,
       "roles": [],
       "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamMyNameController_update",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/iam/me/name",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Corregir el nombre de la propia cuenta",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -18520,7 +18742,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 24,
+      "tablas": 25,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23120,7 +23342,7 @@
         "BUSINESS_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 31,
+      "tablas": 32,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23182,7 +23404,7 @@
         "PHARMA_LAB_ADMIN",
         "BUSINESS_ADMIN"
       ],
-      "tablas": 19,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23471,7 +23693,7 @@
         "LEGAL_COUNSEL",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 14,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23591,7 +23813,7 @@
         "BUSINESS_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 20,
+      "tablas": 21,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23791,7 +24013,7 @@
       "roles": [
         "MEDICAL_VISITOR"
       ],
-      "tablas": 24,
+      "tablas": 25,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23829,7 +24051,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 18,
+      "tablas": 19,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23906,7 +24128,7 @@
       "roles": [
         "MEDICAL_VISITOR"
       ],
-      "tablas": 32,
+      "tablas": 33,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23945,7 +24167,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 17,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23965,7 +24187,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 19,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23984,7 +24206,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 26,
+      "tablas": 27,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24003,7 +24225,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 17,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24022,7 +24244,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 16,
+      "tablas": 17,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24040,7 +24262,7 @@
       "roles": [
         "MEDICAL_VISITOR"
       ],
-      "tablas": 27,
+      "tablas": 28,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -24970,7 +25192,7 @@
         "SYSTEM",
         "SECURITY_ADMIN"
       ],
-      "tablas": 23,
+      "tablas": 24,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25501,7 +25723,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 33,
+      "tablas": 34,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -25590,7 +25812,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 39,
+      "tablas": 40,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25625,7 +25847,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 36,
+      "tablas": 37,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25662,7 +25884,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 28,
+      "tablas": 29,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25681,7 +25903,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 33,
+      "tablas": 34,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25700,7 +25922,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 28,
+      "tablas": 29,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25718,7 +25940,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 47,
+      "tablas": 48,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28109,7 +28331,7 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 26,
+      "tablas": 27,
       "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28226,7 +28448,7 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 19,
+      "tablas": 20,
       "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28402,7 +28624,7 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 21,
+      "tablas": 22,
       "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28422,7 +28644,7 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 37,
+      "tablas": 38,
       "eventos": 2,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -28590,7 +28812,7 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 18,
+      "tablas": 19,
       "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -28634,7 +28856,7 @@
         "SURGERY_SCHEDULER",
         "PERIOP_ADMIN"
       ],
-      "tablas": 17,
+      "tablas": 18,
       "eventos": 2,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -29277,7 +29499,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -29293,7 +29515,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 14,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -29309,7 +29531,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -33877,7 +34099,7 @@
       "roles": [],
       "tablas": 5,
       "eventos": 0,
-      "pruebas": 4,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {

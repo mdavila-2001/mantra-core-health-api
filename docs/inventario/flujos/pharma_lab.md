@@ -28,7 +28,7 @@ _Fuente: `src/modules/pharma_lab/README.md:3`_
 |  |  | PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/products | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 8 |
 |  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 12 |
 |  |  | PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/specialties | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 7 |
-|  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 31 |
+|  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 32 |
 |  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/verifications | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 6 |
 | `ctrl:PharmaCatalogController` | Operaciones de PharmaCatalogController que el README no asigna a un caso de uso | GET /pharma-labs/{pharmaLabId}/materials | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · MEDICAL_VISITOR · PLATFORM_ADMIN | BAJO | 2 |
 |  |  | POST /pharma-labs/{pharmaLabId}/materials | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 6 |
@@ -42,7 +42,7 @@ _Fuente: `src/modules/pharma_lab/README.md:3`_
 |  |  | PATCH /pharma-labs/{pharmaLabId}/products/{productId} | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 6 |
 |  |  | POST /pharma-labs/{pharmaLabId}/products/{productId}/status | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 6 |
 | `ctrl:PharmacovigilanceController` | Operaciones de PharmacovigilanceController que el README no asigna a un caso de uso | GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
-|  |  | POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | PRACTITIONER · CLINICIAN · PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · BUSINESS_ADMIN | MEDIO | 19 |
+|  |  | POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | PRACTITIONER · CLINICIAN · PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · BUSINESS_ADMIN | MEDIO | 20 |
 |  |  | GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId} | PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · PLATFORM_ADMIN | BAJO | 3 |
 |  |  | POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions | PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · PLATFORM_ADMIN | MEDIO | 7 |
 | `ctrl:PharmaLabNoticesController` | Operaciones de PharmaLabNoticesController que el README no asigna a un caso de uso | POST /pharma-labs/notices/{noticeId}/read | Cualquier sesión válida | ALTO | 2 |
@@ -60,7 +60,7 @@ _Fuente: `src/modules/pharma_lab/README.md:3`_
 | `ctrl:PharmaLabSocialController` | Operaciones de PharmaLabSocialController que el README no asigna a un caso de uso | POST /pharma-labs/{pharmaLabId}/cost-allocations | PHARMA_LAB_ADMIN · ACCOUNTANT · FINANCE · PLATFORM_ADMIN | MEDIO | 7 |
 |  |  | GET /pharma-labs/{pharmaLabId}/cost-allocations/report | PHARMA_LAB_ADMIN · ACCOUNTANT · FINANCE · PLATFORM_ADMIN | BAJO | 3 |
 |  |  | GET /pharma-labs/{pharmaLabId}/visitor-posts | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
-|  |  | POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 20 |
+|  |  | POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 21 |
 |  |  | POST /pharma-labs/visitor-posts | MEDICAL_VISITOR | MEDIO | 7 |
 | `ctrl:RegulatoryDocumentsController` | Operaciones de RegulatoryDocumentsController que el README no asigna a un caso de uso | GET /pharma-labs/{pharmaLabId}/regulatory-documents | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | BAJO | 2 |
 |  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 6 |
@@ -69,27 +69,27 @@ _Fuente: `src/modules/pharma_lab/README.md:3`_
 |  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/invalidate | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 8 |
 |  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 9 |
 |  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions/{versionId}/download | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 7 |
-|  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 14 |
+|  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 15 |
 | `ctrl:VisitAgendaController` | Operaciones de VisitAgendaController que el README no asigna a un caso de uso | GET /visit-agenda/blocks | PRACTITIONER · CLINICIAN | BAJO | 1 |
 |  |  | POST /visit-agenda/blocks | PRACTITIONER · CLINICIAN | MEDIO | 4 |
 |  |  | POST /visit-agenda/blocks/{blockId}/lift | PRACTITIONER · CLINICIAN | MEDIO | 5 |
 |  |  | GET /visit-agenda/doctors/{doctorUserId} | MEDICAL_VISITOR · PHARMA_LAB_ADMIN · PRACTITIONER · CLINICIAN | BAJO | 2 |
 |  |  | GET /visit-agenda/me | PRACTITIONER · CLINICIAN | BAJO | 2 |
 |  |  | PUT /visit-agenda/me | PRACTITIONER · CLINICIAN | ALTO | 8 |
-| `ctrl:VisitRecordsController` | Operaciones de VisitRecordsController que el README no asigna a un caso de uso | POST /visit-records | MEDICAL_VISITOR | MEDIO | 24 |
+| `ctrl:VisitRecordsController` | Operaciones de VisitRecordsController que el README no asigna a un caso de uso | POST /visit-records | MEDICAL_VISITOR | MEDIO | 25 |
 |  |  | POST /visit-records/{visitRecordId}/confirm | PRACTITIONER · CLINICIAN | MEDIO | 5 |
-|  |  | POST /visit-records/{visitRecordId}/rating | PRACTITIONER · CLINICIAN | MEDIO | 18 |
+|  |  | POST /visit-records/{visitRecordId}/rating | PRACTITIONER · CLINICIAN | MEDIO | 19 |
 |  |  | GET /visit-records/inbox | PRACTITIONER · CLINICIAN | BAJO | 1 |
 |  |  | GET /visit-records/labs/{pharmaLabId} | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
 |  |  | GET /visit-records/labs/{pharmaLabId}/rating-summary | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 3 |
-| `ctrl:VisitRequestsController` | Operaciones de VisitRequestsController que el README no asigna a un caso de uso | POST /visit-requests | MEDICAL_VISITOR | MEDIO | 32 |
+| `ctrl:VisitRequestsController` | Operaciones de VisitRequestsController que el README no asigna a un caso de uso | POST /visit-requests | MEDICAL_VISITOR | MEDIO | 33 |
 |  |  | GET /visit-requests/{visitRequestId} | MEDICAL_VISITOR · PRACTITIONER · CLINICIAN | BAJO | 4 |
-|  |  | POST /visit-requests/{visitRequestId}/accept | PRACTITIONER · CLINICIAN | MEDIO | 17 |
-|  |  | POST /visit-requests/{visitRequestId}/cancel | MEDICAL_VISITOR · PRACTITIONER · CLINICIAN | MEDIO | 19 |
-|  |  | POST /visit-requests/{visitRequestId}/propose-time | PRACTITIONER · CLINICIAN | MEDIO | 26 |
-|  |  | POST /visit-requests/{visitRequestId}/reject | PRACTITIONER · CLINICIAN | MEDIO | 17 |
-|  |  | POST /visit-requests/{visitRequestId}/request-info | PRACTITIONER · CLINICIAN | MEDIO | 16 |
-|  |  | POST /visit-requests/{visitRequestId}/reschedule | MEDICAL_VISITOR | MEDIO | 27 |
+|  |  | POST /visit-requests/{visitRequestId}/accept | PRACTITIONER · CLINICIAN | MEDIO | 18 |
+|  |  | POST /visit-requests/{visitRequestId}/cancel | MEDICAL_VISITOR · PRACTITIONER · CLINICIAN | MEDIO | 20 |
+|  |  | POST /visit-requests/{visitRequestId}/propose-time | PRACTITIONER · CLINICIAN | MEDIO | 27 |
+|  |  | POST /visit-requests/{visitRequestId}/reject | PRACTITIONER · CLINICIAN | MEDIO | 18 |
+|  |  | POST /visit-requests/{visitRequestId}/request-info | PRACTITIONER · CLINICIAN | MEDIO | 17 |
+|  |  | POST /visit-requests/{visitRequestId}/reschedule | MEDICAL_VISITOR | MEDIO | 28 |
 |  |  | GET /visit-requests/inbox | PRACTITIONER · CLINICIAN | BAJO | 1 |
 |  |  | GET /visit-requests/mine | MEDICAL_VISITOR | BAJO | 2 |
 | `ctrl:VisitSurveysController` | Operaciones de VisitSurveysController que el README no asigna a un caso de uso | GET /visit-surveys/labs/{pharmaLabId} | PHARMA_LAB_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
@@ -118,7 +118,7 @@ flowchart LR
   t9[("iam.sessions")]:::tabla
   t12[("pharma_lab.medical_visitor_products")]:::tabla
   t17[("pharma_lab.medical_visitor_specialties")]:::tabla
-  t20[("iam.refresh_tokens")]:::tabla
+  t20[("directory.tenant_memberships")]:::tabla
   t25[("pharma_lab.informational_materials")]:::tabla
   t28[("pharma_lab.pharma_products")]:::tabla
   t30[("pharma_lab.material_approvals")]:::tabla
@@ -131,7 +131,7 @@ flowchart LR
   t13[("+2 tablas más")]
   t15[("+6 tablas más")]
   t18[("+1 tablas más")]
-  t21[("+25 tablas más")]
+  t21[("+26 tablas más")]
   subgraph s0["ctrl:MedicalVisitorsController · Operaciones de MedicalVisitorsController que e…"]
     o1["GET /pharma-labs/{pharmaLabId}/medical-visitors"]:::op
     o5["POST /pharma-labs/{pharmaLabId}/medical-visitors"]:::op
@@ -156,7 +156,7 @@ flowchart LR
     o40["PATCH /pharma-labs/{pharmaLabId}/products/{productId}"]:::op
     o41["POST /pharma-labs/{pharmaLabId}/products/{productId}/status"]:::op
   end
-  t48[("+13 tablas más")]
+  t48[("+14 tablas más")]
   t52[("+1 tablas más")]
   subgraph s2["ctrl:PharmacovigilanceController · Operaciones de PharmacovigilanceController q…"]
     o42["GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports"]:::op
@@ -212,7 +212,7 @@ flowchart LR
   o19 -->|"LEE"| t7
   o19 -->|"ACTUALIZA"| t8
   o19 -->|"LEE"| t8
-  o19 -->|"ACTUALIZA"| t20
+  o19 -->|"LEE"| t20
   o19 -.-> t21
   a2 --> o22
   o22 -->|"CREA"| t6
@@ -288,10 +288,10 @@ flowchart LR
   a46 --> o45
   o45 -->|"CREA"| t6
   o45 -->|"LEE"| t6
+  o45 -->|"LEE"| t20
   o45 -->|"LEE"| t9
   o45 -->|"ACTUALIZA"| t47
   o45 -->|"CREA"| t47
-  o45 -->|"LEE"| t47
   o45 -.-> t48
   a43 --> o49
   o49 -->|"LEE"| t4
@@ -323,8 +323,8 @@ flowchart LR
 flowchart LR
   a2(["PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN"]):::actor
   a21(["PHARMA_LAB_ADMIN · ACCOUNTANT · FINANCE · PLATFORM_ADMIN"]):::actor
-  a34(["MEDICAL_VISITOR"]):::actor
-  a39(["REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLA…"]):::actor
+  a35(["MEDICAL_VISITOR"]):::actor
+  a40(["REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLA…"]):::actor
   t3[("pharma_lab.pharma_lab_staff")]:::tabla
   t4[("pharma_lab.pharma_labs")]:::tabla
   t6[("audit.audit_log")]:::tabla
@@ -337,15 +337,15 @@ flowchart LR
   t28[("pharma_lab.visitor_post_submissions")]:::tabla
   t30[("community.public_profiles")]:::tabla
   t31[("community.social_posts")]:::tabla
-  t35[("pharma_lab.informational_materials")]:::tabla
-  t36[("pharma_lab.medical_visitors")]:::tabla
-  t40[("pharma_lab.regulatory_documents")]:::tabla
-  t42[("pharma_lab.regulatory_document_versions")]:::tabla
-  t44[("pharma_lab.regulatory_document_access_log")]:::tabla
-  t53[("messaging.in_app_notifications")]:::tabla
-  t54[("messaging.message_channels")]:::tabla
-  t55[("messaging.messaging_providers")]:::tabla
-  t56[("messaging.notification_deliveries")]:::tabla
+  t32[("directory.tenant_memberships")]:::tabla
+  t36[("pharma_lab.informational_materials")]:::tabla
+  t37[("pharma_lab.medical_visitors")]:::tabla
+  t41[("pharma_lab.regulatory_documents")]:::tabla
+  t43[("pharma_lab.regulatory_document_versions")]:::tabla
+  t45[("pharma_lab.regulatory_document_access_log")]:::tabla
+  t54[("messaging.in_app_notifications")]:::tabla
+  t55[("messaging.message_channels")]:::tabla
+  t56[("messaging.messaging_providers")]:::tabla
   t15[("+1 tablas más")]
   t17[("+1 tablas más")]
   t19[("+1 tablas más")]
@@ -361,28 +361,28 @@ flowchart LR
     o18["POST /pharma-labs/{pharmaLabId}/staff/{staffId}/unlink"]:::op
   end
   t24[("+1 tablas más")]
-  t32[("+14 tablas más")]
-  t37[("+1 tablas más")]
+  t33[("+15 tablas más")]
+  t38[("+1 tablas más")]
   subgraph s1["ctrl:PharmaLabSocialController · Operaciones de PharmaLabSocialController que e…"]
     o20["POST /pharma-labs/{pharmaLabId}/cost-allocations"]:::op
     o25["GET /pharma-labs/{pharmaLabId}/cost-allocations/report"]:::op
     o27["GET /pharma-labs/{pharmaLabId}/visitor-posts"]:::op
     o29["POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision"]:::op
-    o33["POST /pharma-labs/visitor-posts"]:::op
+    o34["POST /pharma-labs/visitor-posts"]:::op
   end
-  t47[("+2 tablas más")]
-  t49[("+3 tablas más")]
-  t51[("+1 tablas más")]
-  t57[("+8 tablas más")]
+  t48[("+2 tablas más")]
+  t50[("+3 tablas más")]
+  t52[("+1 tablas más")]
+  t57[("+9 tablas más")]
   subgraph s2["ctrl:RegulatoryDocumentsController · Operaciones de RegulatoryDocumentsControll…"]
-    o38["GET /pharma-labs/{pharmaLabId}/regulatory-documents"]:::op
-    o41["POST /pharma-labs/{pharmaLabId}/regulatory-documents"]:::op
-    o43["GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}"]:::op
-    o45["GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/acce…"]:::op
-    o46["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/inv…"]:::op
-    o48["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/ver…"]:::op
-    o50["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/ver…"]:::op
-    o52["POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/revi…"]:::op
+    o39["GET /pharma-labs/{pharmaLabId}/regulatory-documents"]:::op
+    o42["POST /pharma-labs/{pharmaLabId}/regulatory-documents"]:::op
+    o44["GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}"]:::op
+    o46["GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/acce…"]:::op
+    o47["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/inv…"]:::op
+    o49["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/ver…"]:::op
+    o51["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/ver…"]:::op
+    o53["POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/revi…"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -456,67 +456,67 @@ flowchart LR
   o29 -->|"CREA"| t30
   o29 -->|"LEE"| t30
   o29 -->|"CREA"| t31
-  o29 -->|"LEE"| t8
-  o29 -.-> t32
-  a34 --> o33
-  o33 -->|"CREA"| t6
-  o33 -->|"LEE"| t6
-  o33 -->|"LEE"| t8
-  o33 -->|"LEE"| t35
-  o33 -->|"LEE"| t36
-  o33 -->|"LEE"| t4
-  o33 -.-> t37
-  a39 --> o38
-  o38 -->|"LEE"| t4
-  o38 -->|"LEE"| t40
-  a39 --> o41
-  o41 -->|"CREA"| t6
-  o41 -->|"LEE"| t6
-  o41 -->|"LEE"| t8
-  o41 -->|"LEE"| t4
-  o41 -->|"CREA"| t42
-  o41 -->|"CREA"| t40
-  a39 --> o43
-  o43 -->|"LEE"| t4
-  o43 -->|"CREA"| t44
-  o43 -->|"LEE"| t42
-  o43 -->|"LEE"| t40
-  a39 --> o45
-  o45 -->|"LEE"| t4
-  o45 -->|"LEE"| t44
-  o45 -->|"LEE"| t40
-  a39 --> o46
-  o46 -->|"CREA"| t6
-  o46 -->|"LEE"| t6
-  o46 -->|"LEE"| t8
+  o29 -->|"LEE"| t32
+  o29 -.-> t33
+  a35 --> o34
+  o34 -->|"CREA"| t6
+  o34 -->|"LEE"| t6
+  o34 -->|"LEE"| t8
+  o34 -->|"LEE"| t36
+  o34 -->|"LEE"| t37
+  o34 -->|"LEE"| t4
+  o34 -.-> t38
+  a40 --> o39
+  o39 -->|"LEE"| t4
+  o39 -->|"LEE"| t41
+  a40 --> o42
+  o42 -->|"CREA"| t6
+  o42 -->|"LEE"| t6
+  o42 -->|"LEE"| t8
+  o42 -->|"LEE"| t4
+  o42 -->|"CREA"| t43
+  o42 -->|"CREA"| t41
+  a40 --> o44
+  o44 -->|"LEE"| t4
+  o44 -->|"CREA"| t45
+  o44 -->|"LEE"| t43
+  o44 -->|"LEE"| t41
+  a40 --> o46
   o46 -->|"LEE"| t4
-  o46 -->|"ACTUALIZA"| t42
-  o46 -->|"LEE"| t42
-  o46 -.-> t47
-  a39 --> o48
-  o48 -->|"CREA"| t6
-  o48 -->|"LEE"| t6
-  o48 -->|"LEE"| t8
-  o48 -->|"LEE"| t4
-  o48 -->|"ACTUALIZA"| t42
-  o48 -->|"CREA"| t42
-  o48 -.-> t49
-  a39 --> o50
-  o50 -->|"CREA"| t6
-  o50 -->|"LEE"| t6
-  o50 -->|"LEE"| t8
-  o50 -->|"LEE"| t4
-  o50 -->|"CREA"| t44
-  o50 -->|"LEE"| t42
-  o50 -.-> t51
-  a39 --> o52
-  o52 -->|"ACTUALIZA"| t53
-  o52 -->|"CREA"| t53
-  o52 -->|"LEE"| t53
-  o52 -->|"LEE"| t54
-  o52 -->|"LEE"| t55
-  o52 -->|"CREA"| t56
-  o52 -.-> t57
+  o46 -->|"LEE"| t45
+  o46 -->|"LEE"| t41
+  a40 --> o47
+  o47 -->|"CREA"| t6
+  o47 -->|"LEE"| t6
+  o47 -->|"LEE"| t8
+  o47 -->|"LEE"| t4
+  o47 -->|"ACTUALIZA"| t43
+  o47 -->|"LEE"| t43
+  o47 -.-> t48
+  a40 --> o49
+  o49 -->|"CREA"| t6
+  o49 -->|"LEE"| t6
+  o49 -->|"LEE"| t8
+  o49 -->|"LEE"| t4
+  o49 -->|"ACTUALIZA"| t43
+  o49 -->|"CREA"| t43
+  o49 -.-> t50
+  a40 --> o51
+  o51 -->|"CREA"| t6
+  o51 -->|"LEE"| t6
+  o51 -->|"LEE"| t8
+  o51 -->|"LEE"| t4
+  o51 -->|"CREA"| t45
+  o51 -->|"LEE"| t43
+  o51 -.-> t52
+  a40 --> o53
+  o53 -->|"LEE"| t32
+  o53 -->|"ACTUALIZA"| t54
+  o53 -->|"CREA"| t54
+  o53 -->|"LEE"| t54
+  o53 -->|"LEE"| t55
+  o53 -->|"LEE"| t56
+  o53 -.-> t57
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -530,21 +530,22 @@ flowchart LR
   a2(["PRACTITIONER · CLINICIAN"]):::actor
   a9(["MEDICAL_VISITOR · PHARMA_LAB_ADMIN · PRACTITIONER · CLINICI…"]):::actor
   a16(["MEDICAL_VISITOR"]):::actor
-  a25(["PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN"]):::actor
-  a32(["MEDICAL_VISITOR · PRACTITIONER · CLINICIAN"]):::actor
+  a26(["PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN"]):::actor
+  a33(["MEDICAL_VISITOR · PRACTITIONER · CLINICIAN"]):::actor
   t3[("pharma_lab.doctor_visit_blocks")]:::tabla
   t5[("audit.audit_log")]:::tabla
   t6[("iam.sessions")]:::tabla
   t10[("pharma_lab.doctor_visit_policies")]:::tabla
   t11[("pharma_lab.doctor_visit_windows")]:::tabla
-  t17[("messaging.in_app_notifications")]:::tabla
-  t20[("pharma_lab.visit_records")]:::tabla
-  t26[("pharma_lab.pharma_labs")]:::tabla
-  t28[("pharma_lab.visit_ratings")]:::tabla
-  t33[("pharma_lab.medical_visitors")]:::tabla
-  t34[("pharma_lab.visit_request_events")]:::tabla
-  t35[("pharma_lab.visit_request_topics")]:::tabla
-  t36[("pharma_lab.visit_requests")]:::tabla
+  t17[("directory.tenant_memberships")]:::tabla
+  t18[("messaging.in_app_notifications")]:::tabla
+  t21[("pharma_lab.visit_records")]:::tabla
+  t27[("pharma_lab.pharma_labs")]:::tabla
+  t29[("pharma_lab.visit_ratings")]:::tabla
+  t34[("pharma_lab.medical_visitors")]:::tabla
+  t35[("pharma_lab.visit_request_events")]:::tabla
+  t36[("pharma_lab.visit_request_topics")]:::tabla
+  t37[("pharma_lab.visit_requests")]:::tabla
   t14[("+2 tablas más")]
   subgraph s0["ctrl:VisitAgendaController · Operaciones de VisitAgendaController que el README…"]
     o1["GET /visit-agenda/blocks"]:::op
@@ -554,34 +555,34 @@ flowchart LR
     o12["GET /visit-agenda/me"]:::op
     o13["PUT /visit-agenda/me"]:::op
   end
-  t18[("+18 tablas más")]
-  t22[("+12 tablas más")]
+  t19[("+19 tablas más")]
+  t23[("+13 tablas más")]
   subgraph s1["ctrl:VisitRecordsController · Operaciones de VisitRecordsController que el READ…"]
     o15["POST /visit-records"]:::op
-    o19["POST /visit-records/{visitRecordId}/confirm"]:::op
-    o21["POST /visit-records/{visitRecordId}/rating"]:::op
-    o23["GET /visit-records/inbox"]:::op
-    o24["GET /visit-records/labs/{pharmaLabId}"]:::op
-    o27["GET /visit-records/labs/{pharmaLabId}/rating-summary"]:::op
+    o20["POST /visit-records/{visitRecordId}/confirm"]:::op
+    o22["POST /visit-records/{visitRecordId}/rating"]:::op
+    o24["GET /visit-records/inbox"]:::op
+    o25["GET /visit-records/labs/{pharmaLabId}"]:::op
+    o28["GET /visit-records/labs/{pharmaLabId}/rating-summary"]:::op
   end
-  t30[("+26 tablas más")]
-  t38[("+11 tablas más")]
-  t40[("+13 tablas más")]
-  t42[("+20 tablas más")]
-  t44[("+11 tablas más")]
-  t46[("+10 tablas más")]
-  t48[("+21 tablas más")]
+  t31[("+27 tablas más")]
+  t39[("+12 tablas más")]
+  t41[("+14 tablas más")]
+  t43[("+21 tablas más")]
+  t45[("+12 tablas más")]
+  t47[("+11 tablas más")]
+  t49[("+22 tablas más")]
   subgraph s2["ctrl:VisitRequestsController · Operaciones de VisitRequestsController que el RE…"]
-    o29["POST /visit-requests"]:::op
-    o31["GET /visit-requests/{visitRequestId}"]:::op
-    o37["POST /visit-requests/{visitRequestId}/accept"]:::op
-    o39["POST /visit-requests/{visitRequestId}/cancel"]:::op
-    o41["POST /visit-requests/{visitRequestId}/propose-time"]:::op
-    o43["POST /visit-requests/{visitRequestId}/reject"]:::op
-    o45["POST /visit-requests/{visitRequestId}/request-info"]:::op
-    o47["POST /visit-requests/{visitRequestId}/reschedule"]:::op
-    o49["GET /visit-requests/inbox"]:::op
-    o50["GET /visit-requests/mine"]:::op
+    o30["POST /visit-requests"]:::op
+    o32["GET /visit-requests/{visitRequestId}"]:::op
+    o38["POST /visit-requests/{visitRequestId}/accept"]:::op
+    o40["POST /visit-requests/{visitRequestId}/cancel"]:::op
+    o42["POST /visit-requests/{visitRequestId}/propose-time"]:::op
+    o44["POST /visit-requests/{visitRequestId}/reject"]:::op
+    o46["POST /visit-requests/{visitRequestId}/request-info"]:::op
+    o48["POST /visit-requests/{visitRequestId}/reschedule"]:::op
+    o50["GET /visit-requests/inbox"]:::op
+    o51["GET /visit-requests/mine"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -613,100 +614,100 @@ flowchart LR
   a16 --> o15
   o15 -->|"CREA"| t5
   o15 -->|"LEE"| t5
-  o15 -->|"LEE"| t6
-  o15 -->|"ACTUALIZA"| t17
-  o15 -->|"CREA"| t17
   o15 -->|"LEE"| t17
-  o15 -.-> t18
-  a2 --> o19
-  o19 -->|"CREA"| t5
-  o19 -->|"LEE"| t5
-  o19 -->|"LEE"| t6
-  o19 -->|"ACTUALIZA"| t20
-  o19 -->|"LEE"| t20
-  a2 --> o21
-  o21 -->|"CREA"| t5
-  o21 -->|"LEE"| t5
-  o21 -->|"LEE"| t6
-  o21 -->|"ACTUALIZA"| t17
-  o21 -->|"CREA"| t17
-  o21 -->|"LEE"| t17
-  o21 -.-> t22
-  a2 --> o23
-  o23 -->|"LEE"| t20
-  a25 --> o24
-  o24 -->|"LEE"| t26
-  o24 -->|"LEE"| t20
-  a25 --> o27
-  o27 -->|"LEE"| t26
-  o27 -->|"LEE"| t28
-  o27 -->|"LEE"| t20
-  a16 --> o29
-  o29 -->|"CREA"| t5
-  o29 -->|"LEE"| t5
-  o29 -->|"LEE"| t6
-  o29 -->|"ACTUALIZA"| t17
-  o29 -->|"CREA"| t17
-  o29 -->|"LEE"| t17
-  o29 -.-> t30
-  a32 --> o31
-  o31 -->|"LEE"| t33
-  o31 -->|"LEE"| t34
-  o31 -->|"LEE"| t35
-  o31 -->|"LEE"| t36
-  a2 --> o37
-  o37 -->|"CREA"| t5
-  o37 -->|"LEE"| t5
-  o37 -->|"LEE"| t6
-  o37 -->|"ACTUALIZA"| t17
-  o37 -->|"CREA"| t17
-  o37 -->|"LEE"| t17
-  o37 -.-> t38
-  a32 --> o39
-  o39 -->|"CREA"| t5
-  o39 -->|"LEE"| t5
-  o39 -->|"LEE"| t6
-  o39 -->|"ACTUALIZA"| t17
-  o39 -->|"CREA"| t17
-  o39 -->|"LEE"| t17
-  o39 -.-> t40
-  a2 --> o41
-  o41 -->|"CREA"| t5
-  o41 -->|"LEE"| t5
-  o41 -->|"LEE"| t6
-  o41 -->|"ACTUALIZA"| t17
-  o41 -->|"CREA"| t17
-  o41 -->|"LEE"| t17
-  o41 -.-> t42
-  a2 --> o43
-  o43 -->|"CREA"| t5
-  o43 -->|"LEE"| t5
-  o43 -->|"LEE"| t6
-  o43 -->|"ACTUALIZA"| t17
-  o43 -->|"CREA"| t17
-  o43 -->|"LEE"| t17
-  o43 -.-> t44
-  a2 --> o45
-  o45 -->|"CREA"| t5
-  o45 -->|"LEE"| t5
-  o45 -->|"LEE"| t6
-  o45 -->|"ACTUALIZA"| t17
-  o45 -->|"CREA"| t17
-  o45 -->|"LEE"| t17
-  o45 -.-> t46
-  a16 --> o47
-  o47 -->|"CREA"| t5
-  o47 -->|"LEE"| t5
-  o47 -->|"LEE"| t6
-  o47 -->|"ACTUALIZA"| t17
-  o47 -->|"CREA"| t17
-  o47 -->|"LEE"| t17
-  o47 -.-> t48
-  a2 --> o49
-  o49 -->|"LEE"| t36
-  a16 --> o50
-  o50 -->|"LEE"| t33
-  o50 -->|"LEE"| t36
+  o15 -->|"LEE"| t6
+  o15 -->|"ACTUALIZA"| t18
+  o15 -->|"CREA"| t18
+  o15 -.-> t19
+  a2 --> o20
+  o20 -->|"CREA"| t5
+  o20 -->|"LEE"| t5
+  o20 -->|"LEE"| t6
+  o20 -->|"ACTUALIZA"| t21
+  o20 -->|"LEE"| t21
+  a2 --> o22
+  o22 -->|"CREA"| t5
+  o22 -->|"LEE"| t5
+  o22 -->|"LEE"| t17
+  o22 -->|"LEE"| t6
+  o22 -->|"ACTUALIZA"| t18
+  o22 -->|"CREA"| t18
+  o22 -.-> t23
+  a2 --> o24
+  o24 -->|"LEE"| t21
+  a26 --> o25
+  o25 -->|"LEE"| t27
+  o25 -->|"LEE"| t21
+  a26 --> o28
+  o28 -->|"LEE"| t27
+  o28 -->|"LEE"| t29
+  o28 -->|"LEE"| t21
+  a16 --> o30
+  o30 -->|"CREA"| t5
+  o30 -->|"LEE"| t5
+  o30 -->|"LEE"| t17
+  o30 -->|"LEE"| t6
+  o30 -->|"ACTUALIZA"| t18
+  o30 -->|"CREA"| t18
+  o30 -.-> t31
+  a33 --> o32
+  o32 -->|"LEE"| t34
+  o32 -->|"LEE"| t35
+  o32 -->|"LEE"| t36
+  o32 -->|"LEE"| t37
+  a2 --> o38
+  o38 -->|"CREA"| t5
+  o38 -->|"LEE"| t5
+  o38 -->|"LEE"| t17
+  o38 -->|"LEE"| t6
+  o38 -->|"ACTUALIZA"| t18
+  o38 -->|"CREA"| t18
+  o38 -.-> t39
+  a33 --> o40
+  o40 -->|"CREA"| t5
+  o40 -->|"LEE"| t5
+  o40 -->|"LEE"| t17
+  o40 -->|"LEE"| t6
+  o40 -->|"ACTUALIZA"| t18
+  o40 -->|"CREA"| t18
+  o40 -.-> t41
+  a2 --> o42
+  o42 -->|"CREA"| t5
+  o42 -->|"LEE"| t5
+  o42 -->|"LEE"| t17
+  o42 -->|"LEE"| t6
+  o42 -->|"ACTUALIZA"| t18
+  o42 -->|"CREA"| t18
+  o42 -.-> t43
+  a2 --> o44
+  o44 -->|"CREA"| t5
+  o44 -->|"LEE"| t5
+  o44 -->|"LEE"| t17
+  o44 -->|"LEE"| t6
+  o44 -->|"ACTUALIZA"| t18
+  o44 -->|"CREA"| t18
+  o44 -.-> t45
+  a2 --> o46
+  o46 -->|"CREA"| t5
+  o46 -->|"LEE"| t5
+  o46 -->|"LEE"| t17
+  o46 -->|"LEE"| t6
+  o46 -->|"ACTUALIZA"| t18
+  o46 -->|"CREA"| t18
+  o46 -.-> t47
+  a16 --> o48
+  o48 -->|"CREA"| t5
+  o48 -->|"LEE"| t5
+  o48 -->|"LEE"| t17
+  o48 -->|"LEE"| t6
+  o48 -->|"ACTUALIZA"| t18
+  o48 -->|"CREA"| t18
+  o48 -.-> t49
+  a2 --> o50
+  o50 -->|"LEE"| t37
+  a16 --> o51
+  o51 -->|"LEE"| t34
+  o51 -->|"LEE"| t37
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -2389,9 +2390,8 @@ Desvincular al visitador y revocar sus accesos
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio |
 | 409 | `CONFLICT` | ConflictException: El visitador ya está desvinculado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2478,62 +2478,37 @@ flowchart TD
   n38 --> n39
   n40[("CREA pharma_lab.pharma_lab_notices")]:::efecto
   n39 --> n40
-  n41["Llama a NotificationsService.emitInApp"]:::llamada
+  n41["Llama a OrganizationRepository.appendLinkEvent"]:::llamada
   n40 --> n41
-  n42["Intenta"]:::intento
+  n35 -->|"al terminar"| n41
+  n42[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
   n41 --> n42
-  n43["Llama a NotificationsService.writeInApp"]:::llamada
+  n43["Llama a MedicalVisitorsService.revokeVisitorRole"]:::llamada
   n42 --> n43
-  n44{"!channel"}:::decision
+  n44["Llama a RolesRepository.findByCode"]:::llamada
   n43 --> n44
-  n45(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n44 -->|"sí"| n45
-  n46{"!config"}:::decision
-  n44 -->|"no"| n46
-  n47(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n46 -->|"sí"| n47
-  n48{"!provider"}:::decision
-  n46 -->|"no"| n48
-  n49(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n48 -->|"sí"| n49
-  n50[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n48 -->|"no"| n50
-  n51{"availableAt › now"}:::decision
+  n45[("LEE authz.roles")]:::efecto
+  n44 --> n45
+  n46["Llama a UserRoleAssignmentsRepository.findActive"]:::llamada
+  n45 --> n46
+  n47[("LEE authz.user_role_assignments")]:::efecto
+  n46 --> n47
+  n48["Llama a UserRoleAssignmentsRepository.revoke"]:::llamada
+  n47 --> n48
+  n49[("ACTUALIZA authz.user_role_assignments")]:::efecto
+  n48 --> n49
+  n50["Llama a AuditTrailService.record"]:::llamada
+  n49 --> n50
+  n51["Llama a AuditLogRepository.append"]:::llamada
   n50 --> n51
-  n52[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n51 -->|"sí"| n52
-  n53["Llama a OrganizationRepository.appendLinkEvent"]:::llamada
+  n52["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n51 --> n52
+  n53[("LEE audit.audit_log")]:::efecto
   n52 --> n53
-  n51 -->|"no"| n53
-  n35 -->|"al terminar"| n53
-  n54[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
+  n54[("CREA audit.audit_log")]:::efecto
   n53 --> n54
-  n55["Llama a MedicalVisitorsService.revokeVisitorRole"]:::llamada
+  n55(("201 Responde con éxito")):::ok
   n54 --> n55
-  n56["Llama a RolesRepository.findByCode"]:::llamada
-  n55 --> n56
-  n57[("LEE authz.roles")]:::efecto
-  n56 --> n57
-  n58["Llama a UserRoleAssignmentsRepository.findActive"]:::llamada
-  n57 --> n58
-  n59[("LEE authz.user_role_assignments")]:::efecto
-  n58 --> n59
-  n60["Llama a UserRoleAssignmentsRepository.revoke"]:::llamada
-  n59 --> n60
-  n61[("ACTUALIZA authz.user_role_assignments")]:::efecto
-  n60 --> n61
-  n62["Llama a AuditTrailService.record"]:::llamada
-  n61 --> n62
-  n63["Llama a AuditLogRepository.append"]:::llamada
-  n62 --> n63
-  n64["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n63 --> n64
-  n65[("LEE audit.audit_log")]:::efecto
-  n64 --> n65
-  n66[("CREA audit.audit_log")]:::efecto
-  n65 --> n66
-  n67(("201 Responde con éxito")):::ok
-  n66 --> n67
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4210,9 +4185,9 @@ Aprobar o rechazar la publicación propuesta
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Propuesta no encontrada; ResourceNotFoundException: Visitador no encontrado en el laboratorio; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Propuesta no encontrada; ResourceNotFoundException: Visitador no encontrado en el laboratorio |
 | 409 | `CONFLICT` | ConflictException: La propuesta ya fue resuelta |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La decisión debe ser aprobar o rechazar; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La decisión debe ser aprobar o rechazar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -4275,43 +4250,18 @@ flowchart TD
   n24 -->|"no"| n28
   n29[("CREA pharma_lab.pharma_lab_notices")]:::efecto
   n28 --> n29
-  n30["Llama a NotificationsService.emitInApp"]:::llamada
+  n30["Llama a AuditTrailService.record"]:::llamada
   n29 --> n30
-  n31["Intenta"]:::intento
+  n31["Llama a AuditLogRepository.append"]:::llamada
   n30 --> n31
-  n32["Llama a NotificationsService.writeInApp"]:::llamada
+  n32["Llama a AuditLogRepository.findChainTip"]:::llamada
   n31 --> n32
-  n33{"!channel"}:::decision
+  n33[("LEE audit.audit_log")]:::efecto
   n32 --> n33
-  n34(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n33 -->|"sí"| n34
-  n35{"!config"}:::decision
-  n33 -->|"no"| n35
-  n36(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n35 -->|"sí"| n36
-  n37{"!provider"}:::decision
-  n35 -->|"no"| n37
-  n38(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n37 -->|"sí"| n38
-  n39[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n37 -->|"no"| n39
-  n40{"availableAt › now"}:::decision
-  n39 --> n40
-  n41[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n40 -->|"sí"| n41
-  n42["Llama a AuditTrailService.record"]:::llamada
-  n41 --> n42
-  n40 -->|"no"| n42
-  n43["Llama a AuditLogRepository.append"]:::llamada
-  n42 --> n43
-  n44["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n43 --> n44
-  n45[("LEE audit.audit_log")]:::efecto
-  n44 --> n45
-  n46[("CREA audit.audit_log")]:::efecto
-  n45 --> n46
-  n47(("201 Responde con éxito")):::ok
-  n46 --> n47
+  n34[("CREA audit.audit_log")]:::efecto
+  n33 --> n34
+  n35(("201 Responde con éxito")):::ok
+  n34 --> n35
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4727,9 +4677,9 @@ Registrar la visita realizada
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico; ResourceNotFoundException: Solicitud no encontrada; ResourceNotFoundException: Material informativo no encontrado en el laboratorio; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico; ResourceNotFoundException: Solicitud no encontrada; ResourceNotFoundException: Material informativo no encontrado en el laboratorio |
 | 409 | `CONFLICT` | ConflictException: La visita ya fue registrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El visitador no tiene una vinculación activa con un laboratorio; PreconditionFailedException: El laboratorio del visitador no está activo; PreconditionFailedException: Solo se registra una visita confirmada; PreconditionFailedException: Un visitador no puede compartir material que no está aprobado; PreconditionFailedException: El material no estaba vigente en la fecha de la visita; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El visitador no tiene una vinculación activa con un laboratorio; PreconditionFailedException: El laboratorio del visitador no está activo; PreconditionFailedException: Solo se registra una visita confirmada; PreconditionFailedException: Un visitador no puede compartir material que no está aprobado; PreconditionFailedException: El material no estaba vigente en la fecha de la visita |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -4827,58 +4777,35 @@ flowchart TD
   n44 --> n45
   n46[("CREA pharma_lab.pharma_lab_notices")]:::efecto
   n45 --> n46
-  n47["Llama a NotificationsService.emitInApp"]:::llamada
+  n47{"attended"}:::decision
   n46 --> n47
-  n48["Intenta"]:::intento
-  n47 --> n48
-  n49["Llama a NotificationsService.writeInApp"]:::llamada
+  n48["Llama a VisitRecordsService.issueSurveyIfApplicable"]:::llamada
+  n47 -->|"sí"| n48
+  n49["Llama a SurveysRepository.findApplicableSurvey"]:::llamada
   n48 --> n49
-  n50{"!channel"}:::decision
+  n50[("LEE pharma_lab.visit_surveys")]:::efecto
   n49 --> n50
-  n51(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n50 -->|"sí"| n51
-  n52{"!config"}:::decision
-  n50 -->|"no"| n52
-  n53(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n52 -->|"sí"| n53
-  n54{"!provider"}:::decision
-  n52 -->|"no"| n54
-  n55(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n54 -->|"sí"| n55
-  n56[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n54 -->|"no"| n56
-  n57{"availableAt › now"}:::decision
+  n51["Llama a SurveysRepository.createResponse"]:::llamada
+  n50 --> n51
+  n52[("CREA pharma_lab.visit_survey_responses")]:::efecto
+  n51 --> n52
+  n53["Llama a PharmaLabNotificationsService.notify"]:::llamada
+  n52 --> n53
+  n54[("CREA pharma_lab.pharma_lab_notices")]:::efecto
+  n53 --> n54
+  n55["Llama a AuditTrailService.record"]:::llamada
+  n54 --> n55
+  n47 -->|"no"| n55
+  n56["Llama a AuditLogRepository.append"]:::llamada
+  n55 --> n56
+  n57["Llama a AuditLogRepository.findChainTip"]:::llamada
   n56 --> n57
-  n58[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n57 -->|"sí"| n58
-  n59{"attended"}:::decision
+  n58[("LEE audit.audit_log")]:::efecto
+  n57 --> n58
+  n59[("CREA audit.audit_log")]:::efecto
   n58 --> n59
-  n57 -->|"no"| n59
-  n60["Llama a VisitRecordsService.issueSurveyIfApplicable"]:::llamada
-  n59 -->|"sí"| n60
-  n61["Llama a SurveysRepository.findApplicableSurvey"]:::llamada
-  n60 --> n61
-  n62[("LEE pharma_lab.visit_surveys")]:::efecto
-  n61 --> n62
-  n63["Llama a SurveysRepository.createResponse"]:::llamada
-  n62 --> n63
-  n64[("CREA pharma_lab.visit_survey_responses")]:::efecto
-  n63 --> n64
-  n65["Llama a PharmaLabNotificationsService.notify"]:::llamada
-  n64 --> n65
-  n66[("CREA pharma_lab.pharma_lab_notices")]:::efecto
-  n65 --> n66
-  n67["Llama a AuditTrailService.record"]:::llamada
-  n66 --> n67
-  n59 -->|"no"| n67
-  n68["Llama a AuditLogRepository.append"]:::llamada
-  n67 --> n68
-  n69["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n68 --> n69
-  n70[("LEE audit.audit_log")]:::efecto
-  n69 --> n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
-  n70 --> n71
+  n60(("201 Responde con éxito")):::ok
+  n59 --> n60
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4961,9 +4888,9 @@ Calificar la visita completada
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de visita no encontrado; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de visita no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe una calificación de esa naturaleza para la visita |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se califica una visita completada; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se califica una visita completada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -5015,44 +4942,19 @@ flowchart TD
   n22 -->|"sí"| n23
   n24[("CREA pharma_lab.pharma_lab_notices")]:::efecto
   n23 --> n24
-  n25["Llama a NotificationsService.emitInApp"]:::llamada
+  n25["Llama a AuditTrailService.record"]:::llamada
   n24 --> n25
-  n26["Intenta"]:::intento
+  n22 -->|"no"| n25
+  n26["Llama a AuditLogRepository.append"]:::llamada
   n25 --> n26
-  n27["Llama a NotificationsService.writeInApp"]:::llamada
+  n27["Llama a AuditLogRepository.findChainTip"]:::llamada
   n26 --> n27
-  n28{"!channel"}:::decision
+  n28[("LEE audit.audit_log")]:::efecto
   n27 --> n28
-  n29(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n28 -->|"sí"| n29
-  n30{"!config"}:::decision
-  n28 -->|"no"| n30
-  n31(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n30 -->|"sí"| n31
-  n32{"!provider"}:::decision
-  n30 -->|"no"| n32
-  n33(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n32 -->|"sí"| n33
-  n34[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n32 -->|"no"| n34
-  n35{"availableAt › now"}:::decision
-  n34 --> n35
-  n36[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n35 -->|"sí"| n36
-  n37["Llama a AuditTrailService.record"]:::llamada
-  n36 --> n37
-  n35 -->|"no"| n37
-  n22 -->|"no"| n37
-  n38["Llama a AuditLogRepository.append"]:::llamada
-  n37 --> n38
-  n39["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n38 --> n39
-  n40[("LEE audit.audit_log")]:::efecto
-  n39 --> n40
-  n41[("CREA audit.audit_log")]:::efecto
-  n40 --> n41
-  n42(("201 Responde con éxito")):::ok
-  n41 --> n42
+  n29[("CREA audit.audit_log")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5163,8 +5065,8 @@ Solicitar una visita médica a un doctor
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El visitador no tiene una vinculación activa con un laboratorio; PreconditionFailedException: El laboratorio del visitador no está activo; PreconditionFailedException: El doctor bloqueó las visitas de este laboratorio o visitador; PreconditionFailedException: El doctor solo recibe visitadores de determinadas especialidades; PreconditionFailedException: El visitador no está autorizado a representar alguno de los productos del temario; PreconditionFailedException: Alguno de los productos del temario está suspendido o retirado; PreconditionFailedException: El doctor no recibe visitas de laboratorio; PreconditionFailedException: La visita debe solicitarse con al menos {policy.minNoticeHours} horas de antelación; PreconditionFailedException: La duración máxima admitida es de {policy.maxDurationMinutes} minutos; PreconditionFailedException: El horario solicitado queda fuera de las ventanas de visita del doctor; PreconditionFailedException: La modalidad solicitada no coincide con la de la ventana de visita; PreconditionFailedException: El doctor ya alcanzó el máximo de visitas para ese día; PreconditionFailedException: El horario se superpone con otra visita ya registrada; PreconditionFailedException: La ventana de visita ya está completa; PreconditionFailedException: El horario se superpone con la agenda clínica del doctor; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El visitador no tiene una vinculación activa con un laboratorio; PreconditionFailedException: El laboratorio del visitador no está activo; PreconditionFailedException: El doctor bloqueó las visitas de este laboratorio o visitador; PreconditionFailedException: El doctor solo recibe visitadores de determinadas especialidades; PreconditionFailedException: El visitador no está autorizado a representar alguno de los productos del temario; PreconditionFailedException: Alguno de los productos del temario está suspendido o retirado; PreconditionFailedException: El doctor no recibe visitas de laboratorio; PreconditionFailedException: La visita debe solicitarse con al menos {policy.minNoticeHours} horas de antelación; PreconditionFailedException: La duración máxima admitida es de {policy.maxDurationMinutes} minutos; PreconditionFailedException: El horario solicitado queda fuera de las ventanas de visita del doctor; PreconditionFailedException: La modalidad solicitada no coincide con la de la ventana de visita; PreconditionFailedException: El doctor ya alcanzó el máximo de visitas para ese día; PreconditionFailedException: El horario se superpone con otra visita ya registrada; PreconditionFailedException: La ventana de visita ya está completa; PreconditionFailedException: El horario se superpone con la agenda clínica del doctor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -5464,9 +5366,9 @@ Cancelar la visita
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada; ResourceNotFoundException: El doctor no tiene agenda de visitas habilitada; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada; ResourceNotFoundException: El doctor no tiene agenda de visitas habilitada |
 | 409 | `CONFLICT` | ConflictException: La solicitud está en un estado final y ya no admite cambios; ConflictException: La transición solicitada no está permitida para el estado actual |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El plazo para reprogramar o cancelar venció ({cutoffHours} horas antes del inicio); PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El plazo para reprogramar o cancelar venció ({cutoffHours} horas antes del inicio) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -5541,54 +5443,29 @@ flowchart TD
   n33 -->|"sí"| n34
   n35[("CREA pharma_lab.pharma_lab_notices")]:::efecto
   n34 --> n35
-  n36["Llama a NotificationsService.emitInApp"]:::llamada
-  n35 --> n36
-  n37["Intenta"]:::intento
+  n36["Llama a VisitRequestsService.notifyVisitor"]:::llamada
+  n33 -->|"no"| n36
+  n37["Llama a VisitorsRepository.findVisitor"]:::llamada
   n36 --> n37
-  n38["Llama a NotificationsService.writeInApp"]:::llamada
+  n38[("LEE pharma_lab.medical_visitors")]:::efecto
   n37 --> n38
-  n39{"!channel"}:::decision
+  n39["Llama a PharmaLabNotificationsService.notify"]:::llamada
   n38 --> n39
-  n40(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n39 -->|"sí"| n40
-  n41{"!config"}:::decision
-  n39 -->|"no"| n41
-  n42(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n41 -->|"sí"| n42
-  n43{"!provider"}:::decision
-  n41 -->|"no"| n43
-  n44(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n43 -->|"sí"| n44
-  n45[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n43 -->|"no"| n45
-  n46{"availableAt › now"}:::decision
+  n40[("CREA pharma_lab.pharma_lab_notices")]:::efecto
+  n39 --> n40
+  n41["Llama a AuditTrailService.record"]:::llamada
+  n35 --> n41
+  n40 --> n41
+  n42["Llama a AuditLogRepository.append"]:::llamada
+  n41 --> n42
+  n43["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n42 --> n43
+  n44[("LEE audit.audit_log")]:::efecto
+  n43 --> n44
+  n45[("CREA audit.audit_log")]:::efecto
+  n44 --> n45
+  n46(("201 Responde con éxito")):::ok
   n45 --> n46
-  n47[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n46 -->|"sí"| n47
-  n48["Llama a VisitRequestsService.notifyVisitor"]:::llamada
-  n33 -->|"no"| n48
-  n49["Llama a VisitorsRepository.findVisitor"]:::llamada
-  n48 --> n49
-  n50[("LEE pharma_lab.medical_visitors")]:::efecto
-  n49 --> n50
-  n51["Llama a PharmaLabNotificationsService.notify"]:::llamada
-  n50 --> n51
-  n52[("CREA pharma_lab.pharma_lab_notices")]:::efecto
-  n51 --> n52
-  n53["Llama a AuditTrailService.record"]:::llamada
-  n47 --> n53
-  n46 -->|"no"| n53
-  n52 --> n53
-  n54["Llama a AuditLogRepository.append"]:::llamada
-  n53 --> n54
-  n55["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n54 --> n55
-  n56[("LEE audit.audit_log")]:::efecto
-  n55 --> n56
-  n57[("CREA audit.audit_log")]:::efecto
-  n56 --> n57
-  n58(("201 Responde con éxito")):::ok
-  n57 --> n58
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5911,9 +5788,9 @@ Reprogramar la visita dentro del plazo permitido
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico; ResourceNotFoundException: Solicitud no encontrada; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico; ResourceNotFoundException: Solicitud no encontrada |
 | 409 | `CONFLICT` | ConflictException: La solicitud está en un estado final y ya no admite cambios; ConflictException: La transición solicitada no está permitida para el estado actual |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El visitador no tiene una vinculación activa con un laboratorio; PreconditionFailedException: El laboratorio del visitador no está activo; PreconditionFailedException: El doctor no recibe visitas de laboratorio; PreconditionFailedException: La visita debe solicitarse con al menos {policy.minNoticeHours} horas de antelación; PreconditionFailedException: La duración máxima admitida es de {policy.maxDurationMinutes} minutos; PreconditionFailedException: El horario solicitado queda fuera de las ventanas de visita del doctor; PreconditionFailedException: La modalidad solicitada no coincide con la de la ventana de visita; PreconditionFailedException: El doctor ya alcanzó el máximo de visitas para ese día; PreconditionFailedException: El horario se superpone con otra visita ya registrada; PreconditionFailedException: La ventana de visita ya está completa; PreconditionFailedException: El horario se superpone con la agenda clínica del doctor; PreconditionFailedException: El plazo para reprogramar o cancelar venció ({cutoffHours} horas antes del inicio); PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El visitador no tiene una vinculación activa con un laboratorio; PreconditionFailedException: El laboratorio del visitador no está activo; PreconditionFailedException: El doctor no recibe visitas de laboratorio; PreconditionFailedException: La visita debe solicitarse con al menos {policy.minNoticeHours} horas de antelación; PreconditionFailedException: La duración máxima admitida es de {policy.maxDurationMinutes} minutos; PreconditionFailedException: El horario solicitado queda fuera de las ventanas de visita del doctor; PreconditionFailedException: La modalidad solicitada no coincide con la de la ventana de visita; PreconditionFailedException: El doctor ya alcanzó el máximo de visitas para ese día; PreconditionFailedException: El horario se superpone con otra visita ya registrada; PreconditionFailedException: La ventana de visita ya está completa; PreconditionFailedException: El horario se superpone con la agenda clínica del doctor; PreconditionFailedException: El plazo para reprogramar o cancelar venció ({cutoffHours} horas antes del inicio) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -6057,9 +5934,9 @@ flowchart TD
   n67 --> n68
   n69[("CREA pharma_lab.pharma_lab_notices")]:::efecto
   n68 --> n69
-  n70["Llama a NotificationsService.emitInApp"]:::llamada
+  n70["Llama a AuditTrailService.record"]:::llamada
   n69 --> n70
-  n71["… el resto del árbol (11 nodos) está en el JSON del inventario"]:::corte
+  n71["… el resto del árbol (4 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33

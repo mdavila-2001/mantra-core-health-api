@@ -7,15 +7,15 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | ID | Severidad | Hallazgo | Cuenta |
 |---|---|---|---|
 | [FLU-01](#flu-01) | ALTA | Operaciones sin proceso asignado | 0 |
-| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 226 |
+| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 227 |
 | [FLU-03](#flu-03) | ALTA | Ruta pública que escribe en la base | 22 |
-| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 188 |
-| [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 13 |
+| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 191 |
+| [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 14 |
 | [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 4 |
-| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1537 |
+| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1549 |
 | [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 11 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 1 |
-| [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 195 |
+| [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 197 |
 
 ## FLU-01
 
@@ -27,7 +27,7 @@ _Ninguno._
 
 ## FLU-02
 
-**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 226 caso(s).
+**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 227 caso(s).
 
 **Qué hacer:** Confirmar que la regla de acceso vive en el servicio o declarar los roles en el controlador. Hoy la API no las distingue de una sesión cualquiera.
 
@@ -103,15 +103,15 @@ _Ninguno._
 | POST /org/affiliation-invitations/{id}/revoke | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/affiliation-invitations.controller.ts:65` |
 | POST /org/support-engagement-requests/{id}/decision | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/support-staff.controller.ts:240` |
 | POST /org/support-engagements/{id}/end | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/support-staff.controller.ts:274` |
-| POST /org/support-staff | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:30` |
+| POST /org/support-staff | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:31` |
 | POST /org/team/invitations | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/support-staff.controller.ts:291` |
 | PATCH /diagnostic-equipment/{id} | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:70` |
 | POST /diagnostic-equipment/{id}/resource | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:44` |
-| POST /diagnostic-units/{unitId}/equipment | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:126` |
-| DELETE /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:159` |
-| PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:109` |
-| PUT /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:142` |
-| PUT /diagnostic-units/{unitId}/schedule | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:89` |
+| POST /diagnostic-units/{unitId}/equipment | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:131` |
+| DELETE /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:165` |
+| PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:114` |
+| PUT /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:148` |
+| PUT /diagnostic-units/{unitId}/schedule | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:93` |
 | POST /diagnostics/lab/catalog/import | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:86` |
 | POST /diagnostics/lab/categories | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:183` |
 | DELETE /diagnostics/lab/categories/{id} | diagnostic_units | escribe y el controlador no declara roles | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:220` |
@@ -157,6 +157,7 @@ _Ninguno._
 | POST /iam/auth/logout-all | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:527` |
 | POST /iam/me/devices/{id}/confirm | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-my-devices.controller.ts:62` |
 | POST /iam/me/devices/{id}/confirm-code | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-my-devices.controller.ts:44` |
+| PATCH /iam/me/name | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-my-name.controller.ts:24` |
 | POST /iam/me/sessions/{id}/revoke | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:71` |
 | POST /iam/users/{id}/devices | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-users.controller.ts:446` |
 | POST /iam/users/{id}/mfa-factors | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-users.controller.ts:428` |
@@ -232,9 +233,8 @@ _Ninguno._
 | POST /profiles/patients/me/dependent-requests/{id}/accept | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159` |
 | POST /profiles/patients/me/dependent-requests/{id}/reject | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:186` |
 | POST /profiles/patients/me/dependents | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:257` |
-| DELETE /profiles/patients/me/primary-practitioner | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:70` |
 
-_Se muestran 200 de 226; la lista completa está en `inventario/flujos/hallazgos.json`._
+_Se muestran 200 de 227; la lista completa está en `inventario/flujos/hallazgos.json`._
 
 ## FLU-03
 
@@ -269,7 +269,7 @@ _Se muestran 200 de 226; la lista completa está en `inventario/flujos/hallazgos
 
 ## FLU-04
 
-**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 188 caso(s).
+**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 191 caso(s).
 
 **Qué hacer:** Escribir la prueba de integración contra PostgreSQL real (regla 80.2.4). Las sin prueba alguna van primero.
 
@@ -326,15 +326,14 @@ _Se muestran 200 de 226; la lista completa está en `inventario/flujos/hallazgos
 | POST /delegated-permission-sets/{id}/versions | delegated_access | sólo prueba de controlador | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
 | POST /org/support-engagement-requests/{id}/decision | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-staff.controller.ts:240` |
 | POST /org/support-engagements/{id}/end | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-staff.controller.ts:274` |
-| POST /org/support-staff | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:30` |
+| POST /org/support-staff | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:31` |
 | POST /org/team/invitations | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-staff.controller.ts:291` |
 | GET /public/prescription-shares/{token} | delegated_access | sólo prueba de controlador | `src/modules/delegated_access/controllers/prescription-shares-public.controller.ts:39` |
-| POST /diagnostic-units/{unitId}/equipment | diagnostic_units | ninguna prueba la menciona | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:126` |
-| DELETE /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | ninguna prueba la menciona | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:159` |
-| PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | ninguna prueba la menciona | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:109` |
-| PUT /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | ninguna prueba la menciona | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:142` |
-| PUT /diagnostic-units/{unitId}/schedule | diagnostic_units | ninguna prueba la menciona | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:89` |
-| POST /diagnostics/lab/catalog/import | diagnostic_units | sólo prueba de controlador | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:86` |
+| POST /diagnostic-units/{unitId}/equipment | diagnostic_units | ninguna prueba la menciona | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:131` |
+| DELETE /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | ninguna prueba la menciona | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:165` |
+| PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | ninguna prueba la menciona | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:114` |
+| PUT /diagnostic-units/{unitId}/equipment/{equipmentId} | diagnostic_units | ninguna prueba la menciona | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:148` |
+| PUT /diagnostic-units/{unitId}/schedule | diagnostic_units | ninguna prueba la menciona | `src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:93` |
 | POST /diagnostics/lab/categories | diagnostic_units | sólo prueba de controlador | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:183` |
 | DELETE /diagnostics/lab/categories/{id} | diagnostic_units | sólo prueba de controlador | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:220` |
 | PATCH /diagnostics/lab/categories/{id} | diagnostic_units | sólo prueba de controlador | `src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:202` |
@@ -361,6 +360,9 @@ _Se muestran 200 de 226; la lista completa está en `inventario/flujos/hallazgos
 | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:394` |
 | POST /tenants/me/membership-invitations/{membershipId}/accept | directory | ninguna prueba la menciona | `src/modules/directory/controllers/membership-invitations.controller.ts:54` |
 | POST /tenants/me/membership-invitations/{membershipId}/decline | directory | ninguna prueba la menciona | `src/modules/directory/controllers/membership-invitations.controller.ts:73` |
+| DELETE /forms/faqs/{id} | forms | ninguna prueba la menciona | `src/modules/forms/controllers/forms-faqs.controller.ts:95` |
+| POST /forms/question-scripts | forms | ninguna prueba la menciona | `src/modules/forms/controllers/forms-question-scripts.controller.ts:48` |
+| PATCH /forms/question-scripts/{id} | forms | ninguna prueba la menciona | `src/modules/forms/controllers/forms-question-scripts.controller.ts:74` |
 | POST /graph/analytics/community-detection | graph_intelligence | ninguna prueba la menciona | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:151` |
 | POST /graph/deletion-jobs | graph_intelligence | ninguna prueba la menciona | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:240` |
 | POST /graph/edges/{id}/expire | graph_intelligence | ninguna prueba la menciona | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:155` |
@@ -375,6 +377,7 @@ _Se muestran 200 de 226; la lista completa está en `inventario/flujos/hallazgos
 | POST /iam/auth/verify-email | iam | sólo prueba de controlador | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:342` |
 | POST /iam/me/devices/{id}/confirm | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-my-devices.controller.ts:62` |
 | POST /iam/me/devices/{id}/confirm-code | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-my-devices.controller.ts:44` |
+| PATCH /iam/me/name | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-my-name.controller.ts:24` |
 | POST /iam/me/sessions/{id}/revoke | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:71` |
 | POST /identity/checks/{id}/results | identity_assurance | sólo prueba de controlador | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:58` |
 | POST /identity/me/practitioner/license-verification | identity_assurance | ninguna prueba la menciona | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78` |
@@ -466,7 +469,7 @@ _Se muestran 200 de 226; la lista completa está en `inventario/flujos/hallazgos
 
 ## FLU-05
 
-**Proceso con operaciones de riesgo ALTO y ninguna prueba de integración** — severidad MEDIA — 13 caso(s).
+**Proceso con operaciones de riesgo ALTO y ninguna prueba de integración** — severidad MEDIA — 14 caso(s).
 
 **Qué hacer:** Priorizar estos procesos al escribir pruebas: un fallo aquí rompe un flujo completo, no una operación.
 
@@ -476,6 +479,7 @@ _Se muestran 200 de 226; la lista completa está en `inventario/flujos/hallazgos
 | audit | — | 1 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso | `src/modules/audit/README.md` |
 | auth_providers | — | 1 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso | `src/modules/auth_providers/README.md` |
 | content_packs | — | 1 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso | `src/modules/content_packs/README.md` |
+| forms | — | 3 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso | `src/modules/forms/README.md` |
 | graph_intelligence | — | 4 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso | `src/modules/graph_intelligence/README.md` |
 | integrations | — | 1 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso | `src/modules/integrations/README.md` |
 | marketing | — | 4 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso | `src/modules/marketing/README.md` |
@@ -501,7 +505,7 @@ _Se muestran 200 de 226; la lista completa está en `inventario/flujos/hallazgos
 
 ## FLU-07
 
-**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1537 caso(s).
+**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1549 caso(s).
 
 **Qué hacer:** Informativo: pueden ser internas (workers), de otros consumidores (móvil, integraciones) o deuda. Confirmar con el responsable antes de retirar nada.
 
@@ -708,7 +712,7 @@ _Se muestran 200 de 226; la lista completa está en `inventario/flujos/hallazgos
 | GET /billing/space-tariffs | billing | ningún cliente del frontend la declara | — |
 | POST /billing/space-tariffs | billing | ningún cliente del frontend la declara | — |
 
-_Se muestran 200 de 1537; la lista completa está en `inventario/flujos/hallazgos.json`._
+_Se muestran 200 de 1549; la lista completa está en `inventario/flujos/hallazgos.json`._
 
 ## FLU-08
 
@@ -742,7 +746,7 @@ _Se muestran 200 de 1537; la lista completa está en `inventario/flujos/hallazgo
 
 ## FLU-10
 
-**Operaciones que pueden terminar en un 500 por una excepción sin tipar** — severidad BAJA — 195 caso(s).
+**Operaciones que pueden terminar en un 500 por una excepción sin tipar** — severidad BAJA — 197 caso(s).
 
 **Qué hacer:** Cambiar el `new Error(...)` por una excepción del proyecto con estado y código estables (regla 96.4.4). El cliente hoy recibe INTERNAL sin poder distinguir la causa.
 
@@ -779,7 +783,7 @@ _Se muestran 200 de 1537; la lista completa está en `inventario/flujos/hallazgo
 | GET /billing/space-tariffs | billing | Error: Acción de infraestructura no registrada: {action} (src/modules/practice/services/infrastructure-access.service.ts:69) | `src/modules/billing/controllers/billing-space-charges.controller.ts:116` |
 | POST /billing/space-tariffs | billing | Error: Acción de infraestructura no registrada: {action} (src/modules/practice/services/infrastructure-access.service.ts:69) | `src/modules/billing/controllers/billing-space-charges.controller.ts:126` |
 | POST /billing/space-tariffs/{id}/close | billing | Error: Acción de infraestructura no registrada: {action} (src/modules/practice/services/infrastructure-access.service.ts:69) | `src/modules/billing/controllers/billing-space-charges.controller.ts:141` |
-| POST /admin/bulk-imports/{id}/confirm | bulk_import | Error: Tipo de carga desconocido (src/modules/bulk_import/services/bulk-import.processor.ts:160) | `src/modules/bulk_import/controllers/bulk-import.controller.ts:170` |
+| POST /admin/bulk-imports/{id}/confirm | bulk_import | Error: transition cannot add rows (src/modules/bulk_import/repositories/postgres-batch.repository.ts:150) \| Error: transition patch key not persisted: {key} (src/modules/bulk_import/repositories/postgres-batch.repository.ts:155) \| Error: Tipo de carga desconocido (src/modules/bulk_import/services/bulk-import.processor.ts:160) | `src/modules/bulk_import/controllers/bulk-import.controller.ts:170` |
 | GET /charts/documents/{documentId}/files/{fileId}/content | chart | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/chart/controllers/chart-documents.controller.ts:79` |
 | GET /charts/me/documents/{documentId}/files/{fileId}/content | chart | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/chart/controllers/chart-me.controller.ts:87` |
 | POST /clinical/admissions | clinical | Error: Acción de infraestructura no registrada: {action} (src/modules/practice/services/infrastructure-access.service.ts:69) \| Error: Acción de infraestructura no registrada: {action} (src/modules/practice/services/infrastructure-access.service.ts:69) | `src/modules/clinical/controllers/clinical-adt.controller.ts:113` |
@@ -828,6 +832,7 @@ _Se muestran 200 de 1537; la lista completa está en `inventario/flujos/hallazgo
 | PUT /admin/catalog/objects/{id}/annotation | data_catalog | DomainException: {422} (src/modules/data_catalog/application/catalog-governance.service.ts:120) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:263` |
 | POST /admin/catalog/scans | data_catalog | ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) \| ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:481` |
 | POST /internal/catalog/scans/run-next | data_catalog | ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) \| ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) | `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30` |
+| POST /access-requests/{id}/decision | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/access-requests.controller.ts:33` |
 | POST /authz/effective-actor/evaluate | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/delegated-access-authz.controller.ts:48` |
 | POST /delegated-permission-sets | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:64` |
 | POST /delegated-permission-sets/{id}/versions | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
@@ -835,8 +840,9 @@ _Se muestran 200 de 1537; la lista completa está en `inventario/flujos/hallazgo
 | GET /org/affiliation-invitations | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/affiliation-invitations.service.ts:170) | `src/modules/delegated_access/controllers/affiliation-invitations.controller.ts:82` |
 | POST /org/affiliation-invitations | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/affiliation-invitations.service.ts:170) | `src/modules/delegated_access/controllers/affiliation-invitations.controller.ts:45` |
 | POST /org/affiliation-invitations/{id}/revoke | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/affiliation-invitations.service.ts:170) | `src/modules/delegated_access/controllers/affiliation-invitations.controller.ts:65` |
-| POST /org/support-staff | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/support-staff-provisioning.service.ts:207) | `src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:30` |
+| POST /org/support-staff | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/support-staff-provisioning.service.ts:216) | `src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:31` |
 | POST /practitioner-delegates | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:51` |
+| POST /practitioner-delegates/{id}/access-requests | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:68` |
 | POST /practitioner-delegates/{id}/grants | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:86` |
 | POST /practitioner-delegates/{id}/revoke | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:104` |
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | diagnostics | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:173` |

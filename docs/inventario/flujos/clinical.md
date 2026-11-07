@@ -44,7 +44,7 @@ _Fuente: `src/modules/clinical/README.md:3`_
 | `ctrl:ClinicalEncountersController` | Operaciones de ClinicalEncountersController que el README no asigna a un caso de uso | POST /clinical/care-episodes | CLINICIAN · PRACTITIONER | MEDIO | 2 |
 |  |  | GET /clinical/encounters/{id}/attachments | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 26 |
 |  |  | POST /clinical/encounters/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 24 |
-|  |  | POST /clinical/encounters/{id}/close | CLINICIAN · PRACTITIONER | MEDIO | 41 |
+|  |  | POST /clinical/encounters/{id}/close | CLINICIAN · PRACTITIONER | MEDIO | 42 |
 |  |  | POST /clinical/encounters/check-in | CLINICIAN · PRACTITIONER | MEDIO | 30 |
 | `ctrl:ClinicalMedicalAspectsController` | Operaciones de ClinicalMedicalAspectsController que el README no asigna a un caso de uso | GET /clinical/me/medical-aspects | Cualquier sesión válida | BAJO | 3 |
 |  |  | PUT /clinical/me/medical-aspects | Cualquier sesión válida | ALTO | 4 |
@@ -52,11 +52,11 @@ _Fuente: `src/modules/clinical/README.md:3`_
 |  |  | PATCH /clinical/observations/{id}/amend | CLINICIAN · PRACTITIONER | MEDIO | 24 |
 | `ctrl:ClinicalOrdersController` | Operaciones de ClinicalOrdersController que el README no asigna a un caso de uso | POST /clinical/diagnostic-reports | CLINICIAN · PRACTITIONER | MEDIO | 3 |
 |  |  | POST /clinical/diagnostic-reports/{id}/release | CLINICIAN · PRACTITIONER | BAJO | 21 |
-|  |  | POST /clinical/requisitions | CLINICIAN · PRACTITIONER | MEDIO | 37 |
-|  |  | POST /clinical/service-requests | CLINICIAN · PRACTITIONER | MEDIO | 36 |
+|  |  | POST /clinical/requisitions | CLINICIAN · PRACTITIONER | MEDIO | 38 |
+|  |  | POST /clinical/service-requests | CLINICIAN · PRACTITIONER | MEDIO | 37 |
 |  |  | GET /clinical/service-requests/{id} | CLINICIAN · PRACTITIONER | BAJO | 28 |
 |  |  | POST /clinical/service-requests/duplicate-check | CLINICIAN · PRACTITIONER | BAJO | 30 |
-| `ctrl:ClinicalPrescriptionExpiryController` | Operaciones de ClinicalPrescriptionExpiryController que el README no asigna a un caso de uso | POST /clinical/internal/prescription-expiry-notices | SYSTEM · SYSTEM_WORKER | MEDIO | 12 |
+| `ctrl:ClinicalPrescriptionExpiryController` | Operaciones de ClinicalPrescriptionExpiryController que el README no asigna a un caso de uso | POST /clinical/internal/prescription-expiry-notices | SYSTEM · SYSTEM_WORKER | MEDIO | 13 |
 | `ctrl:ClinicalPrescriptionPoliciesController` | Operaciones de ClinicalPrescriptionPoliciesController que el README no asigna a un caso de uso | GET /clinical/prescription-signature-policies | CLINICIAN · SECURITY_ADMIN | BAJO | 1 |
 |  |  | POST /clinical/prescription-signature-policies | CLINICIAN · SECURITY_ADMIN | MEDIO | 1 |
 |  |  | POST /clinical/prescription-signature-policies/{id}/deactivate | CLINICIAN · SECURITY_ADMIN | MEDIO | 2 |
@@ -79,7 +79,7 @@ _Fuente: `src/modules/clinical/README.md:3`_
 |  |  | POST /clinical/medication-requests/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 25 |
 |  |  | POST /clinical/medication-requests/{id}/edit | CLINICIAN · PRACTITIONER | MEDIO | 26 |
 |  |  | POST /clinical/medication-requests/{id}/invalidate | CLINICIAN · PRACTITIONER | MEDIO | 28 |
-|  |  | POST /clinical/medication-requests/{id}/issue | CLINICIAN · PRACTITIONER | MEDIO | 38 |
+|  |  | POST /clinical/medication-requests/{id}/issue | CLINICIAN · PRACTITIONER | MEDIO | 39 |
 |  |  | POST /clinical/medication-requests/{id}/renew | CLINICIAN · PRACTITIONER | MEDIO | 28 |
 |  |  | POST /clinical/medication-requests/{id}/replace | CLINICIAN · PRACTITIONER | MEDIO | 29 |
 |  |  | POST /clinical/medication-requests/{id}/sign | CLINICIAN · PRACTITIONER | MEDIO | 28 |
@@ -171,7 +171,7 @@ flowchart LR
   end
   t72[("+20 tablas más")]
   t74[("+18 tablas más")]
-  t76[("+35 tablas más")]
+  t76[("+36 tablas más")]
   t81[("+24 tablas más")]
   subgraph s2["ctrl:ClinicalEncountersController · Operaciones de ClinicalEncountersController…"]
     o68["POST /clinical/care-episodes"]:::op
@@ -419,9 +419,9 @@ flowchart LR
   e29>"ServiceRequestPlaced"]:::evento
   e30>"clinical.service_request.collection_point_suggest…"]:::evento
   t39[("clinical.medication_requests")]:::tabla
-  t40[("messaging.in_app_notifications")]:::tabla
-  t41[("messaging.message_channels")]:::tabla
-  t42[("messaging.messaging_providers")]:::tabla
+  t40[("directory.tenant_memberships")]:::tabla
+  t41[("messaging.in_app_notifications")]:::tabla
+  t42[("messaging.message_channels")]:::tabla
   t46[("clinical.prescription_signature_policies")]:::tabla
   t54[("profiles.jurisdiction_authorizations")]:::tabla
   t57[("common.addresses")]:::tabla
@@ -442,8 +442,8 @@ flowchart LR
     o10["PATCH /clinical/observations/{id}/amend"]:::op
   end
   t22[("+15 tablas más")]
-  t28[("+31 tablas más")]
-  t32[("+30 tablas más")]
+  t28[("+32 tablas más")]
+  t32[("+31 tablas más")]
   t34[("+22 tablas más")]
   t36[("+24 tablas más")]
   subgraph s1["ctrl:ClinicalOrdersController · Operaciones de ClinicalOrdersController que el…"]
@@ -454,7 +454,7 @@ flowchart LR
     o33["GET /clinical/service-requests/{id}"]:::op
     o35["POST /clinical/service-requests/duplicate-check"]:::op
   end
-  t43[("+6 tablas más")]
+  t43[("+7 tablas más")]
   subgraph s2["ctrl:ClinicalPrescriptionExpiryController · Operaciones de ClinicalPrescription…"]
     o37["POST /clinical/internal/prescription-expiry-notices"]:::op
   end
@@ -546,9 +546,9 @@ flowchart LR
   o35 -.-> t36
   a38 --> o37
   o37 -->|"LEE"| t39
-  o37 -->|"ACTUALIZA"| t40
-  o37 -->|"CREA"| t40
   o37 -->|"LEE"| t40
+  o37 -->|"ACTUALIZA"| t41
+  o37 -->|"CREA"| t41
   o37 -->|"LEE"| t41
   o37 -->|"LEE"| t42
   o37 -.-> t43
@@ -636,7 +636,7 @@ flowchart LR
   t40[("+19 tablas más")]
   t42[("+20 tablas más")]
   t44[("+22 tablas más")]
-  t46[("+32 tablas más")]
+  t46[("+33 tablas más")]
   t48[("+22 tablas más")]
   t50[("+23 tablas más")]
   t52[("+22 tablas más")]
@@ -3705,61 +3705,83 @@ flowchart TD
   n7 -->|"cada elemento"| n8
   n9["Intenta"]:::intento
   n8 --> n9
-  n10["Llama a NotificationsService.writeInApp"]:::llamada
+  n10["Llama a NotificationsService.writeInRecipientInbox"]:::llamada
   n9 --> n10
-  n11["Llama a NotificationsRepository.findActiveChannelByType"]:::llamada
+  n11["Llama a NotificationsService.writeInApp"]:::llamada
   n10 --> n11
-  n12[("LEE messaging.message_channels")]:::efecto
+  n12{"!channel"}:::decision
   n11 --> n12
-  n13{"!channel"}:::decision
-  n12 --> n13
-  n14(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n13 -->|"sí"| n14
-  n15{"input.destination"}:::decision
-  n13 -->|"no"| n15
-  n16["Llama a NotificationsRepository.findUnreadInAppForResource"]:::llamada
-  n15 -->|"sí"| n16
-  n17[("LEE messaging.in_app_notifications")]:::efecto
-  n16 --> n17
-  n18["Llama a NotificationsRepository.createNotificationRequest"]:::llamada
-  n17 --> n18
-  n15 -->|"no"| n18
-  n19[("CREA messaging.notification_requests")]:::efecto
+  n13(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
+  n12 -->|"sí"| n13
+  n14{"!config"}:::decision
+  n12 -->|"no"| n14
+  n15(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
+  n14 -->|"sí"| n15
+  n16{"!provider"}:::decision
+  n14 -->|"no"| n16
+  n17(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
+  n16 -->|"sí"| n17
+  n18[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n16 -->|"no"| n18
+  n19{"availableAt › now"}:::decision
   n18 --> n19
-  n20["Llama a NotificationsRepository.findChannelConfigs"]:::llamada
-  n19 --> n20
-  n21[("LEE messaging.provider_channel_configs")]:::efecto
+  n20[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n19 -->|"sí"| n20
+  n21{"input.tenantId"}:::decision
   n20 --> n21
-  n22{"!config"}:::decision
-  n21 --> n22
-  n23(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a NotificationsRepository.findProviderById"]:::llamada
-  n22 -->|"no"| n24
-  n25[("LEE messaging.messaging_providers")]:::efecto
-  n24 --> n25
-  n26{"!provider"}:::decision
-  n25 --> n26
-  n27(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n26 -->|"sí"| n27
-  n28["Llama a NotificationsRepository.createDelivery"]:::llamada
-  n26 -->|"no"| n28
-  n29[("CREA messaging.notification_deliveries")]:::efecto
-  n28 --> n29
-  n30["Llama a NotificationsRepository.createInAppNotification"]:::llamada
+  n19 -->|"no"| n21
+  n22["Llama a NotificationsService.writeInApp"]:::llamada
+  n21 -->|"sí"| n22
+  n23{"!channel"}:::decision
+  n22 --> n23
+  n24(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
+  n23 -->|"sí"| n24
+  n25{"!config"}:::decision
+  n23 -->|"no"| n25
+  n26(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
+  n25 -->|"sí"| n26
+  n27{"!provider"}:::decision
+  n25 -->|"no"| n27
+  n28(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
+  n27 -->|"sí"| n28
+  n29[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n27 -->|"no"| n29
+  n30{"availableAt › now"}:::decision
   n29 --> n30
-  n31[("CREA messaging.in_app_notifications")]:::efecto
-  n30 --> n31
-  n32[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n31[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n30 -->|"sí"| n31
+  n32["Transacción: withSystemRlsInTransaction(…)"]:::transaccion
   n31 --> n32
-  n33{"availableAt › now"}:::decision
+  n30 -->|"no"| n32
+  n21 -->|"no"| n32
+  n33["Llama a NotificationsRepository.listActiveTenantIds"]:::llamada
   n32 --> n33
-  n34[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n33 -->|"sí"| n34
-  n35(("200 Responde con éxito")):::ok
+  n34[("LEE directory.tenant_memberships")]:::efecto
+  n33 --> n34
+  n35["Llama a NotificationsService.writeInApp"]:::llamada
   n34 --> n35
-  n33 -->|"no"| n35
-  n7 -->|"al terminar"| n35
+  n36{"!channel"}:::decision
+  n35 --> n36
+  n37(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
+  n36 -->|"sí"| n37
+  n38{"!config"}:::decision
+  n36 -->|"no"| n38
+  n39(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
+  n38 -->|"sí"| n39
+  n40{"!provider"}:::decision
+  n38 -->|"no"| n40
+  n41(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
+  n40 -->|"sí"| n41
+  n42[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n40 -->|"no"| n42
+  n43{"availableAt › now"}:::decision
+  n42 --> n43
+  n44[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n43 -->|"sí"| n44
+  n45(("200 Responde con éxito")):::ok
+  n44 --> n45
+  n43 -->|"no"| n45
+  n7 -->|"al terminar"| n45
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

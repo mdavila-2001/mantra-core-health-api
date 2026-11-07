@@ -29,6 +29,8 @@ import {
 } from './presentation/controllers';
 import { IamIdentifierExistsController } from './presentation/controllers/iam-identifier-exists.controller';
 import { IdentifierExistsUseCase } from './application/use-cases/identifier-exists.use-case';
+import { UpdateMyNameUseCase } from './application/use-cases/update-my-name.use-case';
+import { IamMyNameController } from './presentation/controllers/iam-my-name.controller';
 import {
   IamUsersService,
   IamUsersReadService,
@@ -121,6 +123,7 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamUsersController,
     IamAuthController,
     IamAccountSecurityController,
+    IamMyNameController,
     IamOnboardingDraftsController,
     IamIdentifierExistsController,
     IamMyDevicesController,
@@ -206,6 +209,7 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamAccountSecurityService,
     IamOnboardingDraftsService,
     IdentifierExistsUseCase,
+    UpdateMyNameUseCase,
     IamMyDevicesService,
     IamLoginDevicesService,
   ],

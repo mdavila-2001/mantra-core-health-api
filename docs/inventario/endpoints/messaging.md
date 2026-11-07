@@ -503,16 +503,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
-| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.messaging_providers` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
-| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
-| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findRequestForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:330` |
-| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsService.deferBySilence → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:554` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:712` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:439` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:516` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:564` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:577` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findRequestForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:332` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:407` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsService.deferBySilence → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 
 ### Parámetros
 
@@ -707,9 +707,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable | `src/modules/messaging/services/notifications.service.ts:344` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable → NotificationsRepository.findClaimableRequests | `src/modules/messaging/repositories/notifications.repository.ts:359` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable | `src/modules/messaging/services/notifications.service.ts:348` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable → NotificationsRepository.findClaimableRequests | `src/modules/messaging/repositories/notifications.repository.ts:361` |
 
 ### Parámetros
 
@@ -1003,8 +1003,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markInAppRead → NotificationsService.markInAppRead | `src/modules/messaging/services/notifications.service.ts:760` |
-| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingController.markInAppRead → NotificationsService.markInAppRead → NotificationsRepository.findInAppForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:745` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markInAppRead → NotificationsService.markInAppRead | `src/modules/messaging/services/notifications.service.ts:764` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingController.markInAppRead → NotificationsService.markInAppRead → NotificationsRepository.findInAppForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:747` |
 
 ### Parámetros
 
@@ -1083,8 +1083,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markAllInAppRead → NotificationsService.markAllInAppRead | `src/modules/messaging/services/notifications.service.ts:948` |
-| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingController.markAllInAppRead → NotificationsService.markAllInAppRead → NotificationsRepository.findUnreadInApp | `src/modules/messaging/repositories/notifications.repository.ts:895` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markAllInAppRead → NotificationsService.markAllInAppRead | `src/modules/messaging/services/notifications.service.ts:952` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingController.markAllInAppRead → NotificationsService.markAllInAppRead → NotificationsRepository.findUnreadInApp | `src/modules/messaging/repositories/notifications.repository.ts:922` |
 
 ### Cuerpo
 
@@ -1150,7 +1150,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingController.listMyNotifications → NotificationsService.listMine → NotificationsRepository.listInAppPage | `src/modules/messaging/repositories/notifications.repository.ts:810` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingController.listMyNotifications → NotificationsService.listMine → NotificationsRepository.listInAppPage | `src/modules/messaging/repositories/notifications.repository.ts:812` |
 
 ### Parámetros
 
@@ -1200,7 +1200,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:260` |
+| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:270` |
 
 ### Flujos
 
@@ -1289,7 +1289,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:191` |
+| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:196` |
 
 ### Flujos
 
@@ -1385,7 +1385,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:170` |
+| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:175` |
 
 ### Flujos
 
@@ -1425,8 +1425,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingController.readMyPreferences → NotificationsService.readMyPreferences → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | MessagingController.readMyPreferences → NotificationsService.readMyPreferences → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingController.readMyPreferences → NotificationsService.readMyPreferences → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:191` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | MessagingController.readMyPreferences → NotificationsService.readMyPreferences → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 
 ### Cuerpo
 
@@ -1499,9 +1499,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingController.updateMyPreferences → NotificationsService.updateMyPreferences → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
-| `messaging.recipient_preferences` | ESCRIBE | CREA | DIRECTA | MessagingController.updateMyPreferences → NotificationsService.updateMyPreferences → NotificationsRepository.createPreference | `src/modules/messaging/repositories/notifications.repository.ts:241` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | MessagingController.updateMyPreferences → NotificationsService.updateMyPreferences → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingController.updateMyPreferences → NotificationsService.updateMyPreferences → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:191` |
+| `messaging.recipient_preferences` | ESCRIBE | CREA | DIRECTA | MessagingController.updateMyPreferences → NotificationsService.updateMyPreferences → NotificationsRepository.createPreference | `src/modules/messaging/repositories/notifications.repository.ts:243` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | MessagingController.updateMyPreferences → NotificationsService.updateMyPreferences → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 
 ### Cuerpo — DTO `UpdateMyPreferencesDto` · `application/json`
 
@@ -1607,11 +1607,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingController.createNotificationRequest → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.message_templates` | LEE | LEE | DIRECTA | MessagingController.createNotificationRequest → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | MessagingController.createNotificationRequest → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | MessagingController.createNotificationRequest → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | MessagingController.createNotificationRequest → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingController.createNotificationRequest → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | MessagingController.createNotificationRequest → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:155` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | MessagingController.createNotificationRequest → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:272` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | MessagingController.createNotificationRequest → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:390` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | MessagingController.createNotificationRequest → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 
 ### Cuerpo — DTO `CreateNotificationRequestDto` · `application/json`
 
@@ -1819,7 +1819,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:292` |
+| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:368` |
 
 ### Flujos
 
@@ -2275,13 +2275,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.delivery_receipts` | ESCRIBE | CREA | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.createReceipt | `src/modules/messaging/repositories/notifications.repository.ts:608` |
-| `messaging.delivery_receipts` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findReceipt | `src/modules/messaging/repositories/notifications.repository.ts:629` |
-| `messaging.messaging_providers` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findProviderByCode | `src/modules/messaging/repositories/notifications.repository.ts:423` |
-| `messaging.notification_deliveries` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:685` |
-| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findDeliveryByProviderRefForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:571` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:690` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findRequestForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:330` |
+| `messaging.delivery_receipts` | ESCRIBE | CREA | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.createReceipt | `src/modules/messaging/repositories/notifications.repository.ts:610` |
+| `messaging.delivery_receipts` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findReceipt | `src/modules/messaging/repositories/notifications.repository.ts:631` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findProviderByCode | `src/modules/messaging/repositories/notifications.repository.ts:425` |
+| `messaging.notification_deliveries` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:689` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findDeliveryByProviderRefForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:573` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:694` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findRequestForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:332` |
 
 ### Parámetros
 

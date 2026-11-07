@@ -17,7 +17,7 @@
 | [diagnostic_study_prices](#diagnostic_study_prices) | Asocia precios a estudios concretos para disponer de valores económicos aplicables a prestaciones diagnósticas. | 15 | 5 | 34 | COINCIDE |
 | [diagnostic_unit_accreditations](#diagnostic_unit_accreditations) | Conserva acreditaciones de unidades diagnósticas para documentar certificaciones y alcance reconocido de sus servicios. | 15 | 8 | 8 | COINCIDE |
 | [diagnostic_unit_practitioner_assignments](#diagnostic_unit_practitioner_assignments) | Vincula profesionales con unidades diagnósticas para documentar asignación y responsabilidad de prestación. | 16 | 9 | 3 | COINCIDE |
-| [diagnostic_unit_sites](#diagnostic_unit_sites) | Identifica sedes físicas de unidades diagnósticas para localizar dónde se reciben pacientes o se procesan estudios. | 13 | 6 | 37 | COINCIDE |
+| [diagnostic_unit_sites](#diagnostic_unit_sites) | Identifica sedes físicas de unidades diagnósticas para localizar dónde se reciben pacientes o se procesan estudios. | 13 | 6 | 36 | COINCIDE |
 | [diagnostic_unit_specialties](#diagnostic_unit_specialties) | Asocia especialidades con unidades diagnósticas para describir las áreas clínicas que pueden atender. | 12 | 5 | 6 | COINCIDE |
 | [diagnostic_units](#diagnostic_units) | Representa laboratorios, centros de imagen u otras unidades que realizan servicios diagnósticos para prestadores de salud. | 19 | 13 | 77 | COINCIDE |
 | [unit_medical_visitors](#unit_medical_visitors) | sin propósito | 26 | 10 | 0 | COINCIDE |
@@ -941,7 +941,7 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_unit_sites`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticUnitSites` — `src/modules/diagnostic_units/entities/diagnostic_unit_sites.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 6 FK salientes · 6 entrantes · 37 operaciones
+- **Resumen:** 13 columnas · 6 índices · 6 FK salientes · 6 entrantes · 36 operaciones
 
 #### Columnas
 
@@ -982,10 +982,10 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_diagnostic_unit_sites_diagnostic_unit_id` | no | diagnostic_unit_id | Soporta la clave foránea fk_diagnostic_unit_sites_diagnostic_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «diagnostic_unit_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_unit_sites_diagnostic_unit_id` | no | diagnostic_unit_id | Soporta la clave foránea fk_diagnostic_unit_sites_diagnostic_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «diagnostic_unit_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_unit_sites_practice_site_id` | no | practice_site_id | Soporta la clave foránea fk_diagnostic_unit_sites_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_unit_sites_site_role_concept_id` | no | site_role_concept_id | Soporta la clave foránea fk_diagnostic_unit_sites_site_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_diagnostic_unit_sites_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_diagnostic_unit_sites_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_unit_sites_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_diagnostic_unit_sites_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_unit_sites_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_diagnostic_unit_sites_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_unit_sites_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_diagnostic_unit_sites_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -1013,7 +1013,6 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 | POST /diagnostic-units/{id}/sites | CREA | DIRECTA |
 | POST /diagnostic-units/{id}/study-offerings | LEE | DIRECTA |
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
-| POST /diagnostic-units/{unitId}/equipment | ACTUALIZA | POR_TIPO |
 | POST /diagnostic-units/{unitId}/equipment | LEE | DIRECTA |
 | DELETE /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | DIRECTA |
 | PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | DIRECTA |

@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **2022 de 2022 endpoints** en **79 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **2034 de 2034 endpoints** en **79 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -33,13 +33,13 @@ Se documentan **2022 de 2022 endpoints** en **79 módulos**. La referencia compl
 | `document_store` | 5 | [Abrir referencia](endpoints/document-store.md) |
 | `education` | 14 | [Abrir referencia](endpoints/education.md) |
 | `erp` | 17 | [Abrir referencia](endpoints/erp.md) |
-| `forms` | 25 | [Abrir referencia](endpoints/forms.md) |
+| `forms` | 36 | [Abrir referencia](endpoints/forms.md) |
 | `geo` | 11 | [Abrir referencia](endpoints/geo.md) |
 | `governance_admin` | 5 | [Abrir referencia](endpoints/governance-admin.md) |
 | `graph_intelligence` | 15 | [Abrir referencia](endpoints/graph-intelligence.md) |
 | `health_context` | 13 | [Abrir referencia](endpoints/health-context.md) |
 | `health_data` | 16 | [Abrir referencia](endpoints/health-data.md) |
-| `iam` | 49 | [Abrir referencia](endpoints/iam.md) |
+| `iam` | 50 | [Abrir referencia](endpoints/iam.md) |
 | `identity_assurance` | 28 | [Abrir referencia](endpoints/identity-assurance.md) |
 | `insurance` | 62 | [Abrir referencia](endpoints/insurance.md) |
 | `insurance-campaigns` | 16 | [Abrir referencia](endpoints/insurance-campaigns.md) |

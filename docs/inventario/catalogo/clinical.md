@@ -18,7 +18,7 @@
 | [diagnostic_reports](#diagnostic_reports) | Gestiona el ciclo de vida del informe diagnóstico y lo vincula con su solicitud y encuentro; los resultados estructurados y archivos asociados se mantienen en el dominio de diagnóstico. | 16 | 14 | 46 | COINCIDE |
 | [encounter_locations](#encounter_locations) | Vincula un encuentro con los lugares de prestación para mantener el contexto físico de la atención. | 20 | 15 | 48 | COINCIDE |
 | [encounter_participants](#encounter_participants) | Identifica a las personas que participan en un encuentro y su rol para conservar quién intervino en la atención. | 14 | 7 | 51 | COINCIDE |
-| [encounters](#encounters) | Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, motivo y estado de atención. | 26 | 18 | 153 | COINCIDE |
+| [encounters](#encounters) | Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, motivo y estado de atención. | 26 | 18 | 155 | COINCIDE |
 | [family_member_history](#family_member_history) | Conserva antecedentes familiares relevantes para la evaluación de riesgo y la historia de salud del paciente. | 15 | 9 | 0 | COINCIDE |
 | [immunizations](#immunizations) | Registra inmunizaciones administradas o documentadas en la historia de salud para sostener seguimiento y continuidad preventiva. | 15 | 10 | 3 | COINCIDE |
 | [inpatient_census_adjustments](#inpatient_census_adjustments) | Deja constancia inmutable de cada corrección a un contador del censo diario cerrado, con valor previo, nuevo y motivo, para indicadores hospitalarios auditables. | 11 | 3 | 4 | COINCIDE |
@@ -1257,7 +1257,7 @@ Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, m
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: encounters`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `Encounters` — `src/modules/clinical/entities/encounters.entity.ts`
-- **Resumen:** 26 columnas · 18 índices · 15 FK salientes · 36 entrantes · 153 operaciones
+- **Resumen:** 26 columnas · 18 índices · 15 FK salientes · 36 entrantes · 155 operaciones
 
 #### Columnas
 
@@ -1491,6 +1491,8 @@ Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, m
 | POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
 | PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
 | PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
+| POST /access-requests/{id}/decision | LEE | DIRECTA |
+| POST /practitioner-delegates/{id}/access-requests | LEE | DIRECTA |
 | POST /practitioner-delegates/{id}/grants | LEE | DIRECTA |
 | POST /diagnostics/clinical-media | LEE | DIRECTA |
 | POST /diagnostics/critical-results | LEE | DIRECTA |

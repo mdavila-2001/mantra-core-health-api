@@ -32,7 +32,7 @@ _Fuente: `src/modules/authz/README.md:3`_
 |  |  | POST /authz/care-relationships | CLINICIAN · SECURITY_ADMIN | MEDIO | 7 |
 |  |  | POST /authz/care-relationships/{id}/respond | PATIENT | MEDIO | 11 |
 |  |  | POST /authz/care-relationships/{id}/revoke | CLINICIAN · SECURITY_ADMIN | MEDIO | 3 |
-|  |  | POST /authz/care-relationships/request | CLINICIAN · PRACTITIONER | MEDIO | 16 |
+|  |  | POST /authz/care-relationships/request | CLINICIAN · PRACTITIONER | MEDIO | 17 |
 |  |  | GET /authz/care-relationships/requests/mine | PATIENT | BAJO | 1 |
 |  |  | GET /authz/legal-representations | SECURITY_ADMIN | BAJO | 1 |
 |  |  | POST /authz/legal-representations | SECURITY_ADMIN | MEDIO | 7 |
@@ -61,7 +61,7 @@ _Fuente: `src/modules/authz/README.md:3`_
 |  |  | GET /authz/me/access-requests | PATIENT | BAJO | 5 |
 |  |  | POST /authz/me/care-relationships/{id}/revoke | PATIENT | MEDIO | 5 |
 |  |  | POST /authz/me/clinical-access-grants/{grantId}/revoke | PATIENT | MEDIO | 6 |
-|  |  | POST /authz/me/primary-practitioner-requests | PATIENT | MEDIO | 16 |
+|  |  | POST /authz/me/primary-practitioner-requests | PATIENT | MEDIO | 17 |
 | `ctrl:AuthzModulesCatalogController` | Operaciones de AuthzModulesCatalogController que el README no asigna a un caso de uso | GET /authz/catalog/modules | SECURITY_ADMIN | BAJO | 3 |
 | `ctrl:AuthzPdpController` | Operaciones de AuthzPdpController que el README no asigna a un caso de uso | POST /authz/decisions/evaluate | SECURITY_ADMIN | BAJO | 13 |
 |  |  | POST /authz/pdp/cache/invalidate | SECURITY_ADMIN | BAJO | 0 |
@@ -81,7 +81,7 @@ flowchart LR
   a14(["CLINICIAN · SECURITY_ADMIN"]):::actor
   a23(["PATIENT"]):::actor
   a32(["CLINICIAN · PRACTITIONER"]):::actor
-  a45(["CLINICAL_APPROVER · SECURITY_ADMIN"]):::actor
+  a44(["CLINICAL_APPROVER · SECURITY_ADMIN"]):::actor
   t3[("authz.roles")]:::tabla
   t4[("authz.user_role_assignments")]:::tabla
   t5[("iam.user_global_roles")]:::tabla
@@ -98,14 +98,13 @@ flowchart LR
   t26[("messaging.domain_events")]:::tabla
   e28>"authz.care_relationship.responded"]:::evento
   t30[("profiles.patient_primary_practitioners")]:::tabla
-  t33[("messaging.in_app_notifications")]:::tabla
-  t37[("authz.patient_legal_representations")]:::tabla
-  t42[("authz.permission_categories")]:::tabla
-  t46[("authz.clinical_access_grants")]:::tabla
-  t48[("audit.data_access_log")]:::tabla
-  t49[("authz.break_glass_sessions")]:::tabla
-  t50[("clinical.encounters")]:::tabla
-  e52>"authz.break_glass.activated"]:::evento
+  t36[("authz.patient_legal_representations")]:::tabla
+  t41[("authz.permission_categories")]:::tabla
+  t45[("authz.clinical_access_grants")]:::tabla
+  t47[("audit.data_access_log")]:::tabla
+  t48[("authz.break_glass_sessions")]:::tabla
+  t49[("clinical.encounters")]:::tabla
+  e51>"authz.break_glass.activated"]:::evento
   subgraph s0["ctrl:AuthzAdminController · Operaciones de AuthzAdminController que el README n…"]
     o1["GET /authz/internal-users"]:::op
     o7["GET /authz/permissions"]:::op
@@ -115,29 +114,29 @@ flowchart LR
   end
   t21[("+1 tablas más")]
   t27[("+5 tablas más")]
-  t34[("+10 tablas más")]
-  t39[("+1 tablas más")]
+  t33[("+11 tablas más")]
+  t38[("+1 tablas más")]
   subgraph s1["ctrl:AuthzCareRelationshipsController · Operaciones de AuthzCareRelationshipsCo…"]
     o13["GET /authz/care-relationships"]:::op
     o16["POST /authz/care-relationships"]:::op
     o22["POST /authz/care-relationships/{id}/respond"]:::op
     o29["POST /authz/care-relationships/{id}/revoke"]:::op
     o31["POST /authz/care-relationships/request"]:::op
-    o35["GET /authz/care-relationships/requests/mine"]:::op
-    o36["GET /authz/legal-representations"]:::op
-    o38["POST /authz/legal-representations"]:::op
-    o40["POST /authz/legal-representations/{id}/revoke"]:::op
+    o34["GET /authz/care-relationships/requests/mine"]:::op
+    o35["GET /authz/legal-representations"]:::op
+    o37["POST /authz/legal-representations"]:::op
+    o39["POST /authz/legal-representations/{id}/revoke"]:::op
   end
   subgraph s2["ctrl:AuthzCatalogController · Operaciones de AuthzCatalogController que el READ…"]
-    o41["POST /authz/permission-categories"]:::op
-    o43["POST /authz/permissions"]:::op
+    o40["POST /authz/permission-categories"]:::op
+    o42["POST /authz/permissions"]:::op
   end
-  t51[("+9 tablas más")]
-  t54[("+6 tablas más")]
+  t50[("+9 tablas más")]
+  t53[("+6 tablas más")]
   subgraph s3["ctrl:AuthzClinicalController · Operaciones de AuthzClinicalController que el RE…"]
-    o44["DELETE /authz/clinical-access-grants/{grantId}"]:::op
-    o47["POST /authz/patients/{patientProfileId}/break-the-glass"]:::op
-    o53["POST /authz/patients/{patientProfileId}/clinical-access-grants"]:::op
+    o43["DELETE /authz/clinical-access-grants/{grantId}"]:::op
+    o46["POST /authz/patients/{patientProfileId}/break-the-glass"]:::op
+    o52["POST /authz/patients/{patientProfileId}/clinical-access-grants"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -185,52 +184,52 @@ flowchart LR
   o31 -->|"LEE"| t24
   o31 -->|"CREA"| t15
   o31 -->|"LEE"| t15
+  o31 -->|"LEE"| t18
   o31 -->|"LEE"| t25
-  o31 -->|"ACTUALIZA"| t33
-  o31 -.-> t34
-  a23 --> o35
-  o35 -->|"LEE"| t15
-  a2 --> o36
-  o36 -->|"LEE"| t37
-  a2 --> o38
-  o38 -->|"CREA"| t37
-  o38 -->|"LEE"| t37
-  o38 -->|"LEE"| t17
-  o38 -->|"LEE"| t18
-  o38 -->|"LEE"| t19
-  o38 -->|"LEE"| t20
-  o38 -.-> t39
+  o31 -.-> t33
+  a23 --> o34
+  o34 -->|"LEE"| t15
+  a2 --> o35
+  o35 -->|"LEE"| t36
+  a2 --> o37
+  o37 -->|"CREA"| t36
+  o37 -->|"LEE"| t36
+  o37 -->|"LEE"| t17
+  o37 -->|"LEE"| t18
+  o37 -->|"LEE"| t19
+  o37 -->|"LEE"| t20
+  o37 -.-> t38
+  a2 --> o39
+  o39 -->|"LEE"| t36
   a2 --> o40
-  o40 -->|"LEE"| t37
-  a2 --> o41
-  o41 -->|"CREA"| t42
-  o41 -->|"LEE"| t42
-  a2 --> o43
-  o43 -->|"LEE"| t42
-  o43 -->|"CREA"| t8
-  o43 -->|"LEE"| t8
-  a45 --> o44
-  o44 -->|"CREA"| t24
-  o44 -->|"LEE"| t24
-  o44 -->|"LEE"| t46
-  o44 -->|"LEE"| t25
-  a45 --> o47
-  o47 -->|"CREA"| t24
-  o47 -->|"LEE"| t24
-  o47 -->|"CREA"| t48
-  o47 -->|"CREA"| t49
-  o47 -->|"CREA"| t46
-  o47 -->|"LEE"| t50
-  o47 -.-> t51
-  o47 -->|"evento"| e52
-  a45 --> o53
-  o53 -->|"CREA"| t24
-  o53 -->|"LEE"| t24
-  o53 -->|"CREA"| t46
-  o53 -->|"LEE"| t46
-  o53 -->|"LEE"| t50
-  o53 -->|"LEE"| t17
-  o53 -.-> t54
+  o40 -->|"CREA"| t41
+  o40 -->|"LEE"| t41
+  a2 --> o42
+  o42 -->|"LEE"| t41
+  o42 -->|"CREA"| t8
+  o42 -->|"LEE"| t8
+  a44 --> o43
+  o43 -->|"CREA"| t24
+  o43 -->|"LEE"| t24
+  o43 -->|"LEE"| t45
+  o43 -->|"LEE"| t25
+  a44 --> o46
+  o46 -->|"CREA"| t24
+  o46 -->|"LEE"| t24
+  o46 -->|"CREA"| t47
+  o46 -->|"CREA"| t48
+  o46 -->|"CREA"| t45
+  o46 -->|"LEE"| t49
+  o46 -.-> t50
+  o46 -->|"evento"| e51
+  a44 --> o52
+  o52 -->|"CREA"| t24
+  o52 -->|"LEE"| t24
+  o52 -->|"CREA"| t45
+  o52 -->|"LEE"| t45
+  o52 -->|"LEE"| t49
+  o52 -->|"LEE"| t17
+  o52 -.-> t53
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -265,7 +264,7 @@ flowchart LR
   t42[("consent.consent_provisions")]:::tabla
   t43[("consent.consents")]:::tabla
   t45[("profiles.patient_primary_practitioners")]:::tabla
-  t48[("messaging.in_app_notifications")]:::tabla
+  t48[("directory.tenant_memberships")]:::tabla
   t14[("+1 tablas más")]
   t21[("+7 tablas más")]
   t23[("+2 tablas más")]
@@ -290,7 +289,7 @@ flowchart LR
     o34["POST /authz/users/{userId}/permission-grants"]:::op
     o35["POST /authz/users/{userId}/role-assignments"]:::op
   end
-  t49[("+10 tablas más")]
+  t49[("+11 tablas más")]
   subgraph s3["ctrl:AuthzMeController · Operaciones de AuthzMeController que el README no asig…"]
     o36["GET /authz/me/access"]:::op
     o41["GET /authz/me/access-requests"]:::op
@@ -410,8 +409,8 @@ flowchart LR
   o47 -->|"LEE"| t3
   o47 -->|"CREA"| t17
   o47 -->|"LEE"| t17
+  o47 -->|"LEE"| t48
   o47 -->|"LEE"| t25
-  o47 -->|"ACTUALIZA"| t48
   o47 -.-> t49
   a2 --> o50
   o50 -->|"LEE"| t9
@@ -936,9 +935,8 @@ Solicitar autorización del paciente para una relación asistencial
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
 | 409 | `CONFLICT` | ConflictException: Ya existe una relación asistencial activa con ese paciente; ConflictException: Ya hay una solicitud pendiente de respuesta para ese paciente |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo un practicante con perfil propio puede solicitar acceso a un expediente; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo un practicante con perfil propio puede solicitar acceso a un expediente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
@@ -1009,36 +1007,8 @@ flowchart TD
   n31 --> n32
   n33[("LEE profiles.person_account_links")]:::efecto
   n32 --> n33
-  n34{"recipientUserId"}:::decision
+  n34(("201 Responde con éxito")):::ok
   n33 --> n34
-  n35["Llama a NotificationsService.emitInApp"]:::llamada
-  n34 -->|"sí"| n35
-  n36["Intenta"]:::intento
-  n35 --> n36
-  n37["Llama a NotificationsService.writeInApp"]:::llamada
-  n36 --> n37
-  n38{"!channel"}:::decision
-  n37 --> n38
-  n39(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n38 -->|"sí"| n39
-  n40{"!config"}:::decision
-  n38 -->|"no"| n40
-  n41(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n40 -->|"sí"| n41
-  n42{"!provider"}:::decision
-  n40 -->|"no"| n42
-  n43(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n42 -->|"sí"| n43
-  n44[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n42 -->|"no"| n44
-  n45{"availableAt › now"}:::decision
-  n44 --> n45
-  n46[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n45 -->|"sí"| n46
-  n47(("201 Responde con éxito")):::ok
-  n46 --> n47
-  n45 -->|"no"| n47
-  n34 -->|"no"| n47
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1672,9 +1642,9 @@ Pedir a un profesional que sea mi médico de cabecera
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado; ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado; ResourceNotFoundException: Profesional no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe una solicitud de cabecera activa o pendiente con este profesional |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No puede elegirse a sí mismo como médico de cabecera.; PreconditionFailedException: Este profesional no está aceptando pacientes nuevos.; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No puede elegirse a sí mismo como médico de cabecera.; PreconditionFailedException: Este profesional no está aceptando pacientes nuevos. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
@@ -1745,33 +1715,8 @@ flowchart TD
   n31 --> n32
   n33[("LEE profiles.person_account_links")]:::efecto
   n32 --> n33
-  n34["Llama a NotificationsService.emitInApp"]:::llamada
+  n34(("201 Responde con éxito")):::ok
   n33 --> n34
-  n35["Intenta"]:::intento
-  n34 --> n35
-  n36["Llama a NotificationsService.writeInApp"]:::llamada
-  n35 --> n36
-  n37{"!channel"}:::decision
-  n36 --> n37
-  n38(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n37 -->|"sí"| n38
-  n39{"!config"}:::decision
-  n37 -->|"no"| n39
-  n40(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n39 -->|"sí"| n40
-  n41{"!provider"}:::decision
-  n39 -->|"no"| n41
-  n42(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n41 -->|"sí"| n42
-  n43[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n41 -->|"no"| n43
-  n44{"availableAt › now"}:::decision
-  n43 --> n44
-  n45[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n44 -->|"sí"| n45
-  n46(("201 Responde con éxito")):::ok
-  n45 --> n46
-  n44 -->|"no"| n46
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

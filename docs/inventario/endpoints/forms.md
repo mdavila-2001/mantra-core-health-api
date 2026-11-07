@@ -3,9 +3,9 @@
 # Endpoints del módulo `forms`
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
-- **Operaciones:** 25 (25 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 16 · BAJO 9
-- **Tablas distintas que tocan:** 39
+- **Operaciones:** 36 (36 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 3 · MEDIO 20 · BAJO 13
+- **Tablas distintas que tocan:** 43
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/forms.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -23,20 +23,31 @@
 | 9 | GET | `/forms/definition-sets/{id}` | Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones | BAJO | 8 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
 | 10 | POST | `/forms/definition-sets/{id}/migrations/{migrationId}/run` | Migrar valores entre versiones de schema | MEDIO | 4 | SECURITY_ADMIN |
 | 11 | POST | `/forms/definition-sets/{id}/versions/{ver}/publish` | Componer miembros del set y publicar la versión | MEDIO | 5 | SECURITY_ADMIN |
-| 12 | POST | `/forms/field-definitions` | Declarar una definición de campo con reglas de validación | MEDIO | 3 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
-| 13 | PATCH | `/forms/field-definitions/{id}` | Corregir el nombre o el tipo de un campo propio | MEDIO | 4 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
-| 14 | POST | `/forms/fields/{id}/access-rules` | Definir reglas de acceso y enmascarado por campo | MEDIO | 2 | SECURITY_ADMIN |
-| 15 | POST | `/forms/fields/{id}/dependencies` | Definir dependencias condicionales entre campos | MEDIO | 3 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
-| 16 | PUT | `/forms/fields/{id}/localizations/{lang}` | Localizar (i18n) una definición de campo | MEDIO | 4 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
-| 17 | GET | `/forms/instances` | Listar las instancias de formulario de un encuentro | BAJO | 24 | CLINICIAN, PRACTITIONER |
-| 18 | POST | `/forms/instances` | Abrir una instancia de formulario para un recurso | MEDIO | 3 | CLINICIAN, PRACTITIONER |
-| 19 | GET | `/forms/instances/{id}` | Leer una instancia con sus valores vigentes, por tipo resuelto | BAJO | 27 | CLINICIAN, PRACTITIONER |
-| 20 | POST | `/forms/instances/{id}/close` | Cerrar formulario y proyectar vista de recurso | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 21 | POST | `/forms/instances/{id}/values` | Capturar valores de formulario (value[x] exclusivo) | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 22 | GET | `/forms/me/instances` | Ver mis formularios clínicos | BAJO | 2 | sesión (sin roles) |
-| 23 | GET | `/forms/me/instances/{id}` | Leer un formulario propio con sus respuestas | BAJO | 5 | sesión (sin roles) |
-| 24 | PATCH | `/forms/values/{id}` | Corregir valor con supersede y snapshot inmutable | MEDIO | 5 | CLINICIAN, PRACTITIONER |
-| 25 | POST | `/forms/values/import` | Registrar procedencia de valores importados (batch ETL) | MEDIO | 5 | CLINICIAN, PRACTITIONER |
+| 12 | GET | `/forms/faqs` | Listar mis preguntas frecuentes, en orden | BAJO | 1 | PRACTITIONER, CLINICIAN |
+| 13 | POST | `/forms/faqs` | Agregar una pregunta frecuente al final | MEDIO | 2 | PRACTITIONER, CLINICIAN |
+| 14 | DELETE | `/forms/faqs/{id}` | Borrar una pregunta frecuente propia | ALTO | 1 | PRACTITIONER, CLINICIAN |
+| 15 | PATCH | `/forms/faqs/{id}` | Editar una pregunta frecuente propia | MEDIO | 2 | PRACTITIONER, CLINICIAN |
+| 16 | PUT | `/forms/faqs/order` | Reordenar mis preguntas frecuentes (lista completa) | MEDIO | 2 | PRACTITIONER, CLINICIAN |
+| 17 | POST | `/forms/field-definitions` | Declarar una definición de campo con reglas de validación | MEDIO | 3 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 18 | PATCH | `/forms/field-definitions/{id}` | Corregir el nombre o el tipo de un campo propio | MEDIO | 4 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 19 | POST | `/forms/fields/{id}/access-rules` | Definir reglas de acceso y enmascarado por campo | MEDIO | 2 | SECURITY_ADMIN |
+| 20 | POST | `/forms/fields/{id}/dependencies` | Definir dependencias condicionales entre campos | MEDIO | 3 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 21 | PUT | `/forms/fields/{id}/localizations/{lang}` | Localizar (i18n) una definición de campo | MEDIO | 4 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 22 | GET | `/forms/instances` | Listar las instancias de formulario de un encuentro | BAJO | 24 | CLINICIAN, PRACTITIONER |
+| 23 | POST | `/forms/instances` | Abrir una instancia de formulario para un recurso | MEDIO | 3 | CLINICIAN, PRACTITIONER |
+| 24 | GET | `/forms/instances/{id}` | Leer una instancia con sus valores vigentes, por tipo resuelto | BAJO | 27 | CLINICIAN, PRACTITIONER |
+| 25 | POST | `/forms/instances/{id}/close` | Cerrar formulario y proyectar vista de recurso | MEDIO | 4 | CLINICIAN, PRACTITIONER |
+| 26 | POST | `/forms/instances/{id}/values` | Capturar valores de formulario (value[x] exclusivo) | MEDIO | 4 | CLINICIAN, PRACTITIONER |
+| 27 | GET | `/forms/me/instances` | Ver mis formularios clínicos | BAJO | 2 | sesión (sin roles) |
+| 28 | GET | `/forms/me/instances/{id}` | Leer un formulario propio con sus respuestas | BAJO | 5 | sesión (sin roles) |
+| 29 | GET | `/forms/question-scripts` | Listar mis guiones de preguntas activos | BAJO | 2 | PRACTITIONER, CLINICIAN |
+| 30 | POST | `/forms/question-scripts` | Crear un guion de preguntas | ALTO | 5 | PRACTITIONER, CLINICIAN |
+| 31 | DELETE | `/forms/question-scripts/{id}` | Archivar un guion propio | MEDIO | 2 | PRACTITIONER, CLINICIAN |
+| 32 | GET | `/forms/question-scripts/{id}` | Leer un guion de preguntas propio | BAJO | 2 | PRACTITIONER, CLINICIAN |
+| 33 | PATCH | `/forms/question-scripts/{id}` | Editar un guion propio (items reemplaza la lista; 409 si version no coincide) | ALTO | 5 | PRACTITIONER, CLINICIAN |
+| 34 | PATCH | `/forms/values/{id}` | Corregir valor con supersede y snapshot inmutable | MEDIO | 5 | CLINICIAN, PRACTITIONER |
+| 35 | POST | `/forms/values/import` | Registrar procedencia de valores importados (batch ETL) | MEDIO | 5 | CLINICIAN, PRACTITIONER |
+| 36 | GET | `/public/profiles/p/{slug}/faqs` | Preguntas frecuentes publicadas de un profesional | BAJO | 2 | pública |
 
 ---
 
@@ -150,7 +161,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Asignar campos a un target con política de extensión. Caso de uso UC-09-06: Asigna campo a target con enforcement de política. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:93`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -693,7 +704,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir un set de campos dinámicos y su versión inicial. Caso de uso UC-09-01: Crea set + versión inicial (draft, inmutable). Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:88`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -936,7 +947,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Migrar valores entre versiones de schema. Caso de uso UC-09-13: Ejecuta migración entre versiones. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:100`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1050,7 +1061,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Componer miembros del set y publicar la versión. Caso de uso UC-09-03: Compone miembros y publica la versión. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:90`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1154,7 +1165,459 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. POST /forms/field-definitions
+## 12. GET /forms/faqs
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar mis preguntas frecuentes, en orden
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsFaqsController.list` — `src/modules/forms/controllers/forms-faqs.controller.ts:40`
+
+### Qué es y para qué sirve (negocio)
+
+Listar mis preguntas frecuentes, en orden. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /forms/faqs` la atiende `FormsFaqsController.list` (src/modules/forms/controllers/forms-faqs.controller.ts:40). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `FaqsService.list`. Lee forms.faq_entries.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/forms/controllers/forms-faqs.controller.ts:40` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.faq_entries (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsFaqsController.list → FaqsService.list → FaqEntriesRepository.listOwned | `src/modules/forms/repositories/faq-entries.repository.ts:36` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<FaqListResponseDto>` · DTO `FaqListResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<FaqEntryDto>` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:16` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/faq-responses.dto.ts:5` |
+| `items[].question` | `string` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:6` |
+| `items[].answer` | `string` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:7` |
+| `items[].category` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/faq-responses.dto.ts:8` |
+| `items[].position` | `number` | Sí | — | — | 1-based display order | `src/modules/forms/dto/faq-responses.dto.ts:9` |
+| `items[].isPublished` | `boolean` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:10` |
+| `items[].updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/forms/dto/faq-responses.dto.ts:11` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsFaqsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 13. POST /forms/faqs
+
+- **Origen:** CONTRATO
+- **Nombre:** Agregar una pregunta frecuente al final
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsFaqsController.create` — `src/modules/forms/controllers/forms-faqs.controller.ts:47`
+
+### Qué es y para qué sirve (negocio)
+
+Agregar una pregunta frecuente al final. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /forms/faqs` la atiende `FormsFaqsController.create` (src/modules/forms/controllers/forms-faqs.controller.ts:47). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateFaqDto` (4 campos, 2 obligatorios). Delega en `FaqsService.create`. Crea filas en forms.faq_entries. Lee forms.faq_entries.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/forms/controllers/forms-faqs.controller.ts:47` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.faq_entries (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | FormsFaqsController.create → FaqsService.create → FaqEntriesRepository.insertLast | `src/modules/forms/repositories/faq-entries.repository.ts:76` |
+| `forms.faq_entries (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsFaqsController.create → FaqsService.create → FaqEntriesRepository.insertLast | `src/modules/forms/repositories/faq-entries.repository.ts:76` |
+
+### Cuerpo — DTO `CreateFaqDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `question` | `string` | Sí | longitud mínima 1; longitud máxima 300; patrón runtime /\S/ | `@IsString()` `@IsNotEmpty()` `@Matches(/\S/, { message: '$property must not be blank' })` `@MaxLength(300)` `@IsPlainText()` | — | `src/modules/forms/dto/create-faq.dto.ts:20` |
+| `answer` | `string` | Sí | longitud mínima 1; longitud máxima 3000; patrón runtime /\S/ | `@IsString()` `@IsNotEmpty()` `@Matches(/\S/, { message: '$property must not be blank' })` `@MaxLength(4000)` `@IsPlainText()` | — | `src/modules/forms/dto/create-faq.dto.ts:28` |
+| `category` | `object` | No | longitud máxima 120; admite null | `@IsOptional()` `@IsString()` `@MaxLength(120)` `@IsPlainText()` | — | `src/modules/forms/dto/create-faq.dto.ts:35` |
+| `isPublished` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | — | `src/modules/forms/dto/create-faq.dto.ts:40` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "question": "valor-ejemplo",
+  "answer": "valor-ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "question": "valor-ejemplo",
+  "answer": "valor-ejemplo",
+  "category": {},
+  "isPublished": false
+}
+```
+
+</details>
+
+### Respuesta — `Promise<FaqEntryDto>` · DTO `FaqEntryDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/faq-responses.dto.ts:5` |
+| `question` | `string` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:6` |
+| `answer` | `string` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:7` |
+| `category` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/faq-responses.dto.ts:8` |
+| `position` | `number` | Sí | — | — | 1-based display order | `src/modules/forms/dto/faq-responses.dto.ts:9` |
+| `isPublished` | `boolean` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:10` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/forms/dto/faq-responses.dto.ts:11` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsFaqsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 14. DELETE /forms/faqs/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Borrar una pregunta frecuente propia
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Borra filas
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsFaqsController.remove` — `src/modules/forms/controllers/forms-faqs.controller.ts:95`
+
+### Qué es y para qué sirve (negocio)
+
+Borrar una pregunta frecuente propia. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /forms/faqs/{id}` la atiende `FormsFaqsController.remove` (src/modules/forms/controllers/forms-faqs.controller.ts:95). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `FaqsService.remove`. Borra de forms.faq_entries.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/forms/controllers/forms-faqs.controller.ts:95` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-faqs.controller.ts:95` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.faq_entries (vista u objeto no catalogado)` | BORRA | BORRA | POR_SQL | FormsFaqsController.remove → FaqsService.remove → FaqEntriesRepository.deleteOwned | `src/modules/forms/repositories/faq-entries.repository.ts:139` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<void>` · HTTP `HttpStatus.NO_CONTENT`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsFaqsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 15. PATCH /forms/faqs/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar una pregunta frecuente propia
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsFaqsController.update` — `src/modules/forms/controllers/forms-faqs.controller.ts:78`
+
+### Qué es y para qué sirve (negocio)
+
+Editar una pregunta frecuente propia. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /forms/faqs/{id}` la atiende `FormsFaqsController.update` (src/modules/forms/controllers/forms-faqs.controller.ts:78). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `UpdateFaqDto` (4 campos, 0 obligatorios). Delega en `FaqsService.update`. Actualiza forms.faq_entries. Lee forms.faq_entries.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/forms/controllers/forms-faqs.controller.ts:78` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-faqs.controller.ts:78` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.faq_entries (vista u objeto no catalogado)` | ESCRIBE | ACTUALIZA | POR_SQL | FormsFaqsController.update → FaqsService.update → FaqEntriesRepository.updateOwned | `src/modules/forms/repositories/faq-entries.repository.ts:124` |
+| `forms.faq_entries (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsFaqsController.update → FaqsService.update → FaqsService.mustFind → FaqEntriesRepository.findOwned | `src/modules/forms/repositories/faq-entries.repository.ts:51` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdateFaqDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `question` | `string` | No | longitud mínima 1; longitud máxima 300; patrón runtime /\S/ | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@Matches(/\S/, { message: '$property must not be blank' })` `@MaxLength(300)` `@IsPlainText()` | — | `src/modules/forms/dto/update-faq.dto.ts:21` |
+| `answer` | `string` | No | longitud mínima 1; longitud máxima 3000; patrón runtime /\S/ | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@Matches(/\S/, { message: '$property must not be blank' })` `@MaxLength(4000)` `@IsPlainText()` | — | `src/modules/forms/dto/update-faq.dto.ts:30` |
+| `category` | `object` | No | longitud máxima 120; admite null | `@IsOptional()` `@IsString()` `@MaxLength(120)` `@IsPlainText()` | — | `src/modules/forms/dto/update-faq.dto.ts:37` |
+| `isPublished` | `boolean` | No | — | `@IsOptional()` `@IsStrictBoolean()` | — | `src/modules/forms/dto/update-faq.dto.ts:42` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "question": "valor-ejemplo",
+  "answer": "valor-ejemplo",
+  "category": {},
+  "isPublished": true
+}
+```
+
+</details>
+
+### Respuesta — `Promise<FaqEntryDto>` · DTO `FaqEntryDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/faq-responses.dto.ts:5` |
+| `question` | `string` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:6` |
+| `answer` | `string` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:7` |
+| `category` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/faq-responses.dto.ts:8` |
+| `position` | `number` | Sí | — | — | 1-based display order | `src/modules/forms/dto/faq-responses.dto.ts:9` |
+| `isPublished` | `boolean` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:10` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/forms/dto/faq-responses.dto.ts:11` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsFaqsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 16. PUT /forms/faqs/order
+
+- **Origen:** CONTRATO
+- **Nombre:** Reordenar mis preguntas frecuentes (lista completa)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsFaqsController.reorder` — `src/modules/forms/controllers/forms-faqs.controller.ts:64`
+
+### Qué es y para qué sirve (negocio)
+
+Reordenar mis preguntas frecuentes (lista completa). Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PUT /forms/faqs/order` la atiende `FormsFaqsController.reorder` (src/modules/forms/controllers/forms-faqs.controller.ts:64). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `ReorderFaqsDto` (1 campo, 1 obligatorio). Delega en `FaqsService.reorder`. Actualiza forms.faq_entries. Lee forms.faq_entries.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/forms/controllers/forms-faqs.controller.ts:64` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.faq_entries (vista u objeto no catalogado)` | ESCRIBE | ACTUALIZA | POR_SQL | FormsFaqsController.reorder → FaqsService.reorder → FaqEntriesRepository.applyOrder | `src/modules/forms/repositories/faq-entries.repository.ts:176` |
+| `forms.faq_entries (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsFaqsController.reorder → FaqsService.reorder → FaqEntriesRepository.lockOwnedIds | `src/modules/forms/repositories/faq-entries.repository.ts:156` |
+
+### Cuerpo — DTO `ReorderFaqsDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `ids` | `array<string>` | Sí | formato uuid; mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayUnique()` `@IsUUID('all', { each: true })` | — | `src/modules/forms/dto/reorder-faqs.dto.ts:15` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "ids": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "ids": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<FaqListResponseDto>` · DTO `FaqListResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<FaqEntryDto>` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:16` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/faq-responses.dto.ts:5` |
+| `items[].question` | `string` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:6` |
+| `items[].answer` | `string` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:7` |
+| `items[].category` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/faq-responses.dto.ts:8` |
+| `items[].position` | `number` | Sí | — | — | 1-based display order | `src/modules/forms/dto/faq-responses.dto.ts:9` |
+| `items[].isPublished` | `boolean` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:10` |
+| `items[].updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/forms/dto/faq-responses.dto.ts:11` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lista debe contener exactamente las preguntas frecuentes propias |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsFaqsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 17. POST /forms/field-definitions
 
 - **Origen:** CONTRATO
 - **Nombre:** Declarar una definición de campo con reglas de validación
@@ -1167,7 +1630,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Declarar una definición de campo con reglas de validación. Caso de uso UC-09-02: clínico, practitioner o SECURITY_ADMIN. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:89`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1292,7 +1755,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. PATCH /forms/field-definitions/{id}
+## 18. PATCH /forms/field-definitions/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir el nombre o el tipo de un campo propio
@@ -1408,7 +1871,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. POST /forms/fields/{id}/access-rules
+## 19. POST /forms/fields/{id}/access-rules
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir reglas de acceso y enmascarado por campo
@@ -1421,7 +1884,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir reglas de acceso y enmascarado por campo. Caso de uso UC-09-12: Define regla de acceso / enmascarado por campo. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:68`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:99`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1517,7 +1980,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. POST /forms/fields/{id}/dependencies
+## 20. POST /forms/fields/{id}/dependencies
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir dependencias condicionales entre campos
@@ -1530,7 +1993,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir dependencias condicionales entre campos. Caso de uso UC-09-04: Define dependencia condicional entre campos. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:91`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1629,7 +2092,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. PUT /forms/fields/{id}/localizations/{lang}
+## 21. PUT /forms/fields/{id}/localizations/{lang}
 
 - **Origen:** CONTRATO
 - **Nombre:** Localizar (i18n) una definición de campo
@@ -1642,7 +2105,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Localizar (i18n) una definición de campo. Caso de uso UC-09-05: Upsert de localización i18n (es/en). Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:92`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1734,7 +2197,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 17. GET /forms/instances
+## 22. GET /forms/instances
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las instancias de formulario de un encuentro
@@ -1842,7 +2305,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 18. POST /forms/instances
+## 23. POST /forms/instances
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir una instancia de formulario para un recurso
@@ -1855,7 +2318,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Abrir una instancia de formulario para un recurso. Caso de uso UC-09-07: Abre instancia de formulario para un recurso. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:63`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:94`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1941,7 +2404,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 19. GET /forms/instances/{id}
+## 24. GET /forms/instances/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Leer una instancia con sus valores vigentes, por tipo resuelto
@@ -2052,7 +2515,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 20. POST /forms/instances/{id}/close
+## 25. POST /forms/instances/{id}/close
 
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar formulario y proyectar vista de recurso
@@ -2065,7 +2528,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Cerrar formulario y proyectar vista de recurso. Caso de uso UC-09-11: Cierra formulario y finaliza valores preliminares. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:67`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:98`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2130,7 +2593,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. POST /forms/instances/{id}/values
+## 26. POST /forms/instances/{id}/values
 
 - **Origen:** CONTRATO
 - **Nombre:** Capturar valores de formulario (value[x] exclusivo)
@@ -2143,7 +2606,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Capturar valores de formulario (value[x] exclusivo). Caso de uso UC-09-08: Captura valores (value[x] exclusivo). Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:64`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:95`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2251,7 +2714,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 22. GET /forms/me/instances
+## 27. GET /forms/me/instances
 
 - **Origen:** CONTRATO
 - **Nombre:** Ver mis formularios clínicos
@@ -2333,7 +2796,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 23. GET /forms/me/instances/{id}
+## 28. GET /forms/me/instances/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Leer un formulario propio con sus respuestas
@@ -2423,7 +2886,511 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. PATCH /forms/values/{id}
+## 29. GET /forms/question-scripts
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar mis guiones de preguntas activos
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsQuestionScriptsController.list` — `src/modules/forms/controllers/forms-question-scripts.controller.ts:39`
+
+### Qué es y para qué sirve (negocio)
+
+Listar mis guiones de preguntas activos. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /forms/question-scripts` la atiende `FormsQuestionScriptsController.list` (src/modules/forms/controllers/forms-question-scripts.controller.ts:39). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `QuestionScriptsService.list`. Lee forms.question_script_items, forms.question_scripts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/forms/controllers/forms-question-scripts.controller.ts:39` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.question_script_items (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsQuestionScriptsController.list → QuestionScriptsService.list → QuestionScriptsRepository.listActive | `src/modules/forms/repositories/question-scripts.repository.ts:69` |
+| `forms.question_scripts (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsQuestionScriptsController.list → QuestionScriptsService.list → QuestionScriptsRepository.listActive | `src/modules/forms/repositories/question-scripts.repository.ts:69` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<QuestionScriptListResponseDto>` · DTO `QuestionScriptListResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<QuestionScriptSummaryDto>` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:44` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:32` |
+| `items[].title` | `string` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:33` |
+| `items[].description` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:34` |
+| `items[].specialtyCode` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:35` |
+| `items[].status` | `string` | Sí | valores: active | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:36` |
+| `items[].itemCount` | `number` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:37` |
+| `items[].updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:38` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsQuestionScriptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 30. POST /forms/question-scripts
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear un guion de preguntas
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Borra filas
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsQuestionScriptsController.create` — `src/modules/forms/controllers/forms-question-scripts.controller.ts:48`
+
+### Qué es y para qué sirve (negocio)
+
+Crear un guion de preguntas. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /forms/question-scripts` la atiende `FormsQuestionScriptsController.create` (src/modules/forms/controllers/forms-question-scripts.controller.ts:48). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateQuestionScriptDto` (9 campos, 5 obligatorios). Delega en `QuestionScriptsService.create`. Crea filas en forms.question_script_items, forms.question_scripts. Borra de forms.question_script_items. Lee forms.question_script_items, forms.question_scripts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/forms/controllers/forms-question-scripts.controller.ts:48` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.question_script_items (vista u objeto no catalogado)` | BORRA | BORRA | POR_SQL | FormsQuestionScriptsController.create → QuestionScriptsService.create → QuestionScriptsRepository.replaceItems | `src/modules/forms/repositories/question-scripts.repository.ts:179` |
+| `forms.question_script_items (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | FormsQuestionScriptsController.create → QuestionScriptsService.create → QuestionScriptsRepository.replaceItems | `src/modules/forms/repositories/question-scripts.repository.ts:196` |
+| `forms.question_script_items (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsQuestionScriptsController.create → QuestionScriptsService.create → QuestionScriptsService.reload → QuestionScriptsService.toDto → QuestionScriptsRepository.listItems | `src/modules/forms/repositories/question-scripts.repository.ts:106` |
+| `forms.question_scripts (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | FormsQuestionScriptsController.create → QuestionScriptsService.create → QuestionScriptsRepository.insertScript | `src/modules/forms/repositories/question-scripts.repository.ts:126` |
+| `forms.question_scripts (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsQuestionScriptsController.create → QuestionScriptsService.create → QuestionScriptsService.reload → QuestionScriptsRepository.findActiveOwned | `src/modules/forms/repositories/question-scripts.repository.ts:90` |
+
+### Cuerpo — DTO `CreateQuestionScriptDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `title` | `string` | Sí | longitud mínima 1; longitud máxima 160; patrón runtime /\S/ | `@IsString()` `@IsNotEmpty()` `@Matches(/\S/, { message: '$property must not be blank' })` `@MaxLength(160)` `@IsPlainText()` | — | `src/modules/forms/dto/create-question-script.dto.ts:28` |
+| `description` | `object` | No | longitud máxima 1600; admite null | `@IsOptional()` `@IsString()` `@MaxLength(2000)` `@IsPlainText()` | — | `src/modules/forms/dto/create-question-script.dto.ts:35` |
+| `specialtyCode` | `object` | No | longitud máxima 64; admite null | `@IsOptional()` `@IsString()` `@MaxLength(64)` | — | `src/modules/forms/dto/create-question-script.dto.ts:41` |
+| `items` | `array<QuestionScriptItemInputDto>` | Sí | mínimo 1 elemento(s); máximo 100 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(QUESTION_SCRIPT_MAX_ITEMS)` `@ValidateNested({ each: true })` `@Type(() => QuestionScriptItemInputDto)` | — | `src/modules/forms/dto/create-question-script.dto.ts:53` |
+| `items[].questionText` | `string` | Sí | longitud mínima 1; longitud máxima 500; patrón runtime /\S/ | `@IsString()` `@IsNotEmpty()` `@Matches(/\S/, { message: '$property must not be blank' })` `@MaxLength(500)` `@IsPlainText()` | — | `src/modules/forms/dto/question-script-item.dto.ts:71` |
+| `items[].helpText` | `object` | No | longitud máxima 1000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(1000)` `@IsPlainText()` | — | `src/modules/forms/dto/question-script-item.dto.ts:78` |
+| `items[].answerType` | `string` | Sí | valores: free_text, yes_no, single_choice, multiple_choice, number, date | `@IsIn(QUESTION_ANSWER_TYPES)` | — | `src/modules/forms/dto/question-script-item.dto.ts:82` |
+| `items[].options` | `array<string>` | No | admite null | `@IsOptionsForAnswerType()` | Required (≥ 2 distinct, non-blank) for single_choice/multiple_choice; forbidden otherwise | `src/modules/forms/dto/question-script-item.dto.ts:91` |
+| `items[].required` | `boolean` | Sí | — | `@IsStrictBoolean()` | — | `src/modules/forms/dto/question-script-item.dto.ts:95` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "title": "valor-ejemplo",
+  "items": [
+    {
+      "questionText": "valor-ejemplo",
+      "answerType": "free_text",
+      "required": true
+    }
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "title": "valor-ejemplo",
+  "description": {},
+  "specialtyCode": {},
+  "items": [
+    {
+      "questionText": "valor-ejemplo",
+      "helpText": {},
+      "answerType": "free_text",
+      "options": [
+        "valor-ejemplo"
+      ],
+      "required": true
+    }
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<QuestionScriptDto>` · DTO `QuestionScriptDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:18` |
+| `title` | `string` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:19` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:20` |
+| `specialtyCode` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:21` |
+| `status` | `string` | Sí | valores: active, archived | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:22` |
+| `version` | `number` | Sí | — | — | Optimistic-concurrency token for PATCH | `src/modules/forms/dto/question-script-responses.dto.ts:24` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:25` |
+| `items` | `array<QuestionScriptItemDto>` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:27` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:6` |
+| `items[].position` | `number` | Sí | — | — | 1-based order inside the script | `src/modules/forms/dto/question-script-responses.dto.ts:8` |
+| `items[].questionText` | `string` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:9` |
+| `items[].helpText` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:10` |
+| `items[].answerType` | `string` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:11` |
+| `items[].options` | `array<string>` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:12` |
+| `items[].required` | `boolean` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:13` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsQuestionScriptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 31. DELETE /forms/question-scripts/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Archivar un guion propio
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsQuestionScriptsController.archive` — `src/modules/forms/controllers/forms-question-scripts.controller.ts:94`
+
+### Qué es y para qué sirve (negocio)
+
+Archivar un guion propio. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /forms/question-scripts/{id}` la atiende `FormsQuestionScriptsController.archive` (src/modules/forms/controllers/forms-question-scripts.controller.ts:94). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `QuestionScriptsService.archive`. Actualiza forms.question_scripts. Lee forms.question_scripts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/forms/controllers/forms-question-scripts.controller.ts:94` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-question-scripts.controller.ts:94` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.question_scripts (vista u objeto no catalogado)` | ESCRIBE | ACTUALIZA | POR_SQL | FormsQuestionScriptsController.archive → QuestionScriptsService.archive → QuestionScriptsRepository.archive | `src/modules/forms/repositories/question-scripts.repository.ts:211` |
+| `forms.question_scripts (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsQuestionScriptsController.archive → QuestionScriptsService.archive → QuestionScriptsRepository.findActiveOwned | `src/modules/forms/repositories/question-scripts.repository.ts:90` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<void>` · HTTP `HttpStatus.NO_CONTENT`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsQuestionScriptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 32. GET /forms/question-scripts/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Leer un guion de preguntas propio
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsQuestionScriptsController.get` — `src/modules/forms/controllers/forms-question-scripts.controller.ts:64`
+
+### Qué es y para qué sirve (negocio)
+
+Leer un guion de preguntas propio. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /forms/question-scripts/{id}` la atiende `FormsQuestionScriptsController.get` (src/modules/forms/controllers/forms-question-scripts.controller.ts:64). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `QuestionScriptsService.get`. Lee forms.question_script_items, forms.question_scripts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/forms/controllers/forms-question-scripts.controller.ts:64` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-question-scripts.controller.ts:64` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.question_script_items (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsQuestionScriptsController.get → QuestionScriptsService.get → QuestionScriptsService.toDto → QuestionScriptsRepository.listItems | `src/modules/forms/repositories/question-scripts.repository.ts:106` |
+| `forms.question_scripts (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsQuestionScriptsController.get → QuestionScriptsService.get → QuestionScriptsRepository.findActiveOwned | `src/modules/forms/repositories/question-scripts.repository.ts:90` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<QuestionScriptDto>` · DTO `QuestionScriptDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:18` |
+| `title` | `string` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:19` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:20` |
+| `specialtyCode` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:21` |
+| `status` | `string` | Sí | valores: active, archived | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:22` |
+| `version` | `number` | Sí | — | — | Optimistic-concurrency token for PATCH | `src/modules/forms/dto/question-script-responses.dto.ts:24` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:25` |
+| `items` | `array<QuestionScriptItemDto>` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:27` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:6` |
+| `items[].position` | `number` | Sí | — | — | 1-based order inside the script | `src/modules/forms/dto/question-script-responses.dto.ts:8` |
+| `items[].questionText` | `string` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:9` |
+| `items[].helpText` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:10` |
+| `items[].answerType` | `string` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:11` |
+| `items[].options` | `array<string>` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:12` |
+| `items[].required` | `boolean` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:13` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsQuestionScriptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 33. PATCH /forms/question-scripts/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar un guion propio (items reemplaza la lista; 409 si version no coincide)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** ALTO — Borra filas
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsQuestionScriptsController.update` — `src/modules/forms/controllers/forms-question-scripts.controller.ts:74`
+
+### Qué es y para qué sirve (negocio)
+
+Editar un guion propio (items reemplaza la lista; 409 si version no coincide). Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /forms/question-scripts/{id}` la atiende `FormsQuestionScriptsController.update` (src/modules/forms/controllers/forms-question-scripts.controller.ts:74). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `UpdateQuestionScriptDto` (10 campos, 1 obligatorio). Delega en `QuestionScriptsService.update`. Crea filas en forms.question_script_items. Actualiza forms.question_scripts. Borra de forms.question_script_items. Lee forms.question_script_items, forms.question_scripts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/forms/controllers/forms-question-scripts.controller.ts:74` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-question-scripts.controller.ts:74` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.question_script_items (vista u objeto no catalogado)` | BORRA | BORRA | POR_SQL | FormsQuestionScriptsController.update → QuestionScriptsService.update → QuestionScriptsRepository.replaceItems | `src/modules/forms/repositories/question-scripts.repository.ts:179` |
+| `forms.question_script_items (vista u objeto no catalogado)` | ESCRIBE | CREA | POR_SQL | FormsQuestionScriptsController.update → QuestionScriptsService.update → QuestionScriptsRepository.replaceItems | `src/modules/forms/repositories/question-scripts.repository.ts:196` |
+| `forms.question_script_items (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsQuestionScriptsController.update → QuestionScriptsService.update → QuestionScriptsService.reload → QuestionScriptsService.toDto → QuestionScriptsRepository.listItems | `src/modules/forms/repositories/question-scripts.repository.ts:106` |
+| `forms.question_scripts (vista u objeto no catalogado)` | ESCRIBE | ACTUALIZA | POR_SQL | FormsQuestionScriptsController.update → QuestionScriptsService.update → QuestionScriptsRepository.touchScript | `src/modules/forms/repositories/question-scripts.repository.ts:164` |
+| `forms.question_scripts (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsQuestionScriptsController.update → QuestionScriptsService.update → QuestionScriptsRepository.findActiveOwned | `src/modules/forms/repositories/question-scripts.repository.ts:90` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdateQuestionScriptDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `version` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | Version the client last read | `src/modules/forms/dto/update-question-script.dto.ts:29` |
+| `title` | `string` | No | longitud mínima 1; longitud máxima 160; patrón runtime /\S/ | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@Matches(/\S/, { message: '$property must not be blank' })` `@MaxLength(160)` `@IsPlainText()` | — | `src/modules/forms/dto/update-question-script.dto.ts:38` |
+| `description` | `object` | No | longitud máxima 1600; admite null | `@IsOptional()` `@IsString()` `@MaxLength(2000)` `@IsPlainText()` | — | `src/modules/forms/dto/update-question-script.dto.ts:45` |
+| `specialtyCode` | `object` | No | longitud máxima 64; admite null | `@IsOptional()` `@IsString()` `@MaxLength(64)` | — | `src/modules/forms/dto/update-question-script.dto.ts:51` |
+| `items` | `array<QuestionScriptItemInputDto>` | No | mínimo 1 elemento(s); máximo 100 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(QUESTION_SCRIPT_MAX_ITEMS)` `@ValidateNested({ each: true })` `@Type(() => QuestionScriptItemInputDto)` | — | `src/modules/forms/dto/update-question-script.dto.ts:64` |
+| `items[].questionText` | `string` | No | longitud mínima 1; longitud máxima 500; patrón runtime /\S/ | `@IsString()` `@IsNotEmpty()` `@Matches(/\S/, { message: '$property must not be blank' })` `@MaxLength(500)` `@IsPlainText()` | — | `src/modules/forms/dto/question-script-item.dto.ts:71` |
+| `items[].helpText` | `object` | No | longitud máxima 1000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(1000)` `@IsPlainText()` | — | `src/modules/forms/dto/question-script-item.dto.ts:78` |
+| `items[].answerType` | `string` | No | valores: free_text, yes_no, single_choice, multiple_choice, number, date | `@IsIn(QUESTION_ANSWER_TYPES)` | — | `src/modules/forms/dto/question-script-item.dto.ts:82` |
+| `items[].options` | `array<string>` | No | admite null | `@IsOptionsForAnswerType()` | Required (≥ 2 distinct, non-blank) for single_choice/multiple_choice; forbidden otherwise | `src/modules/forms/dto/question-script-item.dto.ts:91` |
+| `items[].required` | `boolean` | No | — | `@IsStrictBoolean()` | — | `src/modules/forms/dto/question-script-item.dto.ts:95` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "version": 1
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "version": 1,
+  "title": "valor-ejemplo",
+  "description": {},
+  "specialtyCode": {},
+  "items": [
+    {
+      "questionText": "valor-ejemplo",
+      "helpText": {},
+      "answerType": "free_text",
+      "options": [
+        "valor-ejemplo"
+      ],
+      "required": true
+    }
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<QuestionScriptDto>` · DTO `QuestionScriptDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:18` |
+| `title` | `string` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:19` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:20` |
+| `specialtyCode` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:21` |
+| `status` | `string` | Sí | valores: active, archived | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:22` |
+| `version` | `number` | Sí | — | — | Optimistic-concurrency token for PATCH | `src/modules/forms/dto/question-script-responses.dto.ts:24` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:25` |
+| `items` | `array<QuestionScriptItemDto>` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:27` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:6` |
+| `items[].position` | `number` | Sí | — | — | 1-based order inside the script | `src/modules/forms/dto/question-script-responses.dto.ts:8` |
+| `items[].questionText` | `string` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:9` |
+| `items[].helpText` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:10` |
+| `items[].answerType` | `string` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:11` |
+| `items[].options` | `array<string>` | Sí | admite null | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:12` |
+| `items[].required` | `boolean` | Sí | — | — | — | `src/modules/forms/dto/question-script-responses.dto.ts:13` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: El guion cambió desde la última lectura |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsQuestionScriptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 34. PATCH /forms/values/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir valor con supersede y snapshot inmutable
@@ -2436,7 +3403,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Corregir valor con supersede y snapshot inmutable. Caso de uso UC-09-09: Corrige valor con supersede y snapshot inmutable. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:65`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:96`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2529,7 +3496,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 25. POST /forms/values/import
+## 35. POST /forms/values/import
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar procedencia de valores importados (batch ETL)
@@ -2542,7 +3509,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar procedencia de valores importados (batch ETL). Caso de uso UC-09-10: Importa valores externos (batch ETL) con procedencia. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:66`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:97`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2649,6 +3616,80 @@ _Ninguna prueba existente menciona esta operación._
 ### Flujos
 
 - Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-10`
+
+---
+
+## 36. GET /public/profiles/p/{slug}/faqs
+
+- **Origen:** CONTRATO
+- **Nombre:** Preguntas frecuentes publicadas de un profesional
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsFaqsPublicController.list` — `src/modules/forms/controllers/forms-faqs-public.controller.ts:24`
+
+### Qué es y para qué sirve (negocio)
+
+Preguntas frecuentes publicadas de un profesional. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /public/profiles/p/{slug}/faqs` la atiende `FormsFaqsPublicController.list` (src/modules/forms/controllers/forms-faqs-public.controller.ts:24). Es una ruta pública: no exige token. Delega en `FaqsService.listPublic`. Lee community.public_profiles, forms.faq_entries.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/forms/controllers/forms-faqs-public.controller.ts:24` |
+| RATE_LIMIT | Límite propio: Throttle(PUBLIC_RATE_LIMIT) | `src/modules/forms/controllers/forms-faqs-public.controller.ts:24` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.public_profiles` | LEE | LEE | POR_SQL | FormsFaqsPublicController.list → FaqsService.listPublic → FaqEntriesRepository.listPublishedBySlug | `src/modules/forms/repositories/faq-entries.repository.ts:198` |
+| `forms.faq_entries (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | FormsFaqsPublicController.list → FaqsService.listPublic → FaqEntriesRepository.listPublishedBySlug | `src/modules/forms/repositories/faq-entries.repository.ts:213` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `slug` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PublicFaqListResponseDto>` · DTO `PublicFaqListResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<PublicFaqEntryDto>` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:29` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/forms/dto/faq-responses.dto.ts:21` |
+| `items[].question` | `string` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:22` |
+| `items[].answer` | `string` | Sí | — | — | — | `src/modules/forms/dto/faq-responses.dto.ts:23` |
+| `items[].category` | `string` | Sí | admite null | — | — | `src/modules/forms/dto/faq-responses.dto.ts:24` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsFaqsPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

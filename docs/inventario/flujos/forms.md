@@ -3,13 +3,13 @@
 # Flujos del módulo `forms`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 25 (22 con decisiones propias, 3 sin ellas)
+- **Operaciones:** 36 (31 con decisiones propias, 5 sin ellas)
 - Inventario de endpoints del módulo: [forms](../endpoints/forms.md)
 
 ## Proceso: Módulo Forms (09) — Dynamic Forms & Extensibility Governance
 
-- **Código:** `forms` · **Agrupación:** MIXTO · **Operaciones:** 25
-- **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER · SECURITY_ADMIN
+- **Código:** `forms` · **Agrupación:** MIXTO · **Operaciones:** 36
+- **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER · Público (sin sesión) · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/forms/README.md`
 
@@ -43,11 +43,22 @@ _Fuente: `src/modules/forms/README.md:3`_
 |  |  | PUT /forms/assignments/order | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 1 |
 | `ctrl:FormsDefinitionSetsController` | Operaciones de FormsDefinitionSetsController que el README no asigna a un caso de uso | GET /forms/definition-sets | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 1 |
 |  |  | GET /forms/definition-sets/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 8 |
+| `ctrl:FormsFaqsController` | Operaciones de FormsFaqsController que el README no asigna a un caso de uso | GET /forms/faqs | PRACTITIONER · CLINICIAN | BAJO | 1 |
+|  |  | POST /forms/faqs | PRACTITIONER · CLINICIAN | MEDIO | 2 |
+|  |  | DELETE /forms/faqs/{id} | PRACTITIONER · CLINICIAN | ALTO | 1 |
+|  |  | PATCH /forms/faqs/{id} | PRACTITIONER · CLINICIAN | MEDIO | 2 |
+|  |  | PUT /forms/faqs/order | PRACTITIONER · CLINICIAN | MEDIO | 2 |
+| `ctrl:FormsFaqsPublicController` | Operaciones de FormsFaqsPublicController que el README no asigna a un caso de uso | GET /public/profiles/p/{slug}/faqs | Público (sin sesión) | BAJO | 2 |
 | `ctrl:FormsFieldsController` | Operaciones de FormsFieldsController que el README no asigna a un caso de uso | PATCH /forms/field-definitions/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 4 |
 | `ctrl:FormsInstancesController` | Operaciones de FormsInstancesController que el README no asigna a un caso de uso | GET /forms/instances | CLINICIAN · PRACTITIONER | BAJO | 24 |
 |  |  | GET /forms/instances/{id} | CLINICIAN · PRACTITIONER | BAJO | 27 |
 | `ctrl:FormsMeController` | Operaciones de FormsMeController que el README no asigna a un caso de uso | GET /forms/me/instances | Cualquier sesión válida | BAJO | 2 |
 |  |  | GET /forms/me/instances/{id} | Cualquier sesión válida | BAJO | 5 |
+| `ctrl:FormsQuestionScriptsController` | Operaciones de FormsQuestionScriptsController que el README no asigna a un caso de uso | GET /forms/question-scripts | PRACTITIONER · CLINICIAN | BAJO | 2 |
+|  |  | POST /forms/question-scripts | PRACTITIONER · CLINICIAN | ALTO | 5 |
+|  |  | DELETE /forms/question-scripts/{id} | PRACTITIONER · CLINICIAN | MEDIO | 2 |
+|  |  | GET /forms/question-scripts/{id} | PRACTITIONER · CLINICIAN | BAJO | 2 |
+|  |  | PATCH /forms/question-scripts/{id} | PRACTITIONER · CLINICIAN | ALTO | 5 |
 
 ### Diagrama 1 de 2 — etapas `UC-09-01`, `UC-09-02`, `UC-09-03`…
 
@@ -217,68 +228,128 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:FormsFieldsController`, `ctrl:FormsInstancesController`, `ctrl:FormsMeController`
+### Diagrama 2 de 2 — etapas `ctrl:FormsFaqsController`, `ctrl:FormsFaqsPublicController`, `ctrl:FormsFieldsController`…
 
 ```mermaid
 flowchart LR
-  a2(["CLINICIAN · PRACTITIONER · SECURITY_ADMIN"]):::actor
-  a7(["CLINICIAN · PRACTITIONER"]):::actor
-  a18(["Cualquier sesión válida"]):::actor
-  t3[("forms.dynamic_field_definitions")]:::tabla
-  t4[("forms.field_assignments")]:::tabla
-  t5[("forms.field_values")]:::tabla
-  t8[("authz.access_policies")]:::tabla
-  t9[("authz.care_relationships")]:::tabla
-  t10[("authz.clinical_access_grants")]:::tabla
-  t11[("authz.field_permissions")]:::tabla
-  t12[("authz.patient_legal_representations")]:::tabla
-  t13[("authz.permissions")]:::tabla
-  t19[("clinical.encounters")]:::tabla
-  t20[("forms.form_instances")]:::tabla
-  t22[("forms.field_value_access_rules")]:::tabla
-  subgraph s0["ctrl:FormsFieldsController · Operaciones de FormsFieldsController que el README…"]
-    o1["PATCH /forms/field-definitions/{id}"]:::op
+  a2(["PRACTITIONER · CLINICIAN"]):::actor
+  a9(["Público (sin sesión)"]):::actor
+  a12(["CLINICIAN · PRACTITIONER · SECURITY_ADMIN"]):::actor
+  a17(["CLINICIAN · PRACTITIONER"]):::actor
+  a28(["Cualquier sesión válida"]):::actor
+  t3[("forms.faq_entries")]:::tabla
+  t10[("community.public_profiles")]:::tabla
+  t13[("forms.dynamic_field_definitions")]:::tabla
+  t14[("forms.field_assignments")]:::tabla
+  t15[("forms.field_values")]:::tabla
+  t18[("authz.access_policies")]:::tabla
+  t19[("authz.care_relationships")]:::tabla
+  t20[("authz.clinical_access_grants")]:::tabla
+  t21[("authz.field_permissions")]:::tabla
+  t22[("authz.patient_legal_representations")]:::tabla
+  t23[("authz.permissions")]:::tabla
+  t29[("clinical.encounters")]:::tabla
+  t30[("forms.form_instances")]:::tabla
+  t32[("forms.field_value_access_rules")]:::tabla
+  t34[("forms.question_script_items")]:::tabla
+  t35[("forms.question_scripts")]:::tabla
+  subgraph s0["ctrl:FormsFaqsController · Operaciones de FormsFaqsController que el README no…"]
+    o1["GET /forms/faqs"]:::op
+    o4["POST /forms/faqs"]:::op
+    o5["DELETE /forms/faqs/{id}"]:::op
+    o6["PATCH /forms/faqs/{id}"]:::op
+    o7["PUT /forms/faqs/order"]:::op
   end
-  t14[("+18 tablas más")]
-  t16[("+21 tablas más")]
-  subgraph s1["ctrl:FormsInstancesController · Operaciones de FormsInstancesController que el…"]
-    o6["GET /forms/instances"]:::op
-    o15["GET /forms/instances/{id}"]:::op
+  subgraph s1["ctrl:FormsFaqsPublicController · Operaciones de FormsFaqsPublicController que e…"]
+    o8["GET /public/profiles/p/{slug}/faqs"]:::op
   end
-  subgraph s2["ctrl:FormsMeController · Operaciones de FormsMeController que el README no asig…"]
-    o17["GET /forms/me/instances"]:::op
-    o21["GET /forms/me/instances/{id}"]:::op
+  subgraph s2["ctrl:FormsFieldsController · Operaciones de FormsFieldsController que el README…"]
+    o11["PATCH /forms/field-definitions/{id}"]:::op
+  end
+  t24[("+18 tablas más")]
+  t26[("+21 tablas más")]
+  subgraph s3["ctrl:FormsInstancesController · Operaciones de FormsInstancesController que el…"]
+    o16["GET /forms/instances"]:::op
+    o25["GET /forms/instances/{id}"]:::op
+  end
+  subgraph s4["ctrl:FormsMeController · Operaciones de FormsMeController que el README no asig…"]
+    o27["GET /forms/me/instances"]:::op
+    o31["GET /forms/me/instances/{id}"]:::op
+  end
+  subgraph s5["ctrl:FormsQuestionScriptsController · Operaciones de FormsQuestionScriptsContro…"]
+    o33["GET /forms/question-scripts"]:::op
+    o36["POST /forms/question-scripts"]:::op
+    o37["DELETE /forms/question-scripts/{id}"]:::op
+    o38["GET /forms/question-scripts/{id}"]:::op
+    o39["PATCH /forms/question-scripts/{id}"]:::op
   end
   a2 --> o1
-  o1 -->|"ACTUALIZA"| t3
   o1 -->|"LEE"| t3
-  o1 -->|"LEE"| t4
-  o1 -->|"LEE"| t5
-  a7 --> o6
-  o6 -->|"LEE"| t8
-  o6 -->|"LEE"| t9
-  o6 -->|"LEE"| t10
-  o6 -->|"LEE"| t11
-  o6 -->|"LEE"| t12
-  o6 -->|"LEE"| t13
-  o6 -.-> t14
-  a7 --> o15
-  o15 -->|"LEE"| t8
-  o15 -->|"LEE"| t9
-  o15 -->|"LEE"| t10
-  o15 -->|"LEE"| t11
-  o15 -->|"LEE"| t12
-  o15 -->|"LEE"| t13
-  o15 -.-> t16
-  a18 --> o17
-  o17 -->|"LEE"| t19
-  o17 -->|"LEE"| t20
-  a18 --> o21
-  o21 -->|"LEE"| t19
-  o21 -->|"LEE"| t3
-  o21 -->|"LEE"| t22
-  o21 -->|"LEE"| t5
-  o21 -->|"LEE"| t20
+  a2 --> o4
+  o4 -->|"CREA"| t3
+  o4 -->|"LEE"| t3
+  a2 --> o5
+  o5 -->|"BORRA"| t3
+  a2 --> o6
+  o6 -->|"ACTUALIZA"| t3
+  o6 -->|"LEE"| t3
+  a2 --> o7
+  o7 -->|"ACTUALIZA"| t3
+  o7 -->|"LEE"| t3
+  a9 --> o8
+  o8 -->|"LEE"| t10
+  o8 -->|"LEE"| t3
+  a12 --> o11
+  o11 -->|"ACTUALIZA"| t13
+  o11 -->|"LEE"| t13
+  o11 -->|"LEE"| t14
+  o11 -->|"LEE"| t15
+  a17 --> o16
+  o16 -->|"LEE"| t18
+  o16 -->|"LEE"| t19
+  o16 -->|"LEE"| t20
+  o16 -->|"LEE"| t21
+  o16 -->|"LEE"| t22
+  o16 -->|"LEE"| t23
+  o16 -.-> t24
+  a17 --> o25
+  o25 -->|"LEE"| t18
+  o25 -->|"LEE"| t19
+  o25 -->|"LEE"| t20
+  o25 -->|"LEE"| t21
+  o25 -->|"LEE"| t22
+  o25 -->|"LEE"| t23
+  o25 -.-> t26
+  a28 --> o27
+  o27 -->|"LEE"| t29
+  o27 -->|"LEE"| t30
+  a28 --> o31
+  o31 -->|"LEE"| t29
+  o31 -->|"LEE"| t13
+  o31 -->|"LEE"| t32
+  o31 -->|"LEE"| t15
+  o31 -->|"LEE"| t30
+  a2 --> o33
+  o33 -->|"LEE"| t34
+  o33 -->|"LEE"| t35
+  a2 --> o36
+  o36 -->|"BORRA"| t34
+  o36 -->|"CREA"| t34
+  o36 -->|"LEE"| t34
+  o36 -->|"CREA"| t35
+  o36 -->|"LEE"| t35
+  a2 --> o37
+  o37 -->|"ACTUALIZA"| t35
+  o37 -->|"LEE"| t35
+  a2 --> o38
+  o38 -->|"LEE"| t34
+  o38 -->|"LEE"| t35
+  a2 --> o39
+  o39 -->|"BORRA"| t34
+  o39 -->|"CREA"| t34
+  o39 -->|"LEE"| t34
+  o39 -->|"ACTUALIZA"| t35
+  o39 -->|"LEE"| t35
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -783,7 +854,186 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /forms/field-definitions
+#### 9. POST /forms/faqs
+
+Agregar una pregunta frecuente al final
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a FaqsService.create"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a FaqEntriesRepository.insertLast"]:::llamada
+  n4 --> n5
+  n6[("CREA forms.faq_entries · LEE forms.faq_entries")]:::efecto
+  n5 --> n6
+  n7["Llama a FaqsService.mustFind"]:::llamada
+  n6 --> n7
+  n8["Llama a FaqEntriesRepository.findOwned"]:::llamada
+  n7 --> n8
+  n9[("LEE forms.faq_entries")]:::efecto
+  n8 --> n9
+  n10{"!row"}:::decision
+  n9 --> n10
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12(("201 Responde con éxito")):::ok
+  n10 -->|"no"| n12
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 10. DELETE /forms/faqs/{id}
+
+Borrar una pregunta frecuente propia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a FaqsService.remove"]:::llamada
+  n2 --> n3
+  n4["Llama a FaqEntriesRepository.deleteOwned"]:::llamada
+  n3 --> n4
+  n5[("BORRA forms.faq_entries")]:::efecto
+  n4 --> n5
+  n6{"!found"}:::decision
+  n5 --> n6
+  n7(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"sí"| n7
+  n8(("204 Responde con éxito")):::ok
+  n6 -->|"no"| n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 11. PATCH /forms/faqs/{id}
+
+Editar una pregunta frecuente propia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a FaqsService.update"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a FaqEntriesRepository.updateOwned"]:::llamada
+  n4 --> n5
+  n6[("ACTUALIZA forms.faq_entries")]:::efecto
+  n5 --> n6
+  n7{"!found"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a FaqsService.mustFind"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a FaqEntriesRepository.findOwned"]:::llamada
+  n9 --> n10
+  n11[("LEE forms.faq_entries")]:::efecto
+  n10 --> n11
+  n12{"!row"}:::decision
+  n11 --> n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14(("200 Responde con éxito")):::ok
+  n12 -->|"no"| n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 12. PUT /forms/faqs/order
+
+Reordenar mis preguntas frecuentes (lista completa)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lista debe contener exactamente las preguntas frecuentes propias |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a FaqsService.reorder"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a FaqEntriesRepository.lockOwnedIds"]:::llamada
+  n4 --> n5
+  n6[("LEE forms.faq_entries")]:::efecto
+  n5 --> n6
+  n7{"!exact"}:::decision
+  n6 --> n7
+  n8(["422 PRECONDITION_FAILED La lista debe contener exactamente las preguntas frecuentes propias"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a FaqEntriesRepository.applyOrder"]:::llamada
+  n7 -->|"no"| n9
+  n10[("ACTUALIZA forms.faq_entries")]:::efecto
+  n9 --> n10
+  n11["Llama a FaqEntriesRepository.listOwned"]:::llamada
+  n10 --> n11
+  n12[("LEE forms.faq_entries")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 13. POST /forms/field-definitions
 
 Declarar una definición de campo con reglas de validación
 
@@ -874,7 +1124,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. PATCH /forms/field-definitions/{id}
+#### 14. PATCH /forms/field-definitions/{id}
 
 Corregir el nombre o el tipo de un campo propio
 
@@ -1037,7 +1287,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /forms/fields/{id}/access-rules
+#### 15. POST /forms/fields/{id}/access-rules
 
 Definir reglas de acceso y enmascarado por campo
 
@@ -1081,7 +1331,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /forms/fields/{id}/dependencies
+#### 16. POST /forms/fields/{id}/dependencies
 
 Definir dependencias condicionales entre campos
 
@@ -1147,7 +1397,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. PUT /forms/fields/{id}/localizations/{lang}
+#### 17. PUT /forms/fields/{id}/localizations/{lang}
 
 Localizar (i18n) una definición de campo
 
@@ -1205,7 +1455,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. GET /forms/instances
+#### 18. GET /forms/instances
 
 Listar las instancias de formulario de un encuentro
 
@@ -1251,7 +1501,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /forms/instances
+#### 19. POST /forms/instances
 
 Abrir una instancia de formulario para un recurso
 
@@ -1299,7 +1549,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /forms/instances/{id}
+#### 20. GET /forms/instances/{id}
 
 Leer una instancia con sus valores vigentes, por tipo resuelto
 
@@ -1363,7 +1613,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /forms/instances/{id}/close
+#### 21. POST /forms/instances/{id}/close
 
 Cerrar formulario y proyectar vista de recurso
 
@@ -1419,7 +1669,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /forms/instances/{id}/values
+#### 22. POST /forms/instances/{id}/values
 
 Capturar valores de formulario (value[x] exclusivo)
 
@@ -1500,7 +1750,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /forms/me/instances
+#### 23. GET /forms/me/instances
 
 Ver mis formularios clínicos
 
@@ -1541,7 +1791,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. GET /forms/me/instances/{id}
+#### 24. GET /forms/me/instances/{id}
 
 Leer un formulario propio con sus respuestas
 
@@ -1606,7 +1856,219 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. PATCH /forms/values/{id}
+#### 25. POST /forms/question-scripts
+
+Crear un guion de preguntas
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a QuestionScriptsService.create"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a QuestionScriptsRepository.insertScript"]:::llamada
+  n4 --> n5
+  n6[("CREA forms.question_scripts")]:::efecto
+  n5 --> n6
+  n7["Llama a QuestionScriptsRepository.replaceItems"]:::llamada
+  n6 --> n7
+  n8[("BORRA forms.question_script_items · CREA forms.question_script_items")]:::efecto
+  n7 --> n8
+  n9["Llama a QuestionScriptsService.reload"]:::llamada
+  n8 --> n9
+  n10["Llama a QuestionScriptsRepository.findActiveOwned"]:::llamada
+  n9 --> n10
+  n11[("LEE forms.question_scripts")]:::efecto
+  n10 --> n11
+  n12{"!script"}:::decision
+  n11 --> n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a QuestionScriptsService.toDto"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a QuestionScriptsRepository.listItems"]:::llamada
+  n14 --> n15
+  n16[("LEE forms.question_script_items")]:::efecto
+  n15 --> n16
+  n17(("201 Responde con éxito")):::ok
+  n16 --> n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 26. DELETE /forms/question-scripts/{id}
+
+Archivar un guion propio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a QuestionScriptsService.archive"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a QuestionScriptsRepository.findActiveOwned"]:::llamada
+  n4 --> n5
+  n6[("LEE forms.question_scripts")]:::efecto
+  n5 --> n6
+  n7{"!current"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a QuestionScriptsRepository.archive"]:::llamada
+  n7 -->|"no"| n9
+  n10[("ACTUALIZA forms.question_scripts")]:::efecto
+  n9 --> n10
+  n11(("204 Responde con éxito")):::ok
+  n10 --> n11
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 27. GET /forms/question-scripts/{id}
+
+Leer un guion de preguntas propio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a QuestionScriptsService.get"]:::llamada
+  n2 --> n3
+  n4["Llama a QuestionScriptsRepository.findActiveOwned"]:::llamada
+  n3 --> n4
+  n5[("LEE forms.question_scripts")]:::efecto
+  n4 --> n5
+  n6{"!script"}:::decision
+  n5 --> n6
+  n7(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a QuestionScriptsService.toDto"]:::llamada
+  n6 -->|"no"| n8
+  n9["Llama a QuestionScriptsRepository.listItems"]:::llamada
+  n8 --> n9
+  n10[("LEE forms.question_script_items")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 28. PATCH /forms/question-scripts/{id}
+
+Editar un guion propio (items reemplaza la lista; 409 si version no coincide)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: El guion cambió desde la última lectura |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a QuestionScriptsService.update"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a QuestionScriptsRepository.findActiveOwned"]:::llamada
+  n4 --> n5
+  n6[("LEE forms.question_scripts")]:::efecto
+  n5 --> n6
+  n7{"!current"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9{"current.version !== dto.version"}:::decision
+  n7 -->|"no"| n9
+  n10(["409 CONCURRENCY_CONFLICT El guion cambió desde la última lectura"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a QuestionScriptsRepository.touchScript"]:::llamada
+  n9 -->|"no"| n11
+  n12[("ACTUALIZA forms.question_scripts")]:::efecto
+  n11 --> n12
+  n13{"dto.items"}:::decision
+  n12 --> n13
+  n14["Llama a QuestionScriptsRepository.replaceItems"]:::llamada
+  n13 -->|"sí"| n14
+  n15[("BORRA forms.question_script_items · CREA forms.question_script_items")]:::efecto
+  n14 --> n15
+  n16["Llama a QuestionScriptsService.reload"]:::llamada
+  n15 --> n16
+  n13 -->|"no"| n16
+  n17["Llama a QuestionScriptsRepository.findActiveOwned"]:::llamada
+  n16 --> n17
+  n18[("LEE forms.question_scripts")]:::efecto
+  n17 --> n18
+  n19{"!script"}:::decision
+  n18 --> n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a QuestionScriptsService.toDto"]:::llamada
+  n19 -->|"no"| n21
+  n22["Llama a QuestionScriptsRepository.listItems"]:::llamada
+  n21 --> n22
+  n23[("LEE forms.question_script_items")]:::efecto
+  n22 --> n23
+  n24(("200 Responde con éxito")):::ok
+  n23 --> n24
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 29. PATCH /forms/values/{id}
 
 Corregir valor con supersede y snapshot inmutable
 
@@ -1684,7 +2146,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /forms/values/import
+#### 30. POST /forms/values/import
 
 Registrar procedencia de valores importados (batch ETL)
 
@@ -1768,6 +2230,42 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+#### 31. GET /public/profiles/p/{slug}/faqs
+
+Preguntas frecuentes publicadas de un profesional
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a FaqsService.listPublic"]:::llamada
+  n2 --> n3
+  n4["Llama a FaqEntriesRepository.listPublishedBySlug"]:::llamada
+  n3 --> n4
+  n5[("LEE community.public_profiles · LEE forms.faq_entries")]:::efecto
+  n4 --> n5
+  n6{"rows === null"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND No encontrado"]):::error
+  n6 -->|"sí"| n7
+  n8(("200 Responde con éxito")):::ok
+  n6 -->|"no"| n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
 ### Operaciones sin decisiones propias
 
 Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
@@ -1777,3 +2275,5 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /forms/assignments | 200, 401, 403, 429 | 2 |
 | GET /forms/assignments/budget | 200, 400, 401, 403, 429 | 2 |
 | GET /forms/definition-sets | 200, 401, 403, 429 | 1 |
+| GET /forms/faqs | 200, 401, 403, 429 | 1 |
+| GET /forms/question-scripts | 200, 401, 403, 429 | 2 |
