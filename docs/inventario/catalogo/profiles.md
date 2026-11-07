@@ -20,8 +20,8 @@
 | [patient_merge_events](#patient_merge_events) | Preserva evidencia de las decisiones y movimientos realizados al resolver perfiles duplicados de pacientes. | 9 | 8 | 3 | COINCIDE |
 | [patient_portal_proxies](#patient_portal_proxies) | Identifica personas habilitadas para actuar como delegadas en el portal del paciente, conservando su vínculo con el paciente representado. | 14 | 9 | 60 | COINCIDE |
 | [patient_primary_practitioners](#patient_primary_practitioners) | sin propósito | 10 | 6 | 17 | COINCIDE |
-| [patient_profiles](#patient_profiles) | Identifica el perfil de paciente y habilita asociar a esa persona su historia, atención y datos de salud. | 13 | 9 | 185 | COINCIDE |
-| [person_account_links](#person_account_links) | Relaciona una persona con una o más cuentas de usuario para mantener identidad y autenticación como conceptos separados. | 13 | 8 | 310 | COINCIDE |
+| [patient_profiles](#patient_profiles) | Identifica el perfil de paciente y habilita asociar a esa persona su historia, atención y datos de salud. | 13 | 9 | 187 | COINCIDE |
+| [person_account_links](#person_account_links) | Relaciona una persona con una o más cuentas de usuario para mantener identidad y autenticación como conceptos separados. | 13 | 8 | 309 | COINCIDE |
 | [person_profiles](#person_profiles) | Conserva los datos de perfil compartidos de una persona que pueden ser utilizados por sus distintos roles dentro del sistema médico. | 9 | 6 | 89 | COINCIDE |
 | [persons](#persons) | Representa a una persona natural una sola vez, separando su identidad humana de sus cuentas de acceso y de sus roles clínicos. | 27 | 14 | 218 | COINCIDE |
 | [practitioner_admission_events](#practitioner_admission_events) | sin propósito | 15 | 5 | 28 | COINCIDE |
@@ -33,7 +33,7 @@
 | [professional_credentials](#professional_credentials) | Registra credenciales y documentación profesional que sustentan la identidad y habilitación declarada de un prestador. | 24 | 10 | 50 | COINCIDE |
 | [provider_operator_profiles](#provider_operator_profiles) | Representa personas operadoras de prestadores que necesitan identidad de perfil propia para gestionar procesos institucionales del sistema médico. | 8 | 4 | 0 | COINCIDE |
 | [related_persons](#related_persons) | Registra vínculos de una persona con otras personas relevantes para la atención, el apoyo o la representación del paciente. | 12 | 7 | 12 | COINCIDE |
-| [secretary_profiles](#secretary_profiles) | Representa personal secretarial vinculado a tareas de coordinación y soporte de la práctica asistencial. | 7 | 3 | 10 | COINCIDE |
+| [secretary_profiles](#secretary_profiles) | Representa personal secretarial vinculado a tareas de coordinación y soporte de la práctica asistencial. | 7 | 3 | 8 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -1474,7 +1474,7 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: patient_profiles`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PatientProfiles` — `src/modules/profiles/entities/patient_profiles.entity.ts`
-- **Resumen:** 13 columnas · 9 índices · 8 FK salientes · 86 entrantes · 185 operaciones
+- **Resumen:** 13 columnas · 9 índices · 8 FK salientes · 86 entrantes · 187 operaciones
 
 #### Columnas
 
@@ -1675,6 +1675,8 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 | POST /consent/privacy-restrictions | LEE | DIRECTA |
 | GET /consent/treatment-informed-consents | LEE | DIRECTA |
 | GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /access-requests/{id}/decision | LEE | DIRECTA |
+| POST /practitioner-delegates/{id}/access-requests | LEE | DIRECTA |
 | POST /practitioner-delegates/{id}/grants | LEE | DIRECTA |
 | DELETE /diagnostic-results/me/orders/{orderId}/booking | LEE | DIRECTA |
 | POST /diagnostic-results/me/orders/{orderId}/booking | LEE | DIRECTA |
@@ -1827,7 +1829,7 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: person_account_links`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PersonAccountLinks` — `src/modules/profiles/entities/person_account_links.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 0 entrantes · 310 operaciones
+- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 0 entrantes · 309 operaciones
 
 #### Columnas
 
@@ -1994,7 +1996,6 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 | GET /org/support-engagements | LEE | POR_SQL |
 | POST /org/support-engagements/{id}/end | LEE | POR_SQL |
 | POST /org/support-staff | CREA | DIRECTA |
-| POST /org/support-staff | LEE | POR_SQL |
 | POST /org/team/invitations | LEE | POR_SQL |
 | POST /practitioner-delegates/{id}/accept | LEE | POR_SQL |
 | POST /practitioner-delegates/{id}/reject | LEE | POR_SQL |
@@ -3789,7 +3790,7 @@ Representa personal secretarial vinculado a tareas de coordinación y soporte de
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: secretary_profiles`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `SecretaryProfiles` — `src/modules/profiles/entities/secretary_profiles.entity.ts`
-- **Resumen:** 7 columnas · 3 índices · 4 FK salientes · 1 entrantes · 10 operaciones
+- **Resumen:** 7 columnas · 3 índices · 4 FK salientes · 1 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -3828,10 +3829,8 @@ Representa personal secretarial vinculado a tareas de coordinación y soporte de
 | POST /affiliation-invitations/redeem | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
 | POST /me/practitioner/support-staff | CREA | DIRECTA |
-| POST /me/practitioner/support-staff | LEE | POR_SQL |
 | GET /me/support-catalog | LEE | POR_SQL |
 | POST /org/support-staff | CREA | DIRECTA |
-| POST /org/support-staff | LEE | POR_SQL |
 | POST /org/team/invitations | LEE | POR_SQL |
 | POST /support-engagement-requests | LEE | POR_SQL |
 | POST /iam/auth/register-support-staff | CREA | DIRECTA |

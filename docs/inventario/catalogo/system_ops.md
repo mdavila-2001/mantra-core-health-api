@@ -15,8 +15,8 @@
 | [assessment_findings](#assessment_findings) | Registra hallazgos de evaluaciones para priorizar riesgos y acciones correctivas. | 17 | 7 | 7 | COINCIDE |
 | [backup_policies](#backup_policies) | Define políticas de respaldo para proteger disponibilidad y recuperabilidad de información del sistema médico. | 16 | 7 | 4 | COINCIDE |
 | [breach_notifications](#breach_notifications) | Conserva notificaciones de brechas para documentar comunicaciones y obligaciones posteriores a un incidente. | 17 | 4 | 0 | COINCIDE |
-| [bulk_import_batch_rows](#bulk_import_batch_rows) | sin propósito | 13 | 5 | 0 | COINCIDE |
-| [bulk_import_batches](#bulk_import_batches) | sin propósito | 33 | 7 | 0 | COINCIDE |
+| [bulk_import_batch_rows](#bulk_import_batch_rows) | sin propósito | 13 | 5 | 5 | COINCIDE |
+| [bulk_import_batches](#bulk_import_batches) | sin propósito | 33 | 7 | 6 | COINCIDE |
 | [cross_border_transfer_events](#cross_border_transfer_events) | Registra transferencias internacionales de datos para mantener trazabilidad de movimientos entre jurisdicciones. | 10 | 9 | 2 | COINCIDE |
 | [data_classifications](#data_classifications) | Define niveles de clasificación de datos para gobernar su protección y uso en la plataforma médica. | 13 | 4 | 5 | COINCIDE |
 | [data_domains](#data_domains) | Cataloga dominios de datos para asignar ownership y organizar gobierno por área del sistema. | 10 | 3 | 4 | COINCIDE |
@@ -730,7 +730,7 @@ _Sin propósito registrado._
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `BulkImportBatchRows` — `src/modules/system_ops/entities/bulk_import_batch_rows.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 2 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 13 columnas · 5 índices · 2 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -777,7 +777,13 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /admin/bulk-imports | CREA | POR_SQL |
+| GET /admin/bulk-imports/{id} | LEE | POR_SQL |
+| POST /admin/bulk-imports/{id}/confirm | ACTUALIZA | POR_SQL |
+| POST /admin/bulk-imports/{id}/confirm | LEE | POR_SQL |
+| GET /admin/bulk-imports/{id}/report | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -802,7 +808,7 @@ _Sin propósito registrado._
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `BulkImportBatches` — `src/modules/system_ops/entities/bulk_import_batches.entity.ts`
-- **Resumen:** 33 columnas · 7 índices · 5 FK salientes · 1 entrantes · 0 operaciones
+- **Resumen:** 33 columnas · 7 índices · 5 FK salientes · 1 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -875,7 +881,14 @@ _Sin propósito registrado._
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /admin/bulk-imports | LEE | POR_SQL |
+| POST /admin/bulk-imports | CREA | POR_SQL |
+| GET /admin/bulk-imports/{id} | LEE | POR_SQL |
+| POST /admin/bulk-imports/{id}/confirm | ACTUALIZA | POR_SQL |
+| POST /admin/bulk-imports/{id}/confirm | LEE | POR_SQL |
+| GET /admin/bulk-imports/{id}/report | LEE | POR_SQL |
 
 #### Gobierno
 

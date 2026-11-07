@@ -27,8 +27,8 @@ _Fuente: `src/modules/delegated_access/README.md:3`_
 | `UC-29-02` | Publicar set de permisos delegados (v1) | POST /delegated-permission-sets | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /delegated-permission-sets/{id}/versions | SECURITY_ADMIN | ALTO | 4 |
 | `UC-29-03` | Crear delegación de practitioner | POST /practitioner-delegates | SECURITY_ADMIN | MEDIO | 7 |
-| `UC-29-04` | Solicitar acceso delegado (aprobación previa) | POST /practitioner-delegates/{id}/access-requests | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-29-05` | Aprobar/Denegar y emitir grant scoped | POST /access-requests/{id}/decision | SECURITY_ADMIN | MEDIO | 4 |
+| `UC-29-04` | Solicitar acceso delegado (aprobación previa) | POST /practitioner-delegates/{id}/access-requests | SECURITY_ADMIN | MEDIO | 7 |
+| `UC-29-05` | Aprobar/Denegar y emitir grant scoped | POST /access-requests/{id}/decision | SECURITY_ADMIN | MEDIO | 8 |
 | `UC-29-06` | Grant pre-autorizado por-propósito y temporal | POST /practitioner-delegates/{id}/grants | SECURITY_ADMIN | MEDIO | 6 |
 | `UC-29-07` | Revocar delegación inmediata (cascada) | POST /practitioner-delegates/{id}/revoke | SECURITY_ADMIN | MEDIO | 5 |
 | `UC-29-08` | Expirar delegaciones y grants vencidos | POST /delegated-access/expiry-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 7 |
@@ -39,12 +39,12 @@ _Fuente: `src/modules/delegated_access/README.md:3`_
 |  |  | POST /org/affiliation-invitations | Cualquier sesión válida | ALTO | 4 |
 |  |  | POST /org/affiliation-invitations/{id}/revoke | Cualquier sesión válida | ALTO | 2 |
 | `ctrl:DelegatedPermissionSetsController` | Operaciones de DelegatedPermissionSetsController que el README no asigna a un caso de uso | GET /delegated-permission-sets | SECURITY_ADMIN | BAJO | 1 |
-| `ctrl:OrgSupportStaffProvisioningController` | Operaciones de OrgSupportStaffProvisioningController que el README no asigna a un caso de uso | POST /org/support-staff | Cualquier sesión válida | ALTO | 26 |
+| `ctrl:OrgSupportStaffProvisioningController` | Operaciones de OrgSupportStaffProvisioningController que el README no asigna a un caso de uso | POST /org/support-staff | Cualquier sesión válida | ALTO | 23 |
 | `ctrl:PractitionerGovernanceController` | Operaciones de PractitionerGovernanceController que el README no asigna a un caso de uso | GET /approvals/pending | PRACTITIONER · CLINICIAN | BAJO | 14 |
 |  |  | GET /me/practitioner/governance-panel | PRACTITIONER · CLINICIAN | BAJO | 15 |
 | `ctrl:PractitionerSupportController` | Operaciones de PractitionerSupportController que el README no asigna a un caso de uso | GET /me/practitioner/support-activity | PRACTITIONER · CLINICIAN · SUPPORT_STAFF | BAJO | 0 |
 |  |  | POST /me/practitioner/support-invitations | PRACTITIONER · CLINICIAN | MEDIO | 17 |
-|  |  | POST /me/practitioner/support-staff | PRACTITIONER · CLINICIAN | MEDIO | 36 |
+|  |  | POST /me/practitioner/support-staff | PRACTITIONER · CLINICIAN | MEDIO | 34 |
 |  |  | GET /me/practitioner/support-team | PRACTITIONER · CLINICIAN · SUPPORT_STAFF | BAJO | 12 |
 |  |  | POST /me/practitioner/support-team/{id}/end | PRACTITIONER · CLINICIAN | MEDIO | 13 |
 |  |  | POST /practitioner-delegates/{id}/accept | PRACTITIONER · CLINICIAN | MEDIO | 14 |
@@ -74,10 +74,10 @@ _Fuente: `src/modules/delegated_access/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a23(["SYSTEM · SECURITY_ADMIN"]):::actor
-  a33(["PRACTITIONER · SUPPORT_STAFF"]):::actor
-  a38(["Cualquier sesión válida"]):::actor
-  a48(["PRACTITIONER · CLINICIAN"]):::actor
+  a25(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a35(["PRACTITIONER · SUPPORT_STAFF"]):::actor
+  a40(["Cualquier sesión válida"]):::actor
+  a51(["PRACTITIONER · CLINICIAN"]):::actor
   t3[("delegated_access.organization_user_assignments")]:::tabla
   t4[("directory.tenant_memberships")]:::tabla
   t6[("delegated_access.delegated_permission_set_items")]:::tabla
@@ -85,24 +85,25 @@ flowchart LR
   t10[("delegated_access.delegation_events")]:::tabla
   t11[("delegated_access.practitioner_delegate_assignments")]:::tabla
   t12[("practice.practices")]:::tabla
-  t15[("delegated_access.delegated_access_approval_reques…")]:::tabla
-  t17[("delegated_access.delegated_access_grants")]:::tabla
-  t19[("clinical.encounters")]:::tabla
-  t20[("profiles.patient_profiles")]:::tabla
-  t28[("messaging.domain_events")]:::tabla
-  t29[("messaging.outbox_messages")]:::tabla
-  e31>"delegated_access.assignment.scope_changed"]:::evento
-  t34[("directory.affiliation_invitation_uses")]:::tabla
-  t35[("directory.affiliation_invitations")]:::tabla
-  t40[("practice.practice_sites")]:::tabla
-  t44[("common.contact_points")]:::tabla
-  t45[("common.identifiers")]:::tabla
-  t49[("delegated_access.four_eyes_requests")]:::tabla
-  t50[("directory.tenants")]:::tabla
-  t51[("iam.users")]:::tabla
-  t52[("practice.care_spaces")]:::tabla
-  t55[("delegated_access.access_anomalies")]:::tabla
-  t56[("delegated_access.access_review_items")]:::tabla
+  t15[("clinical.encounters")]:::tabla
+  t16[("delegated_access.delegated_access_approval_reques…")]:::tabla
+  t19[("delegated_access.delegated_access_grants")]:::tabla
+  t22[("profiles.patient_profiles")]:::tabla
+  t30[("messaging.domain_events")]:::tabla
+  t31[("messaging.outbox_messages")]:::tabla
+  e33>"delegated_access.assignment.scope_changed"]:::evento
+  t36[("directory.affiliation_invitation_uses")]:::tabla
+  t37[("directory.affiliation_invitations")]:::tabla
+  t42[("practice.practice_sites")]:::tabla
+  t46[("common.contact_points")]:::tabla
+  t47[("common.identifiers")]:::tabla
+  t48[("iam.authentication_credentials")]:::tabla
+  t52[("delegated_access.four_eyes_requests")]:::tabla
+  t53[("directory.tenants")]:::tabla
+  t54[("iam.users")]:::tabla
+  t55[("practice.care_spaces")]:::tabla
+  t58[("delegated_access.access_anomalies")]:::tabla
+  t59[("delegated_access.access_review_items")]:::tabla
   subgraph s0["UC-29-01 · Asignar usuario de organización (scoped, vigente)"]
     o1["POST /org/{tenantMembershipId}/user-assignments"]:::op
   end
@@ -114,49 +115,51 @@ flowchart LR
   subgraph s2["UC-29-03 · Crear delegación de practitioner"]
     o9["POST /practitioner-delegates"]:::op
   end
+  t17[("+1 tablas más")]
   subgraph s3["UC-29-04 · Solicitar acceso delegado (aprobación previa)"]
     o14["POST /practitioner-delegates/{id}/access-requests"]:::op
   end
+  t20[("+2 tablas más")]
   subgraph s4["UC-29-05 · Aprobar/Denegar y emitir grant scoped"]
-    o16["POST /access-requests/{id}/decision"]:::op
+    o18["POST /access-requests/{id}/decision"]:::op
   end
   subgraph s5["UC-29-06 · Grant pre-autorizado por-propósito y temporal"]
-    o18["POST /practitioner-delegates/{id}/grants"]:::op
+    o21["POST /practitioner-delegates/{id}/grants"]:::op
   end
   subgraph s6["UC-29-07 · Revocar delegación inmediata (cascada)"]
-    o21["POST /practitioner-delegates/{id}/revoke"]:::op
-  end
-  t24[("+1 tablas más")]
-  subgraph s7["UC-29-08 · Expirar delegaciones y grants vencidos"]
-    o22["POST /delegated-access/expiry-sweep"]:::op
+    o23["POST /practitioner-delegates/{id}/revoke"]:::op
   end
   t26[("+1 tablas más")]
+  subgraph s7["UC-29-08 · Expirar delegaciones y grants vencidos"]
+    o24["POST /delegated-access/expiry-sweep"]:::op
+  end
+  t28[("+1 tablas más")]
   subgraph s8["UC-29-09 · Evaluar actor efectivo por propósito (step-up)"]
-    o25["POST /authz/effective-actor/evaluate"]:::op
+    o27["POST /authz/effective-actor/evaluate"]:::op
   end
-  t30[("+1 tablas más")]
+  t32[("+1 tablas más")]
   subgraph s9["UC-29-10 · Reasignar supervisor / suspender (cascada)"]
-    o27["PATCH /org/user-assignments/{id}"]:::op
+    o29["PATCH /org/user-assignments/{id}"]:::op
   end
-  t36[("+33 tablas más")]
+  t38[("+33 tablas más")]
   subgraph s10["ctrl:AffiliationInvitationsController · Operaciones de AffiliationInvitationsCo…"]
-    o32["POST /affiliation-invitations/redeem"]:::op
-    o37["GET /org/affiliation-invitations"]:::op
-    o39["POST /org/affiliation-invitations"]:::op
-    o41["POST /org/affiliation-invitations/{id}/revoke"]:::op
+    o34["POST /affiliation-invitations/redeem"]:::op
+    o39["GET /org/affiliation-invitations"]:::op
+    o41["POST /org/affiliation-invitations"]:::op
+    o43["POST /org/affiliation-invitations/{id}/revoke"]:::op
   end
   subgraph s11["ctrl:DelegatedPermissionSetsController · Operaciones de DelegatedPermissionSets…"]
-    o42["GET /delegated-permission-sets"]:::op
+    o44["GET /delegated-permission-sets"]:::op
   end
-  t46[("+20 tablas más")]
+  t49[("+17 tablas más")]
   subgraph s12["ctrl:OrgSupportStaffProvisioningController · Operaciones de OrgSupportStaffProv…"]
-    o43["POST /org/support-staff"]:::op
+    o45["POST /org/support-staff"]:::op
   end
-  t53[("+8 tablas más")]
-  t57[("+9 tablas más")]
+  t56[("+8 tablas más")]
+  t60[("+9 tablas más")]
   subgraph s13["ctrl:PractitionerGovernanceController · Operaciones de PractitionerGovernanceCo…"]
-    o47["GET /approvals/pending"]:::op
-    o54["GET /me/practitioner/governance-panel"]:::op
+    o50["GET /approvals/pending"]:::op
+    o57["GET /me/practitioner/governance-panel"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -180,98 +183,104 @@ flowchart LR
   o9 -->|"LEE"| t12
   o9 -.-> t13
   a2 --> o14
-  o14 -->|"CREA"| t15
   o14 -->|"LEE"| t15
+  o14 -->|"CREA"| t16
+  o14 -->|"LEE"| t16
+  o14 -->|"LEE"| t7
   o14 -->|"CREA"| t10
   o14 -->|"LEE"| t11
-  a2 --> o16
-  o16 -->|"ACTUALIZA"| t15
-  o16 -->|"LEE"| t15
-  o16 -->|"CREA"| t17
-  o16 -->|"CREA"| t10
+  o14 -.-> t17
   a2 --> o18
-  o18 -->|"LEE"| t19
-  o18 -->|"CREA"| t17
+  o18 -->|"LEE"| t15
+  o18 -->|"ACTUALIZA"| t16
+  o18 -->|"LEE"| t16
+  o18 -->|"CREA"| t19
   o18 -->|"LEE"| t7
   o18 -->|"CREA"| t10
-  o18 -->|"LEE"| t11
-  o18 -->|"LEE"| t20
+  o18 -.-> t20
   a2 --> o21
-  o21 -->|"ACTUALIZA"| t15
-  o21 -->|"ACTUALIZA"| t17
+  o21 -->|"LEE"| t15
+  o21 -->|"CREA"| t19
   o21 -->|"LEE"| t7
   o21 -->|"CREA"| t10
   o21 -->|"LEE"| t11
-  a23 --> o22
-  o22 -->|"ACTUALIZA"| t17
-  o22 -->|"LEE"| t17
-  o22 -->|"CREA"| t10
-  o22 -->|"ACTUALIZA"| t3
-  o22 -->|"LEE"| t3
-  o22 -->|"ACTUALIZA"| t11
-  o22 -.-> t24
-  a2 --> o25
-  o25 -->|"LEE"| t17
-  o25 -->|"LEE"| t6
-  o25 -->|"LEE"| t7
-  o25 -->|"CREA"| t10
-  o25 -->|"LEE"| t3
-  o25 -->|"LEE"| t11
-  o25 -.-> t26
+  o21 -->|"LEE"| t22
+  a2 --> o23
+  o23 -->|"ACTUALIZA"| t16
+  o23 -->|"ACTUALIZA"| t19
+  o23 -->|"LEE"| t7
+  o23 -->|"CREA"| t10
+  o23 -->|"LEE"| t11
+  a25 --> o24
+  o24 -->|"ACTUALIZA"| t19
+  o24 -->|"LEE"| t19
+  o24 -->|"CREA"| t10
+  o24 -->|"ACTUALIZA"| t3
+  o24 -->|"LEE"| t3
+  o24 -->|"ACTUALIZA"| t11
+  o24 -.-> t26
   a2 --> o27
-  o27 -->|"ACTUALIZA"| t3
+  o27 -->|"LEE"| t19
+  o27 -->|"LEE"| t6
+  o27 -->|"LEE"| t7
+  o27 -->|"CREA"| t10
   o27 -->|"LEE"| t3
-  o27 -->|"ACTUALIZA"| t11
-  o27 -->|"LEE"| t4
-  o27 -->|"CREA"| t28
-  o27 -->|"CREA"| t29
-  o27 -.-> t30
-  o27 -->|"evento"| e31
-  a33 --> o32
-  o32 -->|"CREA"| t3
-  o32 -->|"LEE"| t3
-  o32 -->|"CREA"| t34
-  o32 -->|"ACTUALIZA"| t35
-  o32 -->|"LEE"| t35
-  o32 -->|"CREA"| t4
-  o32 -.-> t36
-  a38 --> o37
-  o37 -->|"LEE"| t35
-  o37 -->|"LEE"| t4
-  a38 --> o39
-  o39 -->|"CREA"| t35
+  o27 -->|"LEE"| t11
+  o27 -.-> t28
+  a2 --> o29
+  o29 -->|"ACTUALIZA"| t3
+  o29 -->|"LEE"| t3
+  o29 -->|"ACTUALIZA"| t11
+  o29 -->|"LEE"| t4
+  o29 -->|"CREA"| t30
+  o29 -->|"CREA"| t31
+  o29 -.-> t32
+  o29 -->|"evento"| e33
+  a35 --> o34
+  o34 -->|"CREA"| t3
+  o34 -->|"LEE"| t3
+  o34 -->|"CREA"| t36
+  o34 -->|"ACTUALIZA"| t37
+  o34 -->|"LEE"| t37
+  o34 -->|"CREA"| t4
+  o34 -.-> t38
+  a40 --> o39
+  o39 -->|"LEE"| t37
   o39 -->|"LEE"| t4
-  o39 -->|"LEE"| t40
-  o39 -->|"LEE"| t12
-  a38 --> o41
-  o41 -->|"ACTUALIZA"| t35
+  a40 --> o41
+  o41 -->|"CREA"| t37
   o41 -->|"LEE"| t4
-  a2 --> o42
-  o42 -->|"LEE"| t7
-  a38 --> o43
-  o43 -->|"CREA"| t44
-  o43 -->|"CREA"| t45
-  o43 -->|"CREA"| t3
-  o43 -->|"CREA"| t4
-  o43 -->|"ACTUALIZA"| t4
+  o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t12
+  a40 --> o43
+  o43 -->|"ACTUALIZA"| t37
   o43 -->|"LEE"| t4
-  o43 -.-> t46
-  a48 --> o47
-  o47 -->|"LEE"| t49
-  o47 -->|"LEE"| t3
-  o47 -->|"LEE"| t4
-  o47 -->|"LEE"| t50
-  o47 -->|"LEE"| t51
-  o47 -->|"LEE"| t52
-  o47 -.-> t53
-  a48 --> o54
-  o54 -->|"LEE"| t55
-  o54 -->|"LEE"| t56
-  o54 -->|"LEE"| t3
-  o54 -->|"LEE"| t4
-  o54 -->|"LEE"| t50
-  o54 -->|"LEE"| t51
-  o54 -.-> t57
+  a2 --> o44
+  o44 -->|"LEE"| t7
+  a40 --> o45
+  o45 -->|"CREA"| t46
+  o45 -->|"CREA"| t47
+  o45 -->|"CREA"| t3
+  o45 -->|"CREA"| t4
+  o45 -->|"LEE"| t4
+  o45 -->|"CREA"| t48
+  o45 -.-> t49
+  a51 --> o50
+  o50 -->|"LEE"| t52
+  o50 -->|"LEE"| t3
+  o50 -->|"LEE"| t4
+  o50 -->|"LEE"| t53
+  o50 -->|"LEE"| t54
+  o50 -->|"LEE"| t55
+  o50 -.-> t56
+  a51 --> o57
+  o57 -->|"LEE"| t58
+  o57 -->|"LEE"| t59
+  o57 -->|"LEE"| t3
+  o57 -->|"LEE"| t4
+  o57 -->|"LEE"| t53
+  o57 -->|"LEE"| t54
+  o57 -.-> t60
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -307,7 +316,7 @@ flowchart LR
   t45[("practice.practices")]:::tabla
   t46[("practice.practitioner_role_assignments")]:::tabla
   t9[("+11 tablas más")]
-  t13[("+30 tablas más")]
+  t13[("+28 tablas más")]
   t18[("+6 tablas más")]
   t20[("+7 tablas más")]
   t22[("+8 tablas más")]
@@ -374,8 +383,8 @@ flowchart LR
   o10 -->|"CREA"| t12
   o10 -->|"LEE"| t5
   o10 -->|"CREA"| t6
-  o10 -->|"ACTUALIZA"| t6
   o10 -->|"LEE"| t6
+  o10 -->|"LEE"| t7
   o10 -.-> t13
   a2 --> o14
   o14 -->|"LEE"| t5
@@ -562,9 +571,9 @@ Aprobar/Denegar solicitud y emitir grant scoped
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud no está abierta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 ```mermaid
 flowchart TD
@@ -573,35 +582,90 @@ flowchart TD
   n1 --> n2
   n3["Llama a AccessRequestsService.decide"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a DelegationScopeService.resolveTenant"]:::llamada
   n3 --> n4
-  n5["Llama a DelegatedAccessApprovalRequestsRepository.findById"]:::llamada
+  n5{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
   n4 --> n5
-  n6[("LEE delegated_access.delegated_access_approval_requests")]:::efecto
-  n5 --> n6
-  n7{"!request"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Solicitud no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"request.statusConceptId !== DELEG.REQUEST_OPEN"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La solicitud no está abierta"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA delegated_access.delegated_access_approval_requests · ACTUALIZA delegated_access.delegated_access_a…")]:::efecto
-  n9 -->|"no"| n11
-  n12{"approved"}:::decision
-  n11 --> n12
-  n13["Llama a DelegatedAccessGrantsRepository.create"]:::llamada
-  n12 -->|"sí"| n13
-  n14[("CREA delegated_access.delegated_access_grants")]:::efecto
+  n6(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a DelegatedAccessApprovalRequestsRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE delegated_access.delegated_access_approval_requests")]:::efecto
+  n8 --> n9
+  n10{"!request"}:::decision
+  n9 --> n10
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12["Intenta"]:::intento
+  n10 -->|"no"| n12
+  n13["Llama a DelegationScopeService.loadDelegationInTenant"]:::llamada
+  n12 --> n13
+  n14["Llama a PractitionerDelegateAssignmentsRepository.findById"]:::llamada
   n13 --> n14
-  n15["Llama a DelegationEventsRepository.record"]:::llamada
+  n15[("LEE delegated_access.practitioner_delegate_assignments")]:::efecto
   n14 --> n15
-  n12 -->|"no"| n15
-  n16[("CREA delegated_access.delegation_events")]:::efecto
+  n16{"!delegate"}:::decision
   n15 --> n16
-  n17(("200 Responde con éxito")):::ok
-  n16 --> n17
+  n17(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a DelegatedPermissionSetsRepository.findById"]:::llamada
+  n16 -->|"no"| n18
+  n19[("LEE delegated_access.delegated_permission_sets")]:::efecto
+  n18 --> n19
+  n20{"error instanceof ResourceNotFoundException"}:::decision
+  n12 -->|"si falla"| n20
+  n21(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"sí"| n21
+  n22(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"no"| n22
+  n23{"request.statusConceptId !== DELEG.REQUEST_OPEN"}:::decision
+  n19 --> n23
+  n24(["422 PRECONDITION_FAILED La solicitud no está abierta"]):::error
+  n23 -->|"sí"| n24
+  n25{"approved"}:::decision
+  n23 -->|"no"| n25
+  n26["Llama a DelegationScopeService.assertGrantTarget"]:::llamada
+  n25 -->|"sí"| n26
+  n27{"encounterId"}:::decision
+  n26 --> n27
+  n28["Llama a DelegationScopeRepository.encounterScope"]:::llamada
+  n27 -->|"sí"| n28
+  n29[("LEE clinical.encounters")]:::efecto
+  n28 --> n29
+  n30{"!encounter || encounter.tenantId !== tenantId || (patientProfileId !== undefined && encounter.patientProfileI…"}:::decision
+  n29 --> n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32{"patientProfileId"}:::decision
+  n30 -->|"no"| n32
+  n27 -->|"no"| n32
+  n33["Llama a DelegationScopeRepository.patientExists"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("LEE profiles.patient_profiles")]:::efecto
+  n33 --> n34
+  n35{"!exists"}:::decision
+  n34 --> n35
+  n36(["↩ (relanza el error capturado)"]):::error
+  n35 -->|"sí"| n36
+  n37[("ACTUALIZA delegated_access.delegated_access_approval_requests · ACTUALIZA delegated_access.delegated_access_a…")]:::efecto
+  n35 -->|"no"| n37
+  n32 -->|"no"| n37
+  n25 -->|"no"| n37
+  n38{"approved"}:::decision
+  n37 --> n38
+  n39["Llama a DelegatedAccessGrantsRepository.create"]:::llamada
+  n38 -->|"sí"| n39
+  n40[("CREA delegated_access.delegated_access_grants")]:::efecto
+  n39 --> n40
+  n41["Llama a DelegationEventsRepository.record"]:::llamada
+  n40 --> n41
+  n38 -->|"no"| n41
+  n42[("CREA delegated_access.delegation_events")]:::efecto
+  n41 --> n42
+  n43(("200 Responde con éxito")):::ok
+  n42 --> n43
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1518,87 +1582,66 @@ flowchart TD
   n8 -->|"sí"| n9
   n10["Llama a SupportStaffProvisioningService.obtainSecretary"]:::llamada
   n8 -->|"no"| n10
-  n11["Intenta"]:::intento
+  n11["Llama a IamSupportStaffSelfRegistrationService.register"]:::llamada
   n10 --> n11
-  n12["Llama a IamSupportStaffSelfRegistrationService.register"]:::llamada
+  n12["Transacción: transactional(…)"]:::transaccion
   n11 --> n12
-  n13["Transacción: transactional(…)"]:::transaccion
+  n13["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
   n12 --> n13
-  n14["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n14[("LEE iam.authentication_credentials")]:::efecto
   n13 --> n14
-  n15[("LEE iam.authentication_credentials")]:::efecto
+  n15{"existing"}:::decision
   n14 --> n15
-  n16{"existing"}:::decision
-  n15 --> n16
-  n17(["409 CONFLICT Ya existe una cuenta con ese documento de identidad"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a UsersRepository.create"]:::llamada
-  n16 -->|"no"| n18
-  n19[("CREA iam.users")]:::efecto
+  n16(["409 CONFLICT Ya existe una cuenta con ese documento de identidad"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a UsersRepository.create"]:::llamada
+  n15 -->|"no"| n17
+  n18[("CREA iam.users")]:::efecto
+  n17 --> n18
+  n19["Llama a CredentialsRepository.createPassword"]:::llamada
   n18 --> n19
-  n20["Llama a CredentialsRepository.createPassword"]:::llamada
+  n20[("CREA iam.authentication_credentials")]:::efecto
   n19 --> n20
-  n21[("CREA iam.authentication_credentials")]:::efecto
+  n21["Llama a UserGlobalRolesRepository.create"]:::llamada
   n20 --> n21
-  n22["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n22[("CREA iam.user_global_roles")]:::efecto
   n21 --> n22
-  n23[("CREA iam.user_global_roles")]:::efecto
+  n23["Llama a UserGlobalRolesRepository.create"]:::llamada
   n22 --> n23
-  n24["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n24[("CREA iam.user_global_roles")]:::efecto
   n23 --> n24
-  n25[("CREA iam.user_global_roles")]:::efecto
+  n25["Llama a ProfilesRegistrationAdapter.createSecretaryProfile"]:::llamada
   n24 --> n25
-  n26["Llama a ProfilesRegistrationAdapter.createSecretaryProfile"]:::llamada
+  n26[("CREA profiles.secretary_profiles")]:::efecto
   n25 --> n26
-  n27[("CREA profiles.secretary_profiles")]:::efecto
+  n27["Llama a EmailVerificationsRepository.create"]:::llamada
   n26 --> n27
-  n28["Llama a EmailVerificationsRepository.create"]:::llamada
+  n28[("CREA iam.email_verifications")]:::efecto
   n27 --> n28
-  n29[("CREA iam.email_verifications")]:::efecto
+  n29["Llama a SecurityEventsRepository.record"]:::llamada
   n28 --> n29
-  n30["Llama a SecurityEventsRepository.record"]:::llamada
+  n30[("CREA iam.security_events")]:::efecto
   n29 --> n30
-  n31[("CREA iam.security_events")]:::efecto
+  n31["Transacción: transactional(…)"]:::transaccion
   n30 --> n31
-  n32{"err instanceof ConflictException && err.reason === IamErrorReason.NATIONAL_ID_ALREADY_REGISTERED"}:::decision
-  n11 -->|"si falla"| n32
-  n33["Llama a SupportLinksRepository.findSecretaryByNationalId"]:::llamada
-  n32 -->|"sí"| n33
-  n34[("LEE iam.authentication_credentials · LEE profiles.person_account_links · LEE profiles.secretary_profiles")]:::efecto
+  n32["Llama a SupportLinksRepository.findOrCreateMembership"]:::llamada
+  n31 --> n32
+  n33[("LEE directory.tenant_memberships · CREA directory.tenant_memberships")]:::efecto
+  n32 --> n33
+  n34["Llama a SupportLinksRepository.findLinks"]:::llamada
   n33 --> n34
-  n35(["↩ (relanza el error capturado)"]):::error
+  n35[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE directory.tenants…")]:::efecto
   n34 --> n35
-  n32 -->|"no"| n35
-  n36["Transacción: transactional(…)"]:::transaccion
-  n31 --> n36
-  n37["Llama a SupportStaffProvisioningRepository.ensureActiveTenantMembership"]:::llamada
-  n36 --> n37
-  n38[("LEE directory.tenant_memberships")]:::efecto
-  n37 --> n38
-  n39{"existing"}:::decision
+  n36{"alreadyLinked"}:::decision
+  n35 --> n36
+  n37(["409 CONFLICT La secretaria ya tiene un vínculo activo con esta vinculación"]):::error
+  n36 -->|"sí"| n37
+  n38["Llama a SupportStaffProvisioningRepository.createActivePractitionerLink"]:::llamada
+  n36 -->|"no"| n38
+  n39[("CREA practice.practitioner_support_assignments")]:::efecto
   n38 --> n39
-  n40{"existing.statusConceptId !== DIR.MEMBERSHIP_ACTIVE"}:::decision
-  n39 -->|"sí"| n40
-  n41[("ACTUALIZA directory.tenant_memberships · ACTUALIZA directory.tenant_memberships")]:::efecto
-  n40 -->|"sí"| n41
-  n42[("CREA directory.tenant_memberships")]:::efecto
-  n41 --> n42
-  n40 -->|"no"| n42
-  n39 -->|"no"| n42
-  n43["Llama a SupportLinksRepository.findLinks"]:::llamada
-  n42 --> n43
-  n44[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships · LEE directory.tenants…")]:::efecto
-  n43 --> n44
-  n45{"alreadyLinked"}:::decision
-  n44 --> n45
-  n46(["409 CONFLICT La secretaria ya tiene un vínculo activo con esta vinculación"]):::error
-  n45 -->|"sí"| n46
-  n47["Llama a SupportStaffProvisioningRepository.createActivePractitionerLink"]:::llamada
-  n45 -->|"no"| n47
-  n48[("CREA practice.practitioner_support_assignments")]:::efecto
-  n47 --> n48
-  n49(("201 Responde con éxito")):::ok
-  n48 --> n49
+  n40(("201 Responde con éxito")):::ok
+  n39 --> n40
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2544,7 +2587,7 @@ Crear cuenta de secretaria y vincularla a la organización de inmediato
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese documento de identidad |
+| 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese documento de identidad; ConflictException: La cuenta ya tiene una membresía en la organización que no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
@@ -2567,79 +2610,67 @@ flowchart TD
   n7 -->|"sí"| n8
   n9["Llama a SupportStaffProvisioningService.obtainSecretary"]:::llamada
   n7 -->|"no"| n9
-  n10["Intenta"]:::intento
+  n10["Llama a IamSupportStaffSelfRegistrationService.register"]:::llamada
   n9 --> n10
-  n11["Llama a IamSupportStaffSelfRegistrationService.register"]:::llamada
+  n11["Transacción: transactional(…)"]:::transaccion
   n10 --> n11
-  n12["Transacción: transactional(…)"]:::transaccion
+  n12["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
   n11 --> n12
-  n13["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n13[("LEE iam.authentication_credentials")]:::efecto
   n12 --> n13
-  n14[("LEE iam.authentication_credentials")]:::efecto
+  n14{"existing"}:::decision
   n13 --> n14
-  n15{"existing"}:::decision
-  n14 --> n15
-  n16(["409 CONFLICT Ya existe una cuenta con ese documento de identidad"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a UsersRepository.create"]:::llamada
-  n15 -->|"no"| n17
-  n18[("CREA iam.users")]:::efecto
+  n15(["409 CONFLICT Ya existe una cuenta con ese documento de identidad"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a UsersRepository.create"]:::llamada
+  n14 -->|"no"| n16
+  n17[("CREA iam.users")]:::efecto
+  n16 --> n17
+  n18["Llama a CredentialsRepository.createPassword"]:::llamada
   n17 --> n18
-  n19["Llama a CredentialsRepository.createPassword"]:::llamada
+  n19[("CREA iam.authentication_credentials")]:::efecto
   n18 --> n19
-  n20[("CREA iam.authentication_credentials")]:::efecto
+  n20["Llama a UserGlobalRolesRepository.create"]:::llamada
   n19 --> n20
-  n21["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n21[("CREA iam.user_global_roles")]:::efecto
   n20 --> n21
-  n22[("CREA iam.user_global_roles")]:::efecto
+  n22["Llama a UserGlobalRolesRepository.create"]:::llamada
   n21 --> n22
-  n23["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n23[("CREA iam.user_global_roles")]:::efecto
   n22 --> n23
-  n24[("CREA iam.user_global_roles")]:::efecto
+  n24["Llama a ProfilesRegistrationAdapter.createSecretaryProfile"]:::llamada
   n23 --> n24
-  n25["Llama a ProfilesRegistrationAdapter.createSecretaryProfile"]:::llamada
+  n25[("CREA profiles.secretary_profiles")]:::efecto
   n24 --> n25
-  n26[("CREA profiles.secretary_profiles")]:::efecto
+  n26["Llama a EmailVerificationsRepository.create"]:::llamada
   n25 --> n26
-  n27["Llama a EmailVerificationsRepository.create"]:::llamada
+  n27[("CREA iam.email_verifications")]:::efecto
   n26 --> n27
-  n28[("CREA iam.email_verifications")]:::efecto
+  n28["Llama a SecurityEventsRepository.record"]:::llamada
   n27 --> n28
-  n29["Llama a SecurityEventsRepository.record"]:::llamada
+  n29[("CREA iam.security_events")]:::efecto
   n28 --> n29
-  n30[("CREA iam.security_events")]:::efecto
+  n30["Transacción: transactional(…)"]:::transaccion
   n29 --> n30
-  n31{"err instanceof ConflictException && err.reason === IamErrorReason.NATIONAL_ID_ALREADY_REGISTERED"}:::decision
-  n10 -->|"si falla"| n31
-  n32["Llama a SupportLinksRepository.findSecretaryByNationalId"]:::llamada
-  n31 -->|"sí"| n32
-  n33[("LEE iam.authentication_credentials · LEE profiles.person_account_links · LEE profiles.secretary_profiles")]:::efecto
+  n31["Llama a SupportStaffProvisioningRepository.ensureActiveTenantMembership"]:::llamada
+  n30 --> n31
+  n32[("LEE directory.tenant_memberships")]:::efecto
+  n31 --> n32
+  n33{"existing"}:::decision
   n32 --> n33
-  n34(["↩ (relanza el error capturado)"]):::error
-  n33 --> n34
-  n31 -->|"no"| n34
-  n35["Transacción: transactional(…)"]:::transaccion
-  n30 --> n35
-  n36["Llama a SupportStaffProvisioningRepository.ensureActiveTenantMembership"]:::llamada
-  n35 --> n36
-  n37[("LEE directory.tenant_memberships")]:::efecto
+  n34{"existing.statusConceptId !== DIR.MEMBERSHIP_ACTIVE"}:::decision
+  n33 -->|"sí"| n34
+  n35(["409 CONFLICT La cuenta ya tiene una membresía en la organización que no está activa"]):::error
+  n34 -->|"sí"| n35
+  n36[("CREA directory.tenant_memberships")]:::efecto
+  n34 -->|"no"| n36
+  n33 -->|"no"| n36
+  n37["Llama a SupportStaffProvisioningRepository.createActiveLocationLink"]:::llamada
   n36 --> n37
-  n38{"existing"}:::decision
+  n38[("CREA delegated_access.organization_user_assignments")]:::efecto
   n37 --> n38
-  n39{"existing.statusConceptId !== DIR.MEMBERSHIP_ACTIVE"}:::decision
-  n38 -->|"sí"| n39
-  n40[("ACTUALIZA directory.tenant_memberships · ACTUALIZA directory.tenant_memberships")]:::efecto
-  n39 -->|"sí"| n40
-  n41[("CREA directory.tenant_memberships")]:::efecto
-  n40 --> n41
-  n39 -->|"no"| n41
-  n38 -->|"no"| n41
-  n42["Llama a SupportStaffProvisioningRepository.createActiveLocationLink"]:::llamada
-  n41 --> n42
-  n43[("CREA delegated_access.organization_user_assignments")]:::efecto
-  n42 --> n43
-  n44(("201 Responde con éxito")):::ok
-  n43 --> n44
+  n39(("201 Responde con éxito")):::ok
+  n38 --> n39
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3067,10 +3098,10 @@ Solicitar acceso delegado (aprobación previa)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Delegación no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una solicitud pendiente equivalente |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La delegación no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 ```mermaid
 flowchart TD
@@ -3079,38 +3110,74 @@ flowchart TD
   n1 --> n2
   n3["Llama a AccessRequestsService.requestAccess"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a DelegationScopeService.resolveTenant"]:::llamada
   n3 --> n4
-  n5["Llama a PractitionerDelegateAssignmentsRepository.findById"]:::llamada
+  n5{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
   n4 --> n5
-  n6[("LEE delegated_access.practitioner_delegate_assignments")]:::efecto
-  n5 --> n6
-  n7{"!delegate"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Delegación no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"delegate.statusConceptId !== STATUS.ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La delegación no está activa"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a DelegatedAccessApprovalRequestsRepository.findOpenDuplicate"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE delegated_access.delegated_access_approval_requests")]:::efecto
-  n11 --> n12
-  n13{"dup"}:::decision
-  n12 --> n13
-  n14(["409 CONFLICT Ya existe una solicitud pendiente equivalente"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a DelegatedAccessApprovalRequestsRepository.create"]:::llamada
-  n13 -->|"no"| n15
-  n16[("CREA delegated_access.delegated_access_approval_requests")]:::efecto
-  n15 --> n16
-  n17["Llama a DelegationEventsRepository.record"]:::llamada
-  n16 --> n17
-  n18[("CREA delegated_access.delegation_events")]:::efecto
+  n6(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a DelegationScopeService.loadDelegationInTenant"]:::llamada
+  n7 --> n8
+  n9["Llama a PractitionerDelegateAssignmentsRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE delegated_access.practitioner_delegate_assignments")]:::efecto
+  n9 --> n10
+  n11{"!delegate"}:::decision
+  n10 --> n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a DelegatedPermissionSetsRepository.findById"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE delegated_access.delegated_permission_sets")]:::efecto
+  n13 --> n14
+  n15{"delegate.statusConceptId !== STATUS.ACTIVE"}:::decision
+  n14 --> n15
+  n16(["422 PRECONDITION_FAILED La delegación no está activa"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a DelegationScopeService.assertGrantTarget"]:::llamada
+  n15 -->|"no"| n17
+  n18{"encounterId"}:::decision
   n17 --> n18
-  n19(("201 Responde con éxito")):::ok
-  n18 --> n19
+  n19["Llama a DelegationScopeRepository.encounterScope"]:::llamada
+  n18 -->|"sí"| n19
+  n20[("LEE clinical.encounters")]:::efecto
+  n19 --> n20
+  n21{"!encounter || encounter.tenantId !== tenantId || (patientProfileId !== undefined && encounter.patientProfileI…"}:::decision
+  n20 --> n21
+  n22(["↩ (relanza el error capturado)"]):::error
+  n21 -->|"sí"| n22
+  n23{"patientProfileId"}:::decision
+  n21 -->|"no"| n23
+  n18 -->|"no"| n23
+  n24["Llama a DelegationScopeRepository.patientExists"]:::llamada
+  n23 -->|"sí"| n24
+  n25[("LEE profiles.patient_profiles")]:::efecto
+  n24 --> n25
+  n26{"!exists"}:::decision
+  n25 --> n26
+  n27(["↩ (relanza el error capturado)"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a DelegatedAccessApprovalRequestsRepository.findOpenDuplicate"]:::llamada
+  n26 -->|"no"| n28
+  n23 -->|"no"| n28
+  n29[("LEE delegated_access.delegated_access_approval_requests")]:::efecto
+  n28 --> n29
+  n30{"dup"}:::decision
+  n29 --> n30
+  n31(["409 CONFLICT Ya existe una solicitud pendiente equivalente"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a DelegatedAccessApprovalRequestsRepository.create"]:::llamada
+  n30 -->|"no"| n32
+  n33[("CREA delegated_access.delegated_access_approval_requests")]:::efecto
+  n32 --> n33
+  n34["Llama a DelegationEventsRepository.record"]:::llamada
+  n33 --> n34
+  n35[("CREA delegated_access.delegation_events")]:::efecto
+  n34 --> n35
+  n36(("201 Responde con éxito")):::ok
+  n35 --> n36
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

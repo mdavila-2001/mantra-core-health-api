@@ -579,7 +579,7 @@
         "ruta": "/org/support-staff",
         "modulo": "delegated_access",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:30"
+        "fuente": "src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:31"
       },
       {
         "operacion": "SupportStaffController_invite",
@@ -611,7 +611,7 @@
         "ruta": "/diagnostic-units/{unitId}/equipment",
         "modulo": "diagnostic_units",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:126"
+        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:131"
       },
       {
         "operacion": "CenterScheduleController_removeEquipment",
@@ -619,7 +619,7 @@
         "ruta": "/diagnostic-units/{unitId}/equipment/{equipmentId}",
         "modulo": "diagnostic_units",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:159"
+        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:165"
       },
       {
         "operacion": "CenterScheduleController_setEquipmentStatus",
@@ -627,7 +627,7 @@
         "ruta": "/diagnostic-units/{unitId}/equipment/{equipmentId}",
         "modulo": "diagnostic_units",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:109"
+        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:114"
       },
       {
         "operacion": "CenterScheduleController_editEquipment",
@@ -635,7 +635,7 @@
         "ruta": "/diagnostic-units/{unitId}/equipment/{equipmentId}",
         "modulo": "diagnostic_units",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:142"
+        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:148"
       },
       {
         "operacion": "CenterScheduleController_saveSchedule",
@@ -643,7 +643,7 @@
         "ruta": "/diagnostic-units/{unitId}/schedule",
         "modulo": "diagnostic_units",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:89"
+        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:93"
       },
       {
         "operacion": "LabPortalServicesController_importCatalog",
@@ -1004,6 +1004,14 @@
         "modulo": "iam",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/iam/presentation/controllers/iam-my-devices.controller.ts:44"
+      },
+      {
+        "operacion": "IamMyNameController_update",
+        "metodo": "PATCH",
+        "ruta": "/iam/me/name",
+        "modulo": "iam",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/iam/presentation/controllers/iam-my-name.controller.ts:24"
       },
       {
         "operacion": "IamAccountSecurityController_revokeSession",
@@ -1822,7 +1830,7 @@
         "fuente": "src/modules/terminology/controllers/terminology-fhir.controller.ts:97"
       }
     ],
-    "cuenta": 226
+    "cuenta": 227
   },
   {
     "id": "FLU-03",
@@ -2429,7 +2437,7 @@
         "ruta": "/org/support-staff",
         "modulo": "delegated_access",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:30"
+        "fuente": "src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:31"
       },
       {
         "operacion": "SupportStaffController_invite",
@@ -2453,7 +2461,7 @@
         "ruta": "/diagnostic-units/{unitId}/equipment",
         "modulo": "diagnostic_units",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:126"
+        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:131"
       },
       {
         "operacion": "CenterScheduleController_removeEquipment",
@@ -2461,7 +2469,7 @@
         "ruta": "/diagnostic-units/{unitId}/equipment/{equipmentId}",
         "modulo": "diagnostic_units",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:159"
+        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:165"
       },
       {
         "operacion": "CenterScheduleController_setEquipmentStatus",
@@ -2469,7 +2477,7 @@
         "ruta": "/diagnostic-units/{unitId}/equipment/{equipmentId}",
         "modulo": "diagnostic_units",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:109"
+        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:114"
       },
       {
         "operacion": "CenterScheduleController_editEquipment",
@@ -2477,7 +2485,7 @@
         "ruta": "/diagnostic-units/{unitId}/equipment/{equipmentId}",
         "modulo": "diagnostic_units",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:142"
+        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:148"
       },
       {
         "operacion": "CenterScheduleController_saveSchedule",
@@ -2485,15 +2493,7 @@
         "ruta": "/diagnostic-units/{unitId}/schedule",
         "modulo": "diagnostic_units",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:89"
-      },
-      {
-        "operacion": "LabPortalServicesController_importCatalog",
-        "metodo": "POST",
-        "ruta": "/diagnostics/lab/catalog/import",
-        "modulo": "diagnostic_units",
-        "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/diagnostic_units/controllers/lab-portal-services.controller.ts:86"
+        "fuente": "src/modules/diagnostic_units/center-schedule/presentation/center-schedule.controller.ts:93"
       },
       {
         "operacion": "LabPortalServicesController_createCategory",
@@ -2704,6 +2704,30 @@
         "fuente": "src/modules/directory/controllers/membership-invitations.controller.ts:73"
       },
       {
+        "operacion": "FormsFaqsController_remove",
+        "metodo": "DELETE",
+        "ruta": "/forms/faqs/{id}",
+        "modulo": "forms",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/forms/controllers/forms-faqs.controller.ts:95"
+      },
+      {
+        "operacion": "FormsQuestionScriptsController_create",
+        "metodo": "POST",
+        "ruta": "/forms/question-scripts",
+        "modulo": "forms",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/forms/controllers/forms-question-scripts.controller.ts:48"
+      },
+      {
+        "operacion": "FormsQuestionScriptsController_update",
+        "metodo": "PATCH",
+        "ruta": "/forms/question-scripts/{id}",
+        "modulo": "forms",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/forms/controllers/forms-question-scripts.controller.ts:74"
+      },
+      {
         "operacion": "GraphQueryController_detectCommunities",
         "metodo": "POST",
         "ruta": "/graph/analytics/community-detection",
@@ -2814,6 +2838,14 @@
         "modulo": "iam",
         "detalle": "ninguna prueba la menciona",
         "fuente": "src/modules/iam/presentation/controllers/iam-my-devices.controller.ts:44"
+      },
+      {
+        "operacion": "IamMyNameController_update",
+        "metodo": "PATCH",
+        "ruta": "/iam/me/name",
+        "modulo": "iam",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/iam/presentation/controllers/iam-my-name.controller.ts:24"
       },
       {
         "operacion": "IamAccountSecurityController_revokeSession",
@@ -3520,7 +3552,7 @@
         "fuente": "src/modules/vector_rag/controllers/vector-runtime.controller.ts:189"
       }
     ],
-    "cuenta": 188
+    "cuenta": 191
   },
   {
     "id": "FLU-05",
@@ -3551,6 +3583,12 @@
         "nombre": "Módulo Content Packs — Contenido curado aplicable a demanda",
         "detalle": "1 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso",
         "fuente": "src/modules/content_packs/README.md"
+      },
+      {
+        "proceso": "forms",
+        "nombre": "Módulo Forms (09) — Dynamic Forms & Extensibility Governance",
+        "detalle": "3 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso",
+        "fuente": "src/modules/forms/README.md"
       },
       {
         "proceso": "graph_intelligence",
@@ -3607,7 +3645,7 @@
         "fuente": "src/modules/vector_rag/README.md"
       }
     ],
-    "cuenta": 13
+    "cuenta": 14
   },
   {
     "id": "FLU-06",
@@ -8713,6 +8751,46 @@
         "fuente": null
       },
       {
+        "operacion": "FormsFaqsController_list",
+        "metodo": "GET",
+        "ruta": "/forms/faqs",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "FormsFaqsController_create",
+        "metodo": "POST",
+        "ruta": "/forms/faqs",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "FormsFaqsController_remove",
+        "metodo": "DELETE",
+        "ruta": "/forms/faqs/{id}",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "FormsFaqsController_update",
+        "metodo": "PATCH",
+        "ruta": "/forms/faqs/{id}",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "FormsFaqsController_reorder",
+        "metodo": "PUT",
+        "ruta": "/forms/faqs/order",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "FormsFieldsController_createAccessRule",
         "metodo": "POST",
         "ruta": "/forms/fields/{id}/access-rules",
@@ -8737,6 +8815,46 @@
         "fuente": null
       },
       {
+        "operacion": "FormsQuestionScriptsController_list",
+        "metodo": "GET",
+        "ruta": "/forms/question-scripts",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "FormsQuestionScriptsController_create",
+        "metodo": "POST",
+        "ruta": "/forms/question-scripts",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "FormsQuestionScriptsController_archive",
+        "metodo": "DELETE",
+        "ruta": "/forms/question-scripts/{id}",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "FormsQuestionScriptsController_get",
+        "metodo": "GET",
+        "ruta": "/forms/question-scripts/{id}",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "FormsQuestionScriptsController_update",
+        "metodo": "PATCH",
+        "ruta": "/forms/question-scripts/{id}",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "FormsValuesController_correctValue",
         "metodo": "PATCH",
         "ruta": "/forms/values/{id}",
@@ -8748,6 +8866,14 @@
         "operacion": "FormsValuesController_importValues",
         "metodo": "POST",
         "ruta": "/forms/values/import",
+        "modulo": "forms",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "FormsFaqsPublicController_list",
+        "metodo": "GET",
+        "ruta": "/public/profiles/p/{slug}/faqs",
         "modulo": "forms",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -9140,6 +9266,14 @@
         "operacion": "IamMyDevicesController_requestCode",
         "metodo": "POST",
         "ruta": "/iam/me/devices/{id}/confirm-code",
+        "modulo": "iam",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "IamMyNameController_update",
+        "metodo": "PATCH",
+        "ruta": "/iam/me/name",
         "modulo": "iam",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -15953,7 +16087,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 1537
+    "cuenta": 1549
   },
   {
     "id": "FLU-08",
@@ -16328,7 +16462,7 @@
         "metodo": "POST",
         "ruta": "/admin/bulk-imports/{id}/confirm",
         "modulo": "bulk_import",
-        "detalle": "Error: Tipo de carga desconocido (src/modules/bulk_import/services/bulk-import.processor.ts:160)",
+        "detalle": "Error: transition cannot add rows (src/modules/bulk_import/repositories/postgres-batch.repository.ts:150) | Error: transition patch key not persisted: {key} (src/modules/bulk_import/repositories/postgres-batch.repository.ts:155) | Error: Tipo de carga desconocido (src/modules/bulk_import/services/bulk-import.processor.ts:160)",
         "fuente": "src/modules/bulk_import/controllers/bulk-import.controller.ts:170"
       },
       {
@@ -16716,6 +16850,14 @@
         "fuente": "src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30"
       },
       {
+        "operacion": "AccessRequestsController_decide",
+        "metodo": "POST",
+        "ruta": "/access-requests/{id}/decision",
+        "modulo": "delegated_access",
+        "detalle": "DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91)",
+        "fuente": "src/modules/delegated_access/controllers/access-requests.controller.ts:33"
+      },
+      {
         "operacion": "DelegatedAccessAuthzController_evaluate",
         "metodo": "POST",
         "ruta": "/authz/effective-actor/evaluate",
@@ -16776,8 +16918,8 @@
         "metodo": "POST",
         "ruta": "/org/support-staff",
         "modulo": "delegated_access",
-        "detalle": "DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/support-staff-provisioning.service.ts:207)",
-        "fuente": "src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:30"
+        "detalle": "DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/support-staff-provisioning.service.ts:216)",
+        "fuente": "src/modules/delegated_access/controllers/org-support-staff-provisioning.controller.ts:31"
       },
       {
         "operacion": "PractitionerDelegatesController_create",
@@ -16786,6 +16928,14 @@
         "modulo": "delegated_access",
         "detalle": "DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91)",
         "fuente": "src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:51"
+      },
+      {
+        "operacion": "PractitionerDelegatesController_requestAccess",
+        "metodo": "POST",
+        "ruta": "/practitioner-delegates/{id}/access-requests",
+        "modulo": "delegated_access",
+        "detalle": "DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91)",
+        "fuente": "src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:68"
       },
       {
         "operacion": "PractitionerDelegatesController_issueGrant",
@@ -17636,6 +17786,6 @@
         "fuente": "src/modules/workflow/controllers/workflow-transitions.controller.ts:73"
       }
     ],
-    "cuenta": 195
+    "cuenta": 197
   }
 ]

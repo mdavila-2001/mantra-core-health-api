@@ -31,7 +31,7 @@ _Fuente: `src/modules/diagnostics/README.md:3`_
 | `UC-20-06` | Verificar (técnica/facultativa) | POST /diagnostics/results/{observationId}/verifications | Cualquier sesión válida | ALTO | 3 |
 | `UC-20-07` | Crear/enmendar versión de informe | POST /diagnostics/reports/{reportId}/versions | CLINICIAN · PRACTITIONER | MEDIO | 8 |
 | `UC-20-08` | Validar y liberar | POST /diagnostics/reports/{reportId}/versions/{versionId}/release | CLINICIAN · PRACTITIONER | MEDIO | 6 |
-| `UC-20-09` | Detectar y notificar resultado crítico | POST /diagnostics/critical-results | CLINICIAN · PRACTITIONER | MEDIO | 16 |
+| `UC-20-09` | Detectar y notificar resultado crítico | POST /diagnostics/critical-results | CLINICIAN · PRACTITIONER | MEDIO | 17 |
 | `UC-20-10` | Acusar recibo / escalar | POST /diagnostics/critical-results/{id}/acknowledge | CLINICIAN · PRACTITIONER | MEDIO | 2 |
 | `UC-20-11` | Ingestar estudio DICOM (STOW-RS) | POST /dicomweb/studies | CLINICIAN · PRACTITIONER | MEDIO | 8 |
 | `UC-20-12` | Adjuntar media clínica / imagen | POST /diagnostics/clinical-media | CLINICIAN · PRACTITIONER | MEDIO | 6 |
@@ -80,7 +80,7 @@ _Fuente: `src/modules/diagnostics/README.md:3`_
 |  |  | POST /diagnostics/report-drafts/{id}/signature-request | Cualquier sesión válida | ALTO | 17 |
 | `ctrl:DiagnosticsReportReleaseController` | Operaciones de DiagnosticsReportReleaseController que el README no asigna a un caso de uso | GET /diagnostics/report-issuer-settings | Cualquier sesión válida | BAJO | 2 |
 |  |  | PUT /diagnostics/report-issuer-settings | Cualquier sesión válida | ALTO | 3 |
-|  |  | POST /diagnostics/reports/{reportId}/patient-release | CLINICIAN · PRACTITIONER | MEDIO | 17 |
+|  |  | POST /diagnostics/reports/{reportId}/patient-release | CLINICIAN · PRACTITIONER | MEDIO | 18 |
 | `ctrl:DiagnosticsReportVerifyPublicController` | Operaciones de DiagnosticsReportVerifyPublicController que el README no asigna a un caso de uso | GET /public/diagnostic-reports/{versionId}/verify | Público (sin sesión) | BAJO | 5 |
 | `ctrl:DiagnosticsSpecimensController` | Operaciones de DiagnosticsSpecimensController que el README no asigna a un caso de uso | GET /diagnostics/accessions/{id} | Cualquier sesión válida | BAJO | 5 |
 |  |  | POST /diagnostics/specimens | Cualquier sesión válida | ALTO | 4 |
@@ -157,7 +157,7 @@ flowchart LR
   subgraph s7["UC-20-08 · Validar y liberar"]
     o31["POST /diagnostics/reports/{reportId}/versions/{versionId}/release"]:::op
   end
-  t37[("+10 tablas más")]
+  t37[("+11 tablas más")]
   subgraph s8["UC-20-09 · Detectar y notificar resultado crítico"]
     o34["POST /diagnostics/critical-results"]:::op
   end
@@ -628,7 +628,7 @@ flowchart LR
     o36["POST /diagnostics/report-drafts/{id}/publish"]:::op
     o39["POST /diagnostics/report-drafts/{id}/signature-request"]:::op
   end
-  t47[("+11 tablas más")]
+  t47[("+12 tablas más")]
   subgraph s3["ctrl:DiagnosticsReportReleaseController · Operaciones de DiagnosticsReportRelea…"]
     o42["GET /diagnostics/report-issuer-settings"]:::op
     o43["PUT /diagnostics/report-issuer-settings"]:::op
@@ -1960,9 +1960,8 @@ Detectar y notificar un resultado crítico
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: {message}; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 409 | `CONFLICT` | ConflictException: Ya existe una notificación crítica para la observación |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2036,33 +2035,8 @@ flowchart TD
   n32 --> n33
   n34[("LEE clinical.encounters")]:::efecto
   n33 --> n34
-  n35["Llama a NotificationsService.emitInApp"]:::llamada
+  n35(("201 Responde con éxito")):::ok
   n34 --> n35
-  n36["Intenta"]:::intento
-  n35 --> n36
-  n37["Llama a NotificationsService.writeInApp"]:::llamada
-  n36 --> n37
-  n38{"!channel"}:::decision
-  n37 --> n38
-  n39(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n38 -->|"sí"| n39
-  n40{"!config"}:::decision
-  n38 -->|"no"| n40
-  n41(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n40 -->|"sí"| n41
-  n42{"!provider"}:::decision
-  n40 -->|"no"| n42
-  n43(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n42 -->|"sí"| n43
-  n44[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n42 -->|"no"| n44
-  n45{"availableAt › now"}:::decision
-  n44 --> n45
-  n46[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n45 -->|"sí"| n46
-  n47(("201 Responde con éxito")):::ok
-  n46 --> n47
-  n45 -->|"no"| n47
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4506,8 +4480,7 @@ Pedir al firmante elegido que revise y publique con su firma
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Para pedir la firma hacen falta un firmante y el texto del informe; PreconditionFailedException: El firmante elegido no está entre los profesionales de la organización; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Para pedir la firma hacen falta un firmante y el texto del informe; PreconditionFailedException: El firmante elegido no está entre los profesionales de la organización |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -4573,35 +4546,8 @@ flowchart TD
   n29 --> n30
   n31[("LEE profiles.person_account_links")]:::efecto
   n30 --> n31
-  n32["Intenta"]:::intento
+  n32(("200 Responde con éxito")):::ok
   n31 --> n32
-  n33["Llama a NotificationsService.emitInApp"]:::llamada
-  n32 --> n33
-  n34["Intenta"]:::intento
-  n33 --> n34
-  n35["Llama a NotificationsService.writeInApp"]:::llamada
-  n34 --> n35
-  n36{"!channel"}:::decision
-  n35 --> n36
-  n37(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n36 -->|"sí"| n37
-  n38{"!config"}:::decision
-  n36 -->|"no"| n38
-  n39(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n38 -->|"sí"| n39
-  n40{"!provider"}:::decision
-  n38 -->|"no"| n40
-  n41(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n40 -->|"sí"| n41
-  n42[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n40 -->|"no"| n42
-  n43{"availableAt › now"}:::decision
-  n42 --> n43
-  n44[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n43 -->|"sí"| n44
-  n45(("200 Responde con éxito")):::ok
-  n44 --> n45
-  n43 -->|"no"| n45
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

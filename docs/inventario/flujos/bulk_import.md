@@ -23,11 +23,11 @@ _Fuente: `src/modules/bulk_import/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `ctrl:BulkImportController` | Operaciones de BulkImportController que el README no asigna a un caso de uso | GET /admin/bulk-imports | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 13 |
-|  |  | POST /admin/bulk-imports | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 13 |
-|  |  | GET /admin/bulk-imports/{id} | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 16 |
-|  |  | POST /admin/bulk-imports/{id}/confirm | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 16 |
-|  |  | GET /admin/bulk-imports/{id}/report | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 16 |
+| `ctrl:BulkImportController` | Operaciones de BulkImportController que el README no asigna a un caso de uso | GET /admin/bulk-imports | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 14 |
+|  |  | POST /admin/bulk-imports | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 15 |
+|  |  | GET /admin/bulk-imports/{id} | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 18 |
+|  |  | POST /admin/bulk-imports/{id}/confirm | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 20 |
+|  |  | GET /admin/bulk-imports/{id}/report | SECURITY_ADMIN · PLATFORM_ADMIN | MEDIO | 18 |
 |  |  | GET /admin/bulk-imports/templates | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 0 |
 |  |  | GET /admin/bulk-imports/templates/{kind} | SECURITY_ADMIN · PLATFORM_ADMIN | BAJO | 0 |
 
@@ -43,11 +43,11 @@ flowchart LR
   t7[("authz.patient_legal_representations")]:::tabla
   t8[("authz.permissions")]:::tabla
   t13[("audit.audit_log")]:::tabla
-  t9[("+7 tablas más")]
-  t11[("+7 tablas más")]
-  t14[("+10 tablas más")]
-  t16[("+10 tablas más")]
-  t18[("+10 tablas más")]
+  t9[("+8 tablas más")]
+  t11[("+9 tablas más")]
+  t14[("+12 tablas más")]
+  t16[("+14 tablas más")]
+  t18[("+12 tablas más")]
   subgraph s0["ctrl:BulkImportController · Operaciones de BulkImportController que el README n…"]
     o1["GET /admin/bulk-imports"]:::op
     o10["POST /admin/bulk-imports"]:::op
@@ -220,8 +220,14 @@ flowchart TD
   n4 -->|"al terminar"| n34
   n35(["↩ (relanza el error capturado)"]):::error
   n34 -->|"sí"| n35
-  n36(("200 Responde con éxito")):::ok
+  n36["Llama a PostgresBatchRepository.list"]:::llamada
   n34 -->|"no"| n36
+  n37["Transacción: inTenant(…)"]:::transaccion
+  n36 --> n37
+  n38[("LEE system_ops.bulk_import_batches")]:::efecto
+  n37 --> n38
+  n39(("200 Responde con éxito")):::ok
+  n38 --> n39
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -263,8 +269,18 @@ flowchart TD
   n7 -->|"no"| n9
   n10(["↩ (relanza el error capturado)"]):::error
   n9 -->|"sí"| n10
-  n11(("201 Responde con éxito")):::ok
+  n11["Llama a PostgresBatchRepository.create"]:::llamada
   n9 -->|"no"| n11
+  n12["Transacción: inTenant(…)"]:::transaccion
+  n11 --> n12
+  n13[("CREA system_ops.bulk_import_batches")]:::efecto
+  n12 --> n13
+  n14["Llama a PostgresBatchRepository.insertRows"]:::llamada
+  n13 --> n14
+  n15[("CREA system_ops.bulk_import_batch_rows")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
+  n15 --> n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -294,22 +310,28 @@ flowchart TD
   n2 --> n3
   n4["Llama a BulkImportService.requireBatch"]:::llamada
   n3 --> n4
-  n5{"!batch || batch.tenantId !== tenantId"}:::decision
+  n5["Llama a PostgresBatchRepository.findById"]:::llamada
   n4 --> n5
-  n6(["↩ (relanza el error capturado)"]):::error
-  n5 -->|"sí"| n6
-  n7{"!schema"}:::decision
-  n5 -->|"no"| n7
-  n8(["↩ (relanza el error capturado)"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a BulkImportService.assertPermission"]:::llamada
-  n7 -->|"no"| n9
-  n10{"!(await this.policy.isAllowed(actor, tenantId, permission))"}:::decision
-  n9 --> n10
+  n6["Llama a PostgresBatchRepository.load"]:::llamada
+  n5 --> n6
+  n7[("LEE system_ops.bulk_import_batches · LEE system_ops.bulk_import_batch_rows")]:::efecto
+  n6 --> n7
+  n8{"!batch || batch.tenantId !== tenantId"}:::decision
+  n7 --> n8
+  n9(["↩ (relanza el error capturado)"]):::error
+  n8 -->|"sí"| n9
+  n10{"!schema"}:::decision
+  n8 -->|"no"| n10
   n11(["↩ (relanza el error capturado)"]):::error
   n10 -->|"sí"| n11
-  n12(("200 Responde con éxito")):::ok
+  n12["Llama a BulkImportService.assertPermission"]:::llamada
   n10 -->|"no"| n12
+  n13{"!(await this.policy.isAllowed(actor, tenantId, permission))"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15(("200 Responde con éxito")):::ok
+  n13 -->|"no"| n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -329,7 +351,7 @@ Confirma un lote VALIDADO y lo encola (idempotente por Idempotency-Key)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: Tipo de carga desconocido |
+| 500 | `INTERNAL` | Error: transition cannot add rows; Error: transition patch key not persisted: {key}; Error: Tipo de carga desconocido |
 
 ```mermaid
 flowchart TD
@@ -344,50 +366,140 @@ flowchart TD
   n4 -->|"sí"| n5
   n6["Llama a BulkImportService.requireBatch"]:::llamada
   n4 -->|"no"| n6
-  n7{"!batch || batch.tenantId !== tenantId"}:::decision
+  n7["Llama a PostgresBatchRepository.findById"]:::llamada
   n6 --> n7
-  n8(["↩ (relanza el error capturado)"]):::error
-  n7 -->|"sí"| n8
-  n9{"!schema"}:::decision
-  n7 -->|"no"| n9
-  n10(["↩ (relanza el error capturado)"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a BulkImportService.assertPermission"]:::llamada
-  n9 -->|"no"| n11
-  n12{"!(await this.policy.isAllowed(actor, tenantId, permission))"}:::decision
-  n11 --> n12
+  n8["Llama a PostgresBatchRepository.load"]:::llamada
+  n7 --> n8
+  n9[("LEE system_ops.bulk_import_batches · LEE system_ops.bulk_import_batch_rows")]:::efecto
+  n8 --> n9
+  n10{"!batch || batch.tenantId !== tenantId"}:::decision
+  n9 --> n10
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12{"!schema"}:::decision
+  n10 -->|"no"| n12
   n13(["↩ (relanza el error capturado)"]):::error
   n12 -->|"sí"| n13
-  n14{"batch.confirmKey !== undefined"}:::decision
+  n14["Llama a BulkImportService.assertPermission"]:::llamada
   n12 -->|"no"| n14
-  n15(["↩ (relanza el error capturado)"]):::error
-  n14 -->|"sí"| n15
-  n16{"holder && holder.id !== batch.id"}:::decision
-  n14 -->|"no"| n16
-  n17(["↩ (relanza el error capturado)"]):::error
-  n16 -->|"sí"| n17
-  n18{"batch.status !== BulkImportStatus.VALIDATED"}:::decision
-  n16 -->|"no"| n18
-  n19(["↩ (relanza el error capturado)"]):::error
-  n18 -->|"sí"| n19
-  n20{"!queued"}:::decision
-  n18 -->|"no"| n20
-  n21(["↩ (relanza el error capturado)"]):::error
-  n20 -->|"sí"| n21
-  n22["Llama a BulkImportProcessor.enqueue"]:::llamada
-  n20 -->|"no"| n22
-  n23["Transacción: setImmediate(…)"]:::transaccion
+  n15{"!(await this.policy.isAllowed(actor, tenantId, permission))"}:::decision
+  n14 --> n15
+  n16(["↩ (relanza el error capturado)"]):::error
+  n15 -->|"sí"| n16
+  n17{"batch.confirmKey !== undefined"}:::decision
+  n15 -->|"no"| n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a PostgresBatchRepository.findByConfirmKey"]:::llamada
+  n17 -->|"no"| n19
+  n20["Transacción: inTenant(…)"]:::transaccion
+  n19 --> n20
+  n21[("LEE system_ops.bulk_import_batches")]:::efecto
+  n20 --> n21
+  n22["Llama a PostgresBatchRepository.load"]:::llamada
+  n21 --> n22
+  n23[("LEE system_ops.bulk_import_batches · LEE system_ops.bulk_import_batch_rows")]:::efecto
   n22 --> n23
-  n24["Llama a BulkImportProcessor.process"]:::llamada
+  n24{"holder && holder.id !== batch.id"}:::decision
   n23 --> n24
-  n25["Intenta"]:::intento
-  n24 --> n25
-  n26{"!schema"}:::decision
-  n25 --> n26
-  n27(["500 INTERNAL Tipo de carga desconocido"]):::error
+  n25(["↩ (relanza el error capturado)"]):::error
+  n24 -->|"sí"| n25
+  n26{"batch.status !== BulkImportStatus.VALIDATED"}:::decision
+  n24 -->|"no"| n26
+  n27(["↩ (relanza el error capturado)"]):::error
   n26 -->|"sí"| n27
-  n28(("202 Responde con éxito")):::ok
+  n28["Llama a PostgresBatchRepository.transition"]:::llamada
   n26 -->|"no"| n28
+  n29["Intenta"]:::intento
+  n28 --> n29
+  n30["Llama a PostgresBatchRepository.applyTransition"]:::llamada
+  n29 --> n30
+  n31["Repite: por cada const [key, value] de Object.entries(patch)"]:::bucle
+  n30 --> n31
+  n32{"key === 'rows'"}:::decision
+  n31 -->|"cada elemento"| n32
+  n33{"(value as unknown[]).length › 0"}:::decision
+  n32 -->|"sí"| n33
+  n34(["500 INTERNAL transition cannot add rows"]):::error
+  n33 -->|"sí"| n34
+  n35{"!spec"}:::decision
+  n33 -->|"no"| n35
+  n32 -->|"no"| n35
+  n36(["500 INTERNAL transition patch key not persisted: {key}"]):::error
+  n35 -->|"sí"| n36
+  n37[("ACTUALIZA system_ops.bulk_import_batches")]:::efecto
+  n35 -->|"no"| n37
+  n31 -->|"al terminar"| n37
+  n38{"patch.report"}:::decision
+  n37 --> n38
+  n39["Llama a PostgresBatchRepository.closeRows"]:::llamada
+  n38 -->|"sí"| n39
+  n40[("ACTUALIZA system_ops.bulk_import_batch_rows")]:::efecto
+  n39 --> n40
+  n41["Llama a PostgresBatchRepository.purgeRows"]:::llamada
+  n38 -->|"no"| n41
+  n42[("ACTUALIZA system_ops.bulk_import_batch_rows")]:::efecto
+  n41 --> n42
+  n43{"patch.rows"}:::decision
+  n42 --> n43
+  n44["Llama a PostgresBatchRepository.purgeRows"]:::llamada
+  n43 -->|"sí"| n44
+  n45[("ACTUALIZA system_ops.bulk_import_batch_rows")]:::efecto
+  n44 --> n45
+  n46["Llama a PostgresBatchRepository.load"]:::llamada
+  n40 --> n46
+  n45 --> n46
+  n43 -->|"no"| n46
+  n47[("LEE system_ops.bulk_import_batches · LEE system_ops.bulk_import_batch_rows")]:::efecto
+  n46 --> n47
+  n48(["↩ (relanza el error capturado)"]):::error
+  n29 -->|"si falla"| n48
+  n49{"!queued"}:::decision
+  n47 --> n49
+  n50["Llama a PostgresBatchRepository.findById"]:::llamada
+  n49 -->|"sí"| n50
+  n51["Llama a PostgresBatchRepository.load"]:::llamada
+  n50 --> n51
+  n52[("LEE system_ops.bulk_import_batches · LEE system_ops.bulk_import_batch_rows")]:::efecto
+  n51 --> n52
+  n53(["↩ (relanza el error capturado)"]):::error
+  n52 --> n53
+  n54["Llama a BulkImportProcessor.enqueue"]:::llamada
+  n49 -->|"no"| n54
+  n55["Transacción: setImmediate(…)"]:::transaccion
+  n54 --> n55
+  n56["Llama a BulkImportProcessor.process"]:::llamada
+  n55 --> n56
+  n57["Llama a PostgresBatchRepository.transition"]:::llamada
+  n56 --> n57
+  n58["Intenta"]:::intento
+  n57 --> n58
+  n59(["↩ (relanza el error capturado)"]):::error
+  n58 -->|"si falla"| n59
+  n60["Intenta"]:::intento
+  n58 --> n60
+  n61{"!schema"}:::decision
+  n60 --> n61
+  n62(["500 INTERNAL Tipo de carga desconocido"]):::error
+  n61 -->|"sí"| n62
+  n63["Repite: por cada const stored de batch.rows"]:::bucle
+  n61 -->|"no"| n63
+  n64{"processed % 25 === 0"}:::decision
+  n63 -->|"cada elemento"| n64
+  n65["Llama a PostgresBatchRepository.recordProgress"]:::llamada
+  n64 -->|"sí"| n65
+  n66[("ACTUALIZA system_ops.bulk_import_batches")]:::efecto
+  n65 --> n66
+  n67["Llama a PostgresBatchRepository.transition"]:::llamada
+  n66 --> n67
+  n64 -->|"no"| n67
+  n63 -->|"al terminar"| n67
+  n68["Intenta"]:::intento
+  n67 --> n68
+  n69(["↩ (relanza el error capturado)"]):::error
+  n68 -->|"si falla"| n69
+  n70(("202 Responde con éxito")):::ok
+  n68 --> n70
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -417,26 +529,32 @@ flowchart TD
   n2 --> n3
   n4["Llama a BulkImportService.requireBatch"]:::llamada
   n3 --> n4
-  n5{"!batch || batch.tenantId !== tenantId"}:::decision
+  n5["Llama a PostgresBatchRepository.findById"]:::llamada
   n4 --> n5
-  n6(["↩ (relanza el error capturado)"]):::error
-  n5 -->|"sí"| n6
-  n7{"!schema"}:::decision
-  n5 -->|"no"| n7
-  n8(["↩ (relanza el error capturado)"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a BulkImportService.assertPermission"]:::llamada
-  n7 -->|"no"| n9
-  n10{"!(await this.policy.isAllowed(actor, tenantId, permission))"}:::decision
-  n9 --> n10
+  n6["Llama a PostgresBatchRepository.load"]:::llamada
+  n5 --> n6
+  n7[("LEE system_ops.bulk_import_batches · LEE system_ops.bulk_import_batch_rows")]:::efecto
+  n6 --> n7
+  n8{"!batch || batch.tenantId !== tenantId"}:::decision
+  n7 --> n8
+  n9(["↩ (relanza el error capturado)"]):::error
+  n8 -->|"sí"| n9
+  n10{"!schema"}:::decision
+  n8 -->|"no"| n10
   n11(["↩ (relanza el error capturado)"]):::error
   n10 -->|"sí"| n11
-  n12{"!batch.report"}:::decision
+  n12["Llama a BulkImportService.assertPermission"]:::llamada
   n10 -->|"no"| n12
-  n13(["↩ (relanza el error capturado)"]):::error
-  n12 -->|"sí"| n13
-  n14(("200 Responde con éxito")):::ok
-  n12 -->|"no"| n14
+  n13{"!(await this.policy.isAllowed(actor, tenantId, permission))"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15{"!batch.report"}:::decision
+  n13 -->|"no"| n15
+  n16(["↩ (relanza el error capturado)"]):::error
+  n15 -->|"sí"| n16
+  n17(("200 Responde con éxito")):::ok
+  n15 -->|"no"| n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

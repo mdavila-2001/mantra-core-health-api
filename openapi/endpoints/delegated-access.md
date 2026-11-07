@@ -177,7 +177,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La solicitud no está abierta | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -4899,6 +4898,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | Ya existe una cuenta con ese documento de identidad | Excepción explícita en src/modules/iam/application/services/iam-support-staff-self-registration.service.ts |
+| 409 | `CONFLICT` | La cuenta ya tiene una membresía en la organización que no está activa | Excepción explícita en src/modules/delegated_access/repositories/support-staff-provisioning.repository.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -5644,7 +5644,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
 | 409 | `CONFLICT` | Ya existe una solicitud pendiente equivalente | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La delegación no está activa | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |

@@ -2,10 +2,10 @@
 
 # Inventario de endpoints
 
-Se inventarían **2033 operaciones HTTP** en **78 módulos**: 2022 publicadas en el contrato OpenAPI y 11 que existen sólo en el código.
+Se inventarían **2045 operaciones HTTP** en **78 módulos**: 2034 publicadas en el contrato OpenAPI y 11 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1933
-- Riesgo ALTO 295 · MEDIO 961 · BAJO 777
+- Con al menos una tabla identificada: 1945
+- Riesgo ALTO 299 · MEDIO 966 · BAJO 780
 - Mencionadas por al menos una prueba: 1105
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
@@ -39,13 +39,13 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `document_store` | 5 | 0 | [document_store.md](document_store.md) |
 | `education` | 14 | 0 | [education.md](education.md) |
 | `erp` | 17 | 0 | [erp.md](erp.md) |
-| `forms` | 25 | 0 | [forms.md](forms.md) |
+| `forms` | 36 | 3 | [forms.md](forms.md) |
 | `geo` | 11 | 0 | [geo.md](geo.md) |
 | `governance_admin` | 5 | 0 | [governance_admin.md](governance_admin.md) |
 | `graph_intelligence` | 15 | 4 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 16 | 0 | [health_data.md](health_data.md) |
-| `iam` | 50 | 23 | [iam.md](iam.md) |
+| `iam` | 51 | 24 | [iam.md](iam.md) |
 | `identity_assurance` | 28 | 8 | [identity_assurance.md](identity_assurance.md) |
 | `insurance` | 78 | 29 | [insurance.md](insurance.md) |
 | `integration_contracts` | 12 | 0 | [integration_contracts.md](integration_contracts.md) |

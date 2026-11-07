@@ -24,9 +24,9 @@ _Fuente: `src/modules/profiles/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `H4 §C` | Search accounts by name to choose whom to ask (≥3 letters, ≤8 rows, CI masked) | GET /profiles/patients/me/dependent-candidates | Cualquier sesión válida | BAJO | 5 |
-|  |  | POST /profiles/patients/me/dependent-requests | Cualquier sesión válida | ALTO | 15 |
-|  |  | POST /profiles/patients/me/dependent-requests/{id}/accept | Cualquier sesión válida | ALTO | 14 |
-|  |  | POST /profiles/patients/me/dependent-requests/{id}/reject | Cualquier sesión válida | ALTO | 13 |
+|  |  | POST /profiles/patients/me/dependent-requests | Cualquier sesión válida | ALTO | 16 |
+|  |  | POST /profiles/patients/me/dependent-requests/{id}/accept | Cualquier sesión válida | ALTO | 15 |
+|  |  | POST /profiles/patients/me/dependent-requests/{id}/reject | Cualquier sesión válida | ALTO | 14 |
 |  |  | GET /profiles/patients/me/dependent-requests/incoming | Cualquier sesión válida | BAJO | 4 |
 |  |  | POST /profiles/patients/search | SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER | BAJO | 0 |
 | `P5 §3` | Clear the practitioner profile photo (the file is not deleted) | DELETE /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | BAJO | 16 |
@@ -125,10 +125,10 @@ flowchart LR
   t5[("profiles.patient_profiles")]:::tabla
   t6[("profiles.person_account_links")]:::tabla
   t7[("profiles.persons")]:::tabla
-  t9[("messaging.in_app_notifications")]:::tabla
-  t10[("messaging.message_channels")]:::tabla
-  t11[("messaging.messaging_providers")]:::tabla
-  t14[("messaging.notification_deliveries")]:::tabla
+  t9[("directory.tenant_memberships")]:::tabla
+  t10[("messaging.in_app_notifications")]:::tabla
+  t11[("messaging.message_channels")]:::tabla
+  t14[("messaging.messaging_providers")]:::tabla
   t22[("chart.clinical_note_headers")]:::tabla
   t23[("chart.document_records")]:::tabla
   t24[("clinical.encounters")]:::tabla
@@ -145,9 +145,9 @@ flowchart LR
   t51[("practice.practitioner_role_assignments")]:::tabla
   t69[("community.public_profiles")]:::tabla
   t70[("community.verified_badges")]:::tabla
-  t12[("+9 tablas más")]
-  t15[("+8 tablas más")]
-  t17[("+7 tablas más")]
+  t12[("+10 tablas más")]
+  t15[("+9 tablas más")]
+  t17[("+8 tablas más")]
   subgraph s0["H4 §C · Search accounts by name to choose whom to ask (≥3 letters, ≤8 rows, CI…"]
     o1["GET /profiles/patients/me/dependent-candidates"]:::op
     o8["POST /profiles/patients/me/dependent-requests"]:::op
@@ -211,27 +211,27 @@ flowchart LR
   o1 -->|"LEE"| t7
   a2 --> o8
   o8 -->|"LEE"| t3
-  o8 -->|"ACTUALIZA"| t9
-  o8 -->|"CREA"| t9
   o8 -->|"LEE"| t9
+  o8 -->|"ACTUALIZA"| t10
+  o8 -->|"CREA"| t10
   o8 -->|"LEE"| t10
   o8 -->|"LEE"| t11
   o8 -.-> t12
   a2 --> o13
-  o13 -->|"ACTUALIZA"| t9
-  o13 -->|"CREA"| t9
   o13 -->|"LEE"| t9
+  o13 -->|"ACTUALIZA"| t10
+  o13 -->|"CREA"| t10
   o13 -->|"LEE"| t10
   o13 -->|"LEE"| t11
-  o13 -->|"CREA"| t14
+  o13 -->|"LEE"| t14
   o13 -.-> t15
   a2 --> o16
-  o16 -->|"ACTUALIZA"| t9
-  o16 -->|"CREA"| t9
   o16 -->|"LEE"| t9
+  o16 -->|"ACTUALIZA"| t10
+  o16 -->|"CREA"| t10
   o16 -->|"LEE"| t10
   o16 -->|"LEE"| t11
-  o16 -->|"CREA"| t14
+  o16 -->|"LEE"| t14
   o16 -.-> t17
   a2 --> o18
   o18 -->|"LEE"| t4
@@ -382,7 +382,7 @@ flowchart LR
   o76 -->|"LEE"| t34
   o76 -->|"LEE"| t35
   o76 -->|"LEE"| t3
-  o76 -->|"ACTUALIZA"| t9
+  o76 -->|"ACTUALIZA"| t10
   o76 -.-> t77
   a2 --> o78
   o78 -->|"LEE"| t26
@@ -390,7 +390,7 @@ flowchart LR
   o78 -->|"LEE"| t34
   o78 -->|"LEE"| t35
   o78 -->|"LEE"| t3
-  o78 -->|"ACTUALIZA"| t9
+  o78 -->|"ACTUALIZA"| t10
   o78 -.-> t79
   a2 --> o80
   o80 -->|"LEE"| t26
@@ -398,7 +398,7 @@ flowchart LR
   o80 -->|"LEE"| t34
   o80 -->|"LEE"| t35
   o80 -->|"LEE"| t3
-  o80 -->|"ACTUALIZA"| t9
+  o80 -->|"ACTUALIZA"| t10
   o80 -.-> t81
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
@@ -3800,9 +3800,9 @@ Pedir representar a una persona que ya tiene cuenta
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene perfil de paciente |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Esa persona ya no tiene una cuenta registrada.; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Esa persona ya no tiene una cuenta registrada. |
 | 409 | `CONFLICT` | ConflictException: Esa persona ya es su dependiente.; ConflictException: Ya le envió una solicitud a esa persona. Falta que la acepte. |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese CI es el suyo: no puede registrarse como su propio dependiente.; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese CI es el suyo: no puede registrarse como su propio dependiente. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3906,35 +3906,8 @@ flowchart TD
   n47 -->|"no"| n49
   n50[("CREA profiles.patient_portal_proxies")]:::efecto
   n49 --> n50
-  n51["Llama a DependentLinkContextAdapter.emitInApp"]:::llamada
+  n51(("201 Responde con éxito")):::ok
   n50 --> n51
-  n52["Llama a NotificationsService.emitInApp"]:::llamada
-  n51 --> n52
-  n53["Intenta"]:::intento
-  n52 --> n53
-  n54["Llama a NotificationsService.writeInApp"]:::llamada
-  n53 --> n54
-  n55{"!channel"}:::decision
-  n54 --> n55
-  n56(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n55 -->|"sí"| n56
-  n57{"!config"}:::decision
-  n55 -->|"no"| n57
-  n58(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n57 -->|"sí"| n58
-  n59{"!provider"}:::decision
-  n57 -->|"no"| n59
-  n60(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n59 -->|"sí"| n60
-  n61[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n59 -->|"no"| n61
-  n62{"availableAt › now"}:::decision
-  n61 --> n62
-  n63[("ACTUALIZA messaging.in_app_notifications")]:::efecto
-  n62 -->|"sí"| n63
-  n64(("201 Responde con éxito")):::ok
-  n63 --> n64
-  n62 -->|"no"| n64
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

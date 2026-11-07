@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `forms`
 
-Referencia exhaustiva de 25 operación(es) del módulo `forms`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 36 operación(es) del módulo `forms`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `forms-assignments`, `forms-definition-sets`, `forms-fields`, `forms-instances`, `forms-me`, `forms-values`
-- **Controladores:** `FormsAssignmentsController`, `FormsDefinitionSetsController`, `FormsFieldsController`, `FormsInstancesController`, `FormsMeController`, `FormsValuesController`
+- **Etiquetas OpenAPI:** `forms-assignments`, `forms-definition-sets`, `forms-faqs`, `forms-fields`, `forms-instances`, `forms-me`, `forms-public`, `forms-question-scripts`, `forms-values`
+- **Controladores:** `FormsAssignmentsController`, `FormsDefinitionSetsController`, `FormsFaqsController`, `FormsFaqsPublicController`, `FormsFieldsController`, `FormsInstancesController`, `FormsMeController`, `FormsQuestionScriptsController`, `FormsValuesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -22,20 +22,31 @@ Referencia exhaustiva de 25 operación(es) del módulo `forms`, derivada del con
 9. [GET /forms/definition-sets/{id}](#9-get-forms-definition-sets-id) — Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones
 10. [POST /forms/definition-sets/{id}/migrations/{migrationId}/run](#10-post-forms-definition-sets-id-migrations-migrationid-run) — Migrar valores entre versiones de schema
 11. [POST /forms/definition-sets/{id}/versions/{ver}/publish](#11-post-forms-definition-sets-id-versions-ver-publish) — Componer miembros del set y publicar la versión
-12. [POST /forms/field-definitions](#12-post-forms-field-definitions) — Declarar una definición de campo con reglas de validación
-13. [PATCH /forms/field-definitions/{id}](#13-patch-forms-field-definitions-id) — Corregir el nombre o el tipo de un campo propio
-14. [POST /forms/fields/{id}/access-rules](#14-post-forms-fields-id-access-rules) — Definir reglas de acceso y enmascarado por campo
-15. [POST /forms/fields/{id}/dependencies](#15-post-forms-fields-id-dependencies) — Definir dependencias condicionales entre campos
-16. [PUT /forms/fields/{id}/localizations/{lang}](#16-put-forms-fields-id-localizations-lang) — Localizar (i18n) una definición de campo
-17. [GET /forms/instances](#17-get-forms-instances) — Listar las instancias de formulario de un encuentro
-18. [POST /forms/instances](#18-post-forms-instances) — Abrir una instancia de formulario para un recurso
-19. [GET /forms/instances/{id}](#19-get-forms-instances-id) — Leer una instancia con sus valores vigentes, por tipo resuelto
-20. [POST /forms/instances/{id}/close](#20-post-forms-instances-id-close) — Cerrar formulario y proyectar vista de recurso
-21. [POST /forms/instances/{id}/values](#21-post-forms-instances-id-values) — Capturar valores de formulario (value[x] exclusivo)
-22. [GET /forms/me/instances](#22-get-forms-me-instances) — Ver mis formularios clínicos
-23. [GET /forms/me/instances/{id}](#23-get-forms-me-instances-id) — Leer un formulario propio con sus respuestas
-24. [PATCH /forms/values/{id}](#24-patch-forms-values-id) — Corregir valor con supersede y snapshot inmutable
-25. [POST /forms/values/import](#25-post-forms-values-import) — Registrar procedencia de valores importados (batch ETL)
+12. [GET /forms/faqs](#12-get-forms-faqs) — Listar mis preguntas frecuentes, en orden
+13. [POST /forms/faqs](#13-post-forms-faqs) — Agregar una pregunta frecuente al final
+14. [DELETE /forms/faqs/{id}](#14-delete-forms-faqs-id) — Borrar una pregunta frecuente propia
+15. [PATCH /forms/faqs/{id}](#15-patch-forms-faqs-id) — Editar una pregunta frecuente propia
+16. [PUT /forms/faqs/order](#16-put-forms-faqs-order) — Reordenar mis preguntas frecuentes (lista completa)
+17. [POST /forms/field-definitions](#17-post-forms-field-definitions) — Declarar una definición de campo con reglas de validación
+18. [PATCH /forms/field-definitions/{id}](#18-patch-forms-field-definitions-id) — Corregir el nombre o el tipo de un campo propio
+19. [POST /forms/fields/{id}/access-rules](#19-post-forms-fields-id-access-rules) — Definir reglas de acceso y enmascarado por campo
+20. [POST /forms/fields/{id}/dependencies](#20-post-forms-fields-id-dependencies) — Definir dependencias condicionales entre campos
+21. [PUT /forms/fields/{id}/localizations/{lang}](#21-put-forms-fields-id-localizations-lang) — Localizar (i18n) una definición de campo
+22. [GET /forms/instances](#22-get-forms-instances) — Listar las instancias de formulario de un encuentro
+23. [POST /forms/instances](#23-post-forms-instances) — Abrir una instancia de formulario para un recurso
+24. [GET /forms/instances/{id}](#24-get-forms-instances-id) — Leer una instancia con sus valores vigentes, por tipo resuelto
+25. [POST /forms/instances/{id}/close](#25-post-forms-instances-id-close) — Cerrar formulario y proyectar vista de recurso
+26. [POST /forms/instances/{id}/values](#26-post-forms-instances-id-values) — Capturar valores de formulario (value[x] exclusivo)
+27. [GET /forms/me/instances](#27-get-forms-me-instances) — Ver mis formularios clínicos
+28. [GET /forms/me/instances/{id}](#28-get-forms-me-instances-id) — Leer un formulario propio con sus respuestas
+29. [GET /forms/question-scripts](#29-get-forms-question-scripts) — Listar mis guiones de preguntas activos
+30. [POST /forms/question-scripts](#30-post-forms-question-scripts) — Crear un guion de preguntas
+31. [DELETE /forms/question-scripts/{id}](#31-delete-forms-question-scripts-id) — Archivar un guion propio
+32. [GET /forms/question-scripts/{id}](#32-get-forms-question-scripts-id) — Leer un guion de preguntas propio
+33. [PATCH /forms/question-scripts/{id}](#33-patch-forms-question-scripts-id) — Editar un guion propio (items reemplaza la lista; 409 si version no coincide)
+34. [PATCH /forms/values/{id}](#34-patch-forms-values-id) — Corregir valor con supersede y snapshot inmutable
+35. [POST /forms/values/import](#35-post-forms-values-import) — Registrar procedencia de valores importados (batch ETL)
+36. [GET /public/profiles/p/{slug}/faqs](#36-get-public-profiles-p-slug-faqs) — Preguntas frecuentes publicadas de un profesional
 
 ---
 
@@ -1632,7 +1643,645 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /forms/field-definitions
+## 12. GET /forms/faqs
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-faqs`
+- **Nombre:** Listar mis preguntas frecuentes, en orden
+- **Operation ID:** `FormsFaqsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsFaqsController.list](../../src/modules/forms/controllers/forms-faqs.controller.ts)
+
+### Descripción de negocio
+
+Listar mis preguntas frecuentes, en orden. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /forms/faqs` en `FormsFaqsController_list`. El controlador delega en `FaqsService.list`. No recibe body. El tipo de retorno estático es `Promise<FaqListResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /forms/faqs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /forms/faqs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<FaqListResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FaqListResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "question": "valor-ejemplo",
+      "answer": "valor-ejemplo",
+      "category": "valor-ejemplo",
+      "position": 1,
+      "isPublished": true,
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<FaqEntryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","question":"valor-ejemplo","answer":"valor-ejemplo","category":"valor-ejemplo","position":1,"isPublished":true,"updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].question` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].answer` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].category` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].position` | Sí | `number` | Sin restricción adicional declarada | 1-based display order | `1` |
+| `items[].isPublished` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/faqs"
+}
+```
+
+---
+
+## 13. POST /forms/faqs
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-faqs`
+- **Nombre:** Agregar una pregunta frecuente al final
+- **Operation ID:** `FormsFaqsController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsFaqsController.create](../../src/modules/forms/controllers/forms-faqs.controller.ts)
+
+### Descripción de negocio
+
+Agregar una pregunta frecuente al final. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /forms/faqs` en `FormsFaqsController_create`. El controlador delega en `FaqsService.create`. Valida el body como `CreateFaqDto` y consume `application/json`. El tipo de retorno estático es `Promise<FaqEntryDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateFaqDto`; los campos opcionales se omiten.
+
+```http
+POST /forms/faqs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "question": "valor-ejemplo",
+  "answer": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `question` | Sí | `string` | longitud mínima 1; longitud máxima 300; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `answer` | Sí | `string` | longitud mínima 1; longitud máxima 3000; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `category` | No | `object` | longitud máxima 120; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `isPublished` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /forms/faqs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "question": "valor-ejemplo",
+  "answer": "valor-ejemplo",
+  "category": {},
+  "isPublished": false
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<FaqEntryDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FaqEntryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "question": "valor-ejemplo",
+  "answer": "valor-ejemplo",
+  "category": "valor-ejemplo",
+  "position": 1,
+  "isPublished": true,
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `question` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `answer` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `category` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `position` | Sí | `number` | Sin restricción adicional declarada | 1-based display order | `1` |
+| `isPublished` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/faqs"
+}
+```
+
+---
+
+## 14. DELETE /forms/faqs/{id}
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-faqs`
+- **Nombre:** Borrar una pregunta frecuente propia
+- **Operation ID:** `FormsFaqsController_remove`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsFaqsController.remove](../../src/modules/forms/controllers/forms-faqs.controller.ts)
+
+### Descripción de negocio
+
+Borrar una pregunta frecuente propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /forms/faqs/{id}` en `FormsFaqsController_remove`. El controlador delega en `FaqsService.remove`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /forms/faqs/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /forms/faqs/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/faqs/{id}"
+}
+```
+
+---
+
+## 15. PATCH /forms/faqs/{id}
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-faqs`
+- **Nombre:** Editar una pregunta frecuente propia
+- **Operation ID:** `FormsFaqsController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsFaqsController.update](../../src/modules/forms/controllers/forms-faqs.controller.ts)
+
+### Descripción de negocio
+
+Editar una pregunta frecuente propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /forms/faqs/{id}` en `FormsFaqsController_update`. El controlador delega en `FaqsService.update`. Valida el body como `UpdateFaqDto` y consume `application/json`. El tipo de retorno estático es `Promise<FaqEntryDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateFaqDto`; los campos opcionales se omiten.
+
+```http
+PATCH /forms/faqs/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `question` | No | `string` | longitud mínima 1; longitud máxima 300; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `answer` | No | `string` | longitud mínima 1; longitud máxima 3000; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `category` | No | `object` | longitud máxima 120; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `isPublished` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /forms/faqs/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "question": "valor-ejemplo",
+  "answer": "valor-ejemplo",
+  "category": {},
+  "isPublished": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FaqEntryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FaqEntryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "question": "valor-ejemplo",
+  "answer": "valor-ejemplo",
+  "category": "valor-ejemplo",
+  "position": 1,
+  "isPublished": true,
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `question` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `answer` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `category` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `position` | Sí | `number` | Sin restricción adicional declarada | 1-based display order | `1` |
+| `isPublished` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/faqs/{id}"
+}
+```
+
+---
+
+## 16. PUT /forms/faqs/order
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-faqs`
+- **Nombre:** Reordenar mis preguntas frecuentes (lista completa)
+- **Operation ID:** `FormsFaqsController_reorder`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsFaqsController.reorder](../../src/modules/forms/controllers/forms-faqs.controller.ts)
+
+### Descripción de negocio
+
+Reordenar mis preguntas frecuentes (lista completa). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Declared before the `:id` routes so `order` is never read as an id.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /forms/faqs/order` en `FormsFaqsController_reorder`. El controlador delega en `FaqsService.reorder`. Valida el body como `ReorderFaqsDto` y consume `application/json`. El tipo de retorno estático es `Promise<FaqListResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReorderFaqsDto`; los campos opcionales se omiten.
+
+```http
+PUT /forms/faqs/order HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "ids": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ids` | Sí | `array<string>` | formato `uuid`; mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /forms/faqs/order HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "ids": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FaqListResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FaqListResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "question": "valor-ejemplo",
+      "answer": "valor-ejemplo",
+      "category": "valor-ejemplo",
+      "position": 1,
+      "isPublished": true,
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<FaqEntryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","question":"valor-ejemplo","answer":"valor-ejemplo","category":"valor-ejemplo","position":1,"isPublished":true,"updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].question` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].answer` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].category` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].position` | Sí | `number` | Sin restricción adicional declarada | 1-based display order | `1` |
+| `items[].isPublished` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La lista debe contener exactamente las preguntas frecuentes propias | Excepción explícita en src/modules/forms/services/faqs.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/faqs/order"
+}
+```
+
+---
+
+## 17. POST /forms/field-definitions
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -1806,7 +2455,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. PATCH /forms/field-definitions/{id}
+## 18. PATCH /forms/field-definitions/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -1960,7 +2609,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /forms/fields/{id}/access-rules
+## 19. POST /forms/fields/{id}/access-rules
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -2097,7 +2746,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /forms/fields/{id}/dependencies
+## 20. POST /forms/fields/{id}/dependencies
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -2237,7 +2886,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. PUT /forms/fields/{id}/localizations/{lang}
+## 21. PUT /forms/fields/{id}/localizations/{lang}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -2368,7 +3017,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /forms/instances
+## 22. GET /forms/instances
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2500,7 +3149,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /forms/instances
+## 23. POST /forms/instances
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2631,7 +3280,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /forms/instances/{id}
+## 24. GET /forms/instances/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2769,7 +3418,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /forms/instances/{id}/close
+## 25. POST /forms/instances/{id}/close
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2880,7 +3529,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /forms/instances/{id}/values
+## 26. POST /forms/instances/{id}/values
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -3031,7 +3680,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /forms/me/instances
+## 27. GET /forms/me/instances
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-me`
@@ -3158,7 +3807,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /forms/me/instances/{id}
+## 28. GET /forms/me/instances/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-me`
@@ -3294,7 +3943,725 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. PATCH /forms/values/{id}
+## 29. GET /forms/question-scripts
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-question-scripts`
+- **Nombre:** Listar mis guiones de preguntas activos
+- **Operation ID:** `FormsQuestionScriptsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsQuestionScriptsController.list](../../src/modules/forms/controllers/forms-question-scripts.controller.ts)
+
+### Descripción de negocio
+
+Listar mis guiones de preguntas activos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /forms/question-scripts` en `FormsQuestionScriptsController_list`. El controlador delega en `QuestionScriptsService.list`. No recibe body. El tipo de retorno estático es `Promise<QuestionScriptListResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /forms/question-scripts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /forms/question-scripts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<QuestionScriptListResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<QuestionScriptListResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<QuestionScriptListResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<QuestionScriptListResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<QuestionScriptListResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<QuestionScriptListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<QuestionScriptListResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QuestionScriptListResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "title": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "specialtyCode": "CODIGO_EJEMPLO",
+      "status": "active",
+      "itemCount": 1,
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<QuestionScriptSummaryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","title":"valor-ejemplo","description":"Texto descriptivo de ejemplo","specialtyCode":"CODIGO_EJEMPLO","status":"active","itemCount":1,"updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].description` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].specialtyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].status` | Sí | `string` | valores: `active` | Sin descripción específica en el contrato OpenAPI. | `active` |
+| `items[].itemCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/question-scripts"
+}
+```
+
+---
+
+## 30. POST /forms/question-scripts
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-question-scripts`
+- **Nombre:** Crear un guion de preguntas
+- **Operation ID:** `FormsQuestionScriptsController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsQuestionScriptsController.create](../../src/modules/forms/controllers/forms-question-scripts.controller.ts)
+
+### Descripción de negocio
+
+Crear un guion de preguntas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /forms/question-scripts` en `FormsQuestionScriptsController_create`. El controlador delega en `QuestionScriptsService.create`. Valida el body como `CreateQuestionScriptDto` y consume `application/json`. El tipo de retorno estático es `Promise<QuestionScriptDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateQuestionScriptDto`; los campos opcionales se omiten.
+
+```http
+POST /forms/question-scripts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "title": "valor-ejemplo",
+  "items": [
+    {
+      "questionText": "valor-ejemplo",
+      "answerType": "free_text",
+      "required": true
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `title` | Sí | `string` | longitud mínima 1; longitud máxima 160; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `description` | No | `object` | longitud máxima 1600; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `specialtyCode` | No | `object` | longitud máxima 64; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items` | Sí | `array<QuestionScriptItemInputDto>` | mínimo 1 elemento(s); máximo 100 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"questionText":"valor-ejemplo","helpText":{},"answerType":"free_text","options":["valor-ejemplo"],"required":true}]` |
+| `items[].questionText` | Sí | `string` | longitud mínima 1; longitud máxima 500; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].helpText` | No | `object` | longitud máxima 1000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].answerType` | Sí | `string` | valores: `free_text`, `yes_no`, `single_choice`, `multiple_choice`, `number`, `date` | Sin descripción específica en el contrato OpenAPI. | `free_text` |
+| `items[].options` | No | `array<string>` | admite null | Required (≥ 2 distinct, non-blank) for single_choice/multiple_choice; forbidden otherwise | `["valor-ejemplo"]` |
+| `items[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /forms/question-scripts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "title": "valor-ejemplo",
+  "description": {},
+  "specialtyCode": {},
+  "items": [
+    {
+      "questionText": "valor-ejemplo",
+      "helpText": {},
+      "answerType": "free_text",
+      "options": [
+        "valor-ejemplo"
+      ],
+      "required": true
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QuestionScriptDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "title": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "specialtyCode": "CODIGO_EJEMPLO",
+  "status": "active",
+  "version": 1,
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "position": 1,
+      "questionText": "valor-ejemplo",
+      "helpText": "valor-ejemplo",
+      "answerType": "valor-ejemplo",
+      "options": [
+        "valor-ejemplo"
+      ],
+      "required": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `description` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialtyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status` | Sí | `string` | valores: `active`, `archived` | Sin descripción específica en el contrato OpenAPI. | `active` |
+| `version` | Sí | `number` | Sin restricción adicional declarada | Optimistic-concurrency token for PATCH | `1` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items` | Sí | `array<QuestionScriptItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","helpText":"valor-ejemplo","answerType":"valor-ejemplo","options":["valor-ejemplo"],"required":true}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].position` | Sí | `number` | Sin restricción adicional declarada | 1-based order inside the script | `1` |
+| `items[].questionText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].helpText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].answerType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].options` | Sí | `array<string>` | admite null | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/question-scripts"
+}
+```
+
+---
+
+## 31. DELETE /forms/question-scripts/{id}
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-question-scripts`
+- **Nombre:** Archivar un guion propio
+- **Operation ID:** `FormsQuestionScriptsController_archive`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsQuestionScriptsController.archive](../../src/modules/forms/controllers/forms-question-scripts.controller.ts)
+
+### Descripción de negocio
+
+Archivar un guion propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /forms/question-scripts/{id}` en `FormsQuestionScriptsController_archive`. El controlador delega en `QuestionScriptsService.archive`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /forms/question-scripts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /forms/question-scripts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/question-scripts/{id}"
+}
+```
+
+---
+
+## 32. GET /forms/question-scripts/{id}
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-question-scripts`
+- **Nombre:** Leer un guion de preguntas propio
+- **Operation ID:** `FormsQuestionScriptsController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsQuestionScriptsController.get](../../src/modules/forms/controllers/forms-question-scripts.controller.ts)
+
+### Descripción de negocio
+
+Leer un guion de preguntas propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /forms/question-scripts/{id}` en `FormsQuestionScriptsController_get`. El controlador delega en `QuestionScriptsService.get`. No recibe body. El tipo de retorno estático es `Promise<QuestionScriptDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /forms/question-scripts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /forms/question-scripts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<QuestionScriptDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QuestionScriptDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "title": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "specialtyCode": "CODIGO_EJEMPLO",
+  "status": "active",
+  "version": 1,
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "position": 1,
+      "questionText": "valor-ejemplo",
+      "helpText": "valor-ejemplo",
+      "answerType": "valor-ejemplo",
+      "options": [
+        "valor-ejemplo"
+      ],
+      "required": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `description` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialtyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status` | Sí | `string` | valores: `active`, `archived` | Sin descripción específica en el contrato OpenAPI. | `active` |
+| `version` | Sí | `number` | Sin restricción adicional declarada | Optimistic-concurrency token for PATCH | `1` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items` | Sí | `array<QuestionScriptItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","helpText":"valor-ejemplo","answerType":"valor-ejemplo","options":["valor-ejemplo"],"required":true}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].position` | Sí | `number` | Sin restricción adicional declarada | 1-based order inside the script | `1` |
+| `items[].questionText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].helpText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].answerType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].options` | Sí | `array<string>` | admite null | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/question-scripts/{id}"
+}
+```
+
+---
+
+## 33. PATCH /forms/question-scripts/{id}
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-question-scripts`
+- **Nombre:** Editar un guion propio (items reemplaza la lista; 409 si version no coincide)
+- **Operation ID:** `FormsQuestionScriptsController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsQuestionScriptsController.update](../../src/modules/forms/controllers/forms-question-scripts.controller.ts)
+
+### Descripción de negocio
+
+Editar un guion propio (items reemplaza la lista; 409 si version no coincide). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /forms/question-scripts/{id}` en `FormsQuestionScriptsController_update`. El controlador delega en `QuestionScriptsService.update`. Valida el body como `UpdateQuestionScriptDto` y consume `application/json`. El tipo de retorno estático es `Promise<QuestionScriptDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateQuestionScriptDto`; los campos opcionales se omiten.
+
+```http
+PATCH /forms/question-scripts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "version": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `version` | Sí | `number` | mínimo 1 | Version the client last read | `1` |
+| `title` | No | `string` | longitud mínima 1; longitud máxima 160; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `description` | No | `object` | longitud máxima 1600; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `specialtyCode` | No | `object` | longitud máxima 64; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items` | No | `array<QuestionScriptItemInputDto>` | mínimo 1 elemento(s); máximo 100 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"questionText":"valor-ejemplo","helpText":{},"answerType":"free_text","options":["valor-ejemplo"],"required":true}]` |
+| `items[].questionText` | No | `string` | longitud mínima 1; longitud máxima 500; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].helpText` | No | `object` | longitud máxima 1000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].answerType` | No | `string` | valores: `free_text`, `yes_no`, `single_choice`, `multiple_choice`, `number`, `date` | Sin descripción específica en el contrato OpenAPI. | `free_text` |
+| `items[].options` | No | `array<string>` | admite null | Required (≥ 2 distinct, non-blank) for single_choice/multiple_choice; forbidden otherwise | `["valor-ejemplo"]` |
+| `items[].required` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /forms/question-scripts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "version": 1,
+  "title": "valor-ejemplo",
+  "description": {},
+  "specialtyCode": {},
+  "items": [
+    {
+      "questionText": "valor-ejemplo",
+      "helpText": {},
+      "answerType": "free_text",
+      "options": [
+        "valor-ejemplo"
+      ],
+      "required": true
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<QuestionScriptDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QuestionScriptDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "title": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "specialtyCode": "CODIGO_EJEMPLO",
+  "status": "active",
+  "version": 1,
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "position": 1,
+      "questionText": "valor-ejemplo",
+      "helpText": "valor-ejemplo",
+      "answerType": "valor-ejemplo",
+      "options": [
+        "valor-ejemplo"
+      ],
+      "required": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `description` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `specialtyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `status` | Sí | `string` | valores: `active`, `archived` | Sin descripción específica en el contrato OpenAPI. | `active` |
+| `version` | Sí | `number` | Sin restricción adicional declarada | Optimistic-concurrency token for PATCH | `1` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items` | Sí | `array<QuestionScriptItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","helpText":"valor-ejemplo","answerType":"valor-ejemplo","options":["valor-ejemplo"],"required":true}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].position` | Sí | `number` | Sin restricción adicional declarada | 1-based order inside the script | `1` |
+| `items[].questionText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].helpText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].answerType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].options` | Sí | `array<string>` | admite null | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].required` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 409 | `CONCURRENCY_CONFLICT` | El guion cambió desde la última lectura | Excepción explícita en src/modules/forms/services/question-scripts.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/question-scripts/{id}"
+}
+```
+
+---
+
+## 34. PATCH /forms/values/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-values`
@@ -3427,7 +4794,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /forms/values/import
+## 35. POST /forms/values/import
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-values`
@@ -3576,6 +4943,117 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/forms/values/import"
+}
+```
+
+---
+
+## 36. GET /public/profiles/p/{slug}/faqs
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-public`
+- **Nombre:** Preguntas frecuentes publicadas de un profesional
+- **Operation ID:** `FormsFaqsPublicController_list`
+- **Autenticación:** Pública
+- **Implementación:** [FormsFaqsPublicController.list](../../src/modules/forms/controllers/forms-faqs-public.controller.ts)
+
+### Descripción de negocio
+
+Sin sesión. Sólo las publicadas, por posición. Un slug inexistente, oculto o que no es de profesional responde 404.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/profiles/p/{slug}/faqs` en `FormsFaqsPublicController_list`. El controlador delega en `FaqsService.listPublic`. No recibe body. El tipo de retorno estático es `Promise<PublicFaqListResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `slug` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/profiles/p/valor-ejemplo/faqs HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/profiles/p/valor-ejemplo/faqs HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicFaqListResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicFaqListResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicFaqListResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicFaqListResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicFaqListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicFaqListResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicFaqListResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "question": "valor-ejemplo",
+      "answer": "valor-ejemplo",
+      "category": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PublicFaqEntryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","question":"valor-ejemplo","answer":"valor-ejemplo","category":"valor-ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].question` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].answer` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].category` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/forms/services/faqs.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/profiles/p/{slug}/faqs"
 }
 ```
 

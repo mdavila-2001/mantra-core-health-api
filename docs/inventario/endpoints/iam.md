@@ -3,8 +3,8 @@
 # Endpoints del módulo `iam`
 
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
-- **Operaciones:** 50 (49 en el contrato, 1 sólo en el código)
-- **Riesgo:** ALTO 23 · MEDIO 11 · BAJO 16
+- **Operaciones:** 51 (50 en el contrato, 1 sólo en el código)
+- **Riesgo:** ALTO 24 · MEDIO 11 · BAJO 16
 - **Tablas distintas que tocan:** 66
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/iam.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -35,33 +35,34 @@
 | 21 | GET | `/iam/me/devices` | Listar los dispositivos donde inicié sesión | BAJO | 2 | sesión (sin roles) |
 | 22 | POST | `/iam/me/devices/{id}/confirm` | Verificar un dispositivo con el código del correo | ALTO | 6 | sesión (sin roles) |
 | 23 | POST | `/iam/me/devices/{id}/confirm-code` | Enviar a mi correo el código para verificar un dispositivo | ALTO | 10 | sesión (sin roles) |
-| 24 | GET | `/iam/me/sessions` | Listar mis sesiones abiertas | BAJO | 1 | sesión (sin roles) |
-| 25 | POST | `/iam/me/sessions/{id}/revoke` | Cerrar una de mis sesiones | ALTO | 4 | sesión (sin roles) |
-| 26 | DELETE | `/iam/onboarding-drafts/{formType}/{draftId}` | Elimina el borrador al completar el alta exitosamente o por descarte del usuario | BAJO | 0 | pública |
-| 27 | GET | `/iam/onboarding-drafts/{formType}/{draftId}` | Recupera un borrador de alta guardado por identificador y tipo de formulario | BAJO | 0 | pública |
-| 28 | PUT | `/iam/onboarding-drafts/{formType}/{draftId}` | Guarda o actualiza el avance del formulario de alta en borrador | BAJO | 0 | pública |
-| 29 | GET | `/iam/users` | Listado paginado de usuarios (obsoleto) | BAJO | 2 | SECURITY_ADMIN |
-| 30 | POST | `/iam/users` | Crear un usuario con credencial de contraseña y rol inicial | MEDIO | 6 | SECURITY_ADMIN |
-| 31 | GET | `/iam/users/{id}` | Ficha de un usuario | BAJO | 1 | SECURITY_ADMIN |
-| 32 | POST | `/iam/users/{id}/anonymize` | Anonimizar (DSAR) la cuenta | MEDIO | 8 | SECURITY_ADMIN |
-| 33 | GET | `/iam/users/{id}/credentials` | Credenciales del usuario | BAJO | 2 | SECURITY_ADMIN |
-| 34 | POST | `/iam/users/{id}/credentials/{cid}/revoke` | Revocar una credencial del usuario | MEDIO | 3 | SECURITY_ADMIN |
-| 35 | POST | `/iam/users/{id}/credentials/federated` | Enlazar una credencial de identidad federada | MEDIO | 4 | SECURITY_ADMIN |
-| 36 | POST | `/iam/users/{id}/deactivate` | Dar de baja la cuenta con motivo (sin borrado físico; idempotente) | MEDIO | 14 | SECURITY_ADMIN |
-| 37 | GET | `/iam/users/{id}/devices` | Dispositivos del usuario | BAJO | 2 | SECURITY_ADMIN |
-| 38 | POST | `/iam/users/{id}/devices` | Registrar un dispositivo del usuario | ALTO | 4 | sesión (sin roles) |
-| 39 | GET | `/iam/users/{id}/global-roles` | Roles globales del usuario | BAJO | 2 | SECURITY_ADMIN |
-| 40 | POST | `/iam/users/{id}/global-roles` | Conceder o revocar un rol global | MEDIO | 8 | SECURITY_ADMIN |
-| 41 | GET | `/iam/users/{id}/lifecycle` | Estado de ciclo de vida de la cuenta y su historia, paginada | BAJO | 2 | SECURITY_ADMIN |
-| 42 | POST | `/iam/users/{id}/lock` | Bloquear la cuenta y revocar sus sesiones | MEDIO | 7 | SECURITY_ADMIN |
-| 43 | GET | `/iam/users/{id}/mfa-factors` | Factores de MFA del usuario | BAJO | 2 | SECURITY_ADMIN |
-| 44 | POST | `/iam/users/{id}/mfa-factors` | Enrolar o verificar un factor MFA | ALTO | 8 | sesión (sin roles) |
-| 45 | POST | `/iam/users/{id}/reactivate` | Reactivar una cuenta suspendida con motivo (idempotente) | MEDIO | 14 | SECURITY_ADMIN |
-| 46 | GET | `/iam/users/{id}/sessions` | Sesiones del usuario | BAJO | 2 | SECURITY_ADMIN |
-| 47 | POST | `/iam/users/{id}/suspend` | Suspender la cuenta con motivo (idempotente, cierra sus sesiones) | MEDIO | 14 | SECURITY_ADMIN |
-| 48 | POST | `/iam/users/assisted-practitioner-registration` | Alta administrativa de un profesional (devuelve token de activación) | ALTO | 70 | SECURITY_ADMIN |
-| 49 | POST | `/iam/users/assisted-registration` | Registro asistido de un paciente (devuelve token de activación) | MEDIO | 9 | CLINICIAN, SECURITY_ADMIN |
-| 50 | POST | `/iam/users/search` | Listado paginado de usuarios, con los filtros en el cuerpo | BAJO | 2 | SECURITY_ADMIN |
+| 24 | PATCH | `/iam/me/name` | Corregir el nombre de la propia cuenta | ALTO | 2 | sesión (sin roles) |
+| 25 | GET | `/iam/me/sessions` | Listar mis sesiones abiertas | BAJO | 1 | sesión (sin roles) |
+| 26 | POST | `/iam/me/sessions/{id}/revoke` | Cerrar una de mis sesiones | ALTO | 4 | sesión (sin roles) |
+| 27 | DELETE | `/iam/onboarding-drafts/{formType}/{draftId}` | Elimina el borrador al completar el alta exitosamente o por descarte del usuario | BAJO | 0 | pública |
+| 28 | GET | `/iam/onboarding-drafts/{formType}/{draftId}` | Recupera un borrador de alta guardado por identificador y tipo de formulario | BAJO | 0 | pública |
+| 29 | PUT | `/iam/onboarding-drafts/{formType}/{draftId}` | Guarda o actualiza el avance del formulario de alta en borrador | BAJO | 0 | pública |
+| 30 | GET | `/iam/users` | Listado paginado de usuarios (obsoleto) | BAJO | 2 | SECURITY_ADMIN |
+| 31 | POST | `/iam/users` | Crear un usuario con credencial de contraseña y rol inicial | MEDIO | 6 | SECURITY_ADMIN |
+| 32 | GET | `/iam/users/{id}` | Ficha de un usuario | BAJO | 1 | SECURITY_ADMIN |
+| 33 | POST | `/iam/users/{id}/anonymize` | Anonimizar (DSAR) la cuenta | MEDIO | 8 | SECURITY_ADMIN |
+| 34 | GET | `/iam/users/{id}/credentials` | Credenciales del usuario | BAJO | 2 | SECURITY_ADMIN |
+| 35 | POST | `/iam/users/{id}/credentials/{cid}/revoke` | Revocar una credencial del usuario | MEDIO | 3 | SECURITY_ADMIN |
+| 36 | POST | `/iam/users/{id}/credentials/federated` | Enlazar una credencial de identidad federada | MEDIO | 4 | SECURITY_ADMIN |
+| 37 | POST | `/iam/users/{id}/deactivate` | Dar de baja la cuenta con motivo (sin borrado físico; idempotente) | MEDIO | 14 | SECURITY_ADMIN |
+| 38 | GET | `/iam/users/{id}/devices` | Dispositivos del usuario | BAJO | 2 | SECURITY_ADMIN |
+| 39 | POST | `/iam/users/{id}/devices` | Registrar un dispositivo del usuario | ALTO | 4 | sesión (sin roles) |
+| 40 | GET | `/iam/users/{id}/global-roles` | Roles globales del usuario | BAJO | 2 | SECURITY_ADMIN |
+| 41 | POST | `/iam/users/{id}/global-roles` | Conceder o revocar un rol global | MEDIO | 8 | SECURITY_ADMIN |
+| 42 | GET | `/iam/users/{id}/lifecycle` | Estado de ciclo de vida de la cuenta y su historia, paginada | BAJO | 2 | SECURITY_ADMIN |
+| 43 | POST | `/iam/users/{id}/lock` | Bloquear la cuenta y revocar sus sesiones | MEDIO | 7 | SECURITY_ADMIN |
+| 44 | GET | `/iam/users/{id}/mfa-factors` | Factores de MFA del usuario | BAJO | 2 | SECURITY_ADMIN |
+| 45 | POST | `/iam/users/{id}/mfa-factors` | Enrolar o verificar un factor MFA | ALTO | 8 | sesión (sin roles) |
+| 46 | POST | `/iam/users/{id}/reactivate` | Reactivar una cuenta suspendida con motivo (idempotente) | MEDIO | 14 | SECURITY_ADMIN |
+| 47 | GET | `/iam/users/{id}/sessions` | Sesiones del usuario | BAJO | 2 | SECURITY_ADMIN |
+| 48 | POST | `/iam/users/{id}/suspend` | Suspender la cuenta con motivo (idempotente, cierra sus sesiones) | MEDIO | 14 | SECURITY_ADMIN |
+| 49 | POST | `/iam/users/assisted-practitioner-registration` | Alta administrativa de un profesional (devuelve token de activación) | ALTO | 70 | SECURITY_ADMIN |
+| 50 | POST | `/iam/users/assisted-registration` | Registro asistido de un paciente (devuelve token de activación) | MEDIO | 9 | CLINICIAN, SECURITY_ADMIN |
+| 51 | POST | `/iam/users/search` | Listado paginado de usuarios, con los filtros en el cuerpo | BAJO | 2 | SECURITY_ADMIN |
 
 ---
 
@@ -361,11 +362,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.password_resets` | ESCRIBE | CREA | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → PasswordResetsRepository.create | `src/modules/iam/infrastructure/repositories/password-resets.repository.ts:38` |
 | `iam.security_events` | ESCRIBE | CREA | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:47` |
 | `iam.users` | LEE | LEE | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → IamPasswordResetService.sendResetEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → IamPasswordResetService.sendResetEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → IamPasswordResetService.sendResetEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → IamPasswordResetService.sendResetEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → IamPasswordResetService.sendResetEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → IamPasswordResetService.sendResetEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → IamPasswordResetService.sendResetEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:155` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → IamPasswordResetService.sendResetEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:272` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → IamPasswordResetService.sendResetEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:390` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.forgotPassword → IamPasswordResetService.requestReset → IamPasswordResetService.sendResetEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 
 ### Cuerpo — DTO `ForgotPasswordDto` · `application/json`
 
@@ -672,7 +673,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/practitioner-profile-identity-fields.int-spec.ts:53` |
 | INTEGRACION | `test/integration/practitioner-registration.int-spec.ts:137` |
 | INTEGRACION | `test/integration/practitioner-signature-registration.int-spec.ts:72` |
-| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:85` |
+| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:90` |
 | INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:94` |
 | INTEGRACION | `test/integration/refresh-cookie.int-spec.ts:53` |
 | INTEGRACION | `test/integration/report-drafts.int-spec.ts:69` |
@@ -891,12 +892,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.users` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → UsersRepository.create | `src/modules/iam/infrastructure/repositories/users.repository.ts:104` |
 | `insurance.insurance_brokers` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → DirectoryRegistrationAdapter.materializeProfile → TenantTypeProfileService.materializeProfile → CatalogRepository.createBroker | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:256` |
 | `insurance.insurance_carriers` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → DirectoryRegistrationAdapter.materializeProfile → TenantTypeProfileService.materializeProfile → CatalogRepository.createCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:62` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:155` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:272` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:390` |
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → DirectoryRegistrationAdapter.attachRegistrationDocuments → TenantAffiliationDocumentsService.attachRegistrationDocuments → TenantAffiliationDocumentsService.attachOne → AttachableFileService.claimAnonymousUpload → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 | `pharmacy.pharmacies` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → PharmacyRegistrationAdapter.provision → PharmacyProvisioningService.provision → PharmaciesRepository.create | `src/modules/pharmacy/repositories/pharmacies.repository.ts:98` |
 | `pharmacy.pharmacy_product_categories` | ESCRIBE | CREA | POR_SQL | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → PharmacyRegistrationAdapter.provision → PharmacyProvisioningService.provision → PharmacyCategoriesService.provisionDefaults → PharmacyCatalogRepository.insertMissingCategories | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:126` |
 | `pharmacy.pharmacy_sites` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → PharmacyRegistrationAdapter.provision → PharmacyProvisioningService.provision → PharmacyProvisioningService.addSite → PharmacySitesRepository.create | `src/modules/pharmacy/repositories/pharmacy-sites.repository.ts:73` |
@@ -1387,6 +1388,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/accounting-practitioner-simple-http.int-spec.ts:173` |
 | INTEGRACION | `test/integration/admin-listados.int-spec.ts:55` |
 | INTEGRACION | `test/integration/center-equipment-types.int-spec.ts:35` |
+| INTEGRACION | `test/integration/center-site-schedules.int-spec.ts:48` |
 | INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:73` |
 | INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:73` |
 | INTEGRACION | `test/integration/fx2-medico-multisede-publica-agenda.int-spec.ts:99` |
@@ -1397,6 +1399,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/insurance-campaigns.int-spec.ts:49` |
 | INTEGRACION | `test/integration/insurance-plan-administration.int-spec.ts:36` |
 | INTEGRACION | `test/integration/insurer-patients.int-spec.ts:44` |
+| INTEGRACION | `test/integration/lab-portal-catalog-import.int-spec.ts:69` |
 | INTEGRACION | `test/integration/lab-portal-order-intake.int-spec.ts:47` |
 | INTEGRACION | `test/integration/lab-portal-prices.int-spec.ts:65` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:52` |
@@ -1463,11 +1466,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.security_events` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:47` |
 | `iam.user_global_roles` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → UserGlobalRolesRepository.create | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:27` |
 | `iam.users` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → UsersRepository.create | `src/modules/iam/infrastructure/repositories/users.repository.ts:104` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → IamPatientSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → IamPatientSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → IamPatientSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → IamPatientSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → IamPatientSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → IamPatientSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → IamPatientSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:155` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → IamPatientSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:272` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → IamPatientSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:390` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → IamPatientSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 | `profiles.patient_profiles` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → ProfilesRegistrationAdapter.createPatientProfile → PatientProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:284` |
 | `profiles.person_account_links` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → ProfilesRegistrationAdapter.createAccountLink → PersonAccountLinksRepository.create | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:50` |
 | `profiles.person_profiles` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPatient → IamPatientSelfRegistrationService.registerPatient → IamPatientSelfRegistrationService.performRegisterPatient → ProfilesRegistrationAdapter.createPersonProfile → PersonProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/person-profiles.repository.ts:57` |
@@ -1732,17 +1735,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.findCarriers | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:111` |
 | `insurance.practitioner_insurer_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.create | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:98` |
 | `insurance.practitioner_insurer_requests` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.findLivePair | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:31` |
-| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:554` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
 | `messaging.message_queues` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.begin → QueuesRepository.findQueueByCode | `src/modules/messaging/repositories/queues.repository.ts:77` |
-| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:155` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:272` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:577` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:390` |
 | `messaging.queued_jobs` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.begin → QueuesRepository.createJob | `src/modules/messaging/repositories/queues.repository.ts:101` |
 | `messaging.queued_jobs` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FileUploadService.publishUpload → StoragePublicationService.publish → StorageLifecycleCoordinator.reuse → StorageLifecycleCoordinator.change | `src/common/storage/storage-lifecycle-coordinator.service.ts:656` |
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRegistrationFilesAdapter.claimAnonymousUpload → AttachableFileService.claimAnonymousUpload → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 | `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:116` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → RegistrationAffiliationsService.requestWithin → AffiliationOrganizationsAdapter.findPublicOrganizations | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:49` |
 | `practice.practices` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:150` |
@@ -2104,11 +2107,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.security_events` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:47` |
 | `iam.user_global_roles` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → UserGlobalRolesRepository.create | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:27` |
 | `iam.users` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → UsersRepository.create | `src/modules/iam/infrastructure/repositories/users.repository.ts:104` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → IamSupportStaffSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → IamSupportStaffSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → IamSupportStaffSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → IamSupportStaffSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → IamSupportStaffSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → IamSupportStaffSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → IamSupportStaffSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:155` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → IamSupportStaffSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:272` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → IamSupportStaffSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:390` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → IamSupportStaffSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 | `profiles.person_account_links` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → ProfilesRegistrationAdapter.createAccountLink → PersonAccountLinksRepository.create | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:50` |
 | `profiles.person_profiles` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → ProfilesRegistrationAdapter.createPersonProfile → PersonProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/person-profiles.repository.ts:57` |
 | `profiles.persons` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerSupportStaff → IamSupportStaffSelfRegistrationService.register → ProfilesRegistrationAdapter.createPerson → PersonsRepository.create | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:119` |
@@ -2242,11 +2245,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.email_verifications` | ESCRIBE | CREA | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → EmailVerificationsRepository.create | `src/modules/iam/infrastructure/repositories/email-verifications.repository.ts:41` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → EmailVerificationsRepository.findLatestByUser | `src/modules/iam/infrastructure/repositories/email-verifications.repository.ts:85` |
 | `iam.users` | LEE | LEE | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → IamEmailVerificationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → IamEmailVerificationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → IamEmailVerificationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → IamEmailVerificationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → IamEmailVerificationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → IamEmailVerificationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → IamEmailVerificationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:155` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → IamEmailVerificationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:272` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → IamEmailVerificationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:390` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.resendVerification → IamEmailVerificationService.resend → IamEmailVerificationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 
 ### Cuerpo — DTO `ResendVerificationDto` · `application/json`
 
@@ -3174,11 +3177,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.email_verifications` | ESCRIBE | CREA | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → EmailVerificationsRepository.create | `src/modules/iam/infrastructure/repositories/email-verifications.repository.ts:41` |
 | `iam.email_verifications` | LEE | LEE | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → IamMyDevicesService.verifiedEmail → EmailVerificationsRepository.findLatestByUser | `src/modules/iam/infrastructure/repositories/email-verifications.repository.ts:85` |
 | `iam.users` | LEE | LEE | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → IamMyDevicesService.verifiedEmail → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.message_templates` | LEE | LEE | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:155` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:272` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:390` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamMyDevicesController.requestCode → IamMyDevicesService.requestCode → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 
 ### Parámetros
 
@@ -3221,7 +3224,104 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. GET /iam/me/sessions
+## 24. PATCH /iam/me/name
+
+- **Origen:** CONTRATO
+- **Nombre:** Corregir el nombre de la propia cuenta
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `IamMyNameController.update` — `src/modules/iam/presentation/controllers/iam-my-name.controller.ts:24`
+
+### Qué es y para qué sirve (negocio)
+
+Corregir el nombre de la propia cuenta. Dentro del módulo (descripción del modelo, en inglés): «Manages login accounts, credentials, MFA, devices and sessions.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_01_iam.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /iam/me/name` la atiende `IamMyNameController.update` (src/modules/iam/presentation/controllers/iam-my-name.controller.ts:24). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateMyNameDto` (4 campos, 2 obligatorios). Delega en `UpdateMyNameUseCase.execute`. Actualiza iam.users. Lee iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-my-name.controller.ts:24` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/iam/presentation/controllers/iam-my-name.controller.ts:24` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 5, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-my-name.controller.ts:24` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | IamMyNameController.update → UpdateMyNameUseCase.execute | `src/modules/iam/application/use-cases/update-my-name.use-case.ts:63` |
+| `iam.users` | LEE | LEE | DIRECTA | IamMyNameController.update → UpdateMyNameUseCase.execute → UsersRepository.findById | `src/modules/iam/infrastructure/repositories/users.repository.ts:45` |
+
+### Cuerpo — DTO `UpdateMyNameDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 100; patrón runtime NAME_PART | `@IsString()` `@MinLength(1)` `@MaxLength(100)` `@Matches(NAME_PART, { message: NAME_PART_MESSAGE })` | — | `src/modules/iam/presentation/dto/update-my-name.dto.ts:33` |
+| `middleName` | `string` | No | longitud máxima 100; patrón runtime NAME_PART | `@IsOptional()` `@IsString()` `@MaxLength(100)` `@ValidateIf(hasText)` `@Matches(NAME_PART, { message: NAME_PART_MESSAGE })` | — | `src/modules/iam/presentation/dto/update-my-name.dto.ts:42` |
+| `lastName` | `string` | Sí | longitud mínima 1; longitud máxima 100; patrón runtime NAME_PART | `@IsString()` `@MinLength(1)` `@MaxLength(100)` `@Matches(NAME_PART, { message: NAME_PART_MESSAGE })` | — | `src/modules/iam/presentation/dto/update-my-name.dto.ts:50` |
+| `motherLastName` | `string` | No | longitud máxima 100; patrón runtime NAME_PART | `@IsOptional()` `@IsString()` `@MaxLength(100)` `@ValidateIf(hasText)` `@Matches(NAME_PART, { message: NAME_PART_MESSAGE })` | — | `src/modules/iam/presentation/dto/update-my-name.dto.ts:59` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "name": "Wendy",
+  "lastName": "Dávila"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Wendy",
+  "middleName": "Jennyfer",
+  "lastName": "Dávila",
+  "motherLastName": "Yamal"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<MyNameResponseDto>` · DTO `MyNameResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `displayName` | `string` | Sí | — | — | Composed name (`iam.users.display_name`). | `src/modules/iam/presentation/dto/update-my-name.dto.ts:65` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Su nombre sale de su perfil verificado: corríjalo en «Mi perfil»; ForbiddenException: La cuenta no está activa |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- IAM — etapa `ctrl:IamMyNameController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 25. GET /iam/me/sessions
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar mis sesiones abiertas
@@ -3290,7 +3390,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 25. POST /iam/me/sessions/{id}/revoke
+## 26. POST /iam/me/sessions/{id}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar una de mis sesiones
@@ -3367,7 +3467,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 26. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+## 27. DELETE /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Elimina el borrador al completar el alta exitosamente o por descarte del usuario
@@ -3436,7 +3536,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 27. GET /iam/onboarding-drafts/{formType}/{draftId}
+## 28. GET /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Recupera un borrador de alta guardado por identificador y tipo de formulario
@@ -3505,7 +3605,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 28. PUT /iam/onboarding-drafts/{formType}/{draftId}
+## 29. PUT /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Guarda o actualiza el avance del formulario de alta en borrador
@@ -3575,7 +3675,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 29. GET /iam/users
+## 30. GET /iam/users
 
 - **Origen:** CONTRATO
 - **Nombre:** Listado paginado de usuarios (obsoleto)
@@ -3664,7 +3764,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 30. POST /iam/users
+## 31. POST /iam/users
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un usuario con credencial de contraseña y rol inicial
@@ -3777,7 +3877,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 31. GET /iam/users/{id}
+## 32. GET /iam/users/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ficha de un usuario
@@ -3860,7 +3960,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 32. POST /iam/users/{id}/anonymize
+## 33. POST /iam/users/{id}/anonymize
 
 - **Origen:** CONTRATO
 - **Nombre:** Anonimizar (DSAR) la cuenta
@@ -3944,7 +4044,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 33. GET /iam/users/{id}/credentials
+## 34. GET /iam/users/{id}/credentials
 
 - **Origen:** CONTRATO
 - **Nombre:** Credenciales del usuario
@@ -4028,7 +4128,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 34. POST /iam/users/{id}/credentials/{cid}/revoke
+## 35. POST /iam/users/{id}/credentials/{cid}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Revocar una credencial del usuario
@@ -4107,7 +4207,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 35. POST /iam/users/{id}/credentials/federated
+## 36. POST /iam/users/{id}/credentials/federated
 
 - **Origen:** CONTRATO
 - **Nombre:** Enlazar una credencial de identidad federada
@@ -4216,7 +4316,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 36. POST /iam/users/{id}/deactivate
+## 37. POST /iam/users/{id}/deactivate
 
 - **Origen:** CONTRATO
 - **Nombre:** Dar de baja la cuenta con motivo (sin borrado físico; idempotente)
@@ -4330,7 +4430,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 37. GET /iam/users/{id}/devices
+## 38. GET /iam/users/{id}/devices
 
 - **Origen:** CONTRATO
 - **Nombre:** Dispositivos del usuario
@@ -4412,7 +4512,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 38. POST /iam/users/{id}/devices
+## 39. POST /iam/users/{id}/devices
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un dispositivo del usuario
@@ -4514,7 +4614,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/iam.int-spec.ts:119` |
-| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:205` |
+| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:210` |
 | CONTROLADOR | `src/modules/iam/presentation/controllers/iam-users.controller.spec.ts:115` |
 
 ### Flujos
@@ -4523,7 +4623,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 39. GET /iam/users/{id}/global-roles
+## 40. GET /iam/users/{id}/global-roles
 
 - **Origen:** CONTRATO
 - **Nombre:** Roles globales del usuario
@@ -4603,7 +4703,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 40. POST /iam/users/{id}/global-roles
+## 41. POST /iam/users/{id}/global-roles
 
 - **Origen:** CONTRATO
 - **Nombre:** Conceder o revocar un rol global
@@ -4714,7 +4814,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 41. GET /iam/users/{id}/lifecycle
+## 42. GET /iam/users/{id}/lifecycle
 
 - **Origen:** CONTRATO
 - **Nombre:** Estado de ciclo de vida de la cuenta y su historia, paginada
@@ -4800,7 +4900,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 42. POST /iam/users/{id}/lock
+## 43. POST /iam/users/{id}/lock
 
 - **Origen:** CONTRATO
 - **Nombre:** Bloquear la cuenta y revocar sus sesiones
@@ -4904,7 +5004,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 43. GET /iam/users/{id}/mfa-factors
+## 44. GET /iam/users/{id}/mfa-factors
 
 - **Origen:** CONTRATO
 - **Nombre:** Factores de MFA del usuario
@@ -4985,7 +5085,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 44. POST /iam/users/{id}/mfa-factors
+## 45. POST /iam/users/{id}/mfa-factors
 
 - **Origen:** CONTRATO
 - **Nombre:** Enrolar o verificar un factor MFA
@@ -5107,7 +5207,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 45. POST /iam/users/{id}/reactivate
+## 46. POST /iam/users/{id}/reactivate
 
 - **Origen:** CONTRATO
 - **Nombre:** Reactivar una cuenta suspendida con motivo (idempotente)
@@ -5221,7 +5321,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 46. GET /iam/users/{id}/sessions
+## 47. GET /iam/users/{id}/sessions
 
 - **Origen:** CONTRATO
 - **Nombre:** Sesiones del usuario
@@ -5303,7 +5403,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 47. POST /iam/users/{id}/suspend
+## 48. POST /iam/users/{id}/suspend
 
 - **Origen:** CONTRATO
 - **Nombre:** Suspender la cuenta con motivo (idempotente, cierra sus sesiones)
@@ -5417,7 +5517,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 48. POST /iam/users/assisted-practitioner-registration
+## 49. POST /iam/users/assisted-practitioner-registration
 
 - **Origen:** CONTRATO
 - **Nombre:** Alta administrativa de un profesional (devuelve token de activación)
@@ -5478,14 +5578,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.findCarriers | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:111` |
 | `insurance.practitioner_insurer_requests` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.create | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:98` |
 | `insurance.practitioner_insurer_requests` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → PractitionerInsurerRequestsService.requestWithin → PractitionerInsurerRequestsRepository.findLivePair | `src/modules/insurance/infrastructure/repositories/practitioner-insurer-requests.repository.ts:31` |
-| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.message_templates` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:554` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:141` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:155` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.notify → RegistrationAffiliationsService.notifyPending → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:577` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:272` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:390` |
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRegistrationFilesAdapter.claimAnonymousUpload → AttachableFileService.claimAnonymousUpload → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:214` |
 | `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:116` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → WorkplaceRequestsAdapter.request → RegistrationAffiliationsService.requestWithin → AffiliationOrganizationsAdapter.findPublicOrganizations | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:49` |
 | `practice.practices` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:150` |
@@ -5759,7 +5859,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 ---
 
-## 49. POST /iam/users/assisted-registration
+## 50. POST /iam/users/assisted-registration
 
 - **Origen:** CONTRATO
 - **Nombre:** Registro asistido de un paciente (devuelve token de activación)
@@ -5879,7 +5979,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 50. POST /iam/users/search
+## 51. POST /iam/users/search
 
 - **Origen:** CONTRATO
 - **Nombre:** Listado paginado de usuarios, con los filtros en el cuerpo

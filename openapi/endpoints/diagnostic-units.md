@@ -668,6 +668,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `siteId` | No | `string` | formato `uuid` | The site (branch) chosen; absent, the main site. | `00000000-0000-4000-8000-000000000001` |
 | `startAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2026-11-05T12:00:00.000Z` |
 
 ### Payload completo de ejemplo
@@ -682,6 +683,7 @@ Content-Type: application/json
 
 {
   "unitId": "00000000-0000-4000-8000-000000000001",
+  "siteId": "00000000-0000-4000-8000-000000000001",
   "startAt": "2026-11-05T12:00:00.000Z"
 }
 ```
@@ -746,6 +748,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Centro no encontrado | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/book-order.use-case.ts |
 | 404 | `NOT_FOUND` | El centro no hace ese estudio | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/book-order.use-case.ts |
 | 404 | `NOT_FOUND` | Orden no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 409 | `CONFLICT` | Esta orden ya tiene un turno. Cancélelo para elegir otro. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/book-order.use-case.ts |
 | 409 | `CONFLICT` | Ese horario se acaba de ocupar. Elija otro. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/book-order.use-case.ts |
 | 409 | `CONFLICT` | Esta orden ya tiene su resultado: no hace falta reservar. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
@@ -848,6 +851,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     {
       "unitId": "00000000-0000-4000-8000-000000000001",
       "unitName": "Nombre de ejemplo",
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "siteName": "Nombre de ejemplo",
       "addressText": "valor-ejemplo",
       "price": 1,
       "currency": "BOB",
@@ -869,9 +874,11 @@ Campos de la respuesta:
 | `studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
 | `modalityLabel` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `options` | Sí | `array<OrderBookingOptionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"unitId":"00000000-0000-4000-8000-000000000001","unitName":"Nombre de ejemplo","addressText":"valor-ejemplo","price":1,"currency":"BOB","distanceKm":1,"nextStartAt":"valor-ejemplo","preparation":"valor-ejemplo","operationalEquipment":1}]` |
+| `options` | Sí | `array<OrderBookingOptionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"unitId":"00000000-0000-4000-8000-000000000001","unitName":"Nombre de ejemplo","siteId":"00000000-0000-4000-8000-000000000001","siteName":"Nombre de ejemplo","addressText":"valor-ejemplo","price":1,"currency":"BOB","distanceKm":1,"nextStartAt":"valor-ejemplo","preparation":"valor-ejemplo","operationalEquipment":1}]` |
 | `options[].unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `options[].unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `options[].siteId` | Sí | `string` | formato `uuid`; admite null | The site (branch) of this option: each site has its schedule. | `00000000-0000-4000-8000-000000000001` |
+| `options[].siteName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `options[].addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `options[].price` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `options[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
@@ -890,6 +897,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Orden no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 409 | `CONFLICT` | Esta orden ya tiene su resultado: no hace falta reservar. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
 | 422 | `PRECONDITION_FAILED` | Esta orden no es de un estudio que se reserve en un centro. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-booking-options.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/order-booking-access.service.ts |
@@ -3556,6 +3564,7 @@ NestJS resuelve `POST /diagnostic-units/{unitId}/equipment` en `CenterScheduleCo
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `siteId` | query | No | `string` | formato `uuid` | `diagnostic_unit_sites.id`; absent, the main site. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
@@ -3592,7 +3601,7 @@ Content-Type: application/json
 Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
 
 ```http
-POST /diagnostic-units/00000000-0000-4000-8000-000000000001/equipment HTTP/1.1
+POST /diagnostic-units/00000000-0000-4000-8000-000000000001/equipment?siteId=00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
@@ -3627,6 +3636,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "unitId": "00000000-0000-4000-8000-000000000001",
   "unitName": "Nombre de ejemplo",
+  "siteId": "00000000-0000-4000-8000-000000000001",
+  "siteName": "Nombre de ejemplo",
+  "sites": [
+    {
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "main": true
+    }
+  ],
   "kind": "LABORATORY",
   "schedule": {
     "general": {
@@ -3634,7 +3653,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         {
           "dayOfWeek": 1,
           "startTime": "08:00",
-          "endTime": "12:00"
+          "endTime": "12:00",
+          "slotMinutes": 5,
+          "gapMinutes": 1
         }
       ],
       "slotMinutes": 30
@@ -3647,7 +3668,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -3662,7 +3685,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -3677,7 +3702,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -3717,37 +3744,52 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `siteId` | Sí | `string` | formato `uuid`; admite null | The site this schedule and equipment belong to. | `00000000-0000-4000-8000-000000000001` |
+| `siteName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites` | Sí | `array<CenterSiteDto>` | Sin restricción adicional declarada | Main site first. | `[{"siteId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","main":true}]` |
+| `sites[].siteId` | Sí | `string` | formato `uuid` | `diagnostic_unit_sites.id`. | `00000000-0000-4000-8000-000000000001` |
+| `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites[].addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sites[].main` | Sí | `boolean` | Sin restricción adicional declarada | The main site: the one used without `siteId`. | `true` |
 | `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
-| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
-| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.general.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
-| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.modalities[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
-| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.studies[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.equipment[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
 | `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
 | `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -3777,6 +3819,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El centro no tiene una sucursal activa donde registrar el equipo. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo todavía no tiene un tipo de equipo para esa modalidad. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
@@ -3872,6 +3915,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "unitId": "00000000-0000-4000-8000-000000000001",
   "unitName": "Nombre de ejemplo",
+  "siteId": "00000000-0000-4000-8000-000000000001",
+  "siteName": "Nombre de ejemplo",
+  "sites": [
+    {
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "main": true
+    }
+  ],
   "kind": "LABORATORY",
   "schedule": {
     "general": {
@@ -3879,7 +3932,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         {
           "dayOfWeek": 1,
           "startTime": "08:00",
-          "endTime": "12:00"
+          "endTime": "12:00",
+          "slotMinutes": 5,
+          "gapMinutes": 1
         }
       ],
       "slotMinutes": 30
@@ -3892,7 +3947,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -3907,7 +3964,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -3922,7 +3981,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -3962,37 +4023,52 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `siteId` | Sí | `string` | formato `uuid`; admite null | The site this schedule and equipment belong to. | `00000000-0000-4000-8000-000000000001` |
+| `siteName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites` | Sí | `array<CenterSiteDto>` | Sin restricción adicional declarada | Main site first. | `[{"siteId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","main":true}]` |
+| `sites[].siteId` | Sí | `string` | formato `uuid` | `diagnostic_unit_sites.id`. | `00000000-0000-4000-8000-000000000001` |
+| `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites[].addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sites[].main` | Sí | `boolean` | Sin restricción adicional declarada | The main site: the one used without `siteId`. | `true` |
 | `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
-| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
-| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.general.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
-| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.modalities[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
-| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.studies[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.equipment[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
 | `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
 | `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -4023,6 +4099,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Equipo no encontrado | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
 | 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 409 | `CONFLICT` | El equipo ya tiene registros asociados: márquelo «Fuera de servicio» en lugar de quitarlo. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4130,6 +4207,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "unitId": "00000000-0000-4000-8000-000000000001",
   "unitName": "Nombre de ejemplo",
+  "siteId": "00000000-0000-4000-8000-000000000001",
+  "siteName": "Nombre de ejemplo",
+  "sites": [
+    {
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "main": true
+    }
+  ],
   "kind": "LABORATORY",
   "schedule": {
     "general": {
@@ -4137,7 +4224,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         {
           "dayOfWeek": 1,
           "startTime": "08:00",
-          "endTime": "12:00"
+          "endTime": "12:00",
+          "slotMinutes": 5,
+          "gapMinutes": 1
         }
       ],
       "slotMinutes": 30
@@ -4150,7 +4239,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -4165,7 +4256,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -4180,7 +4273,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -4220,37 +4315,52 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `siteId` | Sí | `string` | formato `uuid`; admite null | The site this schedule and equipment belong to. | `00000000-0000-4000-8000-000000000001` |
+| `siteName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites` | Sí | `array<CenterSiteDto>` | Sin restricción adicional declarada | Main site first. | `[{"siteId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","main":true}]` |
+| `sites[].siteId` | Sí | `string` | formato `uuid` | `diagnostic_unit_sites.id`. | `00000000-0000-4000-8000-000000000001` |
+| `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites[].addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sites[].main` | Sí | `boolean` | Sin restricción adicional declarada | The main site: the one used without `siteId`. | `true` |
 | `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
-| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
-| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.general.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
-| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.modalities[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
-| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.studies[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.equipment[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
 | `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
 | `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -4281,6 +4391,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Equipo no encontrado | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/set-equipment-status.use-case.ts |
 | 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4394,6 +4505,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "unitId": "00000000-0000-4000-8000-000000000001",
   "unitName": "Nombre de ejemplo",
+  "siteId": "00000000-0000-4000-8000-000000000001",
+  "siteName": "Nombre de ejemplo",
+  "sites": [
+    {
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "main": true
+    }
+  ],
   "kind": "LABORATORY",
   "schedule": {
     "general": {
@@ -4401,7 +4522,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         {
           "dayOfWeek": 1,
           "startTime": "08:00",
-          "endTime": "12:00"
+          "endTime": "12:00",
+          "slotMinutes": 5,
+          "gapMinutes": 1
         }
       ],
       "slotMinutes": 30
@@ -4414,7 +4537,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -4429,7 +4554,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -4444,7 +4571,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -4484,37 +4613,52 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `siteId` | Sí | `string` | formato `uuid`; admite null | The site this schedule and equipment belong to. | `00000000-0000-4000-8000-000000000001` |
+| `siteName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites` | Sí | `array<CenterSiteDto>` | Sin restricción adicional declarada | Main site first. | `[{"siteId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","main":true}]` |
+| `sites[].siteId` | Sí | `string` | formato `uuid` | `diagnostic_unit_sites.id`. | `00000000-0000-4000-8000-000000000001` |
+| `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites[].addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sites[].main` | Sí | `boolean` | Sin restricción adicional declarada | The main site: the one used without `siteId`. | `true` |
 | `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
-| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
-| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.general.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
-| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.modalities[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
-| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.studies[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.equipment[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
 | `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
 | `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -4545,6 +4689,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Equipo no encontrado | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
 | 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El catálogo todavía no tiene un tipo de equipo para esa modalidad. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/manage-center-equipment.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -4587,6 +4732,7 @@ NestJS resuelve `GET /diagnostic-units/{unitId}/schedule` en `CenterScheduleCont
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `siteId` | query | No | `string` | formato `uuid` | `diagnostic_unit_sites.id`; absent, the main site. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
@@ -4612,7 +4758,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /diagnostic-units/00000000-0000-4000-8000-000000000001/schedule HTTP/1.1
+GET /diagnostic-units/00000000-0000-4000-8000-000000000001/schedule?siteId=00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -4636,6 +4782,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "unitId": "00000000-0000-4000-8000-000000000001",
   "unitName": "Nombre de ejemplo",
+  "siteId": "00000000-0000-4000-8000-000000000001",
+  "siteName": "Nombre de ejemplo",
+  "sites": [
+    {
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "main": true
+    }
+  ],
   "kind": "LABORATORY",
   "schedule": {
     "general": {
@@ -4643,7 +4799,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         {
           "dayOfWeek": 1,
           "startTime": "08:00",
-          "endTime": "12:00"
+          "endTime": "12:00",
+          "slotMinutes": 5,
+          "gapMinutes": 1
         }
       ],
       "slotMinutes": 30
@@ -4656,7 +4814,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -4671,7 +4831,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -4686,7 +4848,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -4726,37 +4890,52 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `siteId` | Sí | `string` | formato `uuid`; admite null | The site this schedule and equipment belong to. | `00000000-0000-4000-8000-000000000001` |
+| `siteName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites` | Sí | `array<CenterSiteDto>` | Sin restricción adicional declarada | Main site first. | `[{"siteId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","main":true}]` |
+| `sites[].siteId` | Sí | `string` | formato `uuid` | `diagnostic_unit_sites.id`. | `00000000-0000-4000-8000-000000000001` |
+| `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites[].addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sites[].main` | Sí | `boolean` | Sin restricción adicional declarada | The main site: the one used without `siteId`. | `true` |
 | `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
-| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
-| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.general.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
-| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.modalities[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
-| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.studies[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.equipment[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
 | `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
 | `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -4786,6 +4965,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4826,6 +5006,7 @@ NestJS resuelve `PUT /diagnostic-units/{unitId}/schedule` en `CenterScheduleCont
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `siteId` | query | No | `string` | formato `uuid` | `diagnostic_unit_sites.id`; absent, the main site. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
@@ -4891,35 +5072,43 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `general.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `general.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
-| `modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `modalities[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `modalities[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
-| `studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `studies[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `studies[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `equipment[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `equipment[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
 
 ### Payload completo de ejemplo
@@ -4927,7 +5116,7 @@ Content-Type: application/json
 Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
 
 ```http
-PUT /diagnostic-units/00000000-0000-4000-8000-000000000001/schedule HTTP/1.1
+PUT /diagnostic-units/00000000-0000-4000-8000-000000000001/schedule?siteId=00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
@@ -4938,7 +5127,9 @@ Content-Type: application/json
       {
         "dayOfWeek": 1,
         "startTime": "08:00",
-        "endTime": "12:00"
+        "endTime": "12:00",
+        "slotMinutes": 5,
+        "gapMinutes": 1
       }
     ],
     "slotMinutes": 30
@@ -4951,7 +5142,9 @@ Content-Type: application/json
           {
             "dayOfWeek": 1,
             "startTime": "08:00",
-            "endTime": "12:00"
+            "endTime": "12:00",
+            "slotMinutes": 5,
+            "gapMinutes": 1
           }
         ],
         "slotMinutes": 30
@@ -4966,7 +5159,9 @@ Content-Type: application/json
           {
             "dayOfWeek": 1,
             "startTime": "08:00",
-            "endTime": "12:00"
+            "endTime": "12:00",
+            "slotMinutes": 5,
+            "gapMinutes": 1
           }
         ],
         "slotMinutes": 30
@@ -4981,7 +5176,9 @@ Content-Type: application/json
           {
             "dayOfWeek": 1,
             "startTime": "08:00",
-            "endTime": "12:00"
+            "endTime": "12:00",
+            "slotMinutes": 5,
+            "gapMinutes": 1
           }
         ],
         "slotMinutes": 30
@@ -5013,6 +5210,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "unitId": "00000000-0000-4000-8000-000000000001",
   "unitName": "Nombre de ejemplo",
+  "siteId": "00000000-0000-4000-8000-000000000001",
+  "siteName": "Nombre de ejemplo",
+  "sites": [
+    {
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "main": true
+    }
+  ],
   "kind": "LABORATORY",
   "schedule": {
     "general": {
@@ -5020,7 +5227,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         {
           "dayOfWeek": 1,
           "startTime": "08:00",
-          "endTime": "12:00"
+          "endTime": "12:00",
+          "slotMinutes": 5,
+          "gapMinutes": 1
         }
       ],
       "slotMinutes": 30
@@ -5033,7 +5242,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -5048,7 +5259,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -5063,7 +5276,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -5103,37 +5318,52 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `siteId` | Sí | `string` | formato `uuid`; admite null | The site this schedule and equipment belong to. | `00000000-0000-4000-8000-000000000001` |
+| `siteName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites` | Sí | `array<CenterSiteDto>` | Sin restricción adicional declarada | Main site first. | `[{"siteId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","main":true}]` |
+| `sites[].siteId` | Sí | `string` | formato `uuid` | `diagnostic_unit_sites.id`. | `00000000-0000-4000-8000-000000000001` |
+| `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites[].addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sites[].main` | Sí | `boolean` | Sin restricción adicional declarada | The main site: the one used without `siteId`. | `true` |
 | `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
-| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
-| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.general.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
-| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.modalities[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
-| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.studies[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.equipment[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
 | `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
 | `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -5163,6 +5393,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 409 | `CONFLICT` | affected === 1             ? 'Hay 1 turno reservado que quedaría fuera del horario nuevo.'             : `Hay ${affected} turnos reservados que quedarían fuera del horario nuevo.` | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/save-center-schedule.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El horario tiene datos incompletos. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/save-center-schedule.use-case.ts |
@@ -5206,6 +5437,7 @@ NestJS resuelve `GET /diagnostic-units/{unitId}/study-availability` en `StudyAva
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `unitId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `siteId` | query | No | `string` | formato `uuid` | `diagnostic_unit_sites.id`; absent, the main site. | `00000000-0000-4000-8000-000000000001` |
 | `studyCode` | query | Sí | `string` | longitud máxima 100 | Sin descripción específica en OpenAPI. | `STUDY-ECO-ABD` |
 | `from` | query | No | `string` | Sin restricción adicional declarada | ISO instant; defaults to now. | `valor-ejemplo` |
 | `to` | query | No | `string` | Sin restricción adicional declarada | ISO instant; defaults to from + 14 days. | `valor-ejemplo` |
@@ -5234,7 +5466,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /diagnostic-units/00000000-0000-4000-8000-000000000001/study-availability?studyCode=STUDY-ECO-ABD&from=valor-ejemplo&to=valor-ejemplo HTTP/1.1
+GET /diagnostic-units/00000000-0000-4000-8000-000000000001/study-availability?siteId=00000000-0000-4000-8000-000000000001&studyCode=STUDY-ECO-ABD&from=valor-ejemplo&to=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -5257,6 +5489,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "unitId": "00000000-0000-4000-8000-000000000001",
+  "siteId": "00000000-0000-4000-8000-000000000001",
   "studyCode": "CODIGO_EJEMPLO",
   "origin": "STUDY",
   "items": [
@@ -5275,6 +5508,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `siteId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `studyCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `origin` | Sí | `string` | valores: `STUDY`, `MODALITY`, `GENERAL` | Sin descripción específica en el contrato OpenAPI. | `STUDY` |
 | `items` | Sí | `array<StudyStartDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"startAt":"2026-11-05T12:00:00.000Z","endAt":"2026-11-05T12:30:00.000Z","remaining":1,"capacity":1}]` |
@@ -5294,6 +5528,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Centro no encontrado | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-study-availability.use-case.ts |
 | 404 | `NOT_FOUND` | El centro no hace ese estudio | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-study-availability.use-case.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 422 | `PRECONDITION_FAILED` | Pida una ventana de hasta ${MAX_WINDOW_DAYS} días, con «to» posterior a «from». | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-study-availability.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -5483,6 +5718,7 @@ NestJS resuelve `GET /diagnostic-units/me/bookings` en `CenterScheduleController
 
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
+| `siteId` | query | No | `string` | formato `uuid` | `diagnostic_unit_sites.id`; absent, the main site. | `00000000-0000-4000-8000-000000000001` |
 | `from` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-11-04T04:00:00.000Z` |
 | `to` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-11-05T04:00:00.000Z` |
 
@@ -5509,7 +5745,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /diagnostic-units/me/bookings?from=2026-11-04T04%3A00%3A00.000Z&to=2026-11-05T04%3A00%3A00.000Z HTTP/1.1
+GET /diagnostic-units/me/bookings?siteId=00000000-0000-4000-8000-000000000001&from=2026-11-04T04%3A00%3A00.000Z&to=2026-11-05T04%3A00%3A00.000Z HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -5573,6 +5809,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Su organización no tiene un centro de diagnóstico con agenda. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 422 | `PRECONDITION_FAILED` | Pida una ventana de hasta 31 días, con «to» posterior a «from». | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/list-center-bookings.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -5611,7 +5848,9 @@ NestJS resuelve `GET /diagnostic-units/me/schedule` en `CenterScheduleController
 
 ### Parámetros
 
-No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | query | No | `string` | formato `uuid` | `diagnostic_unit_sites.id`; absent, the main site. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
@@ -5636,7 +5875,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /diagnostic-units/me/schedule HTTP/1.1
+GET /diagnostic-units/me/schedule?siteId=00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -5659,6 +5898,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "unitId": "00000000-0000-4000-8000-000000000001",
   "unitName": "Nombre de ejemplo",
+  "siteId": "00000000-0000-4000-8000-000000000001",
+  "siteName": "Nombre de ejemplo",
+  "sites": [
+    {
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "main": true
+    }
+  ],
   "kind": "LABORATORY",
   "schedule": {
     "general": {
@@ -5666,7 +5915,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         {
           "dayOfWeek": 1,
           "startTime": "08:00",
-          "endTime": "12:00"
+          "endTime": "12:00",
+          "slotMinutes": 5,
+          "gapMinutes": 1
         }
       ],
       "slotMinutes": 30
@@ -5679,7 +5930,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -5694,7 +5947,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -5709,7 +5964,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
             {
               "dayOfWeek": 1,
               "startTime": "08:00",
-              "endTime": "12:00"
+              "endTime": "12:00",
+              "slotMinutes": 5,
+              "gapMinutes": 1
             }
           ],
           "slotMinutes": 30
@@ -5749,37 +6006,52 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `unitId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `unitName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `siteId` | Sí | `string` | formato `uuid`; admite null | The site this schedule and equipment belong to. | `00000000-0000-4000-8000-000000000001` |
+| `siteName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites` | Sí | `array<CenterSiteDto>` | Sin restricción adicional declarada | Main site first. | `[{"siteId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","main":true}]` |
+| `sites[].siteId` | Sí | `string` | formato `uuid` | `diagnostic_unit_sites.id`. | `00000000-0000-4000-8000-000000000001` |
+| `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites[].addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sites[].main` | Sí | `boolean` | Sin restricción adicional declarada | The main site: the one used without `siteId`. | `true` |
 | `kind` | Sí | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en el contrato OpenAPI. | `LABORATORY` |
-| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]}` |
-| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule` | Sí | `SaveCenterScheduleDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"general":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30},"modalities":[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"studies":[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}],"equipment":[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]}` |
+| `schedule.general` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.general.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.general.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.general.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.general.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.general.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.general.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.general.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.modalities` | Sí | `array<ModalityScheduleDto>` | máximo MODALITY_CODES.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"modalityCode":"ECO","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.modalities[].modalityCode` | Sí | `string` | valores: `ECO`, `RX`, `RM`, `TC`, `MG`, `DXA`, `LAB` | Sin descripción específica en el contrato OpenAPI. | `ECO` |
-| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.modalities[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.modalities[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.modalities[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.modalities[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.modalities[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.modalities[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.modalities[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.modalities[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.studies` | Sí | `array<StudyScheduleDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"studyCode":"STUDY-ECO-OBSTETRICA","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.studies[].studyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `STUDY-ECO-OBSTETRICA` |
-| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.studies[].schedule` | Sí | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.studies[].schedule.windows` | Sí | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.studies[].schedule.windows[].dayOfWeek` | Sí | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.studies[].schedule.windows[].startTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.studies[].schedule.windows[].endTime` | Sí | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.studies[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.studies[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.studies[].schedule.slotMinutes` | Sí | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
-| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}}]` |
+| `schedule.equipment` | No | `array<EquipmentScheduleDto>` | máximo 200 elemento(s) | Devices with a shift of their own; the rest follow their study. Omitted = none. | `[{"equipmentId":"00000000-0000-4000-8000-000000000001","schedule":{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}}]` |
 | `schedule.equipment[].equipmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}],"slotMinutes":30}` |
-| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00"}]` |
+| `schedule.equipment[].schedule` | No | `ScheduleBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"windows":[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}],"slotMinutes":30}` |
+| `schedule.equipment[].schedule.windows` | No | `array<ScheduleWindowDto>` | máximo 28 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"dayOfWeek":1,"startTime":"08:00","endTime":"12:00","slotMinutes":5,"gapMinutes":1}]` |
 | `schedule.equipment[].schedule.windows[].dayOfWeek` | No | `number` | mínimo 1; máximo 7 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `schedule.equipment[].schedule.windows[].startTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `08:00` |
 | `schedule.equipment[].schedule.windows[].endTime` | No | `string` | patrón `^([01]\d\|2[0-3]):[0-5]\d$`; patrón runtime `HH_MM` | Sin descripción específica en el contrato OpenAPI. | `12:00` |
+| `schedule.equipment[].schedule.windows[].slotMinutes` | No | `number` | mínimo 5; máximo 240 | This window's appointment length; absent, the block's. | `5` |
+| `schedule.equipment[].schedule.windows[].gapMinutes` | No | `number` | mínimo 0; máximo 120 | Rest after each appointment; absent, none. | `1` |
 | `schedule.equipment[].schedule.slotMinutes` | No | `number` | mínimo 5; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `30` |
 | `studies` | Sí | `array<CenterStudyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","modalityCode":"ECO","price":1,"currency":"BOB","preparation":"valor-ejemplo"}]` |
 | `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -5805,9 +6077,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Su organización no tiene un centro de diagnóstico con agenda. | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/get-center-schedule.use-case.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/diagnostic_units/center-schedule/application/center-context.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5815,8 +6089,8 @@ Ejemplo de error normalizado:
 
 ```json
 {
-  "code": "UNAUTHENTICATED",
-  "message": "JWT Bearer ausente, vencido o inválido.",
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/diagnostic-units/me/schedule"
@@ -6235,6 +6509,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `conceptIds` | Sí | `array<string>` | formato `uuid`; mínimo 1 elemento(s); máximo 600 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `skipComponentIds` | No | `array<string>` | formato `uuid`; máximo 5000 elemento(s) | Components the lab does not offer: no service is made for them. Absent or empty: every component of each chosen análisis | `["00000000-0000-4000-8000-000000000001"]` |
 
 ### Payload completo de ejemplo
 
@@ -6248,6 +6523,9 @@ Content-Type: application/json
 
 {
   "conceptIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
+  "skipComponentIds": [
     "00000000-0000-4000-8000-000000000001"
   ]
 }

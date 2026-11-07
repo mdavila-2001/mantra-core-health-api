@@ -52,7 +52,7 @@ _Fuente: `src/modules/procedures_perioperative/README.md:117`_
 |---|---|---|---|---|---|
 | `UC-53-01` | Programar caso y reservar quirófano | POST /procedure-cases | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 14 |
 | `UC-53-02` | Diagnósticos y equipo | POST /procedure-cases/{id}/diagnoses | SURGEON · PERIOP_ADMIN | MEDIO | 11 |
-| `UC-53-03` | Valoración y riesgo | POST /procedure-cases/{id}/preoperative-assessments | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 21 |
+| `UC-53-03` | Valoración y riesgo | POST /procedure-cases/{id}/preoperative-assessments | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 22 |
 | `UC-53-04` | Clearance de órdenes | POST /procedure-cases/{id}/preoperative-orders/verify | ANESTHESIOLOGIST · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 2 |
 | `UC-53-05` | Checklist por fases | POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses | PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 6 |
 | `UC-53-06` | Plan de anestesia | POST /procedure-cases/{id}/anesthesia-plans | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 3 |
@@ -71,17 +71,17 @@ _Fuente: `src/modules/procedures_perioperative/README.md:117`_
 |  |  | POST /pacu-stays/{stayId}/discharge | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 6 |
 |  |  | GET /procedure-cases | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 5 |
 |  |  | GET /procedure-cases/{id} | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 46 |
-|  |  | PATCH /procedure-cases/{id} | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 26 |
+|  |  | PATCH /procedure-cases/{id} | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 27 |
 |  |  | POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 2 |
-|  |  | POST /procedure-cases/{id}/confirm | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 19 |
+|  |  | POST /procedure-cases/{id}/confirm | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 20 |
 |  |  | POST /procedure-cases/{id}/findings | SURGEON · PERIOP_ADMIN | MEDIO | 4 |
 |  |  | POST /procedure-cases/{id}/operative-reports/{reportId}/sign | SURGEON · PERIOP_ADMIN | MEDIO | 7 |
-|  |  | POST /procedure-cases/{id}/preoperative-orders | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 37 |
+|  |  | POST /procedure-cases/{id}/preoperative-orders | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 38 |
 |  |  | POST /procedure-cases/{id}/specimens | SURGEON · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 2 |
 |  |  | GET /procedure-cases/{id}/team-members | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 2 |
-|  |  | POST /procedure-cases/{id}/team-members | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 18 |
+|  |  | POST /procedure-cases/{id}/team-members | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 19 |
 |  |  | POST /procedure-cases/{id}/team-members/{memberId}/accept | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 2 |
-|  |  | POST /procedure-cases/{id}/team-members/{memberId}/respond | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | MEDIO | 17 |
+|  |  | POST /procedure-cases/{id}/team-members/{memberId}/respond | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | MEDIO | 18 |
 | `ctrl:PeriopOrController` | Operaciones de PeriopOrController que el README no asigna a un caso de uso | POST /internal/periop/or-blocks-release-tick | SYSTEM · SYSTEM_WORKER | MEDIO | 3 |
 |  |  | POST /or-blocks/{id}/cancel | Cualquier sesión válida | ALTO | 10 |
 |  |  | POST /or-blocks/{id}/release | Cualquier sesión válida | ALTO | 10 |
@@ -116,10 +116,10 @@ flowchart LR
   t12[("audit.audit_log")]:::tabla
   t13[("audit.conditions_history")]:::tabla
   t14[("clinical.conditions")]:::tabla
-  t18[("messaging.domain_events")]:::tabla
-  t19[("messaging.in_app_notifications")]:::tabla
-  t20[("messaging.message_channels")]:::tabla
-  t21[("messaging.messaging_providers")]:::tabla
+  t18[("directory.tenant_memberships")]:::tabla
+  t19[("messaging.domain_events")]:::tabla
+  t20[("messaging.in_app_notifications")]:::tabla
+  t21[("messaging.message_channels")]:::tabla
   e23>"periop.case.reacceptance_required"]:::evento
   e24>"~null"]:::evento
   t27[("procedures_perioperative.preoperative_orders")]:::tabla
@@ -158,7 +158,7 @@ flowchart LR
   subgraph s1["UC-53-02 · Diagnósticos y equipo"]
     o10["POST /procedure-cases/{id}/diagnoses"]:::op
   end
-  t22[("+15 tablas más")]
+  t22[("+16 tablas más")]
   subgraph s2["UC-53-03 · Valoración y riesgo"]
     o16["POST /procedure-cases/{id}/preoperative-assessments"]:::op
   end
@@ -220,10 +220,10 @@ flowchart LR
   o10 -->|"CREA"| t14
   o10 -.-> t15
   a17 --> o16
-  o16 -->|"CREA"| t18
-  o16 -->|"ACTUALIZA"| t19
+  o16 -->|"LEE"| t18
   o16 -->|"CREA"| t19
-  o16 -->|"LEE"| t19
+  o16 -->|"ACTUALIZA"| t20
+  o16 -->|"CREA"| t20
   o16 -->|"LEE"| t20
   o16 -->|"LEE"| t21
   o16 -.-> t22
@@ -316,8 +316,8 @@ flowchart LR
   a64(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
   a77(["SYSTEM · SYSTEM_WORKER"]):::actor
   a79(["Cualquier sesión válida"]):::actor
-  a88(["PERIOP_ADMIN · PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST"]):::actor
-  a93(["PERIOP_ADMIN · PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST ·…"]):::actor
+  a87(["PERIOP_ADMIN · PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST"]):::actor
+  a92(["PERIOP_ADMIN · PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST ·…"]):::actor
   t3[("procedures_perioperative.pacu_assessments")]:::tabla
   t4[("procedures_perioperative.pacu_stays")]:::tabla
   t7[("procedures_perioperative.postoperative_followups")]:::tabla
@@ -335,9 +335,9 @@ flowchart LR
   t22[("authz.patient_legal_representations")]:::tabla
   t23[("authz.permissions")]:::tabla
   t27[("clinical.encounter_locations")]:::tabla
-  t28[("messaging.domain_events")]:::tabla
-  t29[("messaging.in_app_notifications")]:::tabla
-  t30[("messaging.message_channels")]:::tabla
+  t28[("directory.tenant_memberships")]:::tabla
+  t29[("messaging.domain_events")]:::tabla
+  t30[("messaging.in_app_notifications")]:::tabla
   e32>"periop.case.reacceptance_required"]:::evento
   e33>"~null"]:::evento
   t35[("procedures_perioperative.anesthesia_plans")]:::tabla
@@ -361,26 +361,25 @@ flowchart LR
   e62>"clinical.service_request.collection_point_suggest…"]:::evento
   t65[("procedures_perioperative.procedure_specimens")]:::tabla
   t67[("procedures_perioperative.procedure_case_team_memb…")]:::tabla
-  t69[("messaging.messaging_providers")]:::tabla
+  t69[("messaging.message_channels")]:::tabla
   t72[("profiles.professional_credentials")]:::tabla
   e75>"periop.case.team_participation_declined"]:::evento
   t80[("delegated_access.organization_user_assignments")]:::tabla
   t81[("directory.branch_memberships")]:::tabla
-  t82[("directory.tenant_memberships")]:::tabla
-  t83[("practice.practice_sites")]:::tabla
-  t89[("practice.care_space_status_events")]:::tabla
-  t90[("practice.cleaning_orders")]:::tabla
-  t94[("procedures_perioperative.surgical_safety_checklis…")]:::tabla
-  t95[("procedures_perioperative.surgical_safety_items")]:::tabla
-  t96[("procedures_perioperative.surgical_safety_responses")]:::tabla
-  t103[("practice.care_space_blocks")]:::tabla
+  t82[("practice.practice_sites")]:::tabla
+  t88[("practice.care_space_status_events")]:::tabla
+  t89[("practice.cleaning_orders")]:::tabla
+  t93[("procedures_perioperative.surgical_safety_checklis…")]:::tabla
+  t94[("procedures_perioperative.surgical_safety_items")]:::tabla
+  t95[("procedures_perioperative.surgical_safety_responses")]:::tabla
+  t102[("practice.care_space_blocks")]:::tabla
   t24[("+40 tablas más")]
-  t31[("+20 tablas más")]
-  t39[("+13 tablas más")]
+  t31[("+21 tablas más")]
+  t39[("+14 tablas más")]
   t51[("+1 tablas más")]
-  t60[("+31 tablas más")]
-  t70[("+12 tablas más")]
-  t74[("+11 tablas más")]
+  t60[("+32 tablas más")]
+  t70[("+13 tablas más")]
+  t74[("+12 tablas más")]
   subgraph s0["ctrl:PeriopController · Operaciones de PeriopController que el README no asigna…"]
     o1["POST /pacu-stays/{stayId}/assessments"]:::op
     o5["POST /pacu-stays/{stayId}/discharge"]:::op
@@ -398,24 +397,24 @@ flowchart LR
     o71["POST /procedure-cases/{id}/team-members/{memberId}/accept"]:::op
     o73["POST /procedure-cases/{id}/team-members/{memberId}/respond"]:::op
   end
-  t84[("+4 tablas más")]
-  t86[("+4 tablas más")]
-  t91[("+6 tablas más")]
-  t99[("+6 tablas más")]
-  t101[("+4 tablas más")]
-  t104[("+6 tablas más")]
-  t106[("+4 tablas más")]
+  t83[("+4 tablas más")]
+  t85[("+4 tablas más")]
+  t90[("+6 tablas más")]
+  t98[("+6 tablas más")]
+  t100[("+4 tablas más")]
+  t103[("+6 tablas más")]
+  t105[("+4 tablas más")]
   subgraph s1["ctrl:PeriopOrController · Operaciones de PeriopOrController que el README no as…"]
     o76["POST /internal/periop/or-blocks-release-tick"]:::op
     o78["POST /or-blocks/{id}/cancel"]:::op
-    o85["POST /or-blocks/{id}/release"]:::op
-    o87["POST /procedure-cases/{id}/room-events"]:::op
-    o92["POST /procedure-cases/{id}/safety-checklists"]:::op
-    o97["GET /procedure-cases/{id}/safety-checklists/{checklistId}"]:::op
-    o98["GET /sites/{siteId}/operating-rooms"]:::op
-    o100["GET /sites/{siteId}/or-blocks"]:::op
-    o102["POST /sites/{siteId}/or-blocks"]:::op
-    o105["GET /sites/{siteId}/or-utilization"]:::op
+    o84["POST /or-blocks/{id}/release"]:::op
+    o86["POST /procedure-cases/{id}/room-events"]:::op
+    o91["POST /procedure-cases/{id}/safety-checklists"]:::op
+    o96["GET /procedure-cases/{id}/safety-checklists/{checklistId}"]:::op
+    o97["GET /sites/{siteId}/operating-rooms"]:::op
+    o99["GET /sites/{siteId}/or-blocks"]:::op
+    o101["POST /sites/{siteId}/or-blocks"]:::op
+    o104["GET /sites/{siteId}/or-utilization"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -443,10 +442,10 @@ flowchart LR
   o17 -.-> t24
   a26 --> o25
   o25 -->|"LEE"| t27
-  o25 -->|"CREA"| t28
-  o25 -->|"ACTUALIZA"| t29
+  o25 -->|"LEE"| t28
   o25 -->|"CREA"| t29
-  o25 -->|"LEE"| t29
+  o25 -->|"ACTUALIZA"| t30
+  o25 -->|"CREA"| t30
   o25 -->|"LEE"| t30
   o25 -.-> t31
   o25 -->|"evento"| e32
@@ -457,10 +456,10 @@ flowchart LR
   a26 --> o36
   o36 -->|"CREA"| t37
   o36 -->|"LEE"| t37
+  o36 -->|"LEE"| t28
   o36 -->|"LEE"| t38
-  o36 -->|"CREA"| t28
-  o36 -->|"ACTUALIZA"| t29
   o36 -->|"CREA"| t29
+  o36 -->|"ACTUALIZA"| t30
   o36 -.-> t39
   o36 -->|"evento"| e40
   o36 -->|"evento"| e33
@@ -494,10 +493,10 @@ flowchart LR
   o66 -->|"LEE"| t67
   o66 -->|"LEE"| t15
   a26 --> o68
-  o68 -->|"CREA"| t28
-  o68 -->|"ACTUALIZA"| t29
+  o68 -->|"LEE"| t28
   o68 -->|"CREA"| t29
-  o68 -->|"LEE"| t29
+  o68 -->|"ACTUALIZA"| t30
+  o68 -->|"CREA"| t30
   o68 -->|"LEE"| t30
   o68 -->|"LEE"| t69
   o68 -.-> t70
@@ -509,10 +508,10 @@ flowchart LR
   a11 --> o73
   o73 -->|"CREA"| t37
   o73 -->|"LEE"| t37
+  o73 -->|"LEE"| t28
   o73 -->|"LEE"| t38
-  o73 -->|"CREA"| t28
-  o73 -->|"ACTUALIZA"| t29
   o73 -->|"CREA"| t29
+  o73 -->|"ACTUALIZA"| t30
   o73 -.-> t74
   o73 -->|"evento"| e75
   o73 -->|"evento"| e33
@@ -523,69 +522,69 @@ flowchart LR
   a79 --> o78
   o78 -->|"LEE"| t80
   o78 -->|"LEE"| t81
-  o78 -->|"LEE"| t82
+  o78 -->|"LEE"| t28
   o78 -->|"LEE"| t12
   o78 -->|"LEE"| t13
-  o78 -->|"LEE"| t83
-  o78 -.-> t84
-  a79 --> o85
-  o85 -->|"LEE"| t80
-  o85 -->|"LEE"| t81
-  o85 -->|"LEE"| t82
-  o85 -->|"LEE"| t12
-  o85 -->|"LEE"| t13
-  o85 -->|"LEE"| t83
-  o85 -.-> t86
-  a88 --> o87
-  o87 -->|"LEE"| t27
-  o87 -->|"CREA"| t89
-  o87 -->|"ACTUALIZA"| t12
-  o87 -->|"LEE"| t12
-  o87 -->|"CREA"| t90
-  o87 -->|"ACTUALIZA"| t90
-  o87 -.-> t91
-  a93 --> o92
-  o92 -->|"CREA"| t94
-  o92 -->|"LEE"| t94
-  o92 -->|"CREA"| t95
-  o92 -->|"LEE"| t95
-  o92 -->|"LEE"| t96
-  a93 --> o97
-  o97 -->|"LEE"| t94
-  o97 -->|"LEE"| t95
-  o97 -->|"LEE"| t96
-  a79 --> o98
-  o98 -->|"LEE"| t27
-  o98 -->|"LEE"| t80
-  o98 -->|"LEE"| t81
-  o98 -->|"LEE"| t82
-  o98 -->|"LEE"| t12
-  o98 -->|"LEE"| t13
-  o98 -.-> t99
-  a79 --> o100
-  o100 -->|"LEE"| t80
-  o100 -->|"LEE"| t81
-  o100 -->|"LEE"| t82
-  o100 -->|"LEE"| t12
-  o100 -->|"LEE"| t13
-  o100 -->|"LEE"| t83
-  o100 -.-> t101
-  a79 --> o102
-  o102 -->|"LEE"| t80
-  o102 -->|"LEE"| t81
-  o102 -->|"LEE"| t82
-  o102 -->|"LEE"| t103
-  o102 -->|"LEE"| t12
-  o102 -->|"LEE"| t13
-  o102 -.-> t104
-  a79 --> o105
-  o105 -->|"LEE"| t80
-  o105 -->|"LEE"| t81
-  o105 -->|"LEE"| t82
-  o105 -->|"LEE"| t12
-  o105 -->|"LEE"| t13
-  o105 -->|"LEE"| t83
-  o105 -.-> t106
+  o78 -->|"LEE"| t82
+  o78 -.-> t83
+  a79 --> o84
+  o84 -->|"LEE"| t80
+  o84 -->|"LEE"| t81
+  o84 -->|"LEE"| t28
+  o84 -->|"LEE"| t12
+  o84 -->|"LEE"| t13
+  o84 -->|"LEE"| t82
+  o84 -.-> t85
+  a87 --> o86
+  o86 -->|"LEE"| t27
+  o86 -->|"CREA"| t88
+  o86 -->|"ACTUALIZA"| t12
+  o86 -->|"LEE"| t12
+  o86 -->|"CREA"| t89
+  o86 -->|"ACTUALIZA"| t89
+  o86 -.-> t90
+  a92 --> o91
+  o91 -->|"CREA"| t93
+  o91 -->|"LEE"| t93
+  o91 -->|"CREA"| t94
+  o91 -->|"LEE"| t94
+  o91 -->|"LEE"| t95
+  a92 --> o96
+  o96 -->|"LEE"| t93
+  o96 -->|"LEE"| t94
+  o96 -->|"LEE"| t95
+  a79 --> o97
+  o97 -->|"LEE"| t27
+  o97 -->|"LEE"| t80
+  o97 -->|"LEE"| t81
+  o97 -->|"LEE"| t28
+  o97 -->|"LEE"| t12
+  o97 -->|"LEE"| t13
+  o97 -.-> t98
+  a79 --> o99
+  o99 -->|"LEE"| t80
+  o99 -->|"LEE"| t81
+  o99 -->|"LEE"| t28
+  o99 -->|"LEE"| t12
+  o99 -->|"LEE"| t13
+  o99 -->|"LEE"| t82
+  o99 -.-> t100
+  a79 --> o101
+  o101 -->|"LEE"| t80
+  o101 -->|"LEE"| t81
+  o101 -->|"LEE"| t28
+  o101 -->|"LEE"| t102
+  o101 -->|"LEE"| t12
+  o101 -->|"LEE"| t13
+  o101 -.-> t103
+  a79 --> o104
+  o104 -->|"LEE"| t80
+  o104 -->|"LEE"| t81
+  o104 -->|"LEE"| t28
+  o104 -->|"LEE"| t12
+  o104 -->|"LEE"| t13
+  o104 -->|"LEE"| t82
+  o104 -.-> t105
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3

@@ -43,7 +43,7 @@ _Fuente: `src/modules/pharmacy_inventory/README.md:3`_
 |  |  | POST /pharmacy/recall-holds/{id}/release | SECURITY_ADMIN | MEDIO | 11 |
 | `ctrl:PharmacyInventoryInternalController` | Operaciones de PharmacyInventoryInternalController que el README no asigna a un caso de uso | POST /internal/inventory-sync-batches | SECURITY_ADMIN | MEDIO | 7 |
 |  |  | POST /internal/inventory-sync/{batchId}/reconcile | SECURITY_ADMIN | MEDIO | 6 |
-|  |  | POST /internal/reservations/expire | SYSTEM · SECURITY_ADMIN | MEDIO | 23 |
+|  |  | POST /internal/reservations/expire | SYSTEM · SECURITY_ADMIN | MEDIO | 24 |
 | `ctrl:PharmacyInventoryManagementController` | Operaciones de PharmacyInventoryManagementController que el README no asigna a un caso de uso | GET /pharmacy/{pharmacyId}/inventory/ledger | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 7 |
 |  |  | GET /pharmacy/{pharmacyId}/inventory/locations | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 5 |
 |  |  | GET /pharmacy/{pharmacyId}/inventory/lots | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 7 |
@@ -51,19 +51,19 @@ _Fuente: `src/modules/pharmacy_inventory/README.md:3`_
 | `ctrl:PharmacyInventoryReadController` | Operaciones de PharmacyInventoryReadController que el README no asigna a un caso de uso | GET /pharmacy-inventory/availability | Cualquier sesión válida | BAJO | 10 |
 |  |  | GET /pharmacy-inventory/availability/medications | Cualquier sesión válida | BAJO | 10 |
 |  |  | GET /pharmacy-inventory/sites/{siteId}/stock | Cualquier sesión válida | BAJO | 6 |
-| `ctrl:PharmacyOrdersController` | Operaciones de PharmacyOrdersController que el README no asigna a un caso de uso | GET /pharmacy/orders | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 33 |
+| `ctrl:PharmacyOrdersController` | Operaciones de PharmacyOrdersController que el README no asigna a un caso de uso | GET /pharmacy/orders | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 34 |
 |  |  | POST /pharmacy/orders | PATIENT | MEDIO | 33 |
 |  |  | GET /pharmacy/orders/{id} | Cualquier sesión válida | ALTO | 48 |
 |  |  | POST /pharmacy/orders/{id}/accept-substitutions | PATIENT | MEDIO | 25 |
 |  |  | POST /pharmacy/orders/{id}/cancel | PATIENT | MEDIO | 23 |
-|  |  | POST /pharmacy/orders/{id}/confirm | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 39 |
+|  |  | POST /pharmacy/orders/{id}/confirm | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 40 |
 |  |  | POST /pharmacy/orders/{id}/conversation | Cualquier sesión válida | ALTO | 11 |
-|  |  | POST /pharmacy/orders/{id}/dispense | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 36 |
+|  |  | POST /pharmacy/orders/{id}/dispense | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 37 |
 |  |  | POST /pharmacy/orders/{id}/prefer-original | PATIENT | MEDIO | 19 |
-|  |  | POST /pharmacy/orders/{id}/ready | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 28 |
-|  |  | POST /pharmacy/orders/{id}/reject | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 33 |
-|  |  | POST /pharmacy/orders/{id}/review | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 28 |
-|  |  | GET /pharmacy/orders/me | PATIENT | MEDIO | 47 |
+|  |  | POST /pharmacy/orders/{id}/ready | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 29 |
+|  |  | POST /pharmacy/orders/{id}/reject | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 34 |
+|  |  | POST /pharmacy/orders/{id}/review | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 29 |
+|  |  | GET /pharmacy/orders/me | PATIENT | MEDIO | 48 |
 | `ctrl:PharmacyPrescriptionSharesController` | Operaciones de PharmacyPrescriptionSharesController que el README no asigna a un caso de uso | GET /pharmacy/prescription-shares/{token} | PHARMACY_STAFF | MEDIO | 21 |
 | `ctrl:PharmacyProcurementController` | Operaciones de PharmacyProcurementController que el README no asigna a un caso de uso | POST /pharmacy/{pharmacyId}/goods-receipts | SECURITY_ADMIN | MEDIO | 19 |
 |  |  | POST /pharmacy/{pharmacyId}/purchase-orders | SECURITY_ADMIN | MEDIO | 8 |
@@ -101,8 +101,8 @@ flowchart LR
   t44[("messaging.outbox_messages")]:::tabla
   e46>"~null"]:::evento
   t51[("pharmacy_inventory.inventory_recall_holds")]:::tabla
-  t60[("messaging.in_app_notifications")]:::tabla
-  t61[("messaging.message_channels")]:::tabla
+  t60[("directory.tenant_memberships")]:::tabla
+  t61[("messaging.in_app_notifications")]:::tabla
   t8[("+13 tablas más")]
   t12[("+4 tablas más")]
   subgraph s0["ctrl:PharmacyDispensingController · Operaciones de PharmacyDispensingController…"]
@@ -139,7 +139,7 @@ flowchart LR
     o53["POST /pharmacy/recall-holds/{id}/release"]:::op
   end
   t56[("+1 tablas más")]
-  t62[("+17 tablas más")]
+  t62[("+18 tablas más")]
   subgraph s3["ctrl:PharmacyInventoryInternalController · Operaciones de PharmacyInventoryInte…"]
     o55["POST /internal/inventory-sync-batches"]:::op
     o57["POST /internal/inventory-sync/{batchId}/reconcile"]:::op
@@ -294,10 +294,10 @@ flowchart LR
   o57 -->|"LEE"| t18
   a59 --> o58
   o58 -->|"LEE"| t3
-  o58 -->|"CREA"| t43
-  o58 -->|"ACTUALIZA"| t60
-  o58 -->|"CREA"| t60
   o58 -->|"LEE"| t60
+  o58 -->|"CREA"| t43
+  o58 -->|"ACTUALIZA"| t61
+  o58 -->|"CREA"| t61
   o58 -->|"LEE"| t61
   o58 -.-> t62
   o58 -->|"evento"| e46
@@ -356,9 +356,9 @@ flowchart LR
   t15[("terminology.catalog_concepts")]:::tabla
   t18[("clinical.medication_requests")]:::tabla
   t19[("community.public_profiles")]:::tabla
-  t20[("directory.tenants")]:::tabla
-  t21[("messaging.domain_events")]:::tabla
-  t22[("messaging.in_app_notifications")]:::tabla
+  t20[("directory.tenant_memberships")]:::tabla
+  t21[("directory.tenants")]:::tabla
+  t22[("messaging.domain_events")]:::tabla
   e24>"~null"]:::evento
   t27[("integrations.provider_connections")]:::tabla
   t28[("integrations.provider_credentials")]:::tabla
@@ -386,19 +386,19 @@ flowchart LR
     o10["GET /pharmacy-inventory/availability/medications"]:::op
     o12["GET /pharmacy-inventory/sites/{siteId}/stock"]:::op
   end
-  t23[("+27 tablas más")]
+  t23[("+28 tablas más")]
   t29[("+27 tablas más")]
   t34[("+42 tablas más")]
   t37[("+19 tablas más")]
   t39[("+17 tablas más")]
-  t41[("+33 tablas más")]
+  t41[("+34 tablas más")]
   t46[("+5 tablas más")]
-  t49[("+30 tablas más")]
+  t49[("+31 tablas más")]
   t51[("+13 tablas más")]
-  t53[("+22 tablas más")]
-  t55[("+27 tablas más")]
-  t57[("+22 tablas más")]
-  t59[("+41 tablas más")]
+  t53[("+23 tablas más")]
+  t55[("+28 tablas más")]
+  t57[("+23 tablas más")]
+  t59[("+42 tablas más")]
   subgraph s1["ctrl:PharmacyOrdersController · Operaciones de PharmacyOrdersController que el…"]
     o16["GET /pharmacy/orders"]:::op
     o25["POST /pharmacy/orders"]:::op
@@ -459,15 +459,15 @@ flowchart LR
   o16 -->|"LEE"| t3
   o16 -->|"LEE"| t19
   o16 -->|"LEE"| t20
-  o16 -->|"CREA"| t21
-  o16 -->|"ACTUALIZA"| t22
+  o16 -->|"LEE"| t21
+  o16 -->|"CREA"| t22
   o16 -.-> t23
   o16 -->|"evento"| e24
   a26 --> o25
   o25 -->|"LEE"| t18
   o25 -->|"LEE"| t3
   o25 -->|"LEE"| t19
-  o25 -->|"LEE"| t20
+  o25 -->|"LEE"| t21
   o25 -->|"LEE"| t27
   o25 -->|"LEE"| t28
   o25 -.-> t29
@@ -485,8 +485,8 @@ flowchart LR
   o35 -->|"LEE"| t18
   o35 -->|"LEE"| t3
   o35 -->|"LEE"| t19
-  o35 -->|"LEE"| t20
-  o35 -->|"CREA"| t21
+  o35 -->|"LEE"| t21
+  o35 -->|"CREA"| t22
   o35 -->|"CREA"| t36
   o35 -.-> t37
   o35 -->|"evento"| e24
@@ -494,8 +494,8 @@ flowchart LR
   o38 -->|"LEE"| t18
   o38 -->|"LEE"| t3
   o38 -->|"LEE"| t19
-  o38 -->|"LEE"| t20
-  o38 -->|"CREA"| t21
+  o38 -->|"LEE"| t21
+  o38 -->|"CREA"| t22
   o38 -->|"CREA"| t36
   o38 -.-> t39
   o38 -->|"evento"| e24
@@ -504,8 +504,8 @@ flowchart LR
   o40 -->|"LEE"| t3
   o40 -->|"LEE"| t19
   o40 -->|"LEE"| t20
-  o40 -->|"CREA"| t21
-  o40 -->|"ACTUALIZA"| t22
+  o40 -->|"LEE"| t21
+  o40 -->|"CREA"| t22
   o40 -.-> t41
   o40 -->|"evento"| e24
   a2 --> o42
@@ -521,16 +521,16 @@ flowchart LR
   o47 -->|"LEE"| t3
   o47 -->|"LEE"| t19
   o47 -->|"LEE"| t20
+  o47 -->|"LEE"| t21
   o47 -->|"LEE"| t48
-  o47 -->|"CREA"| t21
   o47 -.-> t49
   o47 -->|"evento"| e24
   a26 --> o50
   o50 -->|"LEE"| t18
   o50 -->|"LEE"| t3
   o50 -->|"LEE"| t19
-  o50 -->|"LEE"| t20
-  o50 -->|"CREA"| t21
+  o50 -->|"LEE"| t21
+  o50 -->|"CREA"| t22
   o50 -->|"CREA"| t36
   o50 -.-> t51
   o50 -->|"evento"| e24
@@ -539,8 +539,8 @@ flowchart LR
   o52 -->|"LEE"| t3
   o52 -->|"LEE"| t19
   o52 -->|"LEE"| t20
-  o52 -->|"CREA"| t21
-  o52 -->|"ACTUALIZA"| t22
+  o52 -->|"LEE"| t21
+  o52 -->|"CREA"| t22
   o52 -.-> t53
   o52 -->|"evento"| e24
   a17 --> o54
@@ -548,8 +548,8 @@ flowchart LR
   o54 -->|"LEE"| t3
   o54 -->|"LEE"| t19
   o54 -->|"LEE"| t20
-  o54 -->|"CREA"| t21
-  o54 -->|"ACTUALIZA"| t22
+  o54 -->|"LEE"| t21
+  o54 -->|"CREA"| t22
   o54 -.-> t55
   o54 -->|"evento"| e24
   a17 --> o56
@@ -557,8 +557,8 @@ flowchart LR
   o56 -->|"LEE"| t3
   o56 -->|"LEE"| t19
   o56 -->|"LEE"| t20
-  o56 -->|"CREA"| t21
-  o56 -->|"ACTUALIZA"| t22
+  o56 -->|"LEE"| t21
+  o56 -->|"CREA"| t22
   o56 -.-> t57
   o56 -->|"evento"| e24
   a26 --> o58

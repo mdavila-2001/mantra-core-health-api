@@ -5991,6 +5991,64 @@
         "description": "Cerrar una de mis sesiones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/iam/me/name": {
+      "patch": {
+        "description": "Recibe las cuatro partes del registro y recompone el nombre. El token lo trae al renovarse.",
+        "operationId": "IamMyNameController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMyNameDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Corregir el nombre de la propia cuenta",
+        "tags": [
+          "iam-auth"
+        ]
+      }
+    },
     "/iam/onboarding-drafts/{formType}/{draftId}": {
       "get": {
         "operationId": "IamOnboardingDraftsController_getDraft",
@@ -135946,6 +136004,36 @@
         "required": [
           "currentPassword",
           "newPassword"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateMyNameDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Wendy"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Jennyfer"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Dávila"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Yamal"
+          }
+        },
+        "required": [
+          "name",
+          "lastName"
         ],
         "additionalProperties": false
       },

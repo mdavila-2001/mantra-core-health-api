@@ -10,7 +10,7 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [addresses](#addresses) | Representa domicilios y direcciones de personas, sedes y organizaciones utilizadas por procesos del sistema médico. | 24 | 11 | 114 | COINCIDE |
+| [addresses](#addresses) | Representa domicilios y direcciones de personas, sedes y organizaciones utilizadas por procesos del sistema médico. | 24 | 11 | 104 | COINCIDE |
 | [contact_points](#contact_points) | Conserva medios de contacto de personas y organizaciones para comunicación asistencial y administrativa. | 15 | 5 | 52 | COINCIDE |
 | [file_derivatives](#file_derivatives) | Cataloga derivados de archivos —como representaciones o vistas procesadas— asociados al original. | 7 | 4 | 5 | COINCIDE |
 | [file_links](#file_links) | Vincula archivos con registros de negocio para reutilizar documentos sin duplicar su identidad. | 13 | 6 | 10 | COINCIDE |
@@ -84,7 +84,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: addresses`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Addresses` — `src/modules/common/entities/addresses.entity.ts`
-- **Resumen:** 24 columnas · 11 índices · 9 FK salientes · 7 entrantes · 114 operaciones
+- **Resumen:** 24 columnas · 11 índices · 9 FK salientes · 7 entrantes · 104 operaciones
 
 #### Columnas
 
@@ -179,18 +179,8 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | GET /public/search/pharmacies | LEE | POR_SQL |
 | GET /public/search/practitioners | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
-| POST /diagnostic-results/me/orders/{orderId}/booking | LEE | POR_SQL |
 | GET /diagnostic-results/me/orders/{orderId}/booking-options | LEE | POR_SQL |
 | GET /diagnostic-units/{id} | LEE | DIRECTA |
-| POST /diagnostic-units/{unitId}/equipment | LEE | POR_SQL |
-| DELETE /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | POR_SQL |
-| PATCH /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | POR_SQL |
-| PUT /diagnostic-units/{unitId}/equipment/{equipmentId} | LEE | POR_SQL |
-| GET /diagnostic-units/{unitId}/schedule | LEE | POR_SQL |
-| PUT /diagnostic-units/{unitId}/schedule | LEE | POR_SQL |
-| GET /diagnostic-units/{unitId}/study-availability | LEE | POR_SQL |
-| GET /diagnostic-units/me/bookings | LEE | POR_SQL |
-| GET /diagnostic-units/me/schedule | LEE | POR_SQL |
 | GET /diagnostic-units/search | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |

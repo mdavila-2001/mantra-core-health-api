@@ -24,7 +24,7 @@
 | [session_policies](#session_policies) | Fija por organización la duración de la sesión inactiva, la alerta de dispositivo nuevo, el horario permitido y el uso de reglas de IP y MFA, para todas las cuentas, su personal o un rol. | 15 | 7 | 0 | COINCIDE |
 | [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 148 | COINCIDE |
 | [user_global_roles](#user_global_roles) | Asocia roles de alcance global a usuarios para resolver privilegios transversales de la plataforma. | 9 | 5 | 100 | COINCIDE |
-| [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 202 | COINCIDE |
+| [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 204 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -1691,7 +1691,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: users`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Users` — `src/modules/iam/entities/users.entity.ts`
-- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 2186 entrantes · 202 operaciones
+- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 2186 entrantes · 204 operaciones
 
 #### Columnas
 
@@ -4059,6 +4059,8 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | POST /iam/auth/verify-email | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/verify-email | LEE | DIRECTA |
 | POST /iam/me/devices/{id}/confirm-code | LEE | DIRECTA |
+| PATCH /iam/me/name | ACTUALIZA | POR_TIPO |
+| PATCH /iam/me/name | LEE | DIRECTA |
 | GET /iam/users | LEE | DIRECTA |
 | POST /iam/users | CREA | DIRECTA |
 | GET /iam/users/{id} | LEE | DIRECTA |
