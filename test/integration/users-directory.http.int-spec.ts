@@ -165,7 +165,6 @@ describe('GET /authz/users/directory (HTTP, real database)', () => {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       dbName: process.env.DB_NAME,
-      connect: true,
     });
     const moduleRef = await Test.createTestingModule({
       controllers: [AuthzUsersDirectoryController],
@@ -277,7 +276,7 @@ describe('GET /authz/users/directory (HTTP, real database)', () => {
       const seen: string[] = [];
       let cursor: string | null = null;
       for (let guard = 0; guard < 50; guard += 1) {
-        const res = await get(
+        const res: request.Response = await get(
           a,
           `?limit=1${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
         ).expect(200);
