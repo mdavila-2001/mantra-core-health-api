@@ -342,13 +342,15 @@
       ]
     },
     {
-      "reason": "Cuenta propia: cambiar la contraseña, listar y revocar las sesiones y cerrar sesión operan sobre el `actor` de la sesión; no reciben el identificador de otra cuenta.",
+      "reason": "Cuenta propia: cambiar la contraseña y el nombre, listar y revocar las sesiones y cerrar sesión operan sobre el `actor` de la sesión; no reciben el identificador de otra cuenta.",
       "evidence": [
         "src/modules/iam/application/services/iam-account-security.service.ts",
-        "src/modules/iam/application/services/iam-auth.service.ts#logout"
+        "src/modules/iam/application/services/iam-auth.service.ts#logout",
+        "src/modules/iam/application/use-cases/update-my-name.use-case.ts"
       ],
       "routes": [
         "GET /iam/me/sessions",
+        "PATCH /iam/me/name",
         "POST /iam/auth/change-password",
         "POST /iam/auth/logout",
         "POST /iam/auth/logout-all",

@@ -25,3 +25,4 @@ export * from './resend-verification.dto';
 export * from './account-security.dto';
 export * from './user-lifecycle.dto';
 export * from './my-devices.dto';
+export * from './update-my-name.dto';
