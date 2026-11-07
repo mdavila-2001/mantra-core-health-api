@@ -52,8 +52,8 @@
       {
         "code": "BO_ARM_CARDIOLOGIA_EVALUACION_CARDIOLOGICA_PREOPERA",
         "especialidad": "Cardiología",
-        "grupo": "EVALUACION CARDIOLÓGICA PREOPERATORIA",
-        "concepto": "Riesgo quirúrgico preoperatorio cardiológico programado en con: sultorio, incluye ECG.",
+        "grupo": "EVALUACIÓN CARDIOLÓGICA PREOPERATORIA",
+        "concepto": "Riesgo quirúrgico preoperatorio cardiológico programado en consultorio, incluye ECG",
         "uma": 6.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Riesgo quirirgico preoperatorio cardiol6gico programado en con: sultorio, incluye ECG.",
@@ -63,13 +63,14 @@
         ],
         "grupoOriginal": "EVALUACION CARDIOLOGICA PREOPERATORIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 8
+        "source_row": 8,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_EVALUACION_CARDIOLOGICA_PREOPERA_947D9A",
         "especialidad": "Cardiología",
-        "grupo": "EVALUACION CARDIOLÓGICA PREOPERATORIA",
-        "concepto": "Riesgo quirúrgico preoperatorio cardiológico programado en clinica hospital, incluye ECG.",
+        "grupo": "EVALUACIÓN CARDIOLÓGICA PREOPERATORIA",
+        "concepto": "Riesgo quirúrgico preoperatorio cardiológico programado en clínica u hospital, incluye ECG",
         "uma": 8.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Riesgo quirirgico preoperatorio cardiolégico programado en clinica hospital, incluye ECG.",
@@ -79,13 +80,14 @@
         ],
         "grupoOriginal": "EVALUACION CARDIOLOGICA PREOPERATORIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 9
+        "source_row": 9,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_EVALUACION_CARDIOLOGICA_PREOPERA_0BD6FE",
         "especialidad": "Cardiología",
-        "grupo": "EVALUACION CARDIOLÓGICA PREOPERATORIA",
-        "concepto": "Riesgo quirúrgico preoperatorio cardiológico no programado ode emergencia en consultorio, clinica u hospital, incluye ECG. 02.09 CONSULTA O ATENCION MEDICA DE CORTESIA A CRITERIO",
+        "grupo": "EVALUACIÓN CARDIOLÓGICA PREOPERATORIA",
+        "concepto": "Riesgo quirúrgico preoperatorio cardiológico no programado o de emergencia en consultorio, clínica u hospital, incluye ECG",
         "uma": 10.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Riesgo quirirgico preoperatorio cardiol6gico no programado ode ‘emergencia en consultorio, clinica u hospital, incluye ECG. 02.09 CONSULTA O ATENCION MEDICA DE CORTESIA A CRITERIO",
@@ -96,23 +98,26 @@
         ],
         "grupoOriginal": "EVALUACION CARDIOLOGICA PREOPERATORIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 10
+        "source_row": 10,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_INTERCONSULTAS_INTERCONSULTA_EN_",
         "especialidad": "Cardiología",
-        "grupo": "Interconsultas",
+        "grupo": "INTERCONSULTAS",
         "concepto": "Interconsulta en centro de salud privado, por visita",
         "uma": 6.0,
         "ocrSospechoso": false,
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 12
+        "source_row": 12,
+        "grupoOriginal": "Interconsultas",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_INTERCONSULTAS_INTERCONSULTA_EN__85558C",
         "especialidad": "Cardiología",
-        "grupo": "Interconsultas",
-        "concepto": "Interconsulta en unidad de terapialcuidados intensivos y/o intermedios, por visita.",
+        "grupo": "INTERCONSULTAS",
+        "concepto": "Interconsulta en unidad de terapia/cuidados intensivos y/o intermedios, por visita",
         "uma": 10.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Interconsulta en unidad de terapialcuidados intensivos yio interme- dios, por visita.",
@@ -121,44 +126,52 @@
           "interme- dios,→intermedios,"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 13
+        "source_row": 13,
+        "grupoOriginal": "Interconsultas",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_INTERCONSULTAS_INTERCONSULTA_EN__C20633",
         "especialidad": "Cardiología",
-        "grupo": "Interconsultas",
+        "grupo": "INTERCONSULTAS",
         "concepto": "Interconsulta en servicio de emergencia/urgencia, por visita",
         "uma": 18.0,
         "ocrSospechoso": false,
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 14
+        "source_row": 14,
+        "grupoOriginal": "Interconsultas",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
-        "concepto": "Electrocardiograma (ECG) en consultori",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
+        "concepto": "Electrocardiograma (ECG) en consultorio",
         "uma": 3.0,
         "ocrSospechoso": false,
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 17
+        "source_row": 17,
+        "conceptoOriginal": "Electrocardiograma (ECG) en consultori",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_01B75F",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
-        "concepto": "Electrocardiograma (ECG) paciente hospitalizado (internado) 303.04 Electrocardiograma (ECG) a domictio. 6",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
+        "concepto": "Electrocardiograma (ECG) a paciente hospitalizado (internado)",
         "uma": 4.0,
         "ocrSospechoso": false,
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 18
+        "source_row": 18,
+        "conceptoOriginal": "Electrocardiograma (ECG) paciente hospitalizado (internado) 303.04 Electrocardiograma (ECG) a domictio. 6",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_909D8D",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
         "concepto": "Holter de 24 horas (monitorización eléctrica del corazón)",
         "uma": 2.0,
         "ocrSospechoso": false,
@@ -169,56 +182,63 @@
         ],
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 19
+        "source_row": 19,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_138869",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
-        "concepto": "Holter do 24 horas por eepocialista en arrtmias 3.0307 Holter protongado por especialsta en arrtmias (ahade 2 umas por dia)",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
+        "concepto": "Holter de 24 horas por especialista en arritmias",
         "uma": 20.0,
         "ocrSospechoso": false,
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 20
+        "source_row": 20,
+        "conceptoOriginal": "Holter do 24 horas por eepocialista en arrtmias 3.0307 Holter protongado por especialsta en arrtmias (ahade 2 umas por dia)",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_1C7563",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
         "concepto": "Looper",
         "uma": 30.0,
         "ocrSospechoso": false,
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 21
+        "source_row": 21,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_B38E8F",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
-        "concepto": "Detector de eventos tipo kardia (por electro enviado)",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
+        "concepto": "Detector de eventos tipo Kardia (por electro enviado)",
         "uma": 20.0,
         "ocrSospechoso": false,
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 22
+        "source_row": 22,
+        "conceptoOriginal": "Detector de eventos tipo kardia (por electro enviado)",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_21D112",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
         "concepto": "Electros mandados por dispositivos de reloj",
         "uma": 20.0,
         "ocrSospechoso": false,
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 23
+        "source_row": 23,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_2287DE",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
         "concepto": "Ergometría o test de esfuerzo (PEG)",
         "uma": 2.0,
         "ocrSospechoso": false,
@@ -228,27 +248,29 @@
         ],
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 24
+        "source_row": 24,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_7796AC",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
-        "concepto": "Mapa de 24 horas (monitoreo ambulatorio de ta presión arterial) a7",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
+        "concepto": "Mapa de 24 horas (monitoreo ambulatorio de la presión arterial)",
         "uma": 10.0,
-        "ocrSospechoso": true,
+        "ocrSospechoso": false,
         "conceptoOriginal": "Mapa de 24 horas (monitoreo ambulatorio de ta presién arterial) a7",
         "correccionesOcr": [
           "presién→presión"
         ],
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 25
+        "source_row": 25,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_4798AF",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
         "concepto": "Evaluación de marcapaso cardiaco, con telemetría",
         "uma": 10.0,
         "ocrSospechoso": false,
@@ -259,24 +281,27 @@
         ],
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 26
+        "source_row": 26,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_762B82",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
-        "concepto": "Evaluacion ¢e resineronizadores",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
+        "concepto": "Evaluación de resincronizadores",
         "uma": 15.0,
-        "ocrSospechoso": true,
+        "ocrSospechoso": false,
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 27
+        "source_row": 27,
+        "conceptoOriginal": "Evaluacion ¢e resineronizadores",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_13F358",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
-        "concepto": "Evaluación ce desfibritadores",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
+        "concepto": "Evaluación de desfibriladores",
         "uma": 15.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Evaluacién ce desfibritadores",
@@ -285,13 +310,14 @@
         ],
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 28
+        "source_row": 28,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_593179",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
-        "concepto": "Estimulación cardiaca trans esofágica",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
+        "concepto": "Estimulación cardiaca transesofágica",
         "uma": 20.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Estimulacién cardiaca trans esofagica",
@@ -301,12 +327,13 @@
         ],
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 29
+        "source_row": 29,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_6D5F2B",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
         "concepto": "Prueba de inclinación en camilla basculante (TILT TEST)",
         "uma": 20.0,
         "ocrSospechoso": false,
@@ -316,18 +343,21 @@
         ],
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 30
+        "source_row": 30,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_PROCEDIMIENTOS_DIAGNESTICOS_COMP_A729E3",
         "especialidad": "Cardiología",
-        "grupo": "Procedimientos diagnósticos complementarios no invasivos",
-        "concepto": "Indice tobilo-brazo(ITB)",
+        "grupo": "PROCEDIMIENTOS DIAGNÓSTICOS COMPLEMENTARIOS",
+        "concepto": "Índice tobillo-brazo (ITB)",
         "uma": 6.0,
         "ocrSospechoso": false,
         "grupoOriginal": "Procedimientos diagnésticos complementarios no invasivos",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 31
+        "source_row": 31,
+        "conceptoOriginal": "Indice tobilo-brazo(ITB)",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOCARDIOGRAMA_D",
@@ -344,7 +374,7 @@
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOCARDIOGRAMA_T",
         "especialidad": "Cardiología",
         "grupo": "ECOCARDIOGRAFÍA",
-        "concepto": "Ecocardiograma transesofágico (ETE), no incluye honorarios de anestesidlogo.",
+        "concepto": "Ecocardiograma transesofágico (ETE), no incluye honorarios de anestesiólogo",
         "uma": 35.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Ecocardiograma transesofagico (ETE), no incluye honorarios de anestesidlogo.",
@@ -353,18 +383,21 @@
         ],
         "grupoOriginal": "ECOCARDIOGRAFIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 34
+        "source_row": 34,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOCARDIOGRAMA_C",
         "especialidad": "Cardiología",
         "grupo": "ECOCARDIOGRAFÍA",
-        "concepto": "Ecocardiograma con stress",
+        "concepto": "Ecocardiograma con estrés",
         "uma": 36.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ECOCARDIOGRAFIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 35
+        "source_row": 35,
+        "conceptoOriginal": "Ecocardiograma con stress",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOCARDIOGRAMA_D_AEEAA4",
@@ -381,18 +414,20 @@
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOCARDIOGRAMA_P",
         "especialidad": "Cardiología",
         "grupo": "ECOCARDIOGRAFÍA",
-        "concepto": "Ecocardiograma pediatrco",
+        "concepto": "Ecocardiograma pediátrico",
         "uma": 20.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ECOCARDIOGRAFIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 37
+        "source_row": 37,
+        "conceptoOriginal": "Ecocardiograma pediatrco",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOGRAFIA_DOPPLE",
         "especialidad": "Cardiología",
         "grupo": "ECOCARDIOGRAFÍA",
-        "concepto": "Ecografía doppler para fistulas arteriovenosas",
+        "concepto": "Ecografía doppler para fístulas arteriovenosas",
         "uma": 20.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Ecografia doppler para fistulas arteriovenosas",
@@ -401,24 +436,27 @@
         ],
         "grupoOriginal": "ECOCARDIOGRAFIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 38
+        "source_row": 38,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECOCARDIOGRATIA_",
         "especialidad": "Cardiología",
         "grupo": "ECOCARDIOGRAFÍA",
-        "concepto": "Ecocardiogratia fetal",
+        "concepto": "Ecocardiografía fetal",
         "uma": 20.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ECOCARDIOGRAFIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 39
+        "source_row": 39,
+        "conceptoOriginal": "Ecocardiogratia fetal",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_EOOCARDIOGRAMA_I",
         "especialidad": "Cardiología",
         "grupo": "ECOCARDIOGRAFÍA",
-        "concepto": "Eoocardiograma intraoperatorio o en sala de hemodinamia,",
+        "concepto": "Ecocardiograma intraoperatorio o en sala de hemodinamia",
         "uma": 50.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Eoocardiograma intraoperatorio 0 en sala de hemodinamia,",
@@ -427,7 +465,8 @@
         ],
         "grupoOriginal": "ECOCARDIOGRAFIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 40
+        "source_row": 40,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_DOPPLER_ARTERIAL",
@@ -444,29 +483,33 @@
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_DOPPLER_VENASO_P",
         "especialidad": "Cardiología",
         "grupo": "ECOCARDIOGRAFÍA",
-        "concepto": "Doppler venaso periférico de un miembro",
+        "concepto": "Doppler venoso periférico de un miembro",
         "uma": 20.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ECOCARDIOGRAFIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 42
+        "source_row": 42,
+        "conceptoOriginal": "Doppler venaso periférico de un miembro",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ECOCARDIOGRAFIA_ECO_DOPPLER_DE_A",
         "especialidad": "Cardiología",
         "grupo": "ECOCARDIOGRAFÍA",
-        "concepto": "Eco doppler de arterias renales, unilateral o bilateral,",
+        "concepto": "Eco doppler de arterias renales, unilateral o bilateral",
         "uma": 20.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ECOCARDIOGRAFIA",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 43
+        "source_row": 43,
+        "conceptoOriginal": "Eco doppler de arterias renales, unilateral o bilateral,",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_TOMOGRAFIA_RESONANCIA_MAGNETICA_",
         "especialidad": "Cardiología",
-        "grupo": "TOMOGRAFIA,RESONANCIA MAGNÉTICA NUCLEAR,SPECT,PET",
-        "concepto": "Angiotomografia cardiaca, con o sin reconstrucción 3D",
+        "grupo": "TOMOGRAFÍA, RESONANCIA MAGNÉTICA NUCLEAR, SPECT, PET",
+        "concepto": "Angiotomografía cardiaca, con o sin reconstrucción 3D",
         "uma": 20.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Angiotomografia cardiaca, con o sin reconstruccién 3D",
@@ -475,12 +518,13 @@
         ],
         "grupoOriginal": "TOMOGRAFIA,RESONANCIA MAGNETICA NUCLEAR,SPECT,PET",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 45
+        "source_row": 45,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_TOMOGRAFIA_RESONANCIA_MAGNETICA__2A7677",
         "especialidad": "Cardiología",
-        "grupo": "TOMOGRAFIA,RESONANCIA MAGNÉTICA NUCLEAR,SPECT,PET",
+        "grupo": "TOMOGRAFÍA, RESONANCIA MAGNÉTICA NUCLEAR, SPECT, PET",
         "concepto": "Cardiorresonancia magnética nuclear, con o sin viabilidad miocárdica",
         "uma": 20.0,
         "ocrSospechoso": false,
@@ -490,13 +534,14 @@
         ],
         "grupoOriginal": "TOMOGRAFIA,RESONANCIA MAGNETICA NUCLEAR,SPECT,PET",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 46
+        "source_row": 46,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_TOMOGRAFIA_RESONANCIA_MAGNETICA__65B7A1",
         "especialidad": "Cardiología",
-        "grupo": "TOMOGRAFIA,RESONANCIA MAGNÉTICA NUCLEAR,SPECT,PET",
-        "concepto": "Tomogratia computarizada por emisión de fotbn simple (SPECTo cámara gama) cardiaca, con o sin viabilidad miocárdica,",
+        "grupo": "TOMOGRAFÍA, RESONANCIA MAGNÉTICA NUCLEAR, SPECT, PET",
+        "concepto": "Tomografía computarizada por emisión de fotón simple (SPECT o cámara gamma) cardiaca, con o sin viabilidad miocárdica",
         "uma": 20.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Tomogratia computarizada por emision de fotbn simple (SPECTo camara gama) cardiaca, con o sin viabllidad miocardica,",
@@ -508,13 +553,14 @@
         ],
         "grupoOriginal": "TOMOGRAFIA,RESONANCIA MAGNETICA NUCLEAR,SPECT,PET",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 47
+        "source_row": 47,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_TOMOGRAFIA_RESONANCIA_MAGNETICA__BB1BD6",
         "especialidad": "Cardiología",
-        "grupo": "TOMOGRAFIA,RESONANCIA MAGNÉTICA NUCLEAR,SPECT,PET",
-        "concepto": "—Tomografia por emisión de positrones (PET) cardiaca, cono sn Viabilidad miocárdica, 3.0800 PROCEDIMIENTOS DIAGNÓSTICOS INVASIVOS (100% PRI-",
+        "grupo": "TOMOGRAFÍA, RESONANCIA MAGNÉTICA NUCLEAR, SPECT, PET",
+        "concepto": "Tomografía por emisión de positrones (PET) cardiaca, con o sin viabilidad miocárdica",
         "uma": 20.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "—Tomografia por emisién de positrones (PET) cardiaca, cono sn Viabilidad miocardica, 3.0800 PROCEDIMIENTOS DIAGNOSTICOS INVASIVOS (100% PRI-",
@@ -525,12 +571,13 @@
         ],
         "grupoOriginal": "TOMOGRAFIA,RESONANCIA MAGNETICA NUCLEAR,SPECT,PET",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 48
+        "source_row": 48,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CORONARIOGRAFIA_CON_O_SIN_VENTRI",
         "especialidad": "Cardiología",
-        "grupo": "Coronariografia con o sin ventriculografía (cateterismo cardiaco) 100,",
+        "grupo": "CATETERISMO CARDIACO",
         "concepto": "Manometría de cavidades derechas (cateterismo derecho)",
         "uma": 50.0,
         "ocrSospechoso": false,
@@ -540,24 +587,27 @@
         ],
         "grupoOriginal": "Coronariografia con o sin ventriculografia (cateterismo cardiaco) 100,",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 51
+        "source_row": 51,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CORONARIOGRAFIA_CON_O_SIN_VENTRI_5D84D9",
         "especialidad": "Cardiología",
-        "grupo": "Coronariografia con o sin ventriculografía (cateterismo cardiaco) 100,",
-        "concepto": "—_Ccronariografia con o sin ventriculogratia y cateterismo derecho (Cateterismo derecho e izquierdo)",
+        "grupo": "CATETERISMO CARDIACO",
+        "concepto": "Coronariografía con o sin ventriculografía y cateterismo derecho (cateterismo derecho e izquierdo)",
         "uma": 120.0,
         "ocrSospechoso": false,
         "grupoOriginal": "Coronariografia con o sin ventriculografia (cateterismo cardiaco) 100,",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 52
+        "source_row": 52,
+        "conceptoOriginal": "—_Ccronariografia con o sin ventriculogratia y cateterismo derecho (Cateterismo derecho e izquierdo)",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CORONARIOGRAFIA_CON_O_SIN_VENTRI_9C8FD0",
         "especialidad": "Cardiología",
-        "grupo": "Coronariografia con o sin ventriculografía (cateterismo cardiaco) 100,",
-        "concepto": "Bliopsia endo miocárdica,",
+        "grupo": "CATETERISMO CARDIACO",
+        "concepto": "Biopsia endomiocárdica",
         "uma": 85.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Bliopsia endo miocardica,",
@@ -566,12 +616,13 @@
         ],
         "grupoOriginal": "Coronariografia con o sin ventriculografia (cateterismo cardiaco) 100,",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 53
+        "source_row": 53,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_EN_CARDIOPATIAS_CONGENITAS_CATET",
         "especialidad": "Cardiología",
-        "grupo": "EN CARDIOPATÍAS CONGÉNITAS:",
+        "grupo": "EN CARDIOPATÍAS CONGÉNITAS",
         "concepto": "Cateterismo de cardiopatías congénitas simples",
         "uma": 120.0,
         "ocrSospechoso": false,
@@ -581,12 +632,13 @@
         ],
         "grupoOriginal": "EN CARDIOPATIAS CONGENITAS:",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 55
+        "source_row": 55,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_EN_CARDIOPATIAS_CONGENITAS_CATET_5E7980",
         "especialidad": "Cardiología",
-        "grupo": "EN CARDIOPATÍAS CONGÉNITAS:",
+        "grupo": "EN CARDIOPATÍAS CONGÉNITAS",
         "concepto": "Cateterismo de cardiopatías congénitas complejas",
         "uma": 150.0,
         "ocrSospechoso": false,
@@ -596,7 +648,8 @@
         ],
         "grupoOriginal": "EN CARDIOPATIAS CONGENITAS:",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 56
+        "source_row": 56,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ARTERIAS_Y_VASOS_CEREBRALES_Y_PE",
@@ -647,7 +700,7 @@
         "code": "BO_ARM_CARDIOLOGIA_ARTERIAS_Y_VASOS_CEREBRALES_Y_PE_951534",
         "especialidad": "Cardiología",
         "grupo": "ARTERIAS Y VASOS CEREBRALES Y PERIFÉRICOS",
-        "concepto": "Angiografías de vasos cerebrales, unilateral o bilateral",
+        "concepto": "Angiografía de vasos cerebrales, unilateral o bilateral",
         "uma": 110.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Angiografias de vasos cerebrales, unilateral o bilateral",
@@ -656,7 +709,8 @@
         ],
         "grupoOriginal": "ARTERIAS Y VASOS CEREBRALES Y PERIFERICOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 61
+        "source_row": 61,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ARTERIAS_Y_VASOS_CEREBRALES_Y_PE_0BCD4D",
@@ -692,7 +746,7 @@
         "code": "BO_ARM_CARDIOLOGIA_ARTERIAS_Y_VASOS_CEREBRALES_Y_PE_4362B4",
         "especialidad": "Cardiología",
         "grupo": "ARTERIAS Y VASOS CEREBRALES Y PERIFÉRICOS",
-        "concepto": "Flebografía. Vena cava inferior",
+        "concepto": "Flebografía de vena cava inferior",
         "uma": 50.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Flebografia. Vena cava inferior",
@@ -701,13 +755,14 @@
         ],
         "grupoOriginal": "ARTERIAS Y VASOS CEREBRALES Y PERIFERICOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 64
+        "source_row": 64,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ARTERIAS_Y_VASOS_CEREBRALES_Y_PE_A4B802",
         "especialidad": "Cardiología",
         "grupo": "ARTERIAS Y VASOS CEREBRALES Y PERIFÉRICOS",
-        "concepto": "—_Angiografía de vasos esplécnicos, con o sin aortografía, 3:08.09 Angiografía pulmonar, con o sin cateterismo derecho. 80",
+        "concepto": "Angiografía de vasos esplácnicos, con o sin aortografía",
         "uma": 60.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "—_Angiografia de vasos esplécnicos, con o sin aortografia, 3:08.09 Angiografia pulmonar, con o sin cateterismo derecho. 80",
@@ -718,12 +773,13 @@
         ],
         "grupoOriginal": "ARTERIAS Y VASOS CEREBRALES Y PERIFERICOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 65
+        "source_row": 65,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIA_CORONARIA_ANGIOPLAS",
         "especialidad": "Cardiología",
-        "grupo": "Angioplastia coronaria",
+        "grupo": "ANGIOPLASTIA CORONARIA",
         "concepto": "Angioplastia coronaria electiva por balón y/o con implante de STENT (segmento de vaso culpable o seleccionado)",
         "uma": 200.0,
         "ocrSospechoso": false,
@@ -734,13 +790,15 @@
           "‘STENT→STENT"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 68
+        "source_row": 68,
+        "grupoOriginal": "Angioplastia coronaria",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIA_CORONARIA_ANGIOPLAS_AC621C",
         "especialidad": "Cardiología",
-        "grupo": "Angioplastia coronaria",
-        "concepto": "Angioplastia coronaria por lesión adicional tratada porbalon ylocon implante de STENT.",
+        "grupo": "ANGIOPLASTIA CORONARIA",
+        "concepto": "Angioplastia coronaria por lesión adicional tratada por balón y/o con implante de STENT",
         "uma": 60.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Angioplastia coronaria por lesién adicional tratada porbalon ylocon implante de STENT.",
@@ -748,13 +806,15 @@
           "lesién→lesión"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 69
+        "source_row": 69,
+        "grupoOriginal": "Angioplastia coronaria",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIA_CORONARIA_ANGLOPLAS",
         "especialidad": "Cardiología",
-        "grupo": "Angioplastia coronaria",
-        "concepto": "Angioplastia primaria en infarto agudo de miocardio,",
+        "grupo": "ANGIOPLASTIA CORONARIA",
+        "concepto": "Angioplastia primaria en infarto agudo de miocardio",
         "uma": 300.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Angloplastia primaria en infarto agudo de miocardio,",
@@ -762,13 +822,15 @@
           "Angloplastia→Angioplastia"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 70
+        "source_row": 70,
+        "grupoOriginal": "Angioplastia coronaria",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIA_CORONARIA_ANGIOPLAS_64A4C6",
         "especialidad": "Cardiología",
-        "grupo": "Angioplastia coronaria",
-        "concepto": "Angioplastia de rescate o faciitada en infarto agudo de miocardio, posterior a uso de fibrinolíticos.",
+        "grupo": "ANGIOPLASTIA CORONARIA",
+        "concepto": "Angioplastia de rescate o facilitada en infarto agudo de miocardio, posterior a uso de fibrinolíticos",
         "uma": 300.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Angioplastia de rescate o faciitada en infarto agudo de miocardio, posterior a uso de fibrinoliticos.",
@@ -776,12 +838,14 @@
           "fibrinoliticos→fibrinolíticos"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 71
+        "source_row": 71,
+        "grupoOriginal": "Angioplastia coronaria",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_ANGIOPLAS",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
         "concepto": "Angioplastia periférica por balón, por miembro",
         "uma": 100.0,
         "ocrSospechoso": false,
@@ -790,32 +854,39 @@
           "balén→balón"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 73
+        "source_row": 73,
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_ANGIOPLAS_C54971",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
         "concepto": "Angioplastia periférica con implante de STENT, por miembro",
         "uma": 150.0,
         "ocrSospechoso": false,
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 74
+        "source_row": 74,
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_TRATAMIEN",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
-        "concepto": "Tratamiento invasivo, mediante trombétisis dirigida por catéter, por miembro,",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
+        "concepto": "Tratamiento mediante trombólisis dirigida por catéter, por miembro",
         "uma": 80.0,
         "ocrSospechoso": false,
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 75
+        "source_row": 75,
+        "conceptoOriginal": "Tratamiento invasivo, mediante trombétisis dirigida por catéter, por miembro,",
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_ANGIOPLAS_AC5B41",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
         "concepto": "Angioplastia renal unilateral por balón y/o con implante de STENT",
         "uma": 100.0,
         "ocrSospechoso": false,
@@ -825,12 +896,14 @@
           "yio→y/o"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 76
+        "source_row": 76,
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_ANGIOPLAS_28FA1B",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
         "concepto": "Angioplastia renal bilateral por balón y/o con implante de STENT",
         "uma": 160.0,
         "ocrSospechoso": false,
@@ -840,12 +913,14 @@
           "ylo→y/o"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 77
+        "source_row": 77,
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_ENDOPRETE",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
         "concepto": "Endoprótesis aórtica",
         "uma": 500.0,
         "ocrSospechoso": false,
@@ -855,12 +930,14 @@
           "aértica→aórtica"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 78
+        "source_row": 78,
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_ENDOPRETE_57E777",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
         "concepto": "Endoprótesis aortoiliaca",
         "uma": 500.0,
         "ocrSospechoso": false,
@@ -869,23 +946,28 @@
           "Endoprétesis→Endoprótesis"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 79
+        "source_row": 79,
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_IMPLANTE_",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
-        "concepto": "Implante de fitra de vena cava inforor",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
+        "concepto": "Implante de filtro de vena cava inferior",
         "uma": 200.0,
         "ocrSospechoso": false,
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 80
+        "source_row": 80,
+        "conceptoOriginal": "Implante de fitra de vena cava inforor",
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_TRATAMIEN_1106C2",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
-        "concepto": "Tratamiento invasivo, mediante trombblsis mecánica del tromboembolismo pulmonar (TEP)",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
+        "concepto": "Tratamiento mediante trombólisis mecánica del tromboembolismo pulmonar (TEP)",
         "uma": 200.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Tratamiento invasivo, mediante trombblsis mecénica del trom- boembolismo pulmonar (TEP)",
@@ -894,23 +976,28 @@
           "trom- boembolismo→tromboembolismo"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 81
+        "source_row": 81,
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_TRATAMIEN_F807AA",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
-        "concepto": "Tratamiento invasivo, mediante trombolisis dirigida por catéter, del tromboembolismo pulmonar (TEP)",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
+        "concepto": "Tratamiento mediante trombólisis dirigida por catéter del tromboembolismo pulmonar (TEP)",
         "uma": 100.0,
         "ocrSospechoso": false,
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 82
+        "source_row": 82,
+        "conceptoOriginal": "Tratamiento invasivo, mediante trombolisis dirigida por catéter, del tromboembolismo pulmonar (TEP)",
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_ANGIOPLAS_ED08D4",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
-        "concepto": "Angioplastia por balón y/o con implante de stent en fistula ertetio- venosa para hemodidlisis.",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
+        "concepto": "Angioplastia por balón y/o con implante de STENT en fístula arteriovenosa para hemodiálisis",
         "uma": 150.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Angioplastia por balén y/o con implante de stent en fistula ertetio- venosa para hemodidlisis.",
@@ -918,23 +1005,28 @@
           "balén→balón"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 83
+        "source_row": 83,
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ANGIOPLASTIAPERIFERICA_EMBOLZACI",
         "especialidad": "Cardiología",
-        "grupo": "ANGIOPLASTIAPERIFERICA.",
-        "concepto": "Embolzaciones(pulmonar, hepatica, renal, mlformaciones vasculares)",
+        "grupo": "ANGIOPLASTIA PERIFÉRICA",
+        "concepto": "Embolizaciones (pulmonar, hepática, renal, malformaciones vasculares)",
         "uma": 180.0,
         "ocrSospechoso": false,
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 84
+        "source_row": 84,
+        "conceptoOriginal": "Embolzaciones(pulmonar, hepatica, renal, mlformaciones vasculares)",
+        "grupoOriginal": "ANGIOPLASTIAPERIFERICA.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_VALVULOPLASTIAS_VALVULOPLASTIA_M",
         "especialidad": "Cardiología",
-        "grupo": "VALVULOPLASTIAS.",
-        "concepto": "Valvuloplastia mitral o tricdspide por balón,",
+        "grupo": "VALVULOPLASTIAS",
+        "concepto": "Valvuloplastia mitral o tricúspide por balón",
         "uma": 250.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Valvuloplastia mitral o tricdspide por balén,",
@@ -942,12 +1034,14 @@
           "balén→balón"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 86
+        "source_row": 86,
+        "grupoOriginal": "VALVULOPLASTIAS.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_VALVULOPLASTIAS_VALVULOPLASTIA_A",
         "especialidad": "Cardiología",
-        "grupo": "VALVULOPLASTIAS.",
+        "grupo": "VALVULOPLASTIAS",
         "concepto": "Valvuloplastia aórtica o pulmonar por balón",
         "uma": 200.0,
         "ocrSospechoso": false,
@@ -958,13 +1052,15 @@
           "balén→balón"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 87
+        "source_row": 87,
+        "grupoOriginal": "VALVULOPLASTIAS.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_VALVULOPLASTIAS_IMPLANTE_REEMPLA",
         "especialidad": "Cardiología",
-        "grupo": "VALVULOPLASTIAS.",
-        "concepto": "Implante/reemplazo percutáneo de válvula aórtica (TAVIOTAVR)",
+        "grupo": "VALVULOPLASTIAS",
+        "concepto": "Implante/reemplazo percutáneo de válvula aórtica (TAVI o TAVR)",
         "uma": 500.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Implante/reemplazo percuténeo de valvula aértica (TAVIOTAVR)",
@@ -974,13 +1070,15 @@
           "aértica→aórtica"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 88
+        "source_row": 88,
+        "grupoOriginal": "VALVULOPLASTIAS.",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CARDIOPATIAS_CONGENITAS_INTERVEN",
         "especialidad": "Cardiología",
-        "grupo": "CARDIOPATÍAS CONGÉNITAS:",
-        "concepto": "Intervencionismo en oclusión de persistencia del conducto arterioso(PCA)",
+        "grupo": "CARDIOPATÍAS CONGÉNITAS",
+        "concepto": "Intervencionismo en oclusión de persistencia del conducto arterioso (PCA)",
         "uma": 200.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Intervencionismo en oclusién de persistencia del conducto arterio- so(PCA)",
@@ -990,12 +1088,13 @@
         ],
         "grupoOriginal": "CARDIOPATIAS CONGENITAS:",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 90
+        "source_row": 90,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CARDIOPATIAS_CONGENITAS_INTERVEN_885155",
         "especialidad": "Cardiología",
-        "grupo": "CARDIOPATÍAS CONGÉNITAS:",
+        "grupo": "CARDIOPATÍAS CONGÉNITAS",
         "concepto": "Intervención de oclusión de comunicación interventricular (CIV)",
         "uma": 250.0,
         "ocrSospechoso": false,
@@ -1007,13 +1106,14 @@
         ],
         "grupoOriginal": "CARDIOPATIAS CONGENITAS:",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 91
+        "source_row": 91,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CARDIOPATIAS_CONGENITAS_INTERVEN_3DB38C",
         "especialidad": "Cardiología",
-        "grupo": "CARDIOPATÍAS CONGÉNITAS:",
-        "concepto": "Intervencionismo en oclusin de comunicación interauricular (CIA)",
+        "grupo": "CARDIOPATÍAS CONGÉNITAS",
+        "concepto": "Intervencionismo en oclusión de comunicación interauricular (CIA)",
         "uma": 250.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Intervencionismo en oclusin de comunicacion interauricular (CIA)",
@@ -1022,13 +1122,14 @@
         ],
         "grupoOriginal": "CARDIOPATIAS CONGENITAS:",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 92
+        "source_row": 92,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CARDIOPATIAS_CONGENITAS_IMPLANTE",
         "especialidad": "Cardiología",
-        "grupo": "CARDIOPATÍAS CONGÉNITAS:",
-        "concepto": "Implante de dispositive auricular, cierre de orejuela izquierda",
+        "grupo": "CARDIOPATÍAS CONGÉNITAS",
+        "concepto": "Implante de dispositivo auricular, cierre de orejuela izquierda",
         "uma": 300.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Implante de dispositive auricular, clerre de orejuela izquierda",
@@ -1037,35 +1138,40 @@
         ],
         "grupoOriginal": "CARDIOPATIAS CONGENITAS:",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 93
+        "source_row": 93,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CARDIOPATIAS_CONGENITAS_RASCHKIN",
         "especialidad": "Cardiología",
-        "grupo": "CARDIOPATÍAS CONGÉNITAS:",
-        "concepto": "Raschkind- intervencionista en ruptura del séptum interauricular (SIA)",
+        "grupo": "CARDIOPATÍAS CONGÉNITAS",
+        "concepto": "Rashkind intervencionista en ruptura del septum interauricular (SIA)",
         "uma": 200.0,
         "ocrSospechoso": false,
         "grupoOriginal": "CARDIOPATIAS CONGENITAS:",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 94
+        "source_row": 94,
+        "conceptoOriginal": "Raschkind- intervencionista en ruptura del séptum interauricular (SIA)",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
-        "concepto": "Implante de marcapaso transitorio,",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
+        "concepto": "Implante de marcapaso transitorio",
         "uma": 50.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 96
+        "source_row": 96,
+        "conceptoOriginal": "Implante de marcapaso transitorio,",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_937DA8",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
-        "concepto": "Estimulación del sistema de conducción 313.03 Estudio electrofisiológico. 120",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
+        "concepto": "Estimulación del sistema de conducción",
         "uma": 200.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Estimulacién det sistema de conduccién 313.03 Estudio electrofisiol6gico. 120",
@@ -1077,13 +1183,14 @@
         ],
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 97
+        "source_row": 97,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_90EA7E",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
-        "concepto": "Ablación de arritmias supraventricular sin mapeamiento electro anatómico",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
+        "concepto": "Ablación de arritmia supraventricular sin mapeo electroanatómico",
         "uma": 200.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Ablacién de arritmias supraventricular sin mapeamiento electro anatomico",
@@ -1093,13 +1200,14 @@
         ],
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 98
+        "source_row": 98,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_62A9AC",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
-        "concepto": "Ablación de arritmias supraventricular con mapeamiento electro anatómico 3:13.06 Ablación de arritmias ventricular sin mapeamiento electro anatómico 250",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
+        "concepto": "Ablación de arritmia supraventricular con mapeo electroanatómico",
         "uma": 250.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Ablacién de arritmias supraventricular con mapeamiento electro ‘anatémico 3:13.06 Ablacién de arritmias ventricular sin mapeamiento electro anatomico 250",
@@ -1112,13 +1220,14 @@
         ],
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 99
+        "source_row": 99,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_F58D25",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
-        "concepto": "Ablación de arritmias ventricular con mapeamiento electro anatómico",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
+        "concepto": "Ablación de arritmia ventricular con mapeo electroanatómico",
         "uma": 300.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Ablaci6n de arritmias ventricular con mapeamiento electro anatémico",
@@ -1128,15 +1237,16 @@
         ],
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 100
+        "source_row": 100,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_B08FF3",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
-        "concepto": "Estudio electrofsiol6gico con evaluación de la conducción AV con droga",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
+        "concepto": "Estudio electrofisiológico con evaluación de la conducción AV con droga",
         "uma": 140.0,
-        "ocrSospechoso": true,
+        "ocrSospechoso": false,
         "conceptoOriginal": "Estudio electrofsiol6gico con evaluacién de la conduccién AV con droga",
         "correccionesOcr": [
           "evaluacién→evaluación",
@@ -1144,67 +1254,76 @@
         ],
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 101
+        "source_row": 101,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_8D9154",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
-        "concepto": "Cardioneuroablacion",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
+        "concepto": "Cardioneuroablación",
         "uma": 300.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 102
+        "source_row": 102,
+        "conceptoOriginal": "Cardioneuroablacion",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_06CBF1",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
-        "concepto": "Implante de marcapaso tipo VWI",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
+        "concepto": "Implante de marcapaso tipo VVI",
         "uma": 100.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 103
+        "source_row": 103,
+        "conceptoOriginal": "Implante de marcapaso tipo VWI",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_CFCE90",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
         "concepto": "Implante de marcapaso unicameral en sitios especiales",
         "uma": 120.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 104
+        "source_row": 104,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_F0A8EF",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
         "concepto": "Implante de marcapaso tipo DDDR",
         "uma": 150.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 105
+        "source_row": 105,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_D8C98F",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
-        "concepto": "Implante de marcapaso tricamaral (resincronizador)",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
+        "concepto": "Implante de marcapaso tricameral (resincronizador)",
         "uma": 200.0,
         "ocrSospechoso": false,
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 106
+        "source_row": 106,
+        "conceptoOriginal": "Implante de marcapaso tricamaral (resincronizador)",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_77DD6B",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
         "concepto": "Implante de desfibrilador cardiaco automático",
         "uma": 200.0,
         "ocrSospechoso": false,
@@ -1214,13 +1333,14 @@
         ],
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 107
+        "source_row": 107,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ELECTROFISIOLOGIA_100_PRIMER_OPE_23DDEB",
         "especialidad": "Cardiología",
-        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
-        "concepto": "Implante de desfibritador cardiaco automático tricamaral",
+        "grupo": "ELECTROFISIOLOGÍA (100% PRIMER OPERADOR, 30% SEGUNDO OPERADOR)",
+        "concepto": "Implante de desfibrilador cardiaco automático tricameral",
         "uma": 250.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Implante de desfibritador cardiaco automatico tricamaral",
@@ -1229,12 +1349,13 @@
         ],
         "grupoOriginal": "ELECTROFISIOLOGIA (100% PRIMER OPERADOR 30 % SE- Ns GUNDO OPERADOR)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 108
+        "source_row": 108,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_HIPERTENSIEN_ARTERIAL_TRATAMIENT",
         "especialidad": "Cardiología",
-        "grupo": "Hipertensión arterial",
+        "grupo": "HIPERTENSIÓN ARTERIAL",
         "concepto": "Tratamiento de crisis hipertensiva (urgencia o emergencia hipertensiva)",
         "uma": 50.0,
         "ocrSospechoso": false,
@@ -1244,35 +1365,39 @@
         ],
         "grupoOriginal": "Hipertensién arterial",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 111
+        "source_row": 111,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_HIPERTENSIEN_ARTERIAL_TRATAMIENT_A063C2",
         "especialidad": "Cardiología",
-        "grupo": "Hipertensión arterial",
+        "grupo": "HIPERTENSIÓN ARTERIAL",
         "concepto": "Tratamiento de la pre-eclampsia",
         "uma": 20.0,
         "ocrSospechoso": false,
         "grupoOriginal": "Hipertensién arterial",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 112
+        "source_row": 112,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_MIOCARDIOPATIAS_TRATAMIENTO_DE_L",
         "especialidad": "Cardiología",
         "grupo": "MIOCARDIOPATÍAS",
-        "concepto": "Tratamiento de la insuficiencia cardiaca aguda, hasta 7 dias",
+        "concepto": "Tratamiento de la insuficiencia cardiaca aguda, hasta 7 días",
         "uma": 80.0,
         "ocrSospechoso": false,
         "grupoOriginal": "MIOCARDIOPATIAS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 114
+        "source_row": 114,
+        "conceptoOriginal": "Tratamiento de la insuficiencia cardiaca aguda, hasta 7 dias",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_MIOCARDIOPATIAS_ATENCION_MEDICA_",
         "especialidad": "Cardiología",
         "grupo": "MIOCARDIOPATÍAS",
-        "concepto": "—Atencion médica de edema agudo de pulmón",
+        "concepto": "Atención médica de edema agudo de pulmón",
         "uma": 80.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "—Atencion médica de edema agudo de pulmén",
@@ -1281,13 +1406,14 @@
         ],
         "grupoOriginal": "MIOCARDIOPATIAS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 115
+        "source_row": 115,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CORONARIOPATIAS_SINDROME_CORONAR",
         "especialidad": "Cardiología",
         "grupo": "CORONARIOPATÍAS",
-        "concepto": "Sindrome coronario agudo y/o infarto agudo de miocardio, hasta 5 dias (no incluye administración de fibriloniiticos)",
+        "concepto": "Síndrome coronario agudo y/o infarto agudo de miocardio, hasta 5 días (no incluye administración de fibrinolíticos)",
         "uma": 100.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Sindrome coronario agudo y/o infarto agudo de miocardio, hasta 5 dias (no incluye administracién de fibriloniiticos)",
@@ -1296,13 +1422,14 @@
         ],
         "grupoOriginal": "CORONARIOPATIAS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 117
+        "source_row": 117,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CORONARIOPATIAS_TRATAMIENTO_CON_",
         "especialidad": "Cardiología",
         "grupo": "CORONARIOPATÍAS",
-        "concepto": "Tratamiento con fibrinolíticos en infarto agudo de miocardio con su- pradesnivel del segmento ST.",
+        "concepto": "Tratamiento con fibrinolíticos en infarto agudo de miocardio con supradesnivel del segmento ST",
         "uma": 100.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Tratamiento con fibrinoliticos en infarto agudo de miocardio con su- pradesnivel del segmento ST.",
@@ -1311,18 +1438,21 @@
         ],
         "grupoOriginal": "CORONARIOPATIAS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 118
+        "source_row": 118,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CORONARIOPATIAS_ANGINA_POST_INFA",
         "especialidad": "Cardiología",
         "grupo": "CORONARIOPATÍAS",
-        "concepto": "Angina post infarto, hasta 3 dias",
+        "concepto": "Angina post infarto, hasta 3 días",
         "uma": 80.0,
         "ocrSospechoso": false,
         "grupoOriginal": "CORONARIOPATIAS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 119
+        "source_row": 119,
+        "conceptoOriginal": "Angina post infarto, hasta 3 dias",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_CORONARIOPATIAS_SHOCK_CARDIOGENI",
@@ -1339,7 +1469,7 @@
         "code": "BO_ARM_CARDIOLOGIA_ARRITMIAS_CARDIACAS_ATENCIEN_MED",
         "especialidad": "Cardiología",
         "grupo": "ARRITMIAS CARDIACAS",
-        "concepto": "Atención médica de arrtmias severas, hasta 7 dias",
+        "concepto": "Atención médica de arritmias severas, hasta 7 días",
         "uma": 80.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Atencién médica de arrtmias severas, hasta 7 dias",
@@ -1347,13 +1477,14 @@
           "Atencién→Atención"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 122
+        "source_row": 122,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ARRITMIAS_CARDIACAS_REANIMACIEN_",
         "especialidad": "Cardiología",
         "grupo": "ARRITMIAS CARDIACAS",
-        "concepto": "Reanimación cardiopulmonar en para cartiaco",
+        "concepto": "Reanimación cardiopulmonar en paro cardiaco",
         "uma": 120.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Reanimacién cardiopulmonar en para cartiaco",
@@ -1361,12 +1492,13 @@
           "Reanimacién→Reanimación"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 123
+        "source_row": 123,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ACOMPANAMIENTO_CLINICO_QUIRERGIC",
         "especialidad": "Cardiología",
-        "grupo": "ACOMPANAMIENTO CLINICO QUIRERGICO",
+        "grupo": "ACOMPAÑAMIENTO CLÍNICO QUIRÚRGICO",
         "concepto": "Acompañamiento intraoperatorio hasta 2 horas",
         "uma": 20.0,
         "ocrSospechoso": false,
@@ -1375,17 +1507,22 @@
           "Acompafiamiento→Acompañamiento"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 125
+        "source_row": 125,
+        "grupoOriginal": "ACOMPANAMIENTO CLINICO QUIRERGICO",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CARDIOLOGIA_ACOMPANAMIENTO_CLINICO_QUIRERGIC_126008",
         "especialidad": "Cardiología",
-        "grupo": "ACOMPANAMIENTO CLINICO QUIRERGICO",
-        "concepto": "Acompefiamiento intraoperatorio por hora adicional",
+        "grupo": "ACOMPAÑAMIENTO CLÍNICO QUIRÚRGICO",
+        "concepto": "Acompañamiento intraoperatorio por hora adicional",
         "uma": 10.0,
         "ocrSospechoso": false,
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 126
+        "source_row": 126,
+        "conceptoOriginal": "Acompefiamiento intraoperatorio por hora adicional",
+        "grupoOriginal": "ACOMPANAMIENTO CLINICO QUIRERGICO",
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CIRUGIA_CARDIACA_TORACICA_Y_VASCULAR_OPERACI",
@@ -8139,7 +8276,7 @@
       {
         "code": "BO_ARM_CIRUGIA_GENERAL_CIRUGIA_MINIMAMENTE_INVASIVO",
         "especialidad": "Cirugía General",
-        "grupo": "CIRUGIA MÍNIMAMENTE INVASIVO PERCUTÁNEO:",
+        "grupo": "CIRUGÍA PERCUTÁNEA",
         "concepto": "Drenaje biiar percutáneo externo",
         "uma": 8.0,
         "ocrSospechoso": false,
@@ -8149,12 +8286,13 @@
         ],
         "grupoOriginal": "CIRUGIA MINIMAMENTE INVASIVO PERCUTANEO:",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 674
+        "source_row": 674,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CIRUGIA_GENERAL_CIRUGIA_MINIMAMENTE_INVASIVO_0B44EA",
         "especialidad": "Cirugía General",
-        "grupo": "CIRUGIA MÍNIMAMENTE INVASIVO PERCUTÁNEO:",
+        "grupo": "CIRUGÍA PERCUTÁNEA",
         "concepto": "Drenaje biliar percutáneo externo e interno",
         "uma": 104.0,
         "ocrSospechoso": false,
@@ -8164,7 +8302,8 @@
         ],
         "grupoOriginal": "CIRUGIA MINIMAMENTE INVASIVO PERCUTANEO:",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 675
+        "source_row": 675,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_CIRUGIA_GENERAL_ENDOPROTESIS_TILIAR_7_COLOCA",
@@ -16190,51 +16329,55 @@
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Blefaroplastia inferior o superior",
         "uma": 12.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1329
+        "source_row": 1329,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_5A3DFB",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Lipoescultura por area de 15 x 15 om 910.03 Lipoimplante 65",
         "uma": 30.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1330
+        "source_row": 1330,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_D9BBD3",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "— Miniliting",
         "uma": 300.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1331
+        "source_row": 1331,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_033603",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Liposuccién de papada",
         "uma": 122.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1332
+        "source_row": 1332,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_4CFAB8",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Exéresis de piel braquioplastia, papada, mustos",
         "uma": 86.0,
         "ocrSospechoso": false,
@@ -16244,34 +16387,37 @@
         ],
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1333
+        "source_row": 1333,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_08C604",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Otoplastia",
         "uma": 122.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1334
+        "source_row": 1334,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_4FDDB6",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Brow lft",
         "uma": 72.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1335
+        "source_row": 1335,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_98EFB2",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Exéresis queloides",
         "uma": 86.0,
         "ocrSospechoso": false,
@@ -16281,23 +16427,25 @@
         ],
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1336
+        "source_row": 1336,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_DC8D2C",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Onicetomia o matricectomia",
         "uma": 50.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1337
+        "source_row": 1337,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_88F134",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Inyección de grasa autóloga en músculo",
         "uma": 72.0,
         "ocrSospechoso": false,
@@ -16309,45 +16457,49 @@
         ],
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1338
+        "source_row": 1338,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_641DBB",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Radiofrecuencia bipolar facial",
         "uma": 10.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1339
+        "source_row": 1339,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_DAB44F",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Radiofrecuencia tripotar facial",
         "uma": 15.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1340
+        "source_row": 1340,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_FC99A3",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Ulthera hit",
         "uma": 65.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1341
+        "source_row": 1341,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_C6A435",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Aparatologia corporal: ultasonido sesión",
         "uma": 5.0,
         "ocrSospechoso": false,
@@ -16357,12 +16509,13 @@
         ],
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1342
+        "source_row": 1342,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_226F0B",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Aparatologia corporal: radiofrecuencia sesión",
         "uma": 6.0,
         "ocrSospechoso": false,
@@ -16372,12 +16525,13 @@
         ],
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1343
+        "source_row": 1343,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_2F6908",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Aparatologia corporal: carboxiterapia sesión",
         "uma": 5.0,
         "ocrSospechoso": false,
@@ -16387,29 +16541,32 @@
         ],
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1344
+        "source_row": 1344,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_0491B8",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "—Criolipolisis",
         "uma": 36.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1345
+        "source_row": 1345,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_DERMATOLOGIA_PROCEDIMIENTOS_QUIRURGICOS_MINI_752705",
         "especialidad": "Dermatología",
-        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS MÍNIMAMENTE INVASIVOS",
+        "grupo": "PROCEDIMIENTOS QUIRÚRGICOS",
         "concepto": "Drenaje linfatico",
         "uma": 5.0,
         "ocrSospechoso": false,
         "grupoOriginal": "PROCEDIMIENTOS QUIRURGICOS MINIMAMENTE INVASIVOS",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1346
+        "source_row": 1346,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_ENDOCRINOLOGIA_METABOLISMO_Y_NUTRICION_MONIT",
@@ -22919,7 +23076,7 @@
         "code": "BO_ARM_NEFROLOGIA_ENTIDADES_ESPECIALES_DEALTO_RIESG_8F9718",
         "especialidad": "Nefrología",
         "grupo": "ENTIDADES ESPECIALES DEALTO RIESGO",
-        "concepto": "Asistencia ventilatoria mecéinica no invasiva (no incluye equipamiento)",
+        "concepto": "Asistencia ventilatoria mecánica con mascarilla, sin intubación (no incluye equipamiento)",
         "uma": 120.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Asistencia ventilatoria mecéinica no invasiva (no incluye equipa- miento)",
@@ -22927,7 +23084,8 @@
           "equipa- miento)→equipamiento)"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 1918
+        "source_row": 1918,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_NEFROLOGIA_PRUEBAS_DE_FUNCION_PULMONAR_ESPIR",
@@ -28679,7 +28837,7 @@
         "code": "BO_ARM_OFTALMOLOGIA_ESTRABISMO_CIRUGLA_MINIMAMENTE_",
         "especialidad": "Oftalmología",
         "grupo": "ESTRABISMO",
-        "concepto": "Cirugía mínimamente invasiva de estrabismo (miss)",
+        "concepto": "Cirugía de estrabismo por microincisiones (MISS)",
         "uma": 60.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Cirugla minimamente invasiva de estrabismo (miss)",
@@ -28688,7 +28846,8 @@
           "minimamente→mínimamente"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 2414
+        "source_row": 2414,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_OFTALMOLOGIA_ESTRABISMO_APLICACI6N_DE_TOXINA",
@@ -54198,7 +54357,7 @@
         "code": "BO_ARM_TERAPIA_INTENSIVA_PEDIATRICA_DIAGNOSTICO_O_P_5D9455",
         "especialidad": "Terapia Intensiva Pediátrica",
         "grupo": "DIAGNOSTICO O PROCEDIMIENTO.",
-        "concepto": "Monitorización invasiva (pic/pialpvelpoapige) (por cada parametro por dia)",
+        "concepto": "Monitorización con catéter de presiones (PIC/PIA/PVC/POAP), por cada parámetro por día",
         "uma": 10.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Monitorizacién invasiva (pic/pialpvelpoapige) (por cada parametro por dia)",
@@ -54206,7 +54365,8 @@
           "Monitorizacién→Monitorización"
         ],
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 4434
+        "source_row": 4434,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_TERAPIA_INTENSIVA_PEDIATRICA_DIAGNOSTICO_O_P_7F33FE",
@@ -54906,7 +55066,7 @@
         "code": "BO_ARM_TERAPIA_INTENSIVA_PEDIATRICA_NEUMOLOGIA_Y_AS_FCC357",
         "especialidad": "Terapia Intensiva Pediátrica",
         "grupo": null,
-        "concepto": "Ventilación no invasiva",
+        "concepto": "Ventilación mecánica con mascarilla, sin intubación",
         "uma": 400.0,
         "ocrSospechoso": false,
         "conceptoOriginal": "Ventilacion no invasiva",
@@ -54915,7 +55075,8 @@
         ],
         "grupoOriginal": "NEUMOLOGIA Y ASISTENCIA RESPIRATORIA (LAS ENFERME- DADES SON INDEPENDIENTES DE LA ASISTENCIA RESPIRA- TORIA MECANICA)",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
-        "source_row": 4499
+        "source_row": 4499,
+        "correccionManual": true
       },
       {
         "code": "BO_ARM_TERAPIA_INTENSIVA_PEDIATRICA_NEUMOLOGIA_Y_AS_31E8CE",
@@ -57832,11 +57993,13 @@
       {
         "code": "BO_ARO_ODONTOPEDIATRIA_3_APLICACION_DE_SELLANTE_TEC",
         "seccion": "ODONTOPEDIATRIA",
-        "concepto": "Aplicación de sellante técnica invasiva por elemento",
+        "concepto": "Aplicación de sellante con ameloplastia, por elemento",
         "precioUsd": 25.0,
         "ocrSospechoso": false,
         "source_file": "LISTADO_ARANCEL_ODONTOLOGICO_2026_1.md",
-        "source_row": 17
+        "source_row": 17,
+        "conceptoOriginal": "Aplicación de sellante técnica invasiva por elemento",
+        "correccionManual": true
       },
       {
         "code": "BO_ARO_ODONTOPEDIATRIA_4_APLICACION_DE_CARIOSTATICO",
