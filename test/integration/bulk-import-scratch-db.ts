@@ -22,6 +22,25 @@ export interface ScratchDb {
 const PATCH = 'database/SQL/patches/2026-10-31_v4281_cargas_masivas.sql';
 
 /**
+ * Plain `DROP DATABASE`, retried while the server still reports the database in
+ * use (55006): our pools have been ended but their sockets may close a moment
+ * later. No `WITH (FORCE)`: killing live backends raced with the pool teardown.
+ */
+async function dropWhenFree(server: pg.Pool, name: string): Promise<void> {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      await server.query(`DROP DATABASE IF EXISTS "${name}"`);
+      return;
+    } catch (error) {
+      if ((error as { code?: string }).code !== '55006' || attempt >= 50) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+}
+
+/**
  * Creates a fresh database on the server given by `DB_HOST`/`DB_PORT`/`DB_USER`/
  * `DB_PASSWORD`, applies the real bulk-import patch there and returns it. It
  * never runs DDL on the configured database: the only destructive statement is
@@ -52,9 +71,7 @@ export async function createScratchDb(
   let admin: pg.Pool | undefined;
   const dispose = async () => {
     await admin?.end();
-    if (isDisposableDatabaseName(name)) {
-      await server.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
-    }
+    if (isDisposableDatabaseName(name)) await dropWhenFree(server, name);
     await server.query(`DROP ROLE IF EXISTS "${role}"`);
     await server.end();
   };
