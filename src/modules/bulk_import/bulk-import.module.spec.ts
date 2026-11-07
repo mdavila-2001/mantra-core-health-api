@@ -6,6 +6,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { AuditTrailService } from '../audit/services/audit-trail.service';
 import { AuthzPdpService } from '../authz/services/authz-pdp.service';
 import { NotConnectedUserProvisioner } from './adapters/not-connected.adapters';
+import { InMemoryBatchRepository } from './repositories/in-memory-batch.repository';
 import { BulkImportModule } from './bulk-import.module';
 import { BulkImportController } from './controllers/bulk-import.controller';
 import {
@@ -36,7 +37,8 @@ describe('BulkImportModule · grafo de inyección', () => {
     error: () => undefined,
   };
 
-  async function build() {
+  /** `memoryRepo`: swaps only the repository; Postgres is covered by the integration spec. */
+  async function build(memoryRepo = false) {
     const controllers = Reflect.getMetadata(
       MODULE_METADATA.CONTROLLERS,
       BulkImportModule,
@@ -49,6 +51,14 @@ describe('BulkImportModule · grafo de inyección', () => {
       controllers,
       providers: [
         ...providers,
+        ...(memoryRepo
+          ? [
+              {
+                provide: BULK_IMPORT_BATCH_REPOSITORY,
+                useClass: InMemoryBatchRepository,
+              },
+            ]
+          : []),
         { provide: PinoLogger, useValue: logger },
         {
           provide: AuthzPdpService,
@@ -90,7 +100,7 @@ describe('BulkImportModule · grafo de inyección', () => {
     const module = await build();
     const service = module.get(BulkImportService);
     expect(service.catalog().engine).toMatchObject({
-      persistence: { durable: false },
+      persistence: { durable: true },
       executors: {
         users: { connected: false },
         clinical: { connected: false },
@@ -120,16 +130,16 @@ describe('BulkImportModule · grafo de inyección', () => {
     });
   });
 
-  it('el repositorio por defecto es el doble en memoria, declarado', async () => {
+  it('el repositorio por defecto es el de Postgres, declarado durable', async () => {
     const module = await build();
     const repo = module.get<BulkImportBatchRepository>(
       BULK_IMPORT_BATCH_REPOSITORY,
     );
-    expect(repo.constructor.name).toBe('InMemoryBatchRepository');
+    expect(repo.constructor.name).toBe('PostgresBatchRepository');
   });
 
   it('de punta a punta con los adaptadores «no conectado»: el lote termina y el informe no dice CREADA', async () => {
-    const module = await build();
+    const module = await build(true);
     const service = module.get(BulkImportService);
     const processor = module.get(BulkImportProcessor);
     // El PDP de la prueba deniega: se concede con un doble sólo para esta prueba.

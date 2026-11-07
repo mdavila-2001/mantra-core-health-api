@@ -6,8 +6,8 @@ generada del mismo esquema que valida** (regla T1 del plan
 
 > **Estado honesto.** El motor (esquema, plantillas, validación, vista previa, confirmación
 > idempotente, procesamiento asíncrono con plazos, informe, autorización, auditoría) está completo y
-> probado **contra dobles declarados**. Lo que sale a producción hoy: ninguna persistencia durable, ningún
-> alta real de usuarios y ninguna escritura clínica real. Ver «Colaboradores» y «Bloqueado».
+> probado **contra dobles declarados** para los ejecutores. Lo que sale a producción hoy: persistencia
+> durable en Postgres, pero ningún alta real de usuarios y ninguna escritura clínica real. Ver «Colaboradores» y «Bloqueado».
 > `GET /admin/bulk-imports/templates` devuelve ese estado en `engine`.
 
 ## Rutas (prefijo `admin/bulk-imports`)
@@ -87,7 +87,7 @@ las filas (datos personales) se vacían en la misma transición.
 
 | Puerto | Adaptador cableado hoy | Estado |
 |---|---|---|
-| `BulkImportBatchRepository` | `InMemoryBatchRepository` | **Doble declarado, no durable** |
+| `BulkImportBatchRepository` | `PostgresBatchRepository` (`system_ops.bulk_import_batches` / `bulk_import_batch_rows`) | Real y durable; probado contra Postgres real (`test/integration/bulk-import-postgres.int-spec.ts`). `InMemoryBatchRepository` sólo lo usan las pruebas |
 | `UserProvisionerPort` | `NotConnectedUserProvisioner` | No conectado: filas `RECHAZADA / EXECUTOR_NOT_CONNECTED` |
 | `ClinicalRecordWriterPort` | `NotConnectedClinicalWriter` | No conectado: ídem |
 | `PatientResolverPort` | `NotConnectedPatientResolver` | No conectado: filas `RECHAZADA / RESOLUTION_UNAVAILABLE` |
@@ -100,12 +100,7 @@ ellos es evidencia del colaborador real (regla 65).
 
 ## Bloqueado / pendiente
 
-- **Tabla del lote (BLOQUEADO, `mantra-core-health-model`).** No existe tabla para el lote
-  (estado, declaración, contadores, clave de confirmación única por organización, informe) ni para el
-  registro de filas procesadas. Se evaluaron `terminology.catalog_import_batches` (exige `source_id` de
-  terminología) y `health_data.health_ingestion_batches` (exige una conexión de fuente y no tiene origen
-  declarado ni base legal; no cubre usuarios). Hace falta una fuente de verdad en el modelo, con retención
-  mínima de filas y unicidad `(organización, clave de confirmación)`. Sin DDL ni sincronización del ORM acá.
+- Decisiones de negocio de los adaptadores (issue #1404).
 - **Adaptador de alta de usuarios**: usar `IamAssistedRegistrationService` /
   `assistedRegisterPractitioner` (la cuenta nace pendiente). El token de activación **no** puede volver al
   motor ni al informe: falta definir cómo se entrega (¿correo vía `EmailNoticePort`?). Decisión de negocio.
@@ -117,5 +112,5 @@ ellos es evidencia del colaborador real (regla 65).
   `consent.*` (a confirmar con el DPO).
 - **Resolutor de códigos**: `code_systems.internal_code` → versión vigente → `catalog_concepts`; falta
   decidir qué versión es la vigente.
-- **Cola durable**: el procesamiento es en proceso; un reinicio deja el lote en `PROCESANDO`/`EN_COLA`.
+- **Cola durable**: el procesamiento es en proceso; un reinicio deja el lote en `PROCESANDO`/`EN_COLA` (issue #1405).
 - Documentación OpenAPI regenerada: no se hizo.
