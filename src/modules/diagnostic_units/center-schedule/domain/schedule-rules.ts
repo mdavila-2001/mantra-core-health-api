@@ -10,6 +10,7 @@ import type {
   ScheduleBlock,
   ScheduleOrigin,
 } from './center-schedule.model';
+import { windowTiming } from './center-schedule.model';
 
 /**
  * Pure rules of a center's schedule, the server twin of the frontend's
@@ -71,10 +72,10 @@ export function validateSchedule(schedule: CenterSchedule): ScheduleProblem[] {
           field,
           problem: 'La hora de fin tiene que ser posterior a la de inicio.',
         });
-      } else if (to - from < block.slotMinutes) {
+      } else if (to - from < windowTiming(block, w).slot) {
         problems.push({
           field,
-          problem: `No entra ni una cita de ${block.slotMinutes} min.`,
+          problem: `No entra ni una cita de ${windowTiming(block, w).slot} min.`,
         });
       }
     }
@@ -101,17 +102,20 @@ export function slotsBetween(
   to: Date,
   zone: string,
 ): SlotInstant[] {
-  const step = block.slotMinutes * 60_000;
-  if (step <= 0) return [];
   const slots: SlotInstant[] = [];
   for (const w of block.windows) {
+    const { slot, gap } = windowTiming(block, w);
+    const length = slot * 60_000;
+    // Each appointment is followed by its rest, as in the practitioner's agenda.
+    const step = (slot + gap) * 60_000;
+    if (length <= 0) continue;
     // ISO 7 (Sunday) is 0 in the scheduling module's convention.
     for (const day of matchingLocalDays(from, to, w.dayOfWeek % 7, zone)) {
       const open = localTimeToUtc(day, w.startTime, zone).getTime();
       const close = localTimeToUtc(day, w.endTime, zone).getTime();
-      for (let t = open; t + step <= close; t += step) {
+      for (let t = open; t + length <= close; t += step) {
         if (t < from.getTime() || t > to.getTime()) continue;
-        slots.push({ startAt: new Date(t), endAt: new Date(t + step) });
+        slots.push({ startAt: new Date(t), endAt: new Date(t + length) });
       }
     }
   }

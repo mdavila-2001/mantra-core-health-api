@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS } from '../../../../common/constants/concepts';
 import { DUNIT } from '../../diagnostic_units.concepts';
 import { findUnitSites, type SiteRow } from './center-sites.query';
+import type { ScheduleWindow } from '../domain/center-schedule.model';
 
 /** The unit as the center screens need it. */
 export interface UnitRow {
@@ -32,6 +33,9 @@ export interface TemplateRuleRow {
   start_time: string | null;
   end_time: string | null;
   capacity_per_slot: number | null;
+  /** The rule's own length and rest: a window may differ from its template. */
+  rule_slot_minutes?: number | null;
+  gap_minutes?: number | null;
 }
 
 export interface EquipmentRow {
@@ -169,7 +173,7 @@ export class CenterScheduleRepository {
     return em.execute<TemplateRuleRow[]>(
       `SELECT t.id AS template_id, t.name, t.slot_minutes, t.updated_at,
               r.day_of_week, r.start_time::text AS start_time, r.end_time::text AS end_time,
-              r.capacity_per_slot
+              r.capacity_per_slot, r.slot_minutes AS rule_slot_minutes, r.gap_minutes
          FROM scheduling.schedule_templates t
          LEFT JOIN scheduling.schedule_rules r
            ON r.schedule_template_id = t.id AND (r.valid_to IS NULL OR r.valid_to >= current_date)
@@ -207,11 +211,7 @@ export class CenterScheduleRepository {
       name: string;
       serviceConceptId: string | null;
       slotMinutes: number;
-      windows: readonly {
-        dayOfWeek: number;
-        startTime: string;
-        endTime: string;
-      }[];
+      windows: readonly ScheduleWindow[];
     },
     actorId: string,
   ): Promise<void> {
@@ -235,15 +235,16 @@ export class CenterScheduleRepository {
     for (const w of data.windows) {
       await em.execute(
         `INSERT INTO scheduling.schedule_rules
-           (id, schedule_template_id, day_of_week, start_time, end_time, slot_minutes,
+           (id, schedule_template_id, day_of_week, start_time, end_time, slot_minutes, gap_minutes,
             created_at, updated_at, created_by_user_id, updated_by_user_id, row_version)
-         VALUES (gen_random_uuid(), ?, ?, ?, ?, ?, now(), now(), ?, ?, 1)`,
+         VALUES (gen_random_uuid(), ?, ?, ?, ?, ?, ?, now(), now(), ?, ?, 1)`,
         [
           template.id,
           w.dayOfWeek % 7,
           w.startTime,
           w.endTime,
-          data.slotMinutes,
+          w.slotMinutes ?? data.slotMinutes,
+          w.gapMinutes ? w.gapMinutes : null,
           actorId,
           actorId,
         ],
