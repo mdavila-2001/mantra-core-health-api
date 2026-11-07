@@ -5,8 +5,11 @@ import { CONCEPTS } from '../../src/common';
 import { DIR } from '../../src/modules/directory/directory.concepts';
 import { PROF } from '../../src/modules/profiles/profiles.concepts';
 import { AUTHZ } from '../../src/modules/authz/authz.concepts';
+import { clinicalRoleId } from '../../src/modules/authz/authz.seed';
+import { rowInserter } from './support/row-inserter';
 import { UsersDirectoryReadAdapter } from '../../src/modules/authz/infrastructure/users-directory-read.adapter';
 import type {
+  DirectoryPermissionRow,
   DirectoryScope,
   DirectoryUserRow,
 } from '../../src/modules/authz/ports/users-directory-read.port';
@@ -22,9 +25,12 @@ describe('Users directory read adapter (integration)', () => {
   const adapter = new UsersDirectoryReadAdapter();
   const mark = randomUUID().slice(0, 8);
   const ids: Record<string, string> = {};
-  const created: Array<[string, string, string]> = [];
   let db: Client;
+  let insert: ReturnType<typeof rowInserter>['insert'];
+  let cleanup: ReturnType<typeof rowInserter>['cleanup'];
   let statements = 0;
+  const baseline: Record<'platform' | 'clinic', DirectoryPermissionRow> =
+    {} as never;
 
   /** Minimal EntityManager over a real connection; counts every statement. */
   const em = {
@@ -41,44 +47,6 @@ describe('Users directory read adapter (integration)', () => {
       },
     }),
   } as unknown as EntityManager;
-
-  /** Inserts a row, filling every NOT NULL column without default. */
-  async function insert(
-    table: string,
-    values: Record<string, unknown>,
-    key = 'id',
-  ): Promise<string> {
-    const [schema, name] = table.split('.');
-    const cols = await db.query(
-      `select column_name, data_type from information_schema.columns
-        where table_schema = $1 and table_name = $2 and is_nullable = 'NO' and column_default is null`,
-      [schema, name],
-    );
-    const row: Record<string, unknown> = { ...values };
-    for (const c of cols.rows) {
-      if (c.column_name in row) continue;
-      row[c.column_name] =
-        c.data_type === 'uuid'
-          ? randomUUID()
-          : c.data_type.startsWith('timestamp')
-            ? new Date()
-            : c.data_type === 'boolean'
-              ? false
-              : c.data_type === 'integer'
-                ? 0
-                : `x-${mark}`;
-    }
-    if (key in row === false && cols.rows.some((c) => c.column_name === key))
-      row[key] = randomUUID();
-    const names = Object.keys(row);
-    const res = await db.query(
-      `insert into ${table} (${names.map((n) => `"${n}"`).join(',')})
-       values (${names.map((_, i) => `$${i + 1}`).join(',')}) returning "${key}"`,
-      names.map((n) => row[n]),
-    );
-    created.push([table, key, res.rows[0][key]]);
-    return res.rows[0][key];
-  }
 
   const user = (label: string, extra: Record<string, unknown> = {}) =>
     insert('iam.users', {
@@ -115,6 +83,18 @@ describe('Users directory read adapter (integration)', () => {
       resource: mark,
       is_dangerous: dangerous,
     });
+  const role = (
+    label: string,
+    extra: Record<string, unknown> = {},
+  ): Promise<string> =>
+    insert('authz.roles', {
+      code: `${mark}-${label}`,
+      name: label,
+      state_concept_id: CONCEPTS.STATE_ACTIVE,
+      is_system: false,
+      is_assignable: true,
+      ...extra,
+    });
   const rolePerm = (roleId: string, permissionId: string, effect: string) =>
     insert('authz.role_permissions', {
       role_id: roleId,
@@ -146,6 +126,7 @@ describe('Users directory read adapter (integration)', () => {
       database: process.env.DB_NAME,
     });
     await db.connect();
+    ({ insert, cleanup } = rowInserter(db, mark));
 
     ids.pharmacy = await tenant('pharmacy', CONCEPTS.TENANT_TYPE_PHARMACY);
     ids.lab = await tenant('lab', CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER);
@@ -234,11 +215,76 @@ describe('Users directory read adapter (integration)', () => {
       });
     // Same user also holds a role in ANOTHER organization: must not leak into clinic scope.
     await assign(ids.plain, ids.role, ids.lab);
+
+    // INTERNAL account: its effective permissions come from the policy role the PDP
+    // binds to the iam global role SECURITY_ADMIN. Seeded databases already have it.
+    const policy = clinicalRoleId('SECURITY_ADMIN');
+    const seeded = await db.query('select 1 from authz.roles where id = $1', [
+      policy,
+    ]);
+    if (seeded.rowCount === 0)
+      await insert('authz.roles', {
+        id: policy,
+        code: 'SECURITY_ADMIN',
+        name: 'Policy role',
+        tenant_id: null,
+        is_system: true,
+        is_assignable: false,
+        state_concept_id: CONCEPTS.STATE_ACTIVE,
+      });
+    ids.policy = policy;
+    baseline.platform = (
+      await adapter.permissionSummary(em, [ids.admin], {})
+    )[0];
+    baseline.clinic = (
+      await adapter.permissionSummary(em, [ids.admin], { tenantId: ids.clinic })
+    )[0];
+    const [pp1, pp2, pp3] = [
+      await permission('pol1', false),
+      await permission('pol2', true),
+      await permission('pol3', false),
+    ];
+    for (const [permissionId, effect] of [
+      [pp1, AUTHZ.EFFECT_ALLOW],
+      [pp2, AUTHZ.EFFECT_ALLOW],
+      [pp3, AUTHZ.EFFECT_DENY],
+    ])
+      ids[`pol-${permissionId}`] = await rolePerm(policy, permissionId, effect);
+
+    ids.root = await user('root');
+    await insert('iam.user_global_roles', {
+      user_id: ids.root,
+      role_concept_id: CONCEPTS.ROLE_SUPERADMIN,
+      state_concept_id: CONCEPTS.STATE_ACTIVE,
+    });
+
+    // Role inheritance: child -> parent; a parent of ANOTHER organization is skipped.
+    const parent = await role('parent');
+    const child = await role('child', { parent_role_id: parent });
+    const foreignParent = await role('fparent', { tenant_id: ids.lab });
+    const orphan = await role('orphan', { parent_role_id: foreignParent });
+    const globalRole = await role('global');
+    for (const [r, label] of [
+      [parent, 'in1'],
+      [child, 'in2'],
+      [foreignParent, 'in3'],
+      [orphan, 'in4'],
+      [globalRole, 'in5'],
+    ])
+      await rolePerm(r, await permission(label, false), AUTHZ.EFFECT_ALLOW);
+    ids.heir = await user('heir');
+    await member(ids.heir, ids.clinic);
+    await assign(ids.heir, child, ids.clinic);
+    ids.orphanHeir = await user('orphan-heir');
+    await member(ids.orphanHeir, ids.clinic);
+    await assign(ids.orphanHeir, orphan, ids.clinic);
+    ids.globalHeir = await user('global-heir');
+    await member(ids.globalHeir, ids.clinic);
+    await assign(ids.globalHeir, globalRole, null);
   });
 
   afterAll(async () => {
-    for (const [table, key, id] of created.reverse())
-      await db.query(`delete from ${table} where "${key}" = $1`, [id]);
+    await cleanup();
     await db.end();
   });
 
@@ -258,7 +304,9 @@ describe('Users directory read adapter (integration)', () => {
 
   it('holds an organization-scoped admin to that organization only', async () => {
     const clinic = await typeOf({ tenantId: ids.clinic });
-    expect(Object.keys(clinic).sort()).toEqual([ids.doctor, ids.plain].sort());
+    expect(Object.keys(clinic).sort()).toEqual(
+      [ids.doctor, ids.plain, ids.heir, ids.orphanHeir, ids.globalHeir].sort(),
+    );
     const pharmacy = await typeOf({ tenantId: ids.pharmacy });
     expect(Object.keys(pharmacy)).toEqual([ids.pharmacist]);
     // Kill-test: no account of another organization leaks.
@@ -293,6 +341,67 @@ describe('Users directory read adapter (integration)', () => {
     expect(roles.map((r) => r.tenantId)).toEqual([ids.clinic]);
     const platformRoles = await adapter.roles(em, [ids.plain], {});
     expect(platformRoles).toHaveLength(2);
+  });
+
+  it("counts an INTERNAL account's permissions through its bound policy role, and lists its global roles", async () => {
+    const [row] = (
+      await adapter.page(em, { type: 'INTERNAL', limit: 500 }, {})
+    ).filter((r) => r.id === ids.admin);
+    expect(row.globalRoles).toEqual(['SECURITY_ADMIN']);
+    const [platform] = await adapter.permissionSummary(em, [ids.admin], {});
+    const [clinic] = await adapter.permissionSummary(em, [ids.admin], {
+      tenantId: ids.clinic,
+    });
+    // The test added to the policy role: 2 allowed (1 dangerous) and 1 denied,
+    // measured against what the database already granted that role.
+    for (const [after, before] of [
+      [platform, baseline.platform],
+      [clinic, baseline.clinic],
+    ]) {
+      expect(after.allowCount - before.allowCount).toBe(2);
+      expect(after.denyCount - before.denyCount).toBe(1);
+      expect(after.dangerousCount - before.dangerousCount).toBe(1);
+    }
+  });
+
+  it('inherits permissions from parent roles but skips a parent of another organization', async () => {
+    const clinic = { tenantId: ids.clinic };
+    const [heir] = await adapter.permissionSummary(em, [ids.heir], clinic);
+    expect(heir.allowCount).toBe(2);
+    const [orphan] = await adapter.permissionSummary(
+      em,
+      [ids.orphanHeir],
+      clinic,
+    );
+    expect(orphan.allowCount).toBe(1);
+    const [orphanPlatform] = await adapter.permissionSummary(
+      em,
+      [ids.orphanHeir],
+      {},
+    );
+    expect(orphanPlatform.allowCount).toBe(2);
+  });
+
+  it('applies an assignment with no tenant inside the organization, and lists it', async () => {
+    const clinic = { tenantId: ids.clinic };
+    const [g] = await adapter.permissionSummary(em, [ids.globalHeir], clinic);
+    expect(g.allowCount).toBe(1);
+    const roles = await adapter.roles(em, [ids.globalHeir], clinic);
+    expect(roles.map((r) => r.tenantId)).toEqual([null]);
+    // ...and the role filter agrees with the listing.
+    const byRole = await adapter.page(
+      em,
+      { roleCode: `${mark}-global`, limit: 50 },
+      clinic,
+    );
+    expect(byRole.map((r) => r.id)).toEqual([ids.globalHeir]);
+  });
+
+  it('reports SUPERADMIN in globalRoles so the caller can mark it unrestricted', async () => {
+    const rows = await adapter.page(em, { type: 'INTERNAL', limit: 500 }, {});
+    expect(rows.find((r) => r.id === ids.root)?.globalRoles).toEqual([
+      'SUPERADMIN',
+    ]);
   });
 
   it('exposes a login subject only when it is an email, and never a secret', async () => {

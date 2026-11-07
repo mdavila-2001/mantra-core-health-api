@@ -23,6 +23,7 @@ const row = (
   mfaStatusConceptId: null,
   lastLoginAt: null,
   userType,
+  globalRoles: userType === 'INTERNAL' ? ['SUPERADMIN'] : [],
 });
 const actor = (roles: string[], scopedRoles?: Record<string, string[]>) =>
   ({ id: 'actor', roles, scopedRoles }) as unknown as AuthenticatedUser;
@@ -177,6 +178,7 @@ describe('AuthzUsersDirectoryService', () => {
       mfaStatusConceptId: null,
       lastLoginAt: null,
       maskedEmail: 'a***@c***.org',
+      globalRoles: [],
       roles: [
         {
           assignmentId: 'a1',
@@ -186,8 +188,31 @@ describe('AuthzUsersDirectoryService', () => {
           validTo: null,
         },
       ],
-      permissions: { allowed: 4, denied: 1, dangerous: 2, directGrants: 1 },
+      permissions: {
+        allowed: 4,
+        denied: 1,
+        dangerous: 2,
+        directGrants: 1,
+        unrestricted: false,
+      },
     });
     expect(JSON.stringify(out)).not.toContain('ana@clinica.org');
+  });
+
+  it('marks a SUPERADMIN as unrestricted and lists its global roles', async () => {
+    const { service } = build([row(1, 'INTERNAL')]);
+    const out = await service.list(actor(['SUPERADMIN']), undefined, {});
+    expect(out.items[0].globalRoles).toEqual(['SUPERADMIN']);
+    expect(out.items[0].permissions.unrestricted).toBe(true);
+  });
+
+  it('rejects a well-formed cursor without our keys instead of ignoring it', async () => {
+    const { service, port } = build([row(1)]);
+    await expect(
+      service.list(actor(['SECURITY_ADMIN']), TENANT, {
+        cursor: encodeKeysetCursor({ x: 1 }),
+      }),
+    ).rejects.toMatchObject({ status: 400 });
+    expect(port.page).not.toHaveBeenCalled();
   });
 });

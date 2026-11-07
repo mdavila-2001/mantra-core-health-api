@@ -5,6 +5,9 @@ import { isoTimestampSql } from '../../../common/pagination/iso-timestamp-sql';
 import { DIR } from '../../directory/directory.concepts';
 import { PROF } from '../../profiles/profiles.concepts';
 import { AUTHZ } from '../authz.concepts';
+import { IAM_PDP_ROLE_BINDINGS } from '../authz.global-role-bindings';
+import { clinicalRoleId } from '../authz.seed';
+import { ROLE_CODE_BY_CONCEPT } from '../../iam/domain/role-mapping';
 import type {
   DirectoryFilter,
   DirectoryPermissionRow,
@@ -26,6 +29,10 @@ function lit(...ids: string[]): string {
 }
 
 const ACTIVE = lit(CONCEPTS.STATE_ACTIVE);
+/** (iam role concept, authz policy role id) pairs the PDP binds to global roles. */
+const BOUND_POLICY_ROLES = Object.entries(IAM_PDP_ROLE_BINDINGS)
+  .map(([code, concept]) => `(${lit(concept)}, ${lit(clinicalRoleId(code))})`)
+  .join(', ');
 const MEMBERSHIPS = lit(DIR.MEMBERSHIP_ACTIVE, CONCEPTS.MEMBERSHIP_ACTIVE);
 
 const global = (roles: string[]) =>
@@ -88,7 +95,7 @@ export class UsersDirectoryReadAdapter implements UsersDirectoryReadPort {
     if (f.roleCode) {
       where.push(`exists (select 1 from authz.user_role_assignments a join authz.roles r on r.id = a.role_id
         where a.user_id = u.id and a.status_concept_id = ${ACTIVE} and r.code = ?
-          and (?::uuid is null or a.tenant_id = ?::uuid))`);
+          and (?::uuid is null or a.tenant_id is null or a.tenant_id = ?::uuid))`);
       params.push(f.roleCode, scope.tenantId ?? null, scope.tenantId ?? null);
     }
     if (f.after) {
@@ -105,11 +112,14 @@ export class UsersDirectoryReadAdapter implements UsersDirectoryReadPort {
       mfa_status_concept_id: string | null;
       last_login_at: string | null;
       user_type: DirectoryUserRow['userType'];
+      global_role_ids: string[];
     }>(
       em,
       `select x.* from (
          select u.id, u.display_name, u.status_concept_id, u.mfa_status_concept_id,
-                ${isoTimestampSql('u.last_login_at')} as last_login_at, ${USER_TYPE_SQL} as user_type
+                ${isoTimestampSql('u.last_login_at')} as last_login_at, ${USER_TYPE_SQL} as user_type,
+                (select coalesce(array_agg(g.role_concept_id::text), '{}') from iam.user_global_roles g
+                  where g.user_id = u.id and g.state_concept_id = ${ACTIVE}) as global_role_ids
            from iam.users u where ${where.join(' and ')}
        ) x ${outer} order by x.display_name, x.id limit ?`,
       params,
@@ -121,6 +131,10 @@ export class UsersDirectoryReadAdapter implements UsersDirectoryReadPort {
       mfaStatusConceptId: r.mfa_status_concept_id,
       lastLoginAt: r.last_login_at,
       userType: r.user_type,
+      globalRoles: r.global_role_ids
+        .map((id) => ROLE_CODE_BY_CONCEPT[id])
+        .filter((code): code is string => Boolean(code))
+        .sort(),
     }));
   }
 
@@ -143,7 +157,7 @@ export class UsersDirectoryReadAdapter implements UsersDirectoryReadPort {
          from authz.user_role_assignments a join authz.roles r on r.id = a.role_id
         where a.user_id = any(?::uuid[]) and a.status_concept_id = ${ACTIVE}
           and (a.valid_from is null or a.valid_from <= now()) and (a.valid_to is null or a.valid_to > now())
-          and (?::uuid is null or a.tenant_id = ?::uuid)
+          and (?::uuid is null or a.tenant_id is null or a.tenant_id = ?::uuid)
         order by r.code, a.id`,
       [`{${ids.join(',')}}`, scope.tenantId ?? null, scope.tenantId ?? null],
     );
@@ -164,6 +178,7 @@ export class UsersDirectoryReadAdapter implements UsersDirectoryReadPort {
   ): Promise<DirectoryPermissionRow[]> {
     if (ids.length === 0) return [];
     const t = scope.tenantId ?? null;
+    const arr = `{${ids.join(',')}}`;
     const rows = await this.run<{
       user_id: string;
       allow_count: number;
@@ -172,20 +187,32 @@ export class UsersDirectoryReadAdapter implements UsersDirectoryReadPort {
       direct_count: number;
     }>(
       em,
-      `with eff as (
-         select a.user_id, rp.permission_id, rp.effect_concept_id, false as direct
-           from authz.user_role_assignments a
-           join authz.roles r on r.id = a.role_id and r.state_concept_id = ${ACTIVE}
-           join authz.role_permissions rp on rp.role_id = r.id and rp.state_concept_id = ${ACTIVE}
+      `with recursive base as (
+         select a.user_id, a.role_id from authz.user_role_assignments a
           where a.user_id = any(?::uuid[]) and a.status_concept_id = ${ACTIVE}
             and (a.valid_from is null or a.valid_from <= now()) and (a.valid_to is null or a.valid_to > now())
-            and (?::uuid is null or a.tenant_id = ?::uuid)
+            and (?::uuid is null or a.tenant_id is null or a.tenant_id = ?::uuid)
+         union
+         select g.user_id, b.role_id from iam.user_global_roles g
+           join iam.users iu on iu.id = g.user_id and iu.status_concept_id = ${lit(CONCEPTS.USER_ACTIVE)}
+           join (values ${BOUND_POLICY_ROLES}) as b(concept_id, role_id) on b.concept_id = g.role_concept_id
+          where g.user_id = any(?::uuid[]) and g.state_concept_id = ${ACTIVE}
+       ), chain(user_id, role_id) as (
+         select b.user_id, b.role_id from base b join authz.roles r on r.id = b.role_id
+          where r.state_concept_id = ${ACTIVE} and (?::uuid is null or r.tenant_id is null or r.tenant_id = ?::uuid)
+         union
+         select c.user_id, p.id from chain c
+           join authz.roles r0 on r0.id = c.role_id join authz.roles p on p.id = r0.parent_role_id
+          where p.state_concept_id = ${ACTIVE} and (?::uuid is null or p.tenant_id is null or p.tenant_id = ?::uuid)
+       ), eff as (
+         select c.user_id, rp.permission_id, rp.effect_concept_id, false as direct
+           from chain c join authz.role_permissions rp on rp.role_id = c.role_id and rp.state_concept_id = ${ACTIVE}
          union all
          select g.user_id, g.permission_id, g.effect_concept_id, true
            from authz.user_permission_grants g
           where g.user_id = any(?::uuid[]) and g.state_concept_id = ${ACTIVE}
             and (g.valid_from is null or g.valid_from <= now()) and (g.valid_to is null or g.valid_to > now())
-            and (?::uuid is null or g.tenant_id = ?::uuid)
+            and (?::uuid is null or g.tenant_id is null or g.tenant_id = ?::uuid)
        ), denied as (
          select user_id, permission_id from eff where effect_concept_id = ${lit(AUTHZ.EFFECT_DENY)} group by 1, 2
        ), allowed as (
@@ -201,15 +228,7 @@ export class UsersDirectoryReadAdapter implements UsersDirectoryReadPort {
                 where w.user_id = u.id and p.is_dangerous is true)::int as dangerous_count,
               (select count(*) from eff e where e.user_id = u.id and e.direct)::int as direct_count
          from iam.users u where u.id = any(?::uuid[])`,
-      [
-        `{${ids.join(',')}}`,
-        t,
-        t,
-        `{${ids.join(',')}}`,
-        t,
-        t,
-        `{${ids.join(',')}}`,
-      ],
+      [arr, t, t, arr, t, t, t, t, arr, t, t, arr],
     );
     return rows.map((r) => ({
       userId: r.user_id,

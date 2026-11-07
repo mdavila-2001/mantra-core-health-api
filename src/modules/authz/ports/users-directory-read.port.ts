@@ -34,6 +34,8 @@ export interface DirectoryUserRow {
   readonly mfaStatusConceptId: string | null;
   readonly lastLoginAt: string | null;
   readonly userType: DirectoryUserType;
+  /** Active `iam` global role codes (e.g. SECURITY_ADMIN, SUPERADMIN, PATIENT), sorted. */
+  readonly globalRoles: readonly string[];
 }
 
 export interface DirectoryRoleRow {

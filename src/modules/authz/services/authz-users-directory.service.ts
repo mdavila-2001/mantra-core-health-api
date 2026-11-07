@@ -2,7 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import type { AuthenticatedUser } from '../../../common';
 import { roleAuthorizesInTenant } from '../../../common/auth/roles.guard';
-import { forbiddenWithReason } from '../../../common/errors/reasoned-http-exceptions';
+import {
+  badRequestWithReason,
+  forbiddenWithReason,
+} from '../../../common/errors/reasoned-http-exceptions';
 import { SystemErrorReason } from '../../../common/errors/system-error-reasons';
 import {
   decodeKeysetCursor,
@@ -55,10 +58,15 @@ export class AuthzUsersDirectoryService {
       : { tenantId: resolvedTenantId };
     const limit = q.limit ?? USERS_DIRECTORY_DEFAULT_PAGE_SIZE;
     const key = q.cursor ? decodeKeysetCursor(q.cursor) : undefined;
-    const after =
-      typeof key?.n === 'string' && typeof key?.i === 'string'
-        ? { displayName: key.n, id: key.i }
-        : undefined;
+    if (key && (typeof key.n !== 'string' || typeof key.i !== 'string'))
+      throw badRequestWithReason(
+        'El cursor de paginación no es válido',
+        SystemErrorReason.INVALID_CURSOR,
+        { parameter: 'cursor' },
+      );
+    const after = key
+      ? { displayName: key.n as string, id: key.i as string }
+      : undefined;
 
     return this.em.fork().transactional(async (tx) => {
       await this.auditTrail.record(tx, actor, {
@@ -99,6 +107,7 @@ export class AuthzUsersDirectoryService {
             maskedEmail: maskEmail(
               subjects.find((s) => s.userId === u.id)?.subject,
             ),
+            globalRoles: [...u.globalRoles],
             roles: roles
               .filter((r) => r.userId === u.id)
               .map(({ userId: _u, ...role }) => role),
@@ -107,6 +116,7 @@ export class AuthzUsersDirectoryService {
               denied: p?.denyCount ?? 0,
               dangerous: p?.dangerousCount ?? 0,
               directGrants: p?.directGrantCount ?? 0,
+              unrestricted: u.globalRoles.includes('SUPERADMIN'),
             },
           };
         }),

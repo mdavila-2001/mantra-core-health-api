@@ -19,6 +19,11 @@ export class DirectoryPermissionSummaryDto {
   dangerous!: number;
   @ApiProperty({ description: 'Active direct grants outside any role' })
   directGrants!: number;
+  @ApiProperty({
+    description:
+      'True for a platform SUPERADMIN: it passes permission checks as a wildcard, so the counts above do not bound it',
+  })
+  unrestricted!: boolean;
 }
 
 export class DirectoryUserDto {
@@ -36,7 +41,18 @@ export class DirectoryUserDto {
     description: 'Null unless the login subject is an email',
   })
   maskedEmail!: string | null;
-  @ApiProperty({ type: [DirectoryRoleDto] }) roles!: DirectoryRoleDto[];
+  @ApiProperty({
+    type: [String],
+    example: ['SECURITY_ADMIN'],
+    description: 'Active iam global role codes, sorted; empty when none',
+  })
+  globalRoles!: string[];
+  @ApiProperty({
+    type: [DirectoryRoleDto],
+    description:
+      'Live authz assignments that apply in the scope: those of the organization and those with no tenant (tenantId null)',
+  })
+  roles!: DirectoryRoleDto[];
   @ApiProperty({ type: DirectoryPermissionSummaryDto })
   permissions!: DirectoryPermissionSummaryDto;
 }
