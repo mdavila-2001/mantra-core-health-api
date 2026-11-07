@@ -85,6 +85,7 @@ def _commit_del_modelo(fuente: Path) -> str:
 # Marcas de daño de OCR: letras y dígitos mezclados dentro de una palabra, o
 # caracteres que el reconocedor usa para rellenar lo que no pudo leer.
 from ocr_es import LEXICO_VERSIONADO, Lexico, corregir_texto  # noqa: E402
+from correcciones_arancel import aplicar as aplicar_correcciones_manuales  # noqa: E402
 
 LEXICO_OCR = Lexico.leer(Path(__file__).with_name(LEXICO_VERSIONADO))
 
@@ -913,7 +914,11 @@ def extraer_aranceles(fuente: Path) -> dict:
             }
         )
 
-    return {"honorariosMedicos": medicos, "arancelOdontologico": odontologicos}
+    aranceles = {"honorariosMedicos": medicos, "arancelOdontologico": odontologicos}
+    # Lo que el corrector automático no resuelve —filas pegadas, nombres que el
+    # cliente pidió cambiar— va revisado a mano en `correcciones-arancel.json`.
+    aplicar_correcciones_manuales(aranceles)
+    return aranceles
 
 
 # --------------------------------------------------------------------------- #
