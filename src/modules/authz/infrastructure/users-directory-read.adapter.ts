@@ -7,7 +7,10 @@ import { PROF } from '../../profiles/profiles.concepts';
 import { AUTHZ } from '../authz.concepts';
 import { IAM_PDP_ROLE_BINDINGS } from '../authz.global-role-bindings';
 import { clinicalRoleId } from '../authz.seed';
-import { ROLE_CODE_BY_CONCEPT } from '../../iam/domain/role-mapping';
+import {
+  ROLE_CODE_BY_CONCEPT,
+  type RoleCode,
+} from '../../iam/domain/role-mapping';
 import type {
   DirectoryFilter,
   DirectoryPermissionRow,
@@ -133,7 +136,7 @@ export class UsersDirectoryReadAdapter implements UsersDirectoryReadPort {
       userType: r.user_type,
       globalRoles: r.global_role_ids
         .map((id) => ROLE_CODE_BY_CONCEPT[id])
-        .filter((code): code is string => Boolean(code))
+        .filter((code): code is RoleCode => code !== undefined)
         .sort(),
     }));
   }

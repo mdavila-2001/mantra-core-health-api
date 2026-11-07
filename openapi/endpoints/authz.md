@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `authz`
 
-Referencia exhaustiva de 49 operación(es) del módulo `authz`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 50 operación(es) del módulo `authz`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `authz-admin`, `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-governance`, `authz-grants`, `authz-me`, `authz-pdp`, `authz-policies`, `authz-practitioner-requests`, `authz-roles`
-- **Controladores:** `AuthzAdminController`, `AuthzCareRelationshipsController`, `AuthzCatalogController`, `AuthzClinicalController`, `AuthzGovernanceController`, `AuthzGovernanceExtController`, `AuthzGrantsController`, `AuthzMeController`, `AuthzModulesCatalogController`, `AuthzPdpController`, `AuthzPoliciesController`, `AuthzPractitionerRequestsController`, `AuthzRolesController`
+- **Controladores:** `AuthzAdminController`, `AuthzCareRelationshipsController`, `AuthzCatalogController`, `AuthzClinicalController`, `AuthzGovernanceController`, `AuthzGovernanceExtController`, `AuthzGrantsController`, `AuthzMeController`, `AuthzModulesCatalogController`, `AuthzPdpController`, `AuthzPoliciesController`, `AuthzPractitionerRequestsController`, `AuthzRolesController`, `AuthzUsersDirectoryController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -60,6 +60,7 @@ Referencia exhaustiva de 49 operación(es) del módulo `authz`, derivada del con
 47. [GET /authz/users/{userId}/role-assignments](#47-get-authz-users-userid-role-assignments) — Asignaciones de rol de un usuario, activas o no
 48. [POST /authz/users/{userId}/role-assignments](#48-post-authz-users-userid-role-assignments) — Asignar un rol a un usuario con vigencia y ámbito
 49. [DELETE /authz/users/{userId}/role-assignments/{assignmentId}](#49-delete-authz-users-userid-role-assignments-assignmentid) — Revocar una asignación de rol (revocación lógica: la fila queda como historia)
+50. [GET /authz/users/directory](#50-get-authz-users-directory) — Directorio de usuarios por tipo, con roles y permisos efectivos
 
 ---
 
@@ -6509,6 +6510,103 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/authz/users/{userId}/role-assignments/{assignmentId}"
+}
+```
+
+---
+
+## 50. GET /authz/users/directory
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-admin`
+- **Nombre:** Directorio de usuarios por tipo, con roles y permisos efectivos
+- **Operation ID:** `AuthzUsersDirectoryController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzUsersDirectoryController.list](../../src/modules/authz/controllers/authz-users-directory.controller.ts)
+
+### Descripción de negocio
+
+Paginado por cursor. Sin contraseñas, documentos ni correo completo. Cada consulta queda sellada en la auditoría.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/users/directory` en `AuthzUsersDirectoryController_list`. El controlador delega en `AuthzUsersDirectoryService.list`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `type` | query | No | `string` | valores: `PATIENT`, `PRACTITIONER`, `PHARMACY`, `LABORATORY`, `INTERNAL`, `OTHER` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `status` | query | No | `string` | formato `uuid` | Concept id of iam.users.status_concept_id | `00000000-0000-4000-8000-000000000001` |
+| `roleCode` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `SECURITY_ADMIN` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Opaque cursor of the previous page | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `50` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/users/directory HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/users/directory?type=PATIENT&status=00000000-0000-4000-8000-000000000001&roleCode=SECURITY_ADMIN&cursor=valor-ejemplo&limit=50 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/users/directory"
 }
 ```
 

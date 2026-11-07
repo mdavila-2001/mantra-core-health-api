@@ -10105,6 +10105,76 @@ paths:
       description: >-
         Aceptar o rechazar una solicitud de cabecera de un paciente. Requiere JWT y los roles o alcances declarados por
         el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /authz/users/directory:
+    get:
+      description: >-
+        Paginado por cursor. Sin contraseñas, documentos ni correo completo. Cada consulta queda sellada en la
+        auditoría.
+      operationId: AuthzUsersDirectoryController_list
+      parameters:
+        - name: type
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - PATIENT
+              - PRACTITIONER
+              - PHARMACY
+              - LABORATORY
+              - INTERNAL
+              - OTHER
+        - name: status
+          required: false
+          in: query
+          description: Concept id of iam.users.status_concept_id
+          schema:
+            format: uuid
+            type: string
+        - name: roleCode
+          required: false
+          in: query
+          schema:
+            example: SECURITY_ADMIN
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor of the previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 50
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersDirectoryPageDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Directorio de usuarios por tipo, con roles y permisos efectivos
+      tags:
+        - authz-admin
   /audit/data-access:
     post:
       operationId: AuditController_recordDataAccess
@@ -95966,6 +96036,138 @@ components:
           description: Nº de filas afectadas cuando aplica
       required:
         - ok
+    DirectoryRoleDto:
+      type: object
+      properties:
+        assignmentId:
+          type: string
+          format: uuid
+        roleCode:
+          type: string
+          example: SECURITY_ADMIN
+        roleName:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        validTo:
+          type: string
+          nullable: true
+      required:
+        - assignmentId
+        - roleCode
+        - roleName
+        - tenantId
+        - validTo
+    DirectoryPermissionSummaryDto:
+      type: object
+      properties:
+        allowed:
+          type: number
+          description: Distinct permissions allowed and not denied
+        denied:
+          type: number
+          description: Distinct permissions denied (deny wins)
+        dangerous:
+          type: number
+          description: Allowed permissions flagged as dangerous
+        directGrants:
+          type: number
+          description: Active direct grants outside any role
+        unrestricted:
+          type: boolean
+          description: >-
+            True for a platform SUPERADMIN: it passes permission checks as a wildcard, so the counts above do not bound
+            it
+      required:
+        - allowed
+        - denied
+        - dangerous
+        - directGrants
+        - unrestricted
+    DirectoryUserDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        type:
+          type: string
+          enum:
+            - PATIENT
+            - PRACTITIONER
+            - PHARMACY
+            - LABORATORY
+            - INTERNAL
+            - OTHER
+        statusConceptId:
+          type: string
+          format: uuid
+        mfaStatusConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        lastLoginAt:
+          type: string
+          nullable: true
+        maskedEmail:
+          type: string
+          nullable: true
+          example: m***@c***.org
+          description: Null unless the login subject is an email
+        globalRoles:
+          example:
+            - SECURITY_ADMIN
+          description: Active iam global role codes, sorted; empty when none
+          type: array
+          items:
+            type: string
+        roles:
+          description: >-
+            Live authz assignments that apply in the scope: those of the organization and those with no tenant (tenantId
+            null)
+          type: array
+          items:
+            $ref: '#/components/schemas/DirectoryRoleDto'
+        permissions:
+          $ref: '#/components/schemas/DirectoryPermissionSummaryDto'
+      required:
+        - id
+        - displayName
+        - type
+        - statusConceptId
+        - mfaStatusConceptId
+        - lastLoginAt
+        - maskedEmail
+        - globalRoles
+        - roles
+        - permissions
+    UsersDirectoryPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DirectoryUserDto'
+        nextCursor:
+          type: string
+          nullable: true
+        limit:
+          type: number
+        scope:
+          type: string
+          enum:
+            - PLATFORM
+            - TENANT
+          description: Scope the caller was held to
+      required:
+        - items
+        - nextCursor
+        - limit
+        - scope
     RecordDataAccessDto:
       type: object
       properties:
