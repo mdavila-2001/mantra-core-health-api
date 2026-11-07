@@ -33,6 +33,18 @@ export interface ScheduleWindow {
   readonly dayOfWeek: number;
   readonly startTime: string;
   readonly endTime: string;
+  /** This window's appointment length; absent, the block's `slotMinutes`. */
+  readonly slotMinutes?: number;
+  /** Rest after each appointment, like the practitioner's agenda; absent, none. */
+  readonly gapMinutes?: number;
+}
+
+/** Appointment length and rest of one window, the block's length by default. */
+export function windowTiming(
+  block: { readonly slotMinutes: number },
+  w: ScheduleWindow,
+): { slot: number; gap: number } {
+  return { slot: w.slotMinutes ?? block.slotMinutes, gap: w.gapMinutes ?? 0 };
 }
 
 export interface ScheduleBlock {

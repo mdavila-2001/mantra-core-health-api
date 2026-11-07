@@ -108,6 +108,12 @@ function scheduleFrom(rows: readonly TemplateRuleRow[], kind: CenterKind) {
             dayOfWeek: row.day_of_week === 0 ? 7 : row.day_of_week,
             startTime: row.start_time.slice(0, 5),
             endTime: row.end_time.slice(0, 5),
+            // Only what differs from the template travels: an old rule reads as before.
+            ...(row.rule_slot_minutes &&
+            row.rule_slot_minutes !== current.block.slotMinutes
+              ? { slotMinutes: row.rule_slot_minutes }
+              : {}),
+            ...(row.gap_minutes ? { gapMinutes: row.gap_minutes } : {}),
           },
         ],
       };

@@ -178,6 +178,50 @@ describe('per-site center schedules (integration)', () => {
     ]);
   });
 
+  it('keeps each window its own length and rest, like the practitioner agenda', async () => {
+    const saver = ctx.app.get(SaveCenterScheduleUseCase);
+    await runWithTenant(tenantId, () =>
+      saver.execute(
+        unitId,
+        {
+          general: {
+            windows: [
+              {
+                dayOfWeek: 2,
+                startTime: '08:00',
+                endTime: '12:00',
+                slotMinutes: 20,
+                gapMinutes: 10,
+              },
+              { dayOfWeek: 4, startTime: '08:00', endTime: '12:00' },
+            ],
+            slotMinutes: 30,
+          },
+          modalities: [],
+          studies: [],
+        },
+        actor,
+        northSiteId,
+      ),
+    );
+    const north = await runWithTenant(tenantId, () =>
+      ctx.app.get(GetCenterScheduleUseCase).forUnit(unitId, northSiteId),
+    );
+    expect(north.schedule.general).toEqual({
+      slotMinutes: 30,
+      windows: [
+        {
+          dayOfWeek: 2,
+          startTime: '08:00',
+          endTime: '12:00',
+          slotMinutes: 20,
+          gapMinutes: 10,
+        },
+        { dayOfWeek: 4, startTime: '08:00', endTime: '12:00' },
+      ],
+    });
+  });
+
   it('a device registered at the branch only counts at the branch', async () => {
     const view = await runWithTenant(tenantId, () =>
       ctx.app

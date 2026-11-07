@@ -107615,6 +107615,16 @@ components:
           type: string
           example: '12:00'
           pattern: ^([01]\d|2[0-3]):[0-5]\d$
+        slotMinutes:
+          type: number
+          minimum: 5
+          maximum: 240
+          description: This window's appointment length; absent, the block's.
+        gapMinutes:
+          type: number
+          minimum: 0
+          maximum: 120
+          description: Rest after each appointment; absent, none.
       required:
         - dayOfWeek
         - startTime
