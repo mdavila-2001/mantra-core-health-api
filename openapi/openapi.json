@@ -160721,6 +160721,14 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          "skipComponentIds": {
+            "description": "Components the lab does not offer: no service is made for them. Absent or empty: every component of each chosen análisis",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         },
         "required": [

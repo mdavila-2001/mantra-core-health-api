@@ -1,5 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsUUID } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 
 /** Suggested price of a catalog item, copied from its tariff (proceso 4.2). */
 export class LabSuggestedPriceDto {
@@ -83,8 +89,22 @@ export class LabCatalogImportDto {
   @IsArray()
   @ArrayMinSize(1, { message: 'Elija al menos un análisis.' })
   @ArrayMaxSize(600, { message: 'Hasta 600 análisis por vez.' })
-  @IsUUID('all', { each: true })
+  // `loose`: the study catalog loader derives concept ids from an md5 hash, so
+  // ~1,000 of them carry no RFC-4122 version/variant bits and `all` rejects them.
+  @IsUUID('loose', { each: true })
   conceptIds!: string[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description:
+      'Components the lab does not offer: no service is made for them. Absent or empty: every component of each chosen análisis',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(5000, { message: 'Hasta 5000 componentes por vez.' })
+  @IsUUID('loose', { each: true })
+  skipComponentIds?: string[];
 }
 
 export class LabCatalogImportRowDto {
