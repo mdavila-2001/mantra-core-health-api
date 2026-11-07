@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
+  CONCEPTS,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
@@ -15,7 +16,9 @@ import type {
 /**
  * Corrects the name of the signed-in account (`iam.users.display_name`). Only the caller's own
  * account: the id comes from the session, never from the request, so nobody renames anybody else.
- * The name is personal data and is never logged. The session token carries it as `name`, so the
+ * A professional's or a patient's name is tied to their verified person record, so it is edited
+ * there ("Mi perfil"), not here: this route is for organization accounts. An account that is not
+ * active cannot be renamed. The name is personal data and is never logged. The session token carries it as `name`, so the
  * new one shows up when the client renews its token.
  */
 @Injectable()
@@ -29,6 +32,14 @@ export class UpdateMyNameUseCase {
     actor: AuthenticatedUser,
     dto: UpdateMyNameDto,
   ): Promise<MyNameResponseDto> {
+    if (
+      actor.practitionerProfileId !== undefined ||
+      actor.patientProfileId !== undefined
+    ) {
+      throw new ForbiddenException(
+        'Su nombre sale de su perfil verificado: corríjalo en «Mi perfil»',
+      );
+    }
     const displayName = composePersonDisplayName({
       name: dto.name,
       middleName: dto.middleName,
@@ -46,6 +57,9 @@ export class UpdateMyNameUseCase {
         throw new ResourceNotFoundException('Cuenta no encontrada', {
           userId: actor.id,
         });
+      if (user.statusConceptId !== CONCEPTS.USER_ACTIVE) {
+        throw new ForbiddenException('La cuenta no está activa');
+      }
       user.displayName = displayName;
       touch(user, actor.id);
       await tx.flush();

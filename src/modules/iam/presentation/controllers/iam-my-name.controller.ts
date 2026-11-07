@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import {
   Audited,
   CurrentUser,
@@ -22,6 +23,7 @@ export class IamMyNameController {
 
   @Audited({ action: 'ACCOUNT_NAME_UPDATED', entity: 'user' })
   @Patch('me/name')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Corregir el nombre de la propia cuenta',

@@ -1,5 +1,7 @@
 import { jest } from '@jest/globals';
+import { ForbiddenException } from '@nestjs/common';
 import {
+  CONCEPTS,
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -18,7 +20,10 @@ function build(user: object | null) {
 
 describe('UpdateMyNameUseCase', () => {
   it('recomposes the account name from the four parts and stamps who changed it', async () => {
-    const user = { displayName: 'Wendy Jennyfer Dávila Tamal' };
+    const user = {
+      displayName: 'Wendy Jennyfer Dávila Tamal',
+      statusConceptId: CONCEPTS.USER_ACTIVE,
+    };
     const { useCase, flush, usersRepo } = build(user);
 
     const result = await useCase.execute(actor, {
@@ -41,7 +46,10 @@ describe('UpdateMyNameUseCase', () => {
   });
 
   it('drops an optional part sent empty', async () => {
-    const { useCase } = build({ displayName: 'x' });
+    const { useCase } = build({
+      displayName: 'x',
+      statusConceptId: CONCEPTS.USER_ACTIVE,
+    });
 
     const result = await useCase.execute(actor, {
       name: 'Wendy',
@@ -59,5 +67,36 @@ describe('UpdateMyNameUseCase', () => {
       useCase.execute(actor, { name: 'Wendy', lastName: 'Dávila' }),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
     expect(flush).not.toHaveBeenCalled();
+  });
+
+  it('refuses an account that is not active', async () => {
+    const { useCase, flush } = build({
+      displayName: 'x',
+      statusConceptId: 'suspended',
+    });
+
+    await expect(
+      useCase.execute(actor, { name: 'Wendy', lastName: 'Dávila' }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(flush).not.toHaveBeenCalled();
+  });
+
+  it('refuses a professional or a patient: their name belongs to the verified profile', async () => {
+    const { useCase, usersRepo } = build({
+      statusConceptId: CONCEPTS.USER_ACTIVE,
+    });
+
+    for (const profile of [
+      { practitionerProfileId: 'pp-1' },
+      { patientProfileId: 'pa-1' },
+    ]) {
+      await expect(
+        useCase.execute({ ...actor, ...profile } as AuthenticatedUser, {
+          name: 'Wendy',
+          lastName: 'Dávila',
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    }
+    expect(usersRepo.findById).not.toHaveBeenCalled();
   });
 });
