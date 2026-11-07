@@ -100,8 +100,13 @@ describe('IamUsersController', () => {
   it('delegates mfaFactor (UC-01-03)', async () => {
     const d = build();
     const dto = { factorType: 'TOTP' };
-    await d.controller.mfaFactor('u1', dto as any, actor);
-    expect(d.mfaService.enrollOrVerify).toHaveBeenCalledWith('u1', dto, actor);
+    await d.controller.mfaFactor('u1', dto as any, actor, '10.0.0.1');
+    expect(d.mfaService.enrollOrVerify).toHaveBeenCalledWith(
+      'u1',
+      dto,
+      actor,
+      '10.0.0.1',
+    );
   });
 
   it('delegates registerDevice (UC-01-05)', async () => {

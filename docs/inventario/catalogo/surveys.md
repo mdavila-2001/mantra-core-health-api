@@ -11,13 +11,13 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [survey_answers](#survey_answers) | Conserva respuestas por pregunta para permitir análisis de experiencia sin mezclar resultados con reseñas públicas. | 12 | 3 | 3 | COINCIDE |
-| [survey_assignments](#survey_assignments) | Asocia versiones de encuestas a profesionales o tipos de atención que deben utilizarlas. | 11 | 3 | 10 | COINCIDE |
+| [survey_assignments](#survey_assignments) | Asocia versiones de encuestas a profesionales o tipos de atención que deben utilizarlas. | 11 | 3 | 13 | DIVERGE |
 | [survey_invitation_reminders](#survey_invitation_reminders) | sin propósito | 7 | 3 | 0 | COINCIDE |
 | [survey_invitations](#survey_invitations) | Emite invitaciones para responder una encuesta a un paciente después de una atención y controla su vigencia. | 18 | 8 | 10 | COINCIDE |
 | [survey_questions](#survey_questions) | Define preguntas que componen cada versión de un cuestionario post-visita. | 14 | 1 | 20 | COINCIDE |
 | [survey_responses](#survey_responses) | Registra respuestas privadas de pacientes a encuestas post-visita sin alimentar la calificación pública de prestadores. | 11 | 4 | 3 | COINCIDE |
-| [survey_templates](#survey_templates) | Define cuestionarios post-atención que profesionales pueden usar para consultar la experiencia del paciente. | 13 | 3 | 27 | COINCIDE |
-| [survey_versions](#survey_versions) | Preserva versiones inmutables de cuestionarios para conocer qué preguntas se presentaron en cada atención. | 14 | 1 | 26 | COINCIDE |
+| [survey_templates](#survey_templates) | Define cuestionarios post-atención que profesionales pueden usar para consultar la experiencia del paciente. | 13 | 3 | 31 | DIVERGE |
+| [survey_versions](#survey_versions) | Preserva versiones inmutables de cuestionarios para conocer qué preguntas se presentaron en cada atención. | 14 | 1 | 30 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -188,7 +188,7 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_assignments`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyAssignments` — `src/modules/surveys/entities/survey_assignments.entity.ts`
-- **Resumen:** 11 columnas · 3 índices · 5 FK salientes · 1 entrantes · 10 operaciones
+- **Resumen:** 11 columnas · 3 índices · 5 FK salientes · 1 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -198,13 +198,13 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 | 2 | `survey_version_id` | `uuid` | Clave foránea → surveys.survey_versions.id; Obligatoria | _sin dato_ | coincide |
 | 3 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `target_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 5 | `target_id` | `uuid` | Obligatoria | Identificador de la cosa evaluada, interpretado según `targetTypeConceptId`: la reserva concreta, el servicio de salud o el tipo de atención. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_assignments.entity.ts:43`)_ | coincide |
-| 6 | `active` | `boolean` | Obligatoria | Si la asignación sigue vigente. Desactivarla frena las emisiones nuevas sin borrar el histórico de lo ya emitido. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_assignments.entity.ts:50`)_ | coincide |
-| 7 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/surveys/entities/survey_assignments.entity.ts:56`)_ | coincide |
-| 8 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/surveys/entities/survey_assignments.entity.ts:62`)_ | coincide |
+| 5 | `target_id` | `uuid` | Obligatoria | Identificador de la cosa evaluada, interpretado según `targetTypeConceptId`: la reserva concreta, el servicio de salud o el tipo de atención. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_assignments.entity.ts:59`)_ | coincide |
+| 6 | `active` | `boolean` | Obligatoria | Si la asignación sigue vigente. Desactivarla frena las emisiones nuevas sin borrar el histórico de lo ya emitido. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_assignments.entity.ts:66`)_ | coincide |
+| 7 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/surveys/entities/survey_assignments.entity.ts:72`)_ | coincide |
+| 8 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/surveys/entities/survey_assignments.entity.ts:78`)_ | coincide |
 | 9 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 10 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 11 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_assignments.entity.ts:80`)_ | coincide |
+| 11 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_assignments.entity.ts:96`)_ | coincide |
 
 #### Relaciones
 
@@ -221,7 +221,7 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_survey_assignments_tenant_target` | no | tenant_id, target_id, active | Soporta la clave foránea fk_survey_assignments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_survey_assignments_tenant_target` | no | tenant_id, target_id, active | Soporta la clave foránea fk_survey_assignments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_survey_assignments_version` | no | survey_version_id | Soporta la clave foránea fk_survey_assignments_survey_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «survey_version_id», la primera columna del índice _(CONSULTA)_ |
 | `uq_survey_assignments_active_target` | sí | survey_version_id, target_type_concept_id, target_id donde WHERE active = true | Garantiza que no se repita la combinación (survey_version_id, target_type_concept_id, target_id) _(DOCUMENTO)_; Soporta la clave foránea fk_survey_assignments_survey_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE active = true _(ESTRUCTURAL)_; 3 consulta(s) de repositorio filtran u ordenan por «survey_version_id», la primera columna del índice _(CONSULTA)_ |
 
@@ -235,7 +235,6 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /scheduling/bookings/{id}/complete | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/complete | LEE | DIRECTA |
 | POST /surveys/assignments | CREA | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
@@ -244,6 +243,10 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 | GET /surveys/insights | LEE | POR_SQL |
 | POST /surveys/invitations | CREA | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
+| GET /surveys/service-assignments | LEE | DIRECTA |
+| DELETE /surveys/service-assignments/{serviceId} | LEE | DIRECTA |
+| PUT /surveys/service-assignments/{serviceId} | CREA | DIRECTA |
+| PUT /surveys/service-assignments/{serviceId} | LEE | DIRECTA |
 | GET /surveys/templates/{id} | LEE | DIRECTA |
 
 #### Gobierno
@@ -475,8 +478,6 @@ Define preguntas que componen cada versión de un cuestionario post-visita.
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /scheduling/bookings/{id}/complete | CREA | DIRECTA |
-| POST /scheduling/bookings/{id}/complete | LEE | DIRECTA |
 | GET /surveys/catalog | CREA | DIRECTA |
 | GET /surveys/catalog | LEE | DIRECTA |
 | GET /surveys/insights | LEE | POR_SQL |
@@ -484,6 +485,8 @@ Define preguntas que componen cada versión de un cuestionario post-visita.
 | POST /surveys/invitations | LEE | DIRECTA |
 | GET /surveys/me/invitations/{id} | LEE | DIRECTA |
 | POST /surveys/me/invitations/{id}/responses | LEE | DIRECTA |
+| PUT /surveys/service-assignments/{serviceId} | CREA | DIRECTA |
+| PUT /surveys/service-assignments/{serviceId} | LEE | DIRECTA |
 | GET /surveys/templates | LEE | DIRECTA |
 | GET /surveys/templates/{id} | LEE | DIRECTA |
 | POST /surveys/templates/{id}/questions | CREA | DIRECTA |
@@ -595,7 +598,7 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_templates; BIZ note`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyTemplates` — `src/modules/surveys/entities/survey_templates.entity.ts`
-- **Resumen:** 13 columnas · 3 índices · 6 FK salientes · 1 entrantes · 27 operaciones
+- **Resumen:** 13 columnas · 3 índices · 6 FK salientes · 1 entrantes · 31 operaciones
 
 #### Columnas
 
@@ -606,14 +609,14 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 | 3 | `owner_practitioner_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Opcional | Profesional dueño del instrumento. Es quien puede editarlo y quien puede leer las respuestas: la autorización de lectura sale de acá, no de un rol. Nulo cuando el dueño es el par tipado (`ownerTypeConceptId` + `ownerId`), como en la encuesta base del sistema. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_templates.entity.ts:32`)_ | coincide |
 | 4 | `owner_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | Tipo del dueño alterno (CAN-SURVEY-001). Va junto con `ownerId` y sólo cuando `ownerPractitionerId` es nulo. Para la encuesta base del sistema es `SURVEYS.SYSTEM_BASE_CONSULTATION` o `SURVEYS.SYSTEM_BASE_SERVICE`. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_templates.entity.ts:44`)_ | coincide |
 | 5 | `owner_id` | `uuid` | Opcional | Identificador del dueño alterno, interpretado según `ownerTypeConceptId`. Para la encuesta base del sistema es el tenant al que pertenece. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_templates.entity.ts:55`)_ | coincide |
-| 6 | `title` | `text` | Obligatoria | Título visible del instrumento. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_templates.entity.ts:61`)_ | coincide |
-| 7 | `description` | `text` | Opcional | Descripción o consigna que se muestra al paciente antes de responder. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_templates.entity.ts:67`)_ | coincide |
+| 6 | `title` | `text` | Obligatoria | Título visible del instrumento. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_templates.entity.ts:75`)_ | coincide |
+| 7 | `description` | `text` | Opcional | Descripción o consigna que se muestra al paciente antes de responder. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_templates.entity.ts:81`)_ | coincide |
 | 8 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 9 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/surveys/entities/survey_templates.entity.ts:79`)_ | coincide |
-| 10 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/surveys/entities/survey_templates.entity.ts:85`)_ | coincide |
+| 9 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/surveys/entities/survey_templates.entity.ts:93`)_ | coincide |
+| 10 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/surveys/entities/survey_templates.entity.ts:99`)_ | coincide |
 | 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 13 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_templates.entity.ts:103`)_ | coincide |
+| 13 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/surveys/entities/survey_templates.entity.ts:117`)_ | coincide |
 
 #### Relaciones
 
@@ -632,7 +635,7 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_survey_templates_owner` | no | owner_practitioner_id, ("created_at" DESC) | _sin uso detectado estáticamente_ |
-| `ix_survey_templates_tenant_id` | no | tenant_id | Soporta la clave foránea fk_survey_templates_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_survey_templates_tenant_id` | no | tenant_id | Soporta la clave foránea fk_survey_templates_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_survey_templates_owner_party` | no | owner_type_concept_id, owner_id, ("created_at" DESC) | _sin uso detectado estáticamente_ |
 
 #### Restricciones
@@ -646,7 +649,6 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /scheduling/bookings/{id}/complete | ACTUALIZA | POR_TIPO |
-| POST /scheduling/bookings/{id}/complete | LEE | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
 | GET /surveys/catalog | ACTUALIZA | POR_TIPO |
 | GET /surveys/catalog | CREA | DIRECTA |
@@ -657,6 +659,11 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 | POST /surveys/invitations | LEE | DIRECTA |
 | GET /surveys/me/invitations | LEE | POR_SQL |
 | GET /surveys/me/invitations/{id} | LEE | DIRECTA |
+| GET /surveys/service-assignments | LEE | DIRECTA |
+| DELETE /surveys/service-assignments/{serviceId} | LEE | DIRECTA |
+| PUT /surveys/service-assignments/{serviceId} | ACTUALIZA | POR_TIPO |
+| PUT /surveys/service-assignments/{serviceId} | CREA | DIRECTA |
+| PUT /surveys/service-assignments/{serviceId} | LEE | DIRECTA |
 | GET /surveys/templates | LEE | DIRECTA |
 | POST /surveys/templates | CREA | DIRECTA |
 | GET /surveys/templates/{id} | LEE | DIRECTA |
@@ -696,7 +703,7 @@ Preserva versiones inmutables de cuestionarios para conocer qué preguntas se pr
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_versions; BIZ note`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyVersions` — `src/modules/surveys/entities/survey_versions.entity.ts`
-- **Resumen:** 14 columnas · 1 índices · 4 FK salientes · 5 entrantes · 26 operaciones
+- **Resumen:** 14 columnas · 1 índices · 4 FK salientes · 5 entrantes · 30 operaciones
 
 #### Columnas
 
@@ -760,6 +767,10 @@ Preserva versiones inmutables de cuestionarios para conocer qué preguntas se pr
 | POST /surveys/invitations | LEE | DIRECTA |
 | GET /surveys/me/invitations | LEE | POR_SQL |
 | GET /surveys/me/invitations/{id} | LEE | DIRECTA |
+| GET /surveys/service-assignments | LEE | DIRECTA |
+| DELETE /surveys/service-assignments/{serviceId} | LEE | DIRECTA |
+| PUT /surveys/service-assignments/{serviceId} | CREA | DIRECTA |
+| PUT /surveys/service-assignments/{serviceId} | LEE | DIRECTA |
 | GET /surveys/templates | LEE | DIRECTA |
 | POST /surveys/templates | CREA | DIRECTA |
 | GET /surveys/templates/{id} | LEE | DIRECTA |

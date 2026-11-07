@@ -41,7 +41,10 @@ import type {
 import { DEFAULT_SLOT_MINUTES } from '../../domain/catalog/catalog-concepts';
 import { DEFAULT_HOLD_TTL_SECONDS } from '../../domain/booking/booking-defaults';
 import { ACTIVE_BOOKING_STATES } from '../../domain/booking/booking-states';
-import { AGENDA_OPERATOR_ROLES } from '../../domain/booking/agenda-actors';
+import {
+  attendsIn,
+  operatesAnyAgenda,
+} from '../../domain/booking/agenda-actors';
 import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { PractitionerAffiliationGateService } from '../affiliation/practitioner-affiliation-gate.service';
@@ -464,9 +467,12 @@ export class SchedulingFlexibleBookingService {
 
   /** ¿Es una cuenta de paciente sin más oficio? Mismo criterio que las reservas. */
   private isPatientActor(actor: AuthenticatedUser): boolean {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
-      return false;
-    return actor.practitionerProfileId === undefined;
+    // El oficio (mostrador, profesional) se lee en la organización activa: ni un
+    // rol de agenda de OTRA organización ni el perfil profesional global del
+    // token eximen del candado de representación.
+    const tenantId = getCurrentTenantId();
+    if (operatesAnyAgenda(actor, tenantId)) return false;
+    return !attendsIn(actor, tenantId);
   }
 
   /** Quien atiende no puede comprometer turnos de una organización que lo desvinculó. */
@@ -474,8 +480,7 @@ export class SchedulingFlexibleBookingService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
-      return;
+    if (operatesAnyAgenda(actor, tenantId)) return;
     if (actor.practitionerProfileId === undefined) return;
     const verdict = await this.affiliations.evaluate(tenantId, actor);
     if (verdict === 'sin-vinculos' || verdict === 'aprobado') return;

@@ -141,6 +141,7 @@ x-app-env: &app-env
   MONGO_DB: ${MONGO_DB:-alovida_document_store}
   REDIS_HOST: redis
   REDIS_PORT: "6379"
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-}
   OPENSEARCH_NODE: http://opensearch:9200
   MINIO_ENDPOINT: minio
   MINIO_PORT: "9000"
@@ -579,11 +580,19 @@ services:
     # `--save 60 1` conserva el snapshot: Redis guarda el estado del limitador
     # de tasa y de las colas, y perderlo en cada reinicio del contenedor no es
     # gratis.
-    command: redis-server --save 60 1 --loglevel notice
+    # `requirepass` solo si `REDIS_PASSWORD` viene definida: el shell del
+    # contenedor la expande (de ahi el doble signo de dolar), asi no queda
+    # escrita en el compose.
+    command:
+      - sh
+      - -c
+      - 'exec redis-server --save 60 1 --loglevel notice $${REDIS_PASSWORD:+--requirepass "$$REDIS_PASSWORD"}'
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping 2>/dev/null | grep -q PONG"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -742,7 +751,14 @@ services:
         APP_VERSION: ${APP_VERSION:-desconocido}
     restart: "no"
     logging: *logging
-    command: ["node", "dist/src/seed-cli.js"]
+    # seed-cli first (schema, boot concepts, the `service-request-code` value
+    # set), then the study catalog: idempotent (ON CONFLICT DO NOTHING), so a
+    # redeploy inserts 0 rows. Without this step the lab catalog stays at the
+    # basic boot análisis, with no sections, LOINC nor components.
+    command:
+      - sh
+      - -c
+      - node dist/src/seed-cli.js && node tools/study-catalogs/load-study-catalogs.mjs --apply
     environment:
       <<: *app-env
       # Las dos únicas diferencias con el resto del stack, y son el motivo de

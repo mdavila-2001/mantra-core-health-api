@@ -4,6 +4,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -54,6 +56,26 @@ export class AffiliationInvitationsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AffiliationInvitationViewDto> {
     return this.invitations.create(requireTenantId(), dto, actor);
+  }
+
+  /**
+   * Organization admin turns a code off. Authorization is the OWNER/ADMIN check of the
+   * service (as in create and list): there is no global role to gate it with.
+   */
+  @Audited({
+    action: 'AFFILIATION_INVITATION_REVOKED',
+    entity: 'affiliation_invitation',
+    entityId: 'param:id',
+  })
+  @Post('org/affiliation-invitations/:id/revoke')
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Revocar un código o QR de afiliación' })
+  revoke(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AffiliationInvitationViewDto> {
+    return this.invitations.revoke(requireTenantId(), id, actor);
   }
 
   /** Codes of the active organization, without the plain codes. */

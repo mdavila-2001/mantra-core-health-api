@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   EntityManager,
   UniqueConstraintViolationException,
@@ -23,11 +23,20 @@ import {
 } from '../branch-categories';
 
 /** Lo que se le dice a quien intenta una segunda casa matriz. */
+/** Column text of a coordinate, or `undefined` when there is none. */
+const coordinate = (value: number | undefined): string | undefined =>
+  value === undefined ? undefined : String(value);
+
 const SECOND_HEAD_OFFICE =
   'La organización ya tiene una casa matriz. Cambie primero la categoría de la actual.';
 
 /** Motivo legible por máquina del 409 de la casa matriz repetida. */
 export const HEAD_OFFICE_TAKEN = 'HEAD_OFFICE_TAKEN';
+import {
+  MAP_LINK_RESOLVER_PORT,
+  type MapLinkResolverPort,
+} from '../domain/ports/map-link-resolver.port';
+import type { MapCoordinates } from '../domain/map-link-coordinates';
 import { TenantAdministrationService } from './tenant-administration.service';
 
 /** Caso de uso UC-04-04: crear una branch / sede física con geolocalización. */
@@ -47,8 +56,33 @@ export class DirectoryBranchesService {
     private readonly tenantsRepo: TenantsRepository,
     private readonly tenantAdmin: TenantAdministrationService,
     private readonly logger: PinoLogger,
+    @Inject(MAP_LINK_RESOLVER_PORT)
+    private readonly mapLinks: MapLinkResolverPort,
   ) {
     this.logger.setContext(DirectoryBranchesService.name);
+  }
+
+  /**
+   * The point a pasted location link stands for, when the caller sent a link
+   * but no coordinates of their own. The network lookup runs before the
+   * transaction so a slow link never holds a connection, and only after the
+   * actor is known to administer the organization.
+   */
+  private async pointOfLink(
+    tenantId: string,
+    dto: {
+      locationUrl?: string | null;
+      latitude?: number | null;
+      longitude?: number | null;
+    },
+    actor: AuthenticatedUser,
+  ): Promise<MapCoordinates | undefined> {
+    if (!dto.locationUrl) return undefined;
+    if (dto.latitude !== undefined || dto.longitude !== undefined) {
+      return undefined;
+    }
+    await this.tenantAdmin.assertCanAdminister(this.em.fork(), tenantId, actor);
+    return this.mapLinks.resolve(dto.locationUrl);
   }
 
   /** UC-04-04: da de alta una branch activa en un tenant activo (code único por tenant). */
@@ -61,6 +95,7 @@ export class DirectoryBranchesService {
       { operation: 'directory.branch.create', tenantId, actorId: actor.id },
       'Creating branch',
     );
+    const point = await this.pointOfLink(tenantId, dto, actor);
     return this.em.transactional(async (tx) => {
       // El owner de la organización administra la suya: su poder viene de la membresía
       // OWNER, no de un rol global de plataforma.
@@ -108,9 +143,8 @@ export class DirectoryBranchesService {
           BRANCH_TYPE_CONCEPT_BY_CODE[dto.branchType ?? 'CLINIC'],
         statusConceptId: DIR.BRANCH_ACTIVE,
         timeZone: dto.timeZone,
-        latitude: dto.latitude !== undefined ? String(dto.latitude) : undefined,
-        longitude:
-          dto.longitude !== undefined ? String(dto.longitude) : undefined,
+        latitude: coordinate(dto.latitude ?? point?.latitude),
+        longitude: coordinate(dto.longitude ?? point?.longitude),
         description: dto.description,
         locationUrl: dto.locationUrl,
         branchCategory: category,
@@ -133,6 +167,7 @@ export class DirectoryBranchesService {
     dto: UpdateBranchDto,
     actor: AuthenticatedUser,
   ): Promise<BranchResponseDto> {
+    const point = await this.pointOfLink(tenantId, dto, actor);
     return this.em.transactional(async (tx) => {
       await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       const branch = await this.branchesRepo.findById(tx, branchId);
@@ -147,6 +182,11 @@ export class DirectoryBranchesService {
         branch.description = dto.description ?? undefined;
       if (dto.locationUrl !== undefined)
         branch.locationUrl = dto.locationUrl ?? undefined;
+      if (point) {
+        // The new link wins over the old pin; an unresolvable link leaves it.
+        branch.latitude = String(point.latitude);
+        branch.longitude = String(point.longitude);
+      }
       if (dto.latitude !== undefined)
         branch.latitude =
           dto.latitude === null ? undefined : String(dto.latitude);

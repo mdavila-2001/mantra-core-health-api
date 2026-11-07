@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
+import * as argon2 from 'argon2';
 import { generate, generateSecret } from 'otplib';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
@@ -19,6 +20,12 @@ import {
 } from '../../../../common';
 
 const actor = { id: 'u1', roles: ['USER'] };
+
+const PASSWORD = 'ClaveActual-1';
+let PASSWORD_HASH: string;
+beforeAll(async () => {
+  PASSWORD_HASH = await argon2.hash(PASSWORD);
+});
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -42,6 +49,12 @@ function build() {
   };
   const eventsRepo = { record: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const credentialsRepo = {
+    findActivePasswordByUser: mockFn(() =>
+      Promise.resolve({ secretHash: PASSWORD_HASH }),
+    ),
+  };
+  const totp = { consume: mockFn().mockResolvedValue({ valid: false }) };
 
   const service = new IamMfaService(
     em as any,
@@ -49,8 +62,20 @@ function build() {
     mfaRepo,
     eventsRepo as any,
     logger as any,
+    credentialsRepo as any,
+    totp as any,
   );
-  return { service, tx, auditEm, em, usersRepo, mfaRepo, eventsRepo };
+  return {
+    service,
+    tx,
+    auditEm,
+    em,
+    usersRepo,
+    mfaRepo,
+    eventsRepo,
+    credentialsRepo,
+    totp,
+  };
 }
 
 describe('IamMfaService (UC-01-03)', () => {
@@ -101,7 +126,7 @@ describe('IamMfaService (UC-01-03)', () => {
 
     const res = await d.service.enrollOrVerify(
       'u1',
-      { factorType: 'TOTP' },
+      { factorType: 'TOTP', currentPassword: PASSWORD },
       actor,
     );
 
@@ -132,7 +157,7 @@ describe('IamMfaService (UC-01-03)', () => {
 
     const res = await d.service.enrollOrVerify(
       'u1',
-      { factorType: 'WEBAUTHN' },
+      { factorType: 'WEBAUTHN', currentPassword: PASSWORD },
       actor,
     );
 
@@ -223,7 +248,11 @@ describe('IamMfaService (UC-01-03)', () => {
     const d = build();
     d.usersRepo.findById.mockResolvedValue(null);
     await expect(
-      d.service.enrollOrVerify('u1', { factorType: 'TOTP' }, actor as any),
+      d.service.enrollOrVerify(
+        'u1',
+        { factorType: 'TOTP', currentPassword: PASSWORD },
+        actor as any,
+      ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
@@ -244,7 +273,120 @@ describe('IamMfaService (UC-01-03)', () => {
     const d = build();
     d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
     await expect(
-      d.service.enrollOrVerify('u1', {}, actor as any),
-    ).rejects.toBeInstanceOf(PreconditionFailedException);
+      d.service.enrollOrVerify(
+        'u1',
+        { currentPassword: PASSWORD },
+        actor as any,
+      ),
+    ).rejects.toMatchObject({ reason: 'MFA_FACTOR_TYPE_REQUIRED_TO_ENROLL' });
+  });
+
+  describe('N6: reautenticación al añadir un factor propio', () => {
+    it('sin contraseña ni código no se crea ningún factor: 422 MFA_REAUTH_REQUIRED', async () => {
+      const d = build();
+      d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
+      await expect(
+        d.service.enrollOrVerify('u1', { factorType: 'TOTP' }, actor as any),
+      ).rejects.toMatchObject({
+        status: 422,
+        reason: 'MFA_REAUTH_REQUIRED',
+      });
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.mfaRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('con una contraseña que no es la actual: 422 MFA_REAUTH_FAILED, deja un evento y no crea nada', async () => {
+      const d = build();
+      d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
+      await expect(
+        d.service.enrollOrVerify(
+          'u1',
+          { factorType: 'TOTP', currentPassword: 'otra-clave' },
+          actor as any,
+        ),
+      ).rejects.toMatchObject({ status: 422, reason: 'MFA_REAUTH_FAILED' });
+      expect(d.eventsRepo.record).toHaveBeenCalledWith(
+        d.auditEm,
+        expect.objectContaining({
+          eventTypeConceptId: CONCEPTS.SEC_LOGIN_FAILED,
+          detailJson: { reason: 'reauth-failed', flow: 'mfa-factor' },
+        }),
+      );
+      expect(d.mfaRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('con el código de un factor YA verificado también reautentica (y se gasta)', async () => {
+      const d = build();
+      d.usersRepo.findById.mockResolvedValue({ id: 'u1', displayName: 'Ana' });
+      const verified = { id: 'f0', secretEncrypted: 'enc' };
+      d.mfaRepo.findVerifiedByUser.mockResolvedValue([verified]);
+      d.totp.consume.mockResolvedValue({ valid: true, factorId: 'f0' });
+      const factor: any = { id: 'f1', stateConceptId: CONCEPTS.STATE_PENDING };
+      d.mfaRepo.create.mockReturnValue(factor);
+      const res = await d.service.enrollOrVerify(
+        'u1',
+        { factorType: 'TOTP', mfaCode: '123456' },
+        actor as any,
+      );
+      expect(res.id).toBe('f1');
+      expect(d.totp.consume).toHaveBeenCalledWith('u1', [verified], '123456');
+    });
+
+    it('un código inválido, o de quien no tiene factor verificado, no reautentica', async () => {
+      const d = build();
+      d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
+      d.mfaRepo.findVerifiedByUser.mockResolvedValue([]);
+      await expect(
+        d.service.enrollOrVerify(
+          'u1',
+          { factorType: 'TOTP', mfaCode: '123456' },
+          actor as any,
+        ),
+      ).rejects.toMatchObject({ reason: 'MFA_REAUTH_FAILED' });
+      d.mfaRepo.findVerifiedByUser.mockResolvedValue([
+        { id: 'f0', secretEncrypted: 'enc' },
+      ]);
+      d.totp.consume.mockResolvedValue({ valid: false });
+      await expect(
+        d.service.enrollOrVerify(
+          'u1',
+          { factorType: 'TOTP', mfaCode: '000000' },
+          actor as any,
+        ),
+      ).rejects.toMatchObject({ reason: 'MFA_REAUTH_FAILED' });
+      expect(d.mfaRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('verificar (confirmar) un factor pendiente no pide reautenticación: el código del propio factor es la prueba', async () => {
+      const d = build();
+      const secret = generateSecret();
+      d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
+      d.mfaRepo.findByIdAndUser.mockResolvedValue({
+        id: 'f1',
+        secretEncrypted: encryptSecret(secret),
+        stateConceptId: CONCEPTS.STATE_PENDING,
+      });
+      const res = await d.service.enrollOrVerify(
+        'u1',
+        { verify: true, factorId: 'f1', code: await generate({ secret }) },
+        actor as any,
+      );
+      expect(res.state).toBe(CONCEPTS.STATE_VERIFIED);
+      expect(d.credentialsRepo.findActivePasswordByUser).not.toHaveBeenCalled();
+    });
+
+    it('el administrador de seguridad que enrola sobre OTRA cuenta no tiene con qué reautenticar al titular: queda como estaba', async () => {
+      const d = build();
+      d.usersRepo.findById.mockResolvedValue({ id: 'u2', displayName: 'Bea' });
+      d.mfaRepo.create.mockReturnValue({
+        id: 'f2',
+        stateConceptId: CONCEPTS.STATE_PENDING,
+      });
+      await d.service.enrollOrVerify('u2', { factorType: 'TOTP' }, {
+        id: 'admin',
+        roles: ['SECURITY_ADMIN'],
+      } as any);
+      expect(d.credentialsRepo.findActivePasswordByUser).not.toHaveBeenCalled();
+    });
   });
 });

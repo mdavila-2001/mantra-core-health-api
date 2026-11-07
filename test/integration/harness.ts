@@ -1365,6 +1365,9 @@ export async function deleteRegisteredPractitioners(
  */
 const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   { table: 'audit.tenants_history', column: 'tenant_id' },
+  // Reads of `@AccessLogged` routes (the lab portal order list): the table only
+  // forbids UPDATE, so a synthetic tenant's access rows can go with it.
+  { table: 'audit.data_access_log', column: 'tenant_id' },
   { table: 'directory.tenant_memberships', column: 'tenant_id' },
   // P50: el alta de farmacia crea su fila de `pharmacy.pharmacies` (de la que
   // cuelgan sus `pharmacy_sites`) y la registra en `directory.branches`. Va

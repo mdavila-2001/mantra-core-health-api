@@ -3,12 +3,12 @@
 # Flujos del módulo `messaging`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 21 (18 con decisiones propias, 3 sin ellas)
+- **Operaciones:** 24 (21 con decisiones propias, 3 sin ellas)
 - Inventario de endpoints del módulo: [messaging](../endpoints/messaging.md)
 
 ## Proceso: Módulo 35 — Mensajería (outbox, colas y notificación multicanal)
 
-- **Código:** `messaging` · **Agrupación:** MIXTO · **Operaciones:** 21
+- **Código:** `messaging` · **Agrupación:** MIXTO · **Operaciones:** 24
 - **Actores:** Cualquier sesión válida · MESSAGING_ADMIN · Público (sin sesión) · SYSTEM · USER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/messaging/README.md`
@@ -71,7 +71,10 @@ _Fuente: `src/modules/messaging/README.md:109`_
 |  |  | GET /notifications/me | USER · MESSAGING_ADMIN | BAJO | 1 |
 |  |  | GET /notifications/preferences/me | USER · MESSAGING_ADMIN | BAJO | 2 |
 |  |  | PUT /notifications/preferences/me | USER · MESSAGING_ADMIN | MEDIO | 3 |
-| `ctrl:MessagingInternalController` | Operaciones de MessagingInternalController que el README no asigna a un caso de uso | GET /internal/notifications/pending | SYSTEM · MESSAGING_ADMIN | MEDIO | 3 |
+| `ctrl:MessagingInternalController` | Operaciones de MessagingInternalController que el README no asigna a un caso de uso | POST /internal/notifications/in-app/release-due | SYSTEM · MESSAGING_ADMIN | MEDIO | 2 |
+|  |  | GET /internal/notifications/pending | SYSTEM · MESSAGING_ADMIN | MEDIO | 3 |
+| `ctrl:NativePushController` | Operaciones de NativePushController que el README no asigna a un caso de uso | DELETE /notifications/native-push/token | USER · MESSAGING_ADMIN | MEDIO | 2 |
+|  |  | PUT /notifications/native-push/token | USER · MESSAGING_ADMIN | MEDIO | 3 |
 | `ctrl:WebPushController` | Operaciones de WebPushController que el README no asigna a un caso de uso | DESCONOCIDO /notifications/web-push | Cualquier sesión válida | BAJO | 0 |
 |  |  | GET /notifications/web-push/config | USER · MESSAGING_ADMIN | BAJO | 0 |
 |  |  | DELETE /notifications/web-push/subscription | USER · MESSAGING_ADMIN | MEDIO | 2 |
@@ -83,8 +86,8 @@ _Fuente: `src/modules/messaging/README.md:109`_
 flowchart LR
   a2(["SYSTEM · MESSAGING_ADMIN"]):::actor
   a18(["MESSAGING_ADMIN"]):::actor
-  a31(["Público (sin sesión)"]):::actor
-  a35(["USER · MESSAGING_ADMIN"]):::actor
+  a30(["Público (sin sesión)"]):::actor
+  a34(["USER · MESSAGING_ADMIN"]):::actor
   t3[("messaging.outbox_messages")]:::tabla
   t5[("messaging.domain_events")]:::tabla
   t6[("messaging.event_deliveries")]:::tabla
@@ -96,11 +99,11 @@ flowchart LR
   t21[("messaging.message_templates")]:::tabla
   t22[("messaging.notification_requests")]:::tabla
   t23[("messaging.recipient_preferences")]:::tabla
-  t25[("iam.devices")]:::tabla
-  t26[("messaging.in_app_notifications")]:::tabla
-  t27[("messaging.messaging_providers")]:::tabla
-  t28[("messaging.notification_deliveries")]:::tabla
-  t32[("messaging.delivery_receipts")]:::tabla
+  t25[("messaging.in_app_notifications")]:::tabla
+  t26[("messaging.messaging_providers")]:::tabla
+  t27[("messaging.notification_deliveries")]:::tabla
+  t31[("messaging.delivery_receipts")]:::tabla
+  t42[("iam.devices")]:::tabla
   subgraph s0["UC-35-02 · Reclamar y publicar mensajes (relay)"]
     o1["POST /internal/outbox/relay/run"]:::op
   end
@@ -129,25 +132,30 @@ flowchart LR
   subgraph s8["UC-35-10 · Solicitud consciente del consentimiento"]
     o19["POST /notifications/requests"]:::op
   end
-  t29[("+4 tablas más")]
+  t28[("+4 tablas más")]
   subgraph s9["UC-35-11 · Entrega multicanal"]
     o24["POST /internal/notifications/{requestId}/deliver"]:::op
   end
-  t33[("+1 tablas más")]
+  t32[("+1 tablas más")]
   subgraph s10["UC-35-12 · Conciliar acuse del proveedor"]
-    o30["POST /webhooks/providers/{providerCode}/receipts"]:::op
+    o29["POST /webhooks/providers/{providerCode}/receipts"]:::op
   end
   subgraph s11["UC-35-13 · Marcar in-app como leída"]
-    o34["POST /notifications/in-app/{id}/read"]:::op
+    o33["POST /notifications/in-app/{id}/read"]:::op
   end
   subgraph s12["ctrl:MessagingController · Operaciones de MessagingController que el README no…"]
-    o36["POST /notifications/in-app/read-all"]:::op
-    o37["GET /notifications/me"]:::op
-    o38["GET /notifications/preferences/me"]:::op
-    o39["PUT /notifications/preferences/me"]:::op
+    o35["POST /notifications/in-app/read-all"]:::op
+    o36["GET /notifications/me"]:::op
+    o37["GET /notifications/preferences/me"]:::op
+    o38["PUT /notifications/preferences/me"]:::op
   end
   subgraph s13["ctrl:MessagingInternalController · Operaciones de MessagingInternalController q…"]
+    o39["POST /internal/notifications/in-app/release-due"]:::op
     o40["GET /internal/notifications/pending"]:::op
+  end
+  subgraph s14["ctrl:NativePushController · Operaciones de NativePushController que el README n…"]
+    o41["DELETE /notifications/native-push/token"]:::op
+    o43["PUT /notifications/native-push/token"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
@@ -191,39 +199,49 @@ flowchart LR
   o19 -->|"LEE"| t23
   a2 --> o24
   o24 -->|"ACTUALIZA"| t25
-  o24 -->|"LEE"| t25
-  o24 -->|"CREA"| t26
+  o24 -->|"CREA"| t25
   o24 -->|"LEE"| t20
+  o24 -->|"LEE"| t26
+  o24 -->|"CREA"| t27
   o24 -->|"LEE"| t27
-  o24 -->|"CREA"| t28
-  o24 -.-> t29
-  a31 --> o30
-  o30 -->|"CREA"| t32
-  o30 -->|"LEE"| t32
-  o30 -->|"LEE"| t27
-  o30 -->|"ACTUALIZA"| t28
-  o30 -->|"LEE"| t28
-  o30 -->|"ACTUALIZA"| t22
-  o30 -.-> t33
-  a35 --> o34
-  o34 -->|"ACTUALIZA"| t26
-  o34 -->|"LEE"| t26
-  a35 --> o36
-  o36 -->|"ACTUALIZA"| t26
-  o36 -->|"LEE"| t26
-  a35 --> o37
-  o37 -->|"LEE"| t26
-  a35 --> o38
+  o24 -.-> t28
+  a30 --> o29
+  o29 -->|"CREA"| t31
+  o29 -->|"LEE"| t31
+  o29 -->|"LEE"| t26
+  o29 -->|"ACTUALIZA"| t27
+  o29 -->|"LEE"| t27
+  o29 -->|"ACTUALIZA"| t22
+  o29 -.-> t32
+  a34 --> o33
+  o33 -->|"ACTUALIZA"| t25
+  o33 -->|"LEE"| t25
+  a34 --> o35
+  o35 -->|"ACTUALIZA"| t25
+  o35 -->|"LEE"| t25
+  a34 --> o36
+  o36 -->|"LEE"| t25
+  a34 --> o37
+  o37 -->|"LEE"| t20
+  o37 -->|"LEE"| t23
+  a34 --> o38
   o38 -->|"LEE"| t20
+  o38 -->|"CREA"| t23
   o38 -->|"LEE"| t23
-  a35 --> o39
-  o39 -->|"LEE"| t20
-  o39 -->|"CREA"| t23
-  o39 -->|"LEE"| t23
+  a2 --> o39
+  o39 -->|"ACTUALIZA"| t25
+  o39 -->|"LEE"| t25
   a2 --> o40
   o40 -->|"LEE"| t20
   o40 -->|"ACTUALIZA"| t22
   o40 -->|"LEE"| t22
+  a34 --> o41
+  o41 -->|"ACTUALIZA"| t42
+  o41 -->|"LEE"| t42
+  a34 --> o43
+  o43 -->|"ACTUALIZA"| t42
+  o43 -->|"CREA"| t42
+  o43 -->|"LEE"| t42
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -580,74 +598,26 @@ flowchart TD
   n29 -->|"sí"| n30
   n31(["422 PRECONDITION_FAILED Una notificación in-app necesita destinatario interno"]):::error
   n30 -->|"sí"| n31
-  n32["Llama a NotificationsRepository.createInAppNotification"]:::llamada
+  n32["Llama a NotificationsService.deferBySilence"]:::llamada
   n30 -->|"no"| n32
-  n33[("CREA messaging.in_app_notifications")]:::efecto
+  n33["Llama a NotificationsRepository.findPreferences"]:::llamada
   n32 --> n33
-  n34[("ACTUALIZA messaging.notification_requests")]:::efecto
+  n34[("LEE messaging.recipient_preferences")]:::efecto
   n33 --> n34
-  n29 -->|"no"| n34
-  n35["Llama a WebPushService.pushToUser"]:::llamada
+  n35["Llama a NotificationsRepository.createInAppNotification"]:::llamada
   n34 --> n35
-  n36["Intenta"]:::intento
+  n36[("CREA messaging.in_app_notifications")]:::efecto
   n35 --> n36
-  n37[("LEE iam.devices")]:::efecto
+  n37{"availableAt › now"}:::decision
   n36 --> n37
-  n38["Repite: por cada const device de devices"]:::bucle
-  n37 --> n38
-  n39["Llama a WebPushService.sendTo"]:::llamada
-  n38 -->|"cada elemento"| n39
-  n40["Intenta"]:::intento
+  n38[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n37 -->|"sí"| n38
+  n39[("ACTUALIZA messaging.notification_requests")]:::efecto
+  n38 --> n39
+  n37 -->|"no"| n39
+  n29 -->|"no"| n39
+  n40(("201 Responde con éxito")):::ok
   n39 --> n40
-  n41{"status !== undefined && GONE_STATUS_CODES.includes(status)"}:::decision
-  n40 -->|"si falla"| n41
-  n42["Llama a WebPushService.forget"]:::llamada
-  n41 -->|"sí"| n42
-  n43["Transacción: transactional(…)"]:::transaccion
-  n42 --> n43
-  n44[("LEE iam.devices · ACTUALIZA iam.devices")]:::efecto
-  n43 --> n44
-  n45{"device"}:::decision
-  n44 --> n45
-  n46[("ACTUALIZA iam.devices")]:::efecto
-  n45 -->|"sí"| n46
-  n47{"pushTarget"}:::decision
-  n40 --> n47
-  n46 --> n47
-  n45 -->|"no"| n47
-  n41 -->|"no"| n47
-  n38 -->|"al terminar"| n47
-  n48["Llama a WebPushService.pushToUser"]:::llamada
-  n47 -->|"sí"| n48
-  n49["Intenta"]:::intento
-  n48 --> n49
-  n50[("LEE iam.devices")]:::efecto
-  n49 --> n50
-  n51["Repite: por cada const device de devices"]:::bucle
-  n50 --> n51
-  n52["Llama a WebPushService.sendTo"]:::llamada
-  n51 -->|"cada elemento"| n52
-  n53["Intenta"]:::intento
-  n52 --> n53
-  n54{"status !== undefined && GONE_STATUS_CODES.includes(status)"}:::decision
-  n53 -->|"si falla"| n54
-  n55["Llama a WebPushService.forget"]:::llamada
-  n54 -->|"sí"| n55
-  n56["Transacción: transactional(…)"]:::transaccion
-  n55 --> n56
-  n57[("LEE iam.devices · ACTUALIZA iam.devices")]:::efecto
-  n56 --> n57
-  n58{"device"}:::decision
-  n57 --> n58
-  n59[("ACTUALIZA iam.devices")]:::efecto
-  n58 -->|"sí"| n59
-  n60(("201 Responde con éxito")):::ok
-  n53 --> n60
-  n59 --> n60
-  n58 -->|"no"| n60
-  n54 -->|"no"| n60
-  n51 -->|"al terminar"| n60
-  n47 -->|"no"| n60
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -656,7 +626,45 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. GET /internal/notifications/pending
+#### 6. POST /internal/notifications/in-app/release-due
+
+Liberar los avisos in-app aplazados por el silencio nocturno
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InAppReleaseService.releaseDue"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5[("LEE messaging.in_app_notifications")]:::efecto
+  n4 --> n5
+  n6["Repite: por cada const row de rows"]:::bucle
+  n5 --> n6
+  n7[("ACTUALIZA messaging.in_app_notifications")]:::efecto
+  n6 -->|"cada elemento"| n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  n6 -->|"al terminar"| n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. GET /internal/notifications/pending
 
 Listar solicitudes de notificación listas para entregar
 
@@ -703,7 +711,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /internal/outbox/relay/run
+#### 8. POST /internal/outbox/relay/run
 
 Reclamar y publicar un lote del outbox
 
@@ -750,7 +758,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /internal/queues/{code}/claim
+#### 9. POST /internal/queues/{code}/claim
 
 Reclamar un lote de trabajos de la cola
 
@@ -808,7 +816,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /notifications/in-app/{id}/read
+#### 10. POST /notifications/in-app/{id}/read
 
 Marcar una notificación in-app como leída
 
@@ -855,7 +863,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /notifications/in-app/read-all
+#### 11. POST /notifications/in-app/read-all
 
 Marcar toda mi bandeja como leída
 
@@ -898,7 +906,96 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. GET /notifications/preferences/me
+#### 12. DELETE /notifications/native-push/token
+
+Quita el token push (FCM) de esta instalación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a NativePushService.unregisterToken"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a NativePushService.nativeDevices"]:::llamada
+  n4 --> n5
+  n6[("LEE iam.devices")]:::efecto
+  n5 --> n6
+  n7["Repite: por cada const device de devices"]:::bucle
+  n6 --> n7
+  n8[("ACTUALIZA iam.devices · ACTUALIZA iam.devices · ACTUALIZA iam.devices")]:::efecto
+  n7 -->|"cada elemento"| n8
+  n9(("204 Responde con éxito")):::ok
+  n8 --> n9
+  n7 -->|"al terminar"| n9
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 13. PUT /notifications/native-push/token
+
+Guarda el token push (FCM) de esta instalación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a NativePushService.registerToken"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a NativePushService.clearFromOtherAccounts"]:::llamada
+  n4 --> n5
+  n6[("LEE iam.devices")]:::efecto
+  n5 --> n6
+  n7["Repite: por cada const device de siblings"]:::bucle
+  n6 --> n7
+  n8[("ACTUALIZA iam.devices · ACTUALIZA iam.devices · ACTUALIZA iam.devices")]:::efecto
+  n7 -->|"cada elemento"| n8
+  n9[("LEE iam.devices")]:::efecto
+  n8 --> n9
+  n7 -->|"al terminar"| n9
+  n10{"existing"}:::decision
+  n9 --> n10
+  n11[("ACTUALIZA iam.devices · ACTUALIZA iam.devices · ACTUALIZA iam.devices · ACTUALIZA iam.devices · ACTUALIZA iam…")]:::efecto
+  n10 -->|"sí"| n11
+  n12[("CREA iam.devices")]:::efecto
+  n11 --> n12
+  n10 -->|"no"| n12
+  n13(("204 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 14. GET /notifications/preferences/me
 
 Mis preferencias de notificación in-app
 
@@ -939,7 +1036,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. PUT /notifications/preferences/me
+#### 15. PUT /notifications/preferences/me
 
 Guardar mis preferencias de notificación in-app
 
@@ -1017,7 +1114,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /notifications/requests
+#### 16. POST /notifications/requests
 
 Crear una solicitud de notificación
 
@@ -1102,7 +1199,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. DESCONOCIDO /notifications/web-push
+#### 17. DESCONOCIDO /notifications/web-push
 
 
 
@@ -1133,7 +1230,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. PUT /notifications/web-push/subscription
+#### 18. PUT /notifications/web-push/subscription
 
 Guarda la suscripción push de este navegador
 
@@ -1184,7 +1281,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /queues/{code}/jobs
+#### 19. POST /queues/{code}/jobs
 
 Encolar un trabajo
 
@@ -1254,7 +1351,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /queues/dead-letter/{deadLetterJobId}/redrive
+#### 20. POST /queues/dead-letter/{deadLetterJobId}/redrive
 
 Reencolar un trabajo desde la cola muerta
 
@@ -1353,7 +1450,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /webhooks/providers/{providerCode}/receipts
+#### 21. POST /webhooks/providers/{providerCode}/receipts
 
 Conciliar el acuse de entrega que envía el proveedor
 

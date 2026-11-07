@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1943 de 1943 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **79 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **2022 de 2022 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **79 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -50,24 +50,24 @@ Esta referencia documenta **1943 de 1943 operaciones HTTP** registradas en `open
 | [audio_assets](audio-assets.md) | 10 | `audio-assets`, `audio-assets-internal` | 2 |
 | [audit](audit.md) | 18 | `audit`, `audit-compliance`, `audit-me`, `audit-moderation`, `audit-privacy` | 6 |
 | [auth_providers](auth-providers.md) | 12 | `auth-providers` | 1 |
-| [authz](authz.md) | 45 | `authz-admin`, `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-governance`, `authz-grants`, `authz-me`, `authz-pdp`, `authz-policies`, `authz-roles` | 12 |
+| [authz](authz.md) | 49 | `authz-admin`, `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-governance`, `authz-grants`, `authz-me`, `authz-pdp`, `authz-policies`, `authz-practitioner-requests`, `authz-roles` | 13 |
 | [automation](automation.md) | 17 | `automation` | 2 |
-| [billing](billing.md) | 53 | `admin-catalogs-services`, `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`, `billing-space-charges`, `patient-spending` | 8 |
+| [billing](billing.md) | 56 | `admin-catalogs-services`, `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`, `billing-space-charges`, `patient-spending` | 8 |
 | [bulk_import](bulk-import.md) | 7 | `bulk-import` | 1 |
 | [chart](chart.md) | 23 | `chart-care-plans`, `chart-documents`, `chart-encounters`, `chart-me`, `chart-notes`, `chart-read`, `chart-templates` | 7 |
 | [clinical](clinical.md) | 62 | `clinical-adt`, `clinical-census`, `clinical-encounters`, `clinical-me`, `clinical-observations`, `clinical-orders`, `clinical-prescription-expiry`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records` | 13 |
 | [clinical_ext](clinical-ext.md) | 34 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 8 |
 | [common](common.md) | 19 | `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files`, `internal/storage-lifecycle` | 6 |
-| [community](community.md) | 100 | `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline` | 14 |
-| [consent](consent.md) | 27 | `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-me`, `consent-patient-objections`, `consent-practitioner-access`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents` | 11 |
+| [community](community.md) | 102 | `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline` | 15 |
+| [consent](consent.md) | 28 | `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-me`, `consent-patient-objections`, `consent-practitioner-access`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents` | 11 |
 | [content_packs](content-packs.md) | 2 | `content-packs` | 1 |
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
 | [data_catalog](data-catalog.md) | 50 | `admin-catalog`, `admin-portal`, `data-catalog-governance`, `data-catalog-internal` | 7 |
-| [delegated_access](delegated-access.md) | 44 | `clinical-prescription-shares`, `clinical-prescription-shares-public`, `delegated-access-affiliation-invitations`, `delegated-access-authz`, `delegated-access-governance`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests`, `delegated-access-support-staff` | 12 |
-| [diagnostic_units](diagnostic-units.md) | 24 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
-| [diagnostics](diagnostics.md) | 33 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reception`, `diagnostics-reports`, `diagnostics-specimens` | 7 |
-| [directory](directory.md) | 26 | `directory-admin-tenants`, `directory-tenants` | 3 |
+| [delegated_access](delegated-access.md) | 45 | `clinical-prescription-shares`, `clinical-prescription-shares-public`, `delegated-access-affiliation-invitations`, `delegated-access-authz`, `delegated-access-governance`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests`, `delegated-access-support-staff` | 12 |
+| [diagnostic_units](diagnostic-units.md) | 47 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units`, `diagnostics-lab-portal`, `diagnostics-patient-results` | 9 |
+| [diagnostics](diagnostics.md) | 63 | `diagnostics-imaging`, `diagnostics-lab-portal`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-public`, `diagnostics-reception`, `diagnostics-report-drafts`, `diagnostics-reports`, `diagnostics-specimens` | 14 |
+| [directory](directory.md) | 31 | `directory-admin-tenants`, `directory-tenants` | 6 |
 | [document_store](document-store.md) | 5 | `document-store` | 1 |
 | [education](education.md) | 14 | `education` | 1 |
 | [erp](erp.md) | 17 | `erp` | 1 |
@@ -77,7 +77,7 @@ Esta referencia documenta **1943 de 1943 operaciones HTTP** registradas en `open
 | [graph_intelligence](graph-intelligence.md) | 15 | `graph_intelligence` | 2 |
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
-| [iam](iam.md) | 45 | `iam-auth`, `iam-onboarding-drafts`, `iam-users` | 4 |
+| [iam](iam.md) | 49 | `iam-auth`, `iam-onboarding-drafts`, `iam-users` | 6 |
 | [identity_assurance](identity-assurance.md) | 28 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
 | [insurance](insurance.md) | 62 | `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-requests`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`, `my-insurance-claims` | 20 |
 | [insurance-campaigns](insurance-campaigns.md) | 16 | `insurance-campaigns` | 0 |
@@ -87,7 +87,7 @@ Esta referencia documenta **1943 de 1943 operaciones HTTP** registradas en `open
 | [marketing](marketing.md) | 31 | `marketing`, `marketing-insights` | 5 |
 | [medical_centers](medical-centers.md) | 2 | `medical-centers` | 1 |
 | [medical_groups](medical-groups.md) | 14 | `medical-groups` | 1 |
-| [messaging](messaging.md) | 20 | `messaging`, `messaging-internal`, `messaging-webhooks` | 4 |
+| [messaging](messaging.md) | 23 | `messaging`, `messaging-internal`, `messaging-webhooks` | 5 |
 | [object_storage](object-storage.md) | 14 | `dicomweb`, `object-storage` | 2 |
 | [observability](observability.md) | 13 | `observability` | 1 |
 | [ops_console](ops-console.md) | 11 | `ops-console` | 3 |
@@ -110,7 +110,7 @@ Esta referencia documenta **1943 de 1943 operaciones HTTP** registradas en `open
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
 | [redis_runtime](redis-runtime.md) | 5 | `redis-runtime` | 1 |
 | [reporting](reporting.md) | 13 | `reporting`, `reporting-money` | 2 |
-| [scheduling](scheduling.md) | 67 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 8 |
+| [scheduling](scheduling.md) | 70 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 8 |
 | [search_platform](search-platform.md) | 3 | `search_platform` | 1 |
 | [study_catalog](study-catalog.md) | 2 | `study-catalog` | 1 |
 | [surveys](surveys.md) | 23 | `surveys-assignments`, `surveys-catalog`, `surveys-insights`, `surveys-patient`, `surveys-service-assignments`, `surveys-templates` | 6 |
@@ -130,4 +130,4 @@ Esta referencia documenta **1943 de 1943 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1938 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 2022 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

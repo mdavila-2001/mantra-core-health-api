@@ -10,9 +10,9 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [pharmacies](#pharmacies) | Representa organizaciones farmacéuticas integradas al sistema médico para identificar prestadores y operadores de farmacia. | 17 | 14 | 80 | COINCIDE |
+| [pharmacies](#pharmacies) | Representa organizaciones farmacéuticas integradas al sistema médico para identificar prestadores y operadores de farmacia. | 17 | 14 | 84 | COINCIDE |
 | [pharmacy_external_product_mappings](#pharmacy_external_product_mappings) | Mapea productos internos a referencias externas para intercambiar información farmacéutica entre sistemas. | 12 | 5 | 14 | COINCIDE |
-| [pharmacy_integration_connections](#pharmacy_integration_connections) | Configura conexiones de farmacia con sistemas externos para sincronizar catálogos u operaciones autorizadas. | 17 | 8 | 15 | DIVERGE |
+| [pharmacy_integration_connections](#pharmacy_integration_connections) | Configura conexiones de farmacia con sistemas externos para sincronizar catálogos u operaciones autorizadas. | 17 | 8 | 16 | DIVERGE |
 | [pharmacy_licenses](#pharmacy_licenses) | Registra licencias de farmacias para documentar habilitaciones vinculadas a su operación. | 16 | 9 | 4 | COINCIDE |
 | [pharmacy_on_call_shifts](#pharmacy_on_call_shifts) | sin propósito | 11 | 7 | 7 | COINCIDE |
 | [pharmacy_price_lists](#pharmacy_price_lists) | Define listas de precios de farmacia para organizar precios por vigencia, sede o contexto comercial. | 16 | 10 | 21 | COINCIDE |
@@ -20,8 +20,8 @@
 | [pharmacy_product_identifiers](#pharmacy_product_identifiers) | Mantiene identificadores alternativos de productos farmacéuticos para reconciliar códigos propios y externos. | 10 | 5 | 1 | COINCIDE |
 | [pharmacy_product_images](#pharmacy_product_images) | sin propósito | 6 | 5 | 7 | COINCIDE |
 | [pharmacy_product_prices](#pharmacy_product_prices) | Asocia productos con precios concretos para soportar consulta y operación económica farmacéutica. | 14 | 5 | 26 | COINCIDE |
-| [pharmacy_products](#pharmacy_products) | Cataloga productos comercializados o gestionados por farmacias, incluidos los medicamentos que pueden relacionarse con prescripciones. | 26 | 12 | 68 | COINCIDE |
-| [pharmacy_sites](#pharmacy_sites) | Identifica sucursales y ubicaciones de farmacias para asociar productos, precios e integraciones con cada sitio. | 17 | 9 | 52 | COINCIDE |
+| [pharmacy_products](#pharmacy_products) | Cataloga productos comercializados o gestionados por farmacias, incluidos los medicamentos que pueden relacionarse con prescripciones. | 26 | 12 | 72 | COINCIDE |
+| [pharmacy_sites](#pharmacy_sites) | Identifica sucursales y ubicaciones de farmacias para asociar productos, precios e integraciones con cada sitio. | 17 | 9 | 56 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -164,7 +164,7 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacies`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `Pharmacies` — `src/modules/pharmacy/entities/pharmacies.entity.ts`
-- **Resumen:** 17 columnas · 14 índices · 10 FK salientes · 14 entrantes · 80 operaciones
+- **Resumen:** 17 columnas · 14 índices · 10 FK salientes · 14 entrantes · 84 operaciones
 
 #### Columnas
 
@@ -299,6 +299,10 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/goods-receipts | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/ledger | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/locations | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/lots | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/positions | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/purchase-orders | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/reservations | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/suppliers | LEE | DIRECTA |
@@ -432,7 +436,7 @@ Configura conexiones de farmacia con sistemas externos para sincronizar catálog
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacy_integration_connections`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `PharmacyIntegrationConnections` — `src/modules/pharmacy/entities/pharmacy_integration_connections.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 3 entrantes · 15 operaciones
+- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 3 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -476,12 +480,12 @@ Configura conexiones de farmacia con sistemas externos para sincronizar catálog
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_pharmacy_integration_connections_pharmacy_id` | no | pharmacy_id | Soporta la clave foránea fk_pharmacy_integration_connections_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_pharmacy_integration_connections_pharmacy_site_id` | no | pharmacy_site_id | Soporta la clave foránea fk_pharmacy_integration_connections_pharmacy_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_pharmacy_integration_connections_pharmacy_id` | no | pharmacy_id | Soporta la clave foránea fk_pharmacy_integration_connections_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_pharmacy_integration_connections_pharmacy_site_id` | no | pharmacy_site_id | Soporta la clave foránea fk_pharmacy_integration_connections_pharmacy_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «pharmacy_site_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharmacy_integration_connections_connection_id` | no | connection_id | Soporta la clave foránea fk_pharmacy_integration_connections_connection_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «connection_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharmacy_integration_connections_integration_mode_concept_id` | no | integration_mode_concept_id | Soporta la clave foránea fk_pharmacy_integration_connections_integration_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacy_integration_connections_inventory_authorit_20c81904` | no | inventory_authority_concept_id | Soporta la clave foránea fk_pharmacy_integration_connections_inventory_authorit_3c66cc96: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_pharmacy_integration_connections_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_pharmacy_integration_connections_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_pharmacy_integration_connections_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_pharmacy_integration_connections_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharmacy_integration_connections_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_pharmacy_integration_connections_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacy_integration_connections_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_pharmacy_integration_connections_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -490,6 +494,7 @@ Configura conexiones de farmacia con sistemas externos para sincronizar catálog
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /pharmacies/{pharmacyId}/integration-connections | CREA | DIRECTA |
+| POST /pharmacies/{pharmacyId}/integration-connections | LEE | DIRECTA |
 | POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings | LEE | DIRECTA |
 | DELETE /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId} | LEE | DIRECTA |
 | PATCH /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings/{mappingId} | LEE | DIRECTA |
@@ -1117,7 +1122,7 @@ Cataloga productos comercializados o gestionados por farmacias, incluidos los me
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacy_products`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `PharmacyProducts` — `src/modules/pharmacy/entities/pharmacy_products.entity.ts`
-- **Resumen:** 26 columnas · 12 índices · 10 FK salientes · 17 entrantes · 68 operaciones
+- **Resumen:** 26 columnas · 12 índices · 10 FK salientes · 17 entrantes · 72 operaciones
 
 #### Columnas
 
@@ -1255,6 +1260,10 @@ Cataloga productos comercializados o gestionados por farmacias, incluidos los me
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/goods-receipts | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/ledger | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/locations | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/lots | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/positions | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/purchase-orders | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/reservations | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/transfers | LEE | DIRECTA |
@@ -1302,7 +1311,7 @@ Identifica sucursales y ubicaciones de farmacias para asociar productos, precios
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacy_sites`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `PharmacySites` — `src/modules/pharmacy/entities/pharmacy_sites.entity.ts`
-- **Resumen:** 17 columnas · 9 índices · 8 FK salientes · 11 entrantes · 52 operaciones
+- **Resumen:** 17 columnas · 9 índices · 8 FK salientes · 11 entrantes · 56 operaciones
 
 #### Columnas
 
@@ -1395,6 +1404,10 @@ Identifica sucursales y ubicaciones de farmacias para asociar productos, precios
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/goods-receipts | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/ledger | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/locations | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/lots | LEE | DIRECTA |
+| GET /pharmacy/{pharmacyId}/inventory/positions | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/purchase-orders | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/reservations | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/transfers | LEE | DIRECTA |

@@ -608,4 +608,96 @@ describe('SchedulingServiceBookingService', () => {
       ).rejects.toThrow(/otra organización/);
     });
   });
+  /**
+   * SEG V-1 / S1-A4 · el oficio (mostrador, profesional) se lee en la
+   * organización activa: ni el rol de otra organización ni el perfil
+   * profesional global del token eximen del candado de representación ni
+   * muestran ofertas que no se pueden reservar.
+   */
+  describe('el oficio se lee en la organización activa', () => {
+    const OTHER_TENANT = '66666666-6666-4666-8666-666666666666';
+    const dto = {
+      resourceId: SITE,
+      startAt: t(1, 8, 15).toISOString(),
+      patientProfileId: PATIENT,
+    };
+    const doctorOfOther = {
+      id: 'user-medico',
+      roles: ['PATIENT', 'PRACTITIONER'],
+      scopedRoles: { [OTHER_TENANT]: ['PRACTITIONER'] },
+      practitionerProfileId: 'hp-otro',
+      tenantIds: [TENANT, OTHER_TENANT],
+    } as any;
+    const deskOfOther = {
+      id: 'user-mostrador',
+      roles: ['PATIENT', 'SCHEDULING_AGENT'],
+      scopedRoles: { [OTHER_TENANT]: ['SCHEDULING_AGENT'] },
+      tenantIds: [TENANT, OTHER_TENANT],
+    } as any;
+    const deskHere = {
+      id: 'user-mostrador',
+      roles: ['SCHEDULING_AGENT'],
+      scopedRoles: { [TENANT]: ['SCHEDULING_AGENT'] },
+      tenantIds: [TENANT],
+    } as any;
+    const doctorHere = {
+      id: 'user-medico',
+      roles: ['PRACTITIONER'],
+      scopedRoles: { [TENANT]: ['PRACTITIONER'] },
+      practitionerProfileId: 'hp-otro',
+      tenantIds: [TENANT],
+    } as any;
+
+    const hold = (actor: unknown) =>
+      runWithTenant(TENANT, () => {
+        const d = build();
+        return d.service.placeHold(OFFERING, dto, actor as any).then(() => d);
+      });
+
+    it('el médico de otra organización retiene como paciente: debe representarlo', async () => {
+      const d = await hold(doctorOfOther);
+      expect(d.representation.assertMayActForPatient).toHaveBeenCalledWith(
+        PATIENT,
+        doctorOfOther,
+      );
+    });
+
+    it('el mostrador de otra organización retiene como paciente: debe representarlo', async () => {
+      const d = await hold(deskOfOther);
+      expect(d.representation.assertMayActForPatient).toHaveBeenCalledWith(
+        PATIENT,
+        deskOfOther,
+      );
+    });
+
+    it('el mostrador de esta organización retiene para cualquiera, sin preguntar', async () => {
+      const d = await hold(deskHere);
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+
+    it('quien atiende en esta organización retiene para sus pacientes, sin preguntar', async () => {
+      const d = await hold(doctorHere);
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+
+    it('el mostrador de otra organización no ve una oferta que no está abierta a pacientes', async () => {
+      const d = build();
+      d.offeringsRepo.findOfferingById.mockResolvedValue(
+        offering({ isPatientBookable: false }),
+      );
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.availability(
+            {
+              offeringId: OFFERING,
+              from: t(1, 0).toISOString(),
+              to: t(2, 0).toISOString(),
+            } as any,
+            deskOfOther,
+          ),
+        ),
+      ).rejects.toThrow(/Servicio no encontrado/);
+    });
+  });
 });

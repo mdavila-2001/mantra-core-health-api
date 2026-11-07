@@ -5,3 +5,6 @@ export * from './forms-instances.service';
 export * from './forms-values.service';
 export * from './forms-read.service';
 export * from './form-instance-origin.validator';
+export * from './practitioner-owner';
+export * from './question-scripts.service';
+export * from './faqs.service';

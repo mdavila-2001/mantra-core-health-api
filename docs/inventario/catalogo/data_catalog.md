@@ -10,8 +10,8 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [catalog_annotation_revisions](#catalog_annotation_revisions) | Conserva versiones de las anotaciones del catálogo de datos de salud, de modo que puedan revisarse los cambios en definiciones y contexto de los activos catalogados. | 10 | 1 | 7 | COINCIDE |
-| [catalog_annotations](#catalog_annotations) | Documenta definiciones y contexto funcional asociados a objetos o columnas del catálogo de datos de salud para mejorar su interpretación y gobernanza. | 34 | 3 | 31 | COINCIDE |
+| [catalog_annotation_revisions](#catalog_annotation_revisions) | Conserva versiones de las anotaciones del catálogo de datos de salud, de modo que puedan revisarse los cambios en definiciones y contexto de los activos catalogados. | 10 | 1 | 8 | COINCIDE |
+| [catalog_annotations](#catalog_annotations) | Documenta definiciones y contexto funcional asociados a objetos o columnas del catálogo de datos de salud para mejorar su interpretación y gobernanza. | 34 | 3 | 33 | COINCIDE |
 | [catalog_certifications](#catalog_certifications) | sin propósito | 19 | 6 | 0 | COINCIDE |
 | [catalog_change_acknowledgements](#catalog_change_acknowledgements) | sin propósito | 5 | 2 | 0 | COINCIDE |
 | [catalog_change_events](#catalog_change_events) | Registra cambios detectados en objetos y columnas entre escaneos del catálogo, lo que permite seguir la evolución de los activos de datos de salud. | 8 | 2 | 6 | COINCIDE |
@@ -257,7 +257,7 @@ Conserva versiones de las anotaciones del catálogo de datos de salud, de modo q
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_67_data_catalog.puml:188: entity catalog_annotation_revisions <<LOG>> {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
 - **Entidad del ORM:** `CatalogAnnotationRevisions` — `src/modules/data_catalog/entities/catalog_annotation_revisions.entity.ts`
-- **Resumen:** 10 columnas · 1 índices · 2 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 10 columnas · 1 índices · 2 FK salientes · 0 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -304,6 +304,7 @@ Conserva versiones de las anotaciones del catálogo de datos de salud, de modo q
 | GET /admin/catalog/objects/{id}/history | LEE | POR_SQL |
 | POST /admin/catalog/scans | CREA | POR_SQL |
 | GET /admin/governance/review-queue | LEE | POR_SQL |
+| POST /internal/catalog/scans/run-next | CREA | POR_SQL |
 
 #### Gobierno
 
@@ -328,7 +329,7 @@ Documenta definiciones y contexto funcional asociados a objetos o columnas del c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_67_data_catalog.puml:143: entity catalog_annotations {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
 - **Entidad del ORM:** `CatalogAnnotations` — `src/modules/data_catalog/entities/catalog_annotations.entity.ts`
-- **Resumen:** 34 columnas · 3 índices · 5 FK salientes · 2 entrantes · 31 operaciones
+- **Resumen:** 34 columnas · 3 índices · 5 FK salientes · 2 entrantes · 33 operaciones
 
 #### Columnas
 
@@ -429,6 +430,8 @@ Documenta definiciones y contexto funcional asociados a objetos o columnas del c
 | GET /admin/catalog/schemas | LEE | POR_SQL |
 | GET /admin/governance/review-queue | LEE | POR_SQL |
 | POST /internal/catalog/fit/run | LEE | POR_SQL |
+| POST /internal/catalog/scans/run-next | CREA | POR_SQL |
+| POST /internal/catalog/scans/run-next | ACTUALIZA | POR_SQL |
 | POST /internal/catalog/scans/run-next | LEE | POR_SQL |
 | GET /admin/ops/readiness | LEE | POR_SQL |
 

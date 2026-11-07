@@ -123,8 +123,10 @@ export class PublicCacheInterceptor implements NestInterceptor {
     // `Cache-Control` ya prometía.
     const cached = this.store.get(key);
     if (cached) {
-      res.setHeader('ETag', cached.etag);
+      // Cache-Control first: with the global `no-store` default in place,
+      // `stripEtagOnNoStore` would drop an ETag set while it still applies.
       res.setHeader('Cache-Control', cached.cacheControl);
+      res.setHeader('ETag', cached.etag);
 
       const order = req.headers['if-none-match'];
       if (order && this.matches(order, cached.etag)) {
@@ -144,8 +146,9 @@ export class PublicCacheInterceptor implements NestInterceptor {
         const maxAge = this.maxAgeFor(req.path);
         const cacheControl = `public, max-age=${maxAge}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`;
 
-        res.setHeader('ETag', etag);
+        // Cache-Control first (see the cached branch above).
         res.setHeader('Cache-Control', cacheControl);
+        res.setHeader('ETag', etag);
         this.store.set(key, { etag, body, cacheControl }, maxAge * 1000);
 
         // `If-None-Match` puede traer varios ETags separados por coma, y `*`.

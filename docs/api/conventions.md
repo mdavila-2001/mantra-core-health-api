@@ -72,7 +72,8 @@ El status no cambia; `details.reason` deja al cliente distinguir subcasos:
 | `TENANT_REQUIRED` | 403 / 422 | Hay que indicar `X-Tenant-Id` y el actor no tiene uno resoluble | Abre el selector de organización |
 | `TENANT_AMBIGUOUS` | 403 | El actor pertenece a varios tenants y no indicó cuál | Abre el selector de organización |
 | `MFA_REQUIRED` | 401 | Login de una cuenta con MFA verificado sin `mfaCode` (con `AUTH_MFA_CHALLENGE_ENABLED=true`) | Pide el código y reintenta el login |
-| `MFA_INVALID` | 401 | `mfaCode` que no valida | Vuelve a pedir el código |
+| `MFA_INVALID` | 401 | `mfaCode` que no valida o que ya se usó (los códigos TOTP son de un solo uso) | Vuelve a pedir el código |
+| `MFA_REAUTH_REQUIRED`, `MFA_REAUTH_FAILED` | 422 | `POST /iam/users/:id/mfa-factors` para añadir un factor propio sin `currentPassword`/`mfaCode`, o con una prueba que no vale | Pide la contraseña actual o un código de la app; no cierres la sesión |
 | `CURRENT_PASSWORD_INVALID`, `PASSWORD_UNCHANGED` | 422 | `POST /iam/auth/change-password` | Muestra el error en el formulario |
 
 Un `429` lleva `code: RATE_LIMITED` y `Retry-After` (segundos).

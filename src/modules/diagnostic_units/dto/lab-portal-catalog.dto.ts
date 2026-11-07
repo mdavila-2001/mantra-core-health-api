@@ -27,6 +27,11 @@ export class LabCatalogItemDto {
   @ApiProperty() name!: string;
   @ApiProperty({ type: String, nullable: true }) loinc!: string | null;
   @ApiProperty({ type: String, nullable: true }) specimen!: string | null;
+  @ApiProperty({
+    enum: ['BLOOD', 'URINE', 'STOOL', 'FLUID', 'SWAB', 'OTHER'],
+    description: 'What is drawn from the patient, to browse by sample type',
+  })
+  sampleType!: string;
   @ApiProperty({ type: LabSuggestedPriceDto, nullable: true })
   suggestedPrice!: LabSuggestedPriceDto | null;
   @ApiProperty({
@@ -46,13 +51,30 @@ export class LabCatalogSectionDto {
   @ApiProperty({ type: [LabCatalogItemDto] }) items!: LabCatalogItemDto[];
 }
 
+export class LabSampleTypeDto {
+  @ApiProperty({ example: 'BLOOD' }) code!: string;
+  @ApiProperty({ example: 'Análisis de sangre' }) name!: string;
+}
+
 /** `GET /diagnostics/lab/catalog`. */
 export class LabCatalogDto {
   @ApiProperty({ type: [LabCatalogSectionDto] })
   sections!: LabCatalogSectionDto[];
+  @ApiProperty({
+    type: [LabSampleTypeDto],
+    description: 'Sample types in display order (blood first)',
+  })
+  sampleTypes!: LabSampleTypeDto[];
   @ApiProperty() count!: number;
   @ApiProperty({ description: 'How suggested prices were chosen' })
   priceRule!: string;
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'Version of the LOINC study catalog loaded in this database (laboratorio.json), or null when only the basic boot análisis are there: no sections, LOINC nor components until `yarn catalog:studies:load` runs',
+  })
+  catalogVersion!: string | null;
 }
 
 /** Body of `POST /diagnostics/lab/catalog/import`. */

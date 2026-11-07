@@ -202,10 +202,11 @@ export class LabPortalSnapshotService {
       const studyName = studies.get(order.codeConceptId) ?? 'Estudio';
       const patientName =
         people.get(order.patientProfileId)?.displayName ?? 'Paciente';
-      const requesterName =
-        (order.requesterProfileId
-          ? people.get(order.requesterProfileId)?.displayName
-          : null) ?? 'Médico solicitante';
+      const requesterName = order.registeredByPerformer
+        ? (order.externalRequesterName ?? 'A pedido del paciente')
+        : ((order.requesterProfileId
+            ? people.get(order.requesterProfileId)?.displayName
+            : null) ?? 'Médico solicitante');
       const files = history
         .filter((entry) => orderByReport.get(entry.reportId) === order.id)
         .map((entry): LabFileView => {

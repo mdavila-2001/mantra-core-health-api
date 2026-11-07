@@ -46,6 +46,7 @@ import { DiagnosticsLabUploadsController } from './controllers/diagnostics-lab-u
 import { LabPortalSnapshotService } from './services/lab-portal-snapshot.service';
 import { LabPortalOrderOutcomeService } from './services/lab-portal-order-outcome.service';
 import { LabPortalOrdersService } from './services/lab-portal-orders.service';
+import { LabPortalOrderIntakeService } from './services/lab-portal-order-intake.service';
 import { LabPortalResultsService } from './services/lab-portal-results.service';
 import { LabPortalResultWritesService } from './services/lab-portal-result-writes.service';
 import { LabPortalSummaryService } from './services/lab-portal-summary.service';
@@ -171,6 +172,7 @@ import {
     LabPortalSnapshotService,
     LabPortalOrderOutcomeService,
     LabPortalOrdersService,
+    LabPortalOrderIntakeService,
     LabPortalResultsService,
     LabPortalResultWritesService,
     LabPortalSummaryService,

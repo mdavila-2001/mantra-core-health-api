@@ -13,6 +13,9 @@ import {
   FormsInstancesController,
   FormsMeController,
   FormsValuesController,
+  FormsQuestionScriptsController,
+  FormsFaqsController,
+  FormsFaqsPublicController,
 } from './controllers';
 import {
   FormsSchemaService,
@@ -21,6 +24,8 @@ import {
   FormsInstancesService,
   FormsValuesService,
   FormsReadService,
+  QuestionScriptsService,
+  FaqsService,
 } from './services';
 import {
   DefinitionSetsRepository,
@@ -29,6 +34,8 @@ import {
   FormInstancesRepository,
   FieldValuesRepository,
   MigrationsRepository,
+  QuestionScriptsRepository,
+  FaqEntriesRepository,
 } from './repositories';
 
 /**
@@ -54,6 +61,9 @@ const entityClasses = Object.values(entities).filter((value) =>
     FormsInstancesController,
     FormsMeController,
     FormsValuesController,
+    FormsQuestionScriptsController,
+    FormsFaqsController,
+    FormsFaqsPublicController,
   ],
   providers: [
     // Repositorios
@@ -63,6 +73,8 @@ const entityClasses = Object.values(entities).filter((value) =>
     FormInstancesRepository,
     FieldValuesRepository,
     MigrationsRepository,
+    QuestionScriptsRepository,
+    FaqEntriesRepository,
     // Servicios
     FormsSchemaService,
     FormsFieldsService,
@@ -70,6 +82,8 @@ const entityClasses = Object.values(entities).filter((value) =>
     FormsInstancesService,
     FormsValuesService,
     FormsReadService,
+    QuestionScriptsService,
+    FaqsService,
   ],
 })
 export class FormsModule {}

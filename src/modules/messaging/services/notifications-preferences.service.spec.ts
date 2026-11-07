@@ -40,6 +40,7 @@ function build() {
     })),
     findLiveRequestByDebounceKey: mockFn(() => Promise.resolve(null)),
     findUnreadInAppForResource: mockFn(() => Promise.resolve(null)),
+    listActiveTenantIds: mockFn(() => Promise.resolve([])),
     createNotificationRequest: mockFn((_em: any, data: any) => ({
       id: 'req-1',
       ...data,

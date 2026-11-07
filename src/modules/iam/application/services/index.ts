@@ -2,6 +2,7 @@ export * from './iam-users.service';
 export * from './iam-users-read.service';
 export * from './iam-credentials.service';
 export * from './iam-mfa.service';
+export * from './iam-totp.service';
 export * from './iam-password-reset.service';
 export * from './iam-devices.service';
 export * from './iam-auth.service';

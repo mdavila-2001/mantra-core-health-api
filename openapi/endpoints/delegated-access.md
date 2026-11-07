@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `delegated_access`
 
-Referencia exhaustiva de 44 operación(es) del módulo `delegated_access`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 45 operación(es) del módulo `delegated_access`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `clinical-prescription-shares`, `clinical-prescription-shares-public`, `delegated-access-affiliation-invitations`, `delegated-access-authz`, `delegated-access-governance`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests`, `delegated-access-support-staff`
 - **Controladores:** `AccessRequestsController`, `AffiliationInvitationsController`, `DelegatedAccessAuthzController`, `DelegatedPermissionSetsController`, `OrgSupportStaffProvisioningController`, `OrgUserAssignmentsController`, `PractitionerDelegatesController`, `PractitionerGovernanceController`, `PractitionerSupportController`, `PrescriptionSharesController`, `PrescriptionSharesPublicController`, `SupportStaffController`
@@ -39,22 +39,23 @@ Referencia exhaustiva de 44 operación(es) del módulo `delegated_access`, deriv
 26. [POST /org/{tenantMembershipId}/user-assignments](#26-post-org-tenantmembershipid-user-assignments) — Asignar usuario de organización con alcance y vigencia
 27. [GET /org/affiliation-invitations](#27-get-org-affiliation-invitations) — Listar los códigos de afiliación de la organización
 28. [POST /org/affiliation-invitations](#28-post-org-affiliation-invitations) — Crear un código o QR de afiliación
-29. [GET /org/support-catalog](#29-get-org-support-catalog) — Sedes, servicios, pisos y doctores para invitar
-30. [GET /org/support-engagement-requests](#30-get-org-support-engagement-requests) — Solicitudes e invitaciones de apoyo del hospital
-31. [POST /org/support-engagement-requests/{id}/decision](#31-post-org-support-engagement-requests-id-decision) — Aceptar o rechazar una solicitud de apoyo
-32. [GET /org/support-engagements](#32-get-org-support-engagements) — Personal de apoyo del hospital
-33. [POST /org/support-engagements/{id}/end](#33-post-org-support-engagements-id-end) — Terminar un vínculo de apoyo
-34. [POST /org/support-staff](#34-post-org-support-staff) — Crear cuenta de secretaria y vincularla a la organización de inmediato
-35. [POST /org/team/invitations](#35-post-org-team-invitations) — Invitar a una secretaria a lugares o doctores
-36. [PATCH /org/user-assignments/{id}](#36-patch-org-user-assignments-id) — Reasignar supervisor / suspender asignación de organización
-37. [POST /practitioner-delegates](#37-post-practitioner-delegates) — Crear asignación de delegado de practitioner
-38. [POST /practitioner-delegates/{id}/accept](#38-post-practitioner-delegates-id-accept) — Aceptar a una secretaria
-39. [POST /practitioner-delegates/{id}/access-requests](#39-post-practitioner-delegates-id-access-requests) — Solicitar acceso delegado (aprobación previa)
-40. [POST /practitioner-delegates/{id}/grants](#40-post-practitioner-delegates-id-grants) — Otorgar grant delegado por-propósito y temporal
-41. [POST /practitioner-delegates/{id}/reject](#41-post-practitioner-delegates-id-reject) — Rechazar a una secretaria
-42. [POST /practitioner-delegates/{id}/revoke](#42-post-practitioner-delegates-id-revoke) — Revocar delegación de forma inmediata (cascada authz)
-43. [GET /public/prescription-shares/{token}](#43-get-public-prescription-shares-token) — Comprobar un enlace de receta compartida
-44. [POST /support-engagement-requests](#44-post-support-engagement-requests) — Pedir un vínculo de apoyo (hospital, sede, servicio, piso o doctor)
+29. [POST /org/affiliation-invitations/{id}/revoke](#29-post-org-affiliation-invitations-id-revoke) — Revocar un código o QR de afiliación
+30. [GET /org/support-catalog](#30-get-org-support-catalog) — Sedes, servicios, pisos y doctores para invitar
+31. [GET /org/support-engagement-requests](#31-get-org-support-engagement-requests) — Solicitudes e invitaciones de apoyo del hospital
+32. [POST /org/support-engagement-requests/{id}/decision](#32-post-org-support-engagement-requests-id-decision) — Aceptar o rechazar una solicitud de apoyo
+33. [GET /org/support-engagements](#33-get-org-support-engagements) — Personal de apoyo del hospital
+34. [POST /org/support-engagements/{id}/end](#34-post-org-support-engagements-id-end) — Terminar un vínculo de apoyo
+35. [POST /org/support-staff](#35-post-org-support-staff) — Crear cuenta de secretaria y vincularla a la organización de inmediato
+36. [POST /org/team/invitations](#36-post-org-team-invitations) — Invitar a una secretaria a lugares o doctores
+37. [PATCH /org/user-assignments/{id}](#37-patch-org-user-assignments-id) — Reasignar supervisor / suspender asignación de organización
+38. [POST /practitioner-delegates](#38-post-practitioner-delegates) — Crear asignación de delegado de practitioner
+39. [POST /practitioner-delegates/{id}/accept](#39-post-practitioner-delegates-id-accept) — Aceptar a una secretaria
+40. [POST /practitioner-delegates/{id}/access-requests](#40-post-practitioner-delegates-id-access-requests) — Solicitar acceso delegado (aprobación previa)
+41. [POST /practitioner-delegates/{id}/grants](#41-post-practitioner-delegates-id-grants) — Otorgar grant delegado por-propósito y temporal
+42. [POST /practitioner-delegates/{id}/reject](#42-post-practitioner-delegates-id-reject) — Rechazar a una secretaria
+43. [POST /practitioner-delegates/{id}/revoke](#43-post-practitioner-delegates-id-revoke) — Revocar delegación de forma inmediata (cascada authz)
+44. [GET /public/prescription-shares/{token}](#44-get-public-prescription-shares-token) — Comprobar un enlace de receta compartida
+45. [POST /support-engagement-requests](#45-post-support-engagement-requests) — Pedir un vínculo de apoyo (hospital, sede, servicio, piso o doctor)
 
 ---
 
@@ -2613,9 +2614,9 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Agenda de un doctor asignado (403 si no hay vínculo activo). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Devuelve como mucho `limit` turnos (500) por hora; con `truncated: true` el rango tenía más: acote `from`/`to` y vuelva a pedir. La lectura queda en la bitácora de acceso a datos.
 
-Contexto declarado en el controlador: Agenda de un doctor al que asiste (sólo con vínculo activo con él).
+Contexto declarado en el controlador: Agenda de un doctor al que asiste (sólo con vínculo activo con él). Devuelve el nombre de los pacientes: es una lectura de PHI y deja su asiento en `audit.data_access_log` (`@AccessLogged`, sin identificadores de paciente en el asiento). Lleva un tope de turnos y avisa con `truncated`.
 
 ### Descripción del sistema
 
@@ -2663,7 +2664,7 @@ Authorization: Bearer <access_token_jwt>
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `Promise<SupportAgendaResponseDto>` | No |
+| 200 | Operación completada correctamente. | `Promise<SupportAgendaResponseDto>` | Sí |
 | 400 | Consulta completada correctamente. | `Promise<SupportAgendaResponseDto>` | No |
 | 401 | Consulta completada correctamente. | `Promise<SupportAgendaResponseDto>` | No |
 | 403 | Consulta completada correctamente. | `Promise<SupportAgendaResponseDto>` | No |
@@ -2685,7 +2686,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "patientName": "Nombre de ejemplo"
     }
   ],
-  "count": 1
+  "count": 1,
+  "truncated": true,
+  "limit": 1
 }
 ```
 
@@ -2701,6 +2704,8 @@ Campos de la respuesta:
 | `items[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | true = el rango tiene más turnos que `limit` y se devolvieron los primeros por hora; acote el rango y vuelva a pedir. | `true` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de turnos por respuesta. | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3876,7 +3881,105 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /org/support-catalog
+## 29. POST /org/affiliation-invitations/{id}/revoke
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-affiliation-invitations`
+- **Nombre:** Revocar un código o QR de afiliación
+- **Operation ID:** `AffiliationInvitationsController_revoke`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AffiliationInvitationsController.revoke](../../src/modules/delegated_access/controllers/affiliation-invitations.controller.ts)
+
+### Descripción de negocio
+
+Revocar un código o QR de afiliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Organization admin turns a code off. Authorization is the OWNER/ADMIN check of the service (as in create and list): there is no global role to gate it with.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/affiliation-invitations/{id}/revoke` en `AffiliationInvitationsController_revoke`. El controlador delega en `AffiliationInvitationsService.revoke`. No recibe body. El tipo de retorno estático es `Promise<AffiliationInvitationViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /org/affiliation-invitations/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit particular: `Throttle({ default: { limit: 20, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /org/affiliation-invitations/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AffiliationInvitationViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AffiliationInvitationViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AffiliationInvitationViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AffiliationInvitationViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AffiliationInvitationViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AffiliationInvitationViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AffiliationInvitationViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AffiliationInvitationViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AffiliationInvitationViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AffiliationInvitationViewDto>` | No |
+
+El controlador declara `AffiliationInvitationViewDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Código de afiliación no encontrado | Excepción explícita en src/modules/delegated_access/services/affiliation-invitations.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 20, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/affiliation-invitations/{id}/revoke"
+}
+```
+
+---
+
+## 30. GET /org/support-catalog
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-support-staff`
@@ -4041,7 +4144,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /org/support-engagement-requests
+## 31. GET /org/support-engagement-requests
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-support-staff`
@@ -4187,7 +4290,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /org/support-engagement-requests/{id}/decision
+## 32. POST /org/support-engagement-requests/{id}/decision
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-support-staff`
@@ -4346,7 +4449,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /org/support-engagements
+## 33. GET /org/support-engagements
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-support-staff`
@@ -4489,7 +4592,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /org/support-engagements/{id}/end
+## 34. POST /org/support-engagements/{id}/end
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-support-staff`
@@ -4644,7 +4747,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /org/support-staff
+## 35. POST /org/support-staff
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-support-staff`
@@ -4814,7 +4917,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /org/team/invitations
+## 36. POST /org/team/invitations
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-support-staff`
@@ -5000,7 +5103,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. PATCH /org/user-assignments/{id}
+## 37. PATCH /org/user-assignments/{id}
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-org`
@@ -5140,7 +5243,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /practitioner-delegates
+## 38. POST /practitioner-delegates
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -5284,7 +5387,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /practitioner-delegates/{id}/accept
+## 39. POST /practitioner-delegates/{id}/accept
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-support-staff`
@@ -5427,7 +5530,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /practitioner-delegates/{id}/access-requests
+## 40. POST /practitioner-delegates/{id}/access-requests
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -5562,7 +5665,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /practitioner-delegates/{id}/grants
+## 41. POST /practitioner-delegates/{id}/grants
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -5700,7 +5803,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /practitioner-delegates/{id}/reject
+## 42. POST /practitioner-delegates/{id}/reject
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-support-staff`
@@ -5856,7 +5959,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /practitioner-delegates/{id}/revoke
+## 43. POST /practitioner-delegates/{id}/revoke
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -5980,7 +6083,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /public/prescription-shares/{token}
+## 44. GET /public/prescription-shares/{token}
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `clinical-prescription-shares-public`
@@ -6099,7 +6202,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /support-engagement-requests
+## 45. POST /support-engagement-requests
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-support-staff`

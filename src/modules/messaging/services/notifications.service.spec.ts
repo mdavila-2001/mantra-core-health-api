@@ -75,6 +75,7 @@ function build() {
     countUnreadInApp: mockFn(() => Promise.resolve(0)),
     findUnreadInApp: mockFn(() => Promise.resolve([])),
     findUnreadInAppForResource: mockFn(() => Promise.resolve(null)),
+    listActiveTenantIds: mockFn(() => Promise.resolve([])),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const gateway = { notifyUser: mockFn() };

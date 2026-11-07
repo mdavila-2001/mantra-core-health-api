@@ -3,12 +3,12 @@
 # Flujos del módulo `surveys`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 19 (19 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 23 (21 con decisiones propias, 2 sin ellas)
 - Inventario de endpoints del módulo: [surveys](../endpoints/surveys.md)
 
 ## Proceso: Módulo Surveys — Cuestionarios y encuestas de satisfacción
 
-- **Código:** `surveys` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 19
+- **Código:** `surveys` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 23
 - **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/surveys/README.md`
@@ -30,6 +30,10 @@ _Fuente: `src/modules/surveys/README.md:3`_
 | `ctrl:SurveysPatientController` | Operaciones de SurveysPatientController que el README no asigna a un caso de uso | GET /surveys/me/invitations | Cualquier sesión válida | BAJO | 9 |
 |  |  | GET /surveys/me/invitations/{id} | Cualquier sesión válida | BAJO | 10 |
 |  |  | POST /surveys/me/invitations/{id}/responses | Cualquier sesión válida | ALTO | 5 |
+| `ctrl:SurveysServiceAssignmentsController` | Operaciones de SurveysServiceAssignmentsController que el README no asigna a un caso de uso | GET /surveys/service-assignments | PRACTITIONER · CLINICIAN | BAJO | 6 |
+|  |  | DELETE /surveys/service-assignments/{serviceId} | PRACTITIONER · CLINICIAN | BAJO | 6 |
+|  |  | PUT /surveys/service-assignments/{serviceId} | PRACTITIONER · CLINICIAN | MEDIO | 12 |
+|  |  | GET /surveys/standard-catalog | PRACTITIONER · CLINICIAN | BAJO | 0 |
 | `ctrl:SurveysTemplatesController` | Operaciones de SurveysTemplatesController que el README no asigna a un caso de uso | GET /surveys/templates | PRACTITIONER · CLINICIAN | BAJO | 3 |
 |  |  | POST /surveys/templates | PRACTITIONER · CLINICIAN | MEDIO | 2 |
 |  |  | GET /surveys/templates/{id} | PRACTITIONER · CLINICIAN | BAJO | 5 |
@@ -84,19 +88,26 @@ flowchart LR
     o24["GET /surveys/me/invitations/{id}"]:::op
     o26["POST /surveys/me/invitations/{id}/responses"]:::op
   end
-  subgraph s4["ctrl:SurveysTemplatesController · Operaciones de SurveysTemplatesController que…"]
-    o29["GET /surveys/templates"]:::op
-    o31["POST /surveys/templates"]:::op
-    o32["GET /surveys/templates/{id}"]:::op
-    o33["PATCH /surveys/templates/{id}"]:::op
-    o34["POST /surveys/templates/{id}/deactivate"]:::op
-    o35["POST /surveys/templates/{id}/questions"]:::op
-    o36["DELETE /surveys/templates/{id}/questions/{questionId}"]:::op
-    o37["PATCH /surveys/templates/{id}/questions/{questionId}"]:::op
-    o38["PUT /surveys/templates/{id}/questions/order"]:::op
-    o39["GET /surveys/templates/{id}/responses"]:::op
-    o40["POST /surveys/templates/{id}/versions"]:::op
-    o41["POST /surveys/templates/{id}/versions/{versionNumber}/publish"]:::op
+  t33[("+6 tablas más")]
+  subgraph s4["ctrl:SurveysServiceAssignmentsController · Operaciones de SurveysServiceAssignm…"]
+    o29["GET /surveys/service-assignments"]:::op
+    o31["DELETE /surveys/service-assignments/{serviceId}"]:::op
+    o32["PUT /surveys/service-assignments/{serviceId}"]:::op
+    o34["GET /surveys/standard-catalog"]:::op
+  end
+  subgraph s5["ctrl:SurveysTemplatesController · Operaciones de SurveysTemplatesController que…"]
+    o35["GET /surveys/templates"]:::op
+    o36["POST /surveys/templates"]:::op
+    o37["GET /surveys/templates/{id}"]:::op
+    o38["PATCH /surveys/templates/{id}"]:::op
+    o39["POST /surveys/templates/{id}/deactivate"]:::op
+    o40["POST /surveys/templates/{id}/questions"]:::op
+    o41["DELETE /surveys/templates/{id}/questions/{questionId}"]:::op
+    o42["PATCH /surveys/templates/{id}/questions/{questionId}"]:::op
+    o43["PUT /surveys/templates/{id}/questions/order"]:::op
+    o44["GET /surveys/templates/{id}/responses"]:::op
+    o45["POST /surveys/templates/{id}/versions"]:::op
+    o46["POST /surveys/templates/{id}/versions/{versionNumber}/publish"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -153,62 +164,85 @@ flowchart LR
   o26 -->|"LEE"| t14
   o26 -->|"CREA"| t28
   a2 --> o29
-  o29 -->|"LEE"| t14
+  o29 -->|"LEE"| t3
+  o29 -->|"LEE"| t4
+  o29 -->|"LEE"| t7
+  o29 -->|"LEE"| t11
   o29 -->|"LEE"| t15
   o29 -->|"LEE"| t30
   a2 --> o31
-  o31 -->|"CREA"| t15
-  o31 -->|"CREA"| t30
+  o31 -->|"LEE"| t3
+  o31 -->|"LEE"| t4
+  o31 -->|"LEE"| t7
+  o31 -->|"LEE"| t11
+  o31 -->|"LEE"| t15
+  o31 -->|"LEE"| t30
   a2 --> o32
   o32 -->|"LEE"| t3
+  o32 -->|"LEE"| t4
+  o32 -->|"LEE"| t7
+  o32 -->|"CREA"| t11
   o32 -->|"LEE"| t11
-  o32 -->|"LEE"| t14
-  o32 -->|"LEE"| t15
-  o32 -->|"LEE"| t30
-  a2 --> o33
-  o33 -->|"ACTUALIZA"| t15
-  o33 -->|"LEE"| t15
-  o33 -->|"ACTUALIZA"| t30
-  o33 -->|"LEE"| t30
+  o32 -->|"CREA"| t14
+  o32 -.-> t33
   a2 --> o34
-  o34 -->|"ACTUALIZA"| t15
-  o34 -->|"LEE"| t15
   a2 --> o35
-  o35 -->|"CREA"| t14
   o35 -->|"LEE"| t14
   o35 -->|"LEE"| t15
   o35 -->|"LEE"| t30
   a2 --> o36
-  o36 -->|"BORRA"| t14
-  o36 -->|"LEE"| t14
-  o36 -->|"LEE"| t15
-  o36 -->|"LEE"| t30
+  o36 -->|"CREA"| t15
+  o36 -->|"CREA"| t30
   a2 --> o37
-  o37 -->|"ACTUALIZA"| t14
+  o37 -->|"LEE"| t3
+  o37 -->|"LEE"| t11
   o37 -->|"LEE"| t14
   o37 -->|"LEE"| t15
   o37 -->|"LEE"| t30
   a2 --> o38
-  o38 -->|"LEE"| t14
+  o38 -->|"ACTUALIZA"| t15
   o38 -->|"LEE"| t15
+  o38 -->|"ACTUALIZA"| t30
   o38 -->|"LEE"| t30
   a2 --> o39
-  o39 -->|"LEE"| t18
-  o39 -->|"LEE"| t27
-  o39 -->|"LEE"| t14
-  o39 -->|"LEE"| t28
+  o39 -->|"ACTUALIZA"| t15
   o39 -->|"LEE"| t15
-  o39 -->|"LEE"| t30
   a2 --> o40
+  o40 -->|"CREA"| t14
+  o40 -->|"LEE"| t14
   o40 -->|"LEE"| t15
-  o40 -->|"CREA"| t30
   o40 -->|"LEE"| t30
   a2 --> o41
+  o41 -->|"BORRA"| t14
   o41 -->|"LEE"| t14
-  o41 -->|"ACTUALIZA"| t15
   o41 -->|"LEE"| t15
-  o41 -->|"ACTUALIZA"| t30
   o41 -->|"LEE"| t30
+  a2 --> o42
+  o42 -->|"ACTUALIZA"| t14
+  o42 -->|"LEE"| t14
+  o42 -->|"LEE"| t15
+  o42 -->|"LEE"| t30
+  a2 --> o43
+  o43 -->|"LEE"| t14
+  o43 -->|"LEE"| t15
+  o43 -->|"LEE"| t30
+  a2 --> o44
+  o44 -->|"LEE"| t18
+  o44 -->|"LEE"| t27
+  o44 -->|"LEE"| t14
+  o44 -->|"LEE"| t28
+  o44 -->|"LEE"| t15
+  o44 -->|"LEE"| t30
+  a2 --> o45
+  o45 -->|"LEE"| t15
+  o45 -->|"CREA"| t30
+  o45 -->|"LEE"| t30
+  a2 --> o46
+  o46 -->|"LEE"| t14
+  o46 -->|"ACTUALIZA"| t15
+  o46 -->|"LEE"| t15
+  o46 -->|"ACTUALIZA"| t30
+  o46 -->|"LEE"| t30
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -663,40 +697,23 @@ flowchart TD
   n42 -->|"cada elemento"| n43
   n44[("LEE surveys.survey_versions")]:::efecto
   n43 --> n44
-  n45["Llama a SurveysAssignmentsService.practitionerCandidates"]:::llamada
+  n45["Llama a InvitationsRepository.create"]:::llamada
   n44 --> n45
   n42 -->|"al terminar"| n45
-  n46["Repite: por cada const assignment de ordered"]:::bucle
+  n46[("CREA surveys.survey_invitations")]:::efecto
   n45 --> n46
-  n47["Llama a TemplatesRepository.findVersionById"]:::llamada
-  n46 -->|"cada elemento"| n47
-  n48[("LEE surveys.survey_versions")]:::efecto
+  n47["Transacción: catch(…)"]:::transaccion
+  n46 --> n47
+  n48{"!(error instanceof UniqueConstraintViolationException)"}:::decision
   n47 --> n48
-  n49["Llama a TemplatesRepository.findTemplateById"]:::llamada
-  n48 --> n49
-  n50[("LEE surveys.survey_templates")]:::efecto
-  n49 --> n50
-  n51["Llama a InvitationsRepository.create"]:::llamada
+  n49(["↩ (relanza el error capturado)"]):::error
+  n48 -->|"sí"| n49
+  n50["Llama a InvitationsRepository.listByBooking"]:::llamada
+  n48 -->|"no"| n50
+  n51[("LEE surveys.survey_invitations")]:::efecto
   n50 --> n51
-  n46 -->|"al terminar"| n51
-  n52[("CREA surveys.survey_invitations")]:::efecto
+  n52(("201 Responde con éxito")):::ok
   n51 --> n52
-  n53["Llama a InvitationsRepository.create"]:::llamada
-  n52 --> n53
-  n54[("CREA surveys.survey_invitations")]:::efecto
-  n53 --> n54
-  n55["Transacción: catch(…)"]:::transaccion
-  n54 --> n55
-  n56{"!(error instanceof UniqueConstraintViolationException)"}:::decision
-  n55 --> n56
-  n57(["↩ (relanza el error capturado)"]):::error
-  n56 -->|"sí"| n57
-  n58["Llama a InvitationsRepository.listByBooking"]:::llamada
-  n56 -->|"no"| n58
-  n59[("LEE surveys.survey_invitations")]:::efecto
-  n58 --> n59
-  n60(("201 Responde con éxito")):::ok
-  n59 --> n60
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -705,51 +722,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. GET /surveys/me/invitations
-
-Ver mis cuestionarios
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Solo un paciente puede ver sus cuestionarios |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a SurveysResponsesService.listMyInvitations"]:::llamada
-  n2 --> n3
-  n4["Llama a SurveysResponsesService.requirePatientProfile"]:::llamada
-  n3 --> n4
-  n5{"!actor.patientProfileId"}:::decision
-  n4 --> n5
-  n6(["403 FORBIDDEN Solo un paciente puede ver sus cuestionarios"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a SurveysResponsesService.listInvitationsOf"]:::llamada
-  n5 -->|"no"| n7
-  n8["Llama a InvitationsRepository.listByPatient"]:::llamada
-  n7 --> n8
-  n9[("LEE surveys.survey_invitations")]:::efecto
-  n8 --> n9
-  n10["Llama a InvitationsRepository.listCardContext"]:::llamada
-  n9 --> n10
-  n11[("LEE surveys.survey_invitations · LEE surveys.survey_versions · LEE surveys.survey_templates · LEE scheduling.…")]:::efecto
-  n10 --> n11
-  n12(("200 Responde con éxito")):::ok
-  n11 --> n12
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 6. GET /surveys/me/invitations/{id}
+#### 5. GET /surveys/me/invitations/{id}
 
 Abrir un cuestionario para responderlo
 
@@ -758,7 +731,7 @@ Abrir un cuestionario para responderlo
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Solo un paciente puede ver sus cuestionarios |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cuestionario no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -769,55 +742,49 @@ flowchart TD
   n1 --> n2
   n3["Llama a SurveysResponsesService.getMyQuestionnaire"]:::llamada
   n2 --> n3
-  n4["Llama a SurveysResponsesService.requirePatientProfile"]:::llamada
+  n4["Llama a SurveysResponsesService.loadOwnInvitation"]:::llamada
   n3 --> n4
-  n5{"!actor.patientProfileId"}:::decision
+  n5["Llama a InvitationsRepository.findByIdForUpdate"]:::llamada
   n4 --> n5
-  n6(["403 FORBIDDEN Solo un paciente puede ver sus cuestionarios"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a SurveysResponsesService.loadOwnInvitation"]:::llamada
-  n5 -->|"no"| n7
-  n8["Llama a InvitationsRepository.findByIdForUpdate"]:::llamada
+  n6[("LEE surveys.survey_invitations")]:::efecto
+  n5 --> n6
+  n7["Llama a InvitationsRepository.findById"]:::llamada
+  n6 --> n7
+  n8[("LEE surveys.survey_invitations")]:::efecto
   n7 --> n8
-  n9[("LEE surveys.survey_invitations")]:::efecto
+  n9["Llama a SurveysResponsesService.loadTemplateOfInvitation"]:::llamada
   n8 --> n9
-  n10["Llama a InvitationsRepository.findById"]:::llamada
+  n10["Llama a TemplatesRepository.findVersionById"]:::llamada
   n9 --> n10
-  n11[("LEE surveys.survey_invitations")]:::efecto
+  n11[("LEE surveys.survey_versions")]:::efecto
   n10 --> n11
-  n12["Llama a SurveysResponsesService.loadTemplateOfInvitation"]:::llamada
+  n12["Llama a TemplatesRepository.findTemplateById"]:::llamada
   n11 --> n12
-  n13["Llama a TemplatesRepository.findVersionById"]:::llamada
+  n13[("LEE surveys.survey_templates")]:::efecto
   n12 --> n13
-  n14[("LEE surveys.survey_versions")]:::efecto
+  n14{"!template"}:::decision
   n13 --> n14
-  n15["Llama a TemplatesRepository.findTemplateById"]:::llamada
-  n14 --> n15
-  n16[("LEE surveys.survey_templates")]:::efecto
-  n15 --> n16
-  n17{"!template"}:::decision
+  n15(["404 NOT_FOUND Cuestionario no encontrado"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a SurveysResponsesService.loadQuestionnaire"]:::llamada
+  n14 -->|"no"| n16
+  n17["Llama a TemplatesRepository.listQuestions"]:::llamada
   n16 --> n17
-  n18(["404 NOT_FOUND Cuestionario no encontrado"]):::error
-  n17 -->|"sí"| n18
-  n19["Llama a SurveysResponsesService.loadQuestionnaire"]:::llamada
-  n17 -->|"no"| n19
+  n18[("LEE surveys.survey_questions")]:::efecto
+  n17 --> n18
+  n19{"invitation.extensionSurveyVersionId"}:::decision
+  n18 --> n19
   n20["Llama a TemplatesRepository.listQuestions"]:::llamada
-  n19 --> n20
+  n19 -->|"sí"| n20
   n21[("LEE surveys.survey_questions")]:::efecto
   n20 --> n21
-  n22{"invitation.extensionSurveyVersionId"}:::decision
+  n22["Llama a InvitationsRepository.listCardContext"]:::llamada
   n21 --> n22
-  n23["Llama a TemplatesRepository.listQuestions"]:::llamada
-  n22 -->|"sí"| n23
-  n24[("LEE surveys.survey_questions")]:::efecto
+  n19 -->|"no"| n22
+  n23[("LEE surveys.survey_invitations · LEE surveys.survey_versions · LEE surveys.survey_templates · LEE scheduling.…")]:::efecto
+  n22 --> n23
+  n24(("200 Responde con éxito")):::ok
   n23 --> n24
-  n25["Llama a InvitationsRepository.listCardContext"]:::llamada
-  n24 --> n25
-  n22 -->|"no"| n25
-  n26[("LEE surveys.survey_invitations · LEE surveys.survey_versions · LEE surveys.survey_templates · LEE scheduling.…")]:::efecto
-  n25 --> n26
-  n27(("200 Responde con éxito")):::ok
-  n26 --> n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -826,7 +793,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /surveys/me/invitations/{id}/responses
+#### 6. POST /surveys/me/invitations/{id}/responses
 
 Responder el cuestionario
 
@@ -835,7 +802,7 @@ Responder el cuestionario
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Solo un paciente puede ver sus cuestionarios |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: La respuesta ya fue registrada para este cuestionario |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay más de una respuesta para la misma pregunta; PreconditionFailedException: La respuesta no corresponde a una pregunta de este cuestionario; PreconditionFailedException: Esta pregunta espera una respuesta de texto; PreconditionFailedException: Esta pregunta espera un valor numérico; PreconditionFailedException: El valor está fuera de la escala de la pregunta; PreconditionFailedException: Esta pregunta espera sí o no; PreconditionFailedException: Esta pregunta espera al menos una opción; PreconditionFailedException: Esta pregunta admite una sola opción; PreconditionFailedException: Se eligieron opciones que la pregunta no ofrece; PreconditionFailedException: Hay opciones repetidas en la respuesta; PreconditionFailedException: Tipo de pregunta desconocido; PreconditionFailedException: Faltan respuestas a preguntas obligatorias; PreconditionFailedException: El plazo para responder este cuestionario venció |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -847,116 +814,110 @@ flowchart TD
   n1 --> n2
   n3["Llama a SurveysResponsesService.submitResponse"]:::llamada
   n2 --> n3
-  n4["Llama a SurveysResponsesService.requirePatientProfile"]:::llamada
+  n4["Llama a SurveysResponsesService.loadOwnInvitation"]:::llamada
   n3 --> n4
-  n5{"!actor.patientProfileId"}:::decision
+  n5["Llama a InvitationsRepository.findByIdForUpdate"]:::llamada
   n4 --> n5
-  n6(["403 FORBIDDEN Solo un paciente puede ver sus cuestionarios"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a SurveysResponsesService.loadOwnInvitation"]:::llamada
-  n5 -->|"no"| n7
-  n8["Llama a InvitationsRepository.findByIdForUpdate"]:::llamada
+  n6[("LEE surveys.survey_invitations")]:::efecto
+  n5 --> n6
+  n7["Llama a InvitationsRepository.findById"]:::llamada
+  n6 --> n7
+  n8[("LEE surveys.survey_invitations")]:::efecto
   n7 --> n8
-  n9[("LEE surveys.survey_invitations")]:::efecto
+  n9[("ACTUALIZA surveys.survey_invitations")]:::efecto
   n8 --> n9
-  n10["Llama a InvitationsRepository.findById"]:::llamada
+  n10["Llama a SurveysResponsesService.loadQuestionnaire"]:::llamada
   n9 --> n10
-  n11[("LEE surveys.survey_invitations")]:::efecto
+  n11["Llama a TemplatesRepository.listQuestions"]:::llamada
   n10 --> n11
-  n12[("ACTUALIZA surveys.survey_invitations")]:::efecto
+  n12[("LEE surveys.survey_questions")]:::efecto
   n11 --> n12
-  n13["Llama a SurveysResponsesService.loadQuestionnaire"]:::llamada
+  n13{"invitation.extensionSurveyVersionId"}:::decision
   n12 --> n13
   n14["Llama a TemplatesRepository.listQuestions"]:::llamada
-  n13 --> n14
+  n13 -->|"sí"| n14
   n15[("LEE surveys.survey_questions")]:::efecto
   n14 --> n15
-  n16{"invitation.extensionSurveyVersionId"}:::decision
+  n16["Llama a SurveysResponsesService.validateAnswers"]:::llamada
   n15 --> n16
-  n17["Llama a TemplatesRepository.listQuestions"]:::llamada
-  n16 -->|"sí"| n17
-  n18[("LEE surveys.survey_questions")]:::efecto
-  n17 --> n18
-  n19["Llama a SurveysResponsesService.validateAnswers"]:::llamada
-  n18 --> n19
-  n16 -->|"no"| n19
-  n20["Repite: por cada const answer de answers"]:::bucle
-  n19 --> n20
-  n21{"seen.has(answer.questionId)"}:::decision
-  n20 -->|"cada elemento"| n21
-  n22(["422 PRECONDITION_FAILED Hay más de una respuesta para la misma pregunta"]):::error
-  n21 -->|"sí"| n22
-  n23{"!item"}:::decision
-  n21 -->|"no"| n23
-  n24(["422 PRECONDITION_FAILED La respuesta no corresponde a una pregunta de este cuestionario"]):::error
-  n23 -->|"sí"| n24
-  n25["Llama a SurveysResponsesService.validateAnswerValue"]:::llamada
-  n23 -->|"no"| n25
-  n26{"según type"}:::decision
-  n25 --> n26
-  n27{"typeof answer.valueText !== 'string' || answer.valueText.trim() === ''"}:::decision
-  n26 -->|"'TEXT'"| n27
-  n28(["422 PRECONDITION_FAILED Esta pregunta espera una respuesta de texto"]):::error
-  n27 -->|"sí"| n28
-  n29{"typeof answer.valueNumber !== 'number'"}:::decision
-  n26 -->|"'SCALE'"| n29
-  n30(["422 PRECONDITION_FAILED Esta pregunta espera un valor numérico"]):::error
-  n29 -->|"sí"| n30
-  n31{"answer.valueNumber ‹ min || answer.valueNumber › max"}:::decision
-  n29 -->|"no"| n31
-  n32(["422 PRECONDITION_FAILED El valor está fuera de la escala de la pregunta"]):::error
-  n31 -->|"sí"| n32
-  n33{"typeof answer.valueBoolean !== 'boolean'"}:::decision
-  n26 -->|"'BOOLEAN'"| n33
-  n34(["422 PRECONDITION_FAILED Esta pregunta espera sí o no"]):::error
-  n33 -->|"sí"| n34
-  n35{"chosen.length === 0"}:::decision
-  n26 -->|"'MULTIPLE_CHOICE'"| n35
-  n36(["422 PRECONDITION_FAILED Esta pregunta espera al menos una opción"]):::error
-  n35 -->|"sí"| n36
-  n37{"type === 'SINGLE_CHOICE' && chosen.length › 1"}:::decision
-  n35 -->|"no"| n37
-  n38(["422 PRECONDITION_FAILED Esta pregunta admite una sola opción"]):::error
-  n37 -->|"sí"| n38
-  n39{"invalid.length › 0"}:::decision
-  n37 -->|"no"| n39
-  n40(["422 PRECONDITION_FAILED Se eligieron opciones que la pregunta no ofrece"]):::error
-  n39 -->|"sí"| n40
-  n41{"new Set(chosen).size !== chosen.length"}:::decision
-  n39 -->|"no"| n41
-  n42(["422 PRECONDITION_FAILED Hay opciones repetidas en la respuesta"]):::error
+  n13 -->|"no"| n16
+  n17["Repite: por cada const answer de answers"]:::bucle
+  n16 --> n17
+  n18{"seen.has(answer.questionId)"}:::decision
+  n17 -->|"cada elemento"| n18
+  n19(["422 PRECONDITION_FAILED Hay más de una respuesta para la misma pregunta"]):::error
+  n18 -->|"sí"| n19
+  n20{"!item"}:::decision
+  n18 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED La respuesta no corresponde a una pregunta de este cuestionario"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a SurveysResponsesService.validateAnswerValue"]:::llamada
+  n20 -->|"no"| n22
+  n23{"según type"}:::decision
+  n22 --> n23
+  n24{"typeof answer.valueText !== 'string' || answer.valueText.trim() === ''"}:::decision
+  n23 -->|"'TEXT'"| n24
+  n25(["422 PRECONDITION_FAILED Esta pregunta espera una respuesta de texto"]):::error
+  n24 -->|"sí"| n25
+  n26{"typeof answer.valueNumber !== 'number'"}:::decision
+  n23 -->|"'SCALE'"| n26
+  n27(["422 PRECONDITION_FAILED Esta pregunta espera un valor numérico"]):::error
+  n26 -->|"sí"| n27
+  n28{"answer.valueNumber ‹ min || answer.valueNumber › max"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED El valor está fuera de la escala de la pregunta"]):::error
+  n28 -->|"sí"| n29
+  n30{"typeof answer.valueBoolean !== 'boolean'"}:::decision
+  n23 -->|"'BOOLEAN'"| n30
+  n31(["422 PRECONDITION_FAILED Esta pregunta espera sí o no"]):::error
+  n30 -->|"sí"| n31
+  n32{"chosen.length === 0"}:::decision
+  n23 -->|"'MULTIPLE_CHOICE'"| n32
+  n33(["422 PRECONDITION_FAILED Esta pregunta espera al menos una opción"]):::error
+  n32 -->|"sí"| n33
+  n34{"type === 'SINGLE_CHOICE' && chosen.length › 1"}:::decision
+  n32 -->|"no"| n34
+  n35(["422 PRECONDITION_FAILED Esta pregunta admite una sola opción"]):::error
+  n34 -->|"sí"| n35
+  n36{"invalid.length › 0"}:::decision
+  n34 -->|"no"| n36
+  n37(["422 PRECONDITION_FAILED Se eligieron opciones que la pregunta no ofrece"]):::error
+  n36 -->|"sí"| n37
+  n38{"new Set(chosen).size !== chosen.length"}:::decision
+  n36 -->|"no"| n38
+  n39(["422 PRECONDITION_FAILED Hay opciones repetidas en la respuesta"]):::error
+  n38 -->|"sí"| n39
+  n40(["422 PRECONDITION_FAILED Tipo de pregunta desconocido"]):::error
+  n23 -->|"por defecto"| n40
+  n41{"missing.length › 0"}:::decision
+  n24 -->|"no"| n41
+  n28 -->|"no"| n41
+  n30 -->|"no"| n41
+  n38 -->|"no"| n41
+  n17 -->|"al terminar"| n41
+  n42(["422 PRECONDITION_FAILED Faltan respuestas a preguntas obligatorias"]):::error
   n41 -->|"sí"| n42
-  n43(["422 PRECONDITION_FAILED Tipo de pregunta desconocido"]):::error
-  n26 -->|"por defecto"| n43
-  n44{"missing.length › 0"}:::decision
-  n27 -->|"no"| n44
-  n31 -->|"no"| n44
-  n33 -->|"no"| n44
-  n41 -->|"no"| n44
-  n20 -->|"al terminar"| n44
-  n45(["422 PRECONDITION_FAILED Faltan respuestas a preguntas obligatorias"]):::error
-  n44 -->|"sí"| n45
-  n46["Llama a ResponsesRepository.createResponse"]:::llamada
-  n44 -->|"no"| n46
-  n47[("CREA surveys.survey_responses")]:::efecto
+  n43["Llama a ResponsesRepository.createResponse"]:::llamada
+  n41 -->|"no"| n43
+  n44[("CREA surveys.survey_responses")]:::efecto
+  n43 --> n44
+  n45["Llama a ResponsesRepository.createAnswer"]:::llamada
+  n44 --> n45
+  n46[("CREA surveys.survey_answers")]:::efecto
+  n45 --> n46
+  n47["Transacción: catch(…)"]:::transaccion
   n46 --> n47
-  n48["Llama a ResponsesRepository.createAnswer"]:::llamada
+  n48{"error instanceof UniqueConstraintViolationException"}:::decision
   n47 --> n48
-  n49[("CREA surveys.survey_answers")]:::efecto
-  n48 --> n49
-  n50["Transacción: catch(…)"]:::transaccion
-  n49 --> n50
-  n51{"error instanceof UniqueConstraintViolationException"}:::decision
-  n50 --> n51
-  n52(["409 CONFLICT La respuesta ya fue registrada para este cuestionario"]):::error
+  n49(["409 CONFLICT La respuesta ya fue registrada para este cuestionario"]):::error
+  n48 -->|"sí"| n49
+  n50(["↩ (relanza el error capturado)"]):::error
+  n48 -->|"no"| n50
+  n51{"'expiredAt' in outcome"}:::decision
+  n52(["422 PRECONDITION_FAILED El plazo para responder este cuestionario venció"]):::error
   n51 -->|"sí"| n52
-  n53(["↩ (relanza el error capturado)"]):::error
+  n53(("201 Responde con éxito")):::ok
   n51 -->|"no"| n53
-  n54{"'expiredAt' in outcome"}:::decision
-  n55(["422 PRECONDITION_FAILED El plazo para responder este cuestionario venció"]):::error
-  n54 -->|"sí"| n55
-  n56(("201 Responde con éxito")):::ok
-  n54 -->|"no"| n56
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -965,7 +926,306 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. GET /surveys/templates
+#### 7. GET /surveys/service-assignments
+
+Ver la encuesta de cada uno de mis servicios
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SurveysServiceAssignmentsService.listServiceAssignments"]:::llamada
+  n2 --> n3
+  n4["Llama a SurveysServiceAssignmentsService.requirePractitioner"]:::llamada
+  n3 --> n4
+  n5{"!actor.practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a ServiceSurveyOwnership.listOwned"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a TargetsRepository.listOfferingsOf"]:::llamada
+  n7 --> n8
+  n9[("LEE scheduling.practitioner_service_offerings")]:::efecto
+  n8 --> n9
+  n10["Llama a TargetsRepository.findServiceCatalogs"]:::llamada
+  n9 --> n10
+  n11[("LEE billing.service_catalog")]:::efecto
+  n10 --> n11
+  n12["Llama a TargetsRepository.findTenantsOfPractices"]:::llamada
+  n11 --> n12
+  n13[("LEE practice.practices")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. DELETE /surveys/service-assignments/{serviceId}
+
+Quitar la encuesta de un servicio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SurveysServiceAssignmentsService.removeServiceSurvey"]:::llamada
+  n2 --> n3
+  n4["Llama a SurveysServiceAssignmentsService.requirePractitioner"]:::llamada
+  n3 --> n4
+  n5{"!actor.practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a ServiceSurveyOwnership.assertOwned"]:::llamada
+  n7 --> n8
+  n9["Llama a TargetsRepository.lockOfferingsOf"]:::llamada
+  n8 --> n9
+  n10[("LEE scheduling.practitioner_service_offerings")]:::efecto
+  n9 --> n10
+  n11["Llama a TargetsRepository.listOfferingsOf"]:::llamada
+  n10 --> n11
+  n12[("LEE scheduling.practitioner_service_offerings")]:::efecto
+  n11 --> n12
+  n13{"!offersIt"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a TargetsRepository.findServiceCatalog"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE billing.service_catalog")]:::efecto
+  n15 --> n16
+  n17["Llama a TargetsRepository.findTenantOfPractice"]:::llamada
+  n16 --> n17
+  n18[("LEE practice.practices")]:::efecto
+  n17 --> n18
+  n19{"!service || (await this.targetsRepo.findTenantOfPractice(em, service.practiceId)) !== tenantId"}:::decision
+  n18 --> n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a ServiceSurveyOwnership.listActive"]:::llamada
+  n19 -->|"no"| n21
+  n22["Llama a AssignmentsRepository.listActiveByTypeAndTargets"]:::llamada
+  n21 --> n22
+  n23[("LEE surveys.survey_assignments")]:::efecto
+  n22 --> n23
+  n24["Llama a StandardTemplatesRepository.findVersionsByIds"]:::llamada
+  n23 --> n24
+  n25[("LEE surveys.survey_versions")]:::efecto
+  n24 --> n25
+  n26["Llama a StandardTemplatesRepository.findTemplatesByIds"]:::llamada
+  n25 --> n26
+  n27[("LEE surveys.survey_templates")]:::efecto
+  n26 --> n27
+  n28(("204 Responde con éxito")):::ok
+  n27 --> n28
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 9. PUT /surveys/service-assignments/{serviceId}
+
+Asociar a un servicio una encuesta del catálogo estándar
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Esa plantilla no está en el catálogo estándar |
+| 409 | `CONFLICT` | ConflictException: El servicio ya tiene una encuesta activa: vuelva a intentarlo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: La plantilla {entry.code} del profesional no quedó materializada |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a SurveysServiceAssignmentsService.importServiceSurvey"]:::llamada
+  n2 --> n3
+  n4["Llama a SurveysServiceAssignmentsService.requirePractitioner"]:::llamada
+  n3 --> n4
+  n5{"!actor.practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a ServiceSurveyOwnership.assertOwned"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a TargetsRepository.lockOfferingsOf"]:::llamada
+  n7 --> n8
+  n9[("LEE scheduling.practitioner_service_offerings")]:::efecto
+  n8 --> n9
+  n10["Llama a TargetsRepository.listOfferingsOf"]:::llamada
+  n9 --> n10
+  n11[("LEE scheduling.practitioner_service_offerings")]:::efecto
+  n10 --> n11
+  n12{"!offersIt"}:::decision
+  n11 --> n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a TargetsRepository.findServiceCatalog"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE billing.service_catalog")]:::efecto
+  n14 --> n15
+  n16["Llama a TargetsRepository.findTenantOfPractice"]:::llamada
+  n15 --> n16
+  n17[("LEE practice.practices")]:::efecto
+  n16 --> n17
+  n18{"!service || (await this.targetsRepo.findTenantOfPractice(em, service.practiceId)) !== tenantId"}:::decision
+  n17 --> n18
+  n19(["↩ (relanza el error capturado)"]):::error
+  n18 -->|"sí"| n19
+  n20{"!entry"}:::decision
+  n18 -->|"no"| n20
+  n21(["404 NOT_FOUND Esa plantilla no está en el catálogo estándar"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a StandardSurveyMaterializer.materialize"]:::llamada
+  n20 -->|"no"| n22
+  n23["Llama a StandardSurveyMaterializer.readImported"]:::llamada
+  n22 --> n23
+  n24["Llama a StandardTemplatesRepository.findByCatalogCode"]:::llamada
+  n23 --> n24
+  n25[("LEE surveys.survey_templates")]:::efecto
+  n24 --> n25
+  n26["Llama a TemplatesRepository.listVersions"]:::llamada
+  n25 --> n26
+  n27[("LEE surveys.survey_versions")]:::efecto
+  n26 --> n27
+  n28["Intenta"]:::intento
+  n27 --> n28
+  n29["Llama a StandardSurveyMaterializer.write"]:::llamada
+  n28 --> n29
+  n30["Llama a TemplatesRepository.findTemplateById"]:::llamada
+  n29 --> n30
+  n31[("LEE surveys.survey_templates")]:::efecto
+  n30 --> n31
+  n32{"!(await this.templatesRepo.findTemplateById(tx, ids.templateId))"}:::decision
+  n31 --> n32
+  n33["Llama a StandardTemplatesRepository.create"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("CREA surveys.survey_templates")]:::efecto
+  n33 --> n34
+  n35["Llama a TemplatesRepository.findVersionById"]:::llamada
+  n34 --> n35
+  n32 -->|"no"| n35
+  n36[("LEE surveys.survey_versions")]:::efecto
+  n35 --> n36
+  n37{"!(await this.templatesRepo.findVersionById(tx, ids.versionId))"}:::decision
+  n36 --> n37
+  n38["Llama a TemplatesRepository.createVersion"]:::llamada
+  n37 -->|"sí"| n38
+  n39[("CREA surveys.survey_versions")]:::efecto
+  n38 --> n39
+  n40["Repite: por cada const [index, question] de entry.questions.entries()"]:::bucle
+  n39 --> n40
+  n37 -->|"no"| n40
+  n41["Llama a TemplatesRepository.findQuestionById"]:::llamada
+  n40 -->|"cada elemento"| n41
+  n42[("LEE surveys.survey_questions")]:::efecto
+  n41 --> n42
+  n43{"await this.templatesRepo.findQuestionById(tx, questionId)"}:::decision
+  n42 --> n43
+  n44["Llama a TemplatesRepository.findQuestionById"]:::llamada
+  n43 -->|"sí"| n44
+  n45[("LEE surveys.survey_questions")]:::efecto
+  n44 --> n45
+  n46["Llama a TemplatesRepository.createQuestion"]:::llamada
+  n45 --> n46
+  n43 -->|"no"| n46
+  n47[("CREA surveys.survey_questions")]:::efecto
+  n46 --> n47
+  n48{"!(error instanceof UniqueConstraintViolationException)"}:::decision
+  n28 -->|"si falla"| n48
+  n49(["↩ (relanza el error capturado)"]):::error
+  n48 -->|"sí"| n49
+  n50{"!created"}:::decision
+  n47 --> n50
+  n40 -->|"al terminar"| n50
+  n48 -->|"no"| n50
+  n51(["500 INTERNAL La plantilla {entry.code} del profesional no quedó materializada"]):::error
+  n50 -->|"sí"| n51
+  n52["Llama a ServiceSurveyOwnership.assertOwned"]:::llamada
+  n50 -->|"no"| n52
+  n53["Llama a TargetsRepository.lockOfferingsOf"]:::llamada
+  n52 --> n53
+  n54[("LEE scheduling.practitioner_service_offerings")]:::efecto
+  n53 --> n54
+  n55["Llama a TargetsRepository.listOfferingsOf"]:::llamada
+  n54 --> n55
+  n56[("LEE scheduling.practitioner_service_offerings")]:::efecto
+  n55 --> n56
+  n57{"!offersIt"}:::decision
+  n56 --> n57
+  n58(["↩ (relanza el error capturado)"]):::error
+  n57 -->|"sí"| n58
+  n59["Llama a TargetsRepository.findServiceCatalog"]:::llamada
+  n57 -->|"no"| n59
+  n60[("LEE billing.service_catalog")]:::efecto
+  n59 --> n60
+  n61["Llama a TargetsRepository.findTenantOfPractice"]:::llamada
+  n60 --> n61
+  n62[("LEE practice.practices")]:::efecto
+  n61 --> n62
+  n63{"!service || (await this.targetsRepo.findTenantOfPractice(em, service.practiceId)) !== tenantId"}:::decision
+  n62 --> n63
+  n64(["↩ (relanza el error capturado)"]):::error
+  n63 -->|"sí"| n64
+  n65["Llama a TemplatesRepository.findTemplateById"]:::llamada
+  n63 -->|"no"| n65
+  n66[("LEE surveys.survey_templates")]:::efecto
+  n65 --> n66
+  n67[("ACTUALIZA surveys.survey_templates")]:::efecto
+  n66 --> n67
+  n68["Llama a ServiceSurveyOwnership.listActive"]:::llamada
+  n67 --> n68
+  n69["Llama a AssignmentsRepository.listActiveByTypeAndTargets"]:::llamada
+  n68 --> n69
+  n70[("LEE surveys.survey_assignments")]:::efecto
+  n69 --> n70
+  n71["… el resto del árbol (4 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 10. GET /surveys/templates
 
 Listar mis encuestas
 
@@ -1015,7 +1275,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /surveys/templates
+#### 11. POST /surveys/templates
 
 Crear una encuesta para pacientes
 
@@ -1061,7 +1321,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. GET /surveys/templates/{id}
+#### 12. GET /surveys/templates/{id}
 
 Ver una encuesta y su cuestionario
 
@@ -1142,7 +1402,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. PATCH /surveys/templates/{id}
+#### 13. PATCH /surveys/templates/{id}
 
 Corregir título, consigna y plazo del borrador
 
@@ -1236,7 +1496,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /surveys/templates/{id}/deactivate
+#### 14. POST /surveys/templates/{id}/deactivate
 
 Desactivar la encuesta
 
@@ -1306,7 +1566,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /surveys/templates/{id}/questions
+#### 15. POST /surveys/templates/{id}/questions
 
 Configurar una pregunta y su tipo de respuesta
 
@@ -1415,7 +1675,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. DELETE /surveys/templates/{id}/questions/{questionId}
+#### 16. DELETE /surveys/templates/{id}/questions/{questionId}
 
 Quitar una pregunta del borrador
 
@@ -1510,7 +1770,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. PATCH /surveys/templates/{id}/questions/{questionId}
+#### 17. PATCH /surveys/templates/{id}/questions/{questionId}
 
 Corregir una pregunta del borrador
 
@@ -1628,7 +1888,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. PUT /surveys/templates/{id}/questions/order
+#### 18. PUT /surveys/templates/{id}/questions/order
 
 Reordenar el cuestionario del borrador
 
@@ -1713,7 +1973,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. GET /surveys/templates/{id}/responses
+#### 19. GET /surveys/templates/{id}/responses
 
 Revisar las respuestas de los pacientes
 
@@ -1777,7 +2037,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /surveys/templates/{id}/versions
+#### 20. POST /surveys/templates/{id}/versions
 
 Abrir una versión nueva del cuestionario
 
@@ -1858,7 +2118,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /surveys/templates/{id}/versions/{versionNumber}/publish
+#### 21. POST /surveys/templates/{id}/versions/{versionNumber}/publish
 
 Publicar la encuesta y configurar su vigencia
 
@@ -1948,3 +2208,11 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+### Operaciones sin decisiones propias
+
+Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
+
+| Operación | Respuestas posibles | Tablas |
+|---|---|---|
+| GET /surveys/me/invitations | 200, 401, 403, 429 | 9 |
+| GET /surveys/standard-catalog | 200, 401, 403, 429 | 0 |

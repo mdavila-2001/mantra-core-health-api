@@ -97,7 +97,7 @@ export class PaymentReceiptAccess {
       const booking = await this.access.loadForOperation(tx, bookingId, actor);
       // Quien opera cualquier agenda la opera **de su organización**: el
       // mostrador de una clínica no revisa los pagos de otra.
-      if (operatesAnyAgenda(actor)) {
+      if (operatesAnyAgenda(actor, booking.tenantId)) {
         this.access.assertResourceInActiveTenant(booking.tenantId, actor);
       }
       return booking;

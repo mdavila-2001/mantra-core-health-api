@@ -5,7 +5,7 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 62 (62 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 10 · MEDIO 32 · BAJO 20
-- **Tablas distintas que tocan:** 116
+- **Tablas distintas que tocan:** 117
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/clinical.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -15,58 +15,58 @@
 | 1 | POST | `/census-days/{id}/adjustments` | Ajustar un día de censo cerrado | ALTO | 13 | sesión (sin roles) |
 | 2 | POST | `/clinical/admissions` | Internar a un paciente | ALTO | 29 | sesión (sin roles) |
 | 3 | POST | `/clinical/allergy-intolerances` | Registrar una alergia con reacciones | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 4 | GET | `/clinical/allergy-intolerances/{id}/attachments` | Listar los adjuntos de una alergia | BAJO | 24 | CLINICIAN, PRACTITIONER, PATIENT |
-| 5 | POST | `/clinical/allergy-intolerances/{id}/attachments` | Adjuntar un archivo ya subido a una alergia | MEDIO | 23 | CLINICIAN, PRACTITIONER |
+| 4 | GET | `/clinical/allergy-intolerances/{id}/attachments` | Listar los adjuntos de una alergia | BAJO | 26 | CLINICIAN, PRACTITIONER, PATIENT |
+| 5 | POST | `/clinical/allergy-intolerances/{id}/attachments` | Adjuntar un archivo ya subido a una alergia | MEDIO | 25 | CLINICIAN, PRACTITIONER |
 | 6 | POST | `/clinical/bed-compatibility` | Compatibilidad prospectiva de una cama con un paciente | BAJO | 16 | sesión (sin roles) |
 | 7 | POST | `/clinical/bed-swaps` | Intercambiar camas entre dos pacientes | ALTO | 21 | sesión (sin roles) |
 | 8 | POST | `/clinical/care-episodes` | Abrir un episodio de cuidado | MEDIO | 2 | CLINICIAN, PRACTITIONER |
 | 9 | POST | `/clinical/conditions` | Registrar una condición/diagnóstico | MEDIO | 9 | CLINICIAN, PRACTITIONER |
-| 10 | POST | `/clinical/conditions/{id}/attachments` | Adjuntar un archivo ya subido a una condición | MEDIO | 23 | CLINICIAN, PRACTITIONER |
-| 11 | POST | `/clinical/conditions/{id}/change-status` | Cambiar el estado clínico de una condición | MEDIO | 26 | CLINICIAN, PRACTITIONER |
-| 12 | POST | `/clinical/conditions/{id}/verification` | Confirmar o refutar un diagnóstico presuntivo | MEDIO | 29 | CLINICIAN, PRACTITIONER |
+| 10 | POST | `/clinical/conditions/{id}/attachments` | Adjuntar un archivo ya subido a una condición | MEDIO | 25 | CLINICIAN, PRACTITIONER |
+| 11 | POST | `/clinical/conditions/{id}/change-status` | Cambiar el estado clínico de una condición | MEDIO | 28 | CLINICIAN, PRACTITIONER |
+| 12 | POST | `/clinical/conditions/{id}/verification` | Confirmar o refutar un diagnóstico presuntivo | MEDIO | 31 | CLINICIAN, PRACTITIONER |
 | 13 | POST | `/clinical/diagnostic-reports` | Emitir un reporte diagnóstico desde la orden | MEDIO | 3 | CLINICIAN, PRACTITIONER |
-| 14 | POST | `/clinical/diagnostic-reports/{id}/release` | Liberar los resultados de un reporte diagnóstico | BAJO | 19 | CLINICIAN, PRACTITIONER |
+| 14 | POST | `/clinical/diagnostic-reports/{id}/release` | Liberar los resultados de un reporte diagnóstico | BAJO | 21 | CLINICIAN, PRACTITIONER |
 | 15 | POST | `/clinical/encounter-locations/{id}/cancel` | Anular una reserva o un traslado | ALTO | 13 | sesión (sin roles) |
-| 16 | GET | `/clinical/encounters/{id}/attachments` | Listar los adjuntos de un encuentro | BAJO | 24 | CLINICIAN, PRACTITIONER, PATIENT |
-| 17 | POST | `/clinical/encounters/{id}/attachments` | Adjuntar un archivo ya subido a un encuentro | MEDIO | 23 | CLINICIAN, PRACTITIONER |
+| 16 | GET | `/clinical/encounters/{id}/attachments` | Listar los adjuntos de un encuentro | BAJO | 26 | CLINICIAN, PRACTITIONER, PATIENT |
+| 17 | POST | `/clinical/encounters/{id}/attachments` | Adjuntar un archivo ya subido a un encuentro | MEDIO | 24 | CLINICIAN, PRACTITIONER |
 | 18 | POST | `/clinical/encounters/{id}/bed-assignment` | Asignar o reservar cama | ALTO | 21 | sesión (sin roles) |
 | 19 | POST | `/clinical/encounters/{id}/bed-compatibility` | Compatibilidad de una cama con el encuentro | BAJO | 13 | sesión (sin roles) |
-| 20 | POST | `/clinical/encounters/{id}/close` | Cerrar un encuentro en curso (gatilla facturación) | MEDIO | 42 | CLINICIAN, PRACTITIONER |
+| 20 | POST | `/clinical/encounters/{id}/close` | Cerrar un encuentro en curso (gatilla facturación) | MEDIO | 41 | CLINICIAN, PRACTITIONER |
 | 21 | POST | `/clinical/encounters/{id}/discharge` | Dar de alta (egreso) | ALTO | 26 | sesión (sin roles) |
-| 22 | GET | `/clinical/encounters/{id}/stay` | Ficha de internación | BAJO | 30 | sesión (sin roles) |
+| 22 | GET | `/clinical/encounters/{id}/stay` | Ficha de internación | BAJO | 32 | sesión (sin roles) |
 | 23 | POST | `/clinical/encounters/{id}/transfer` | Trasladar de cama | ALTO | 21 | sesión (sin roles) |
-| 24 | POST | `/clinical/encounters/check-in` | Check-in de un encuentro con participantes y ubicación | MEDIO | 31 | CLINICIAN, PRACTITIONER |
+| 24 | POST | `/clinical/encounters/check-in` | Check-in de un encuentro con participantes y ubicación | MEDIO | 30 | CLINICIAN, PRACTITIONER |
 | 25 | POST | `/clinical/immunizations` | Registrar una inmunización | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 26 | POST | `/clinical/internal/prescription-expiry-notices` | Avisar al paciente de las recetas por vencer (barrido) | MEDIO | 13 | SYSTEM, SYSTEM_WORKER |
+| 26 | POST | `/clinical/internal/prescription-expiry-notices` | Avisar al paciente de las recetas por vencer (barrido) | MEDIO | 12 | SYSTEM, SYSTEM_WORKER |
 | 27 | GET | `/clinical/me/medical-aspects` | Ver mis aspectos médicos declarados | BAJO | 3 | sesión (sin roles) |
 | 28 | PUT | `/clinical/me/medical-aspects` | Guardar mis aspectos médicos declarados | ALTO | 4 | sesión (sin roles) |
 | 29 | GET | `/clinical/me/procedure-centers` | Dónde hacerme los procedimientos que me pidieron | BAJO | 7 | PATIENT |
 | 30 | POST | `/clinical/medication-records` | Administrar/registrar medicación | MEDIO | 3 | CLINICIAN, PRACTITIONER |
 | 31 | POST | `/clinical/medication-requests` | Prescribir medicación | MEDIO | 6 | CLINICIAN, PRACTITIONER |
-| 32 | GET | `/clinical/medication-requests/{id}/attachments` | Listar los adjuntos de una receta | BAJO | 24 | CLINICIAN, PRACTITIONER, PATIENT |
-| 33 | POST | `/clinical/medication-requests/{id}/attachments` | Adjuntar un archivo ya subido a una receta | MEDIO | 23 | CLINICIAN, PRACTITIONER |
-| 34 | POST | `/clinical/medication-requests/{id}/edit` | Editar ítems de una receta en borrador (DRAFT) | MEDIO | 24 | CLINICIAN, PRACTITIONER |
-| 35 | POST | `/clinical/medication-requests/{id}/invalidate` | Invalidar una receta emitida | MEDIO | 26 | CLINICIAN, PRACTITIONER |
-| 36 | POST | `/clinical/medication-requests/{id}/issue` | Emitir una receta (la vuelve inmutable) | MEDIO | 37 | CLINICIAN, PRACTITIONER |
-| 37 | POST | `/clinical/medication-requests/{id}/renew` | Renovar una receta (crea una nueva copiando datos) | MEDIO | 26 | CLINICIAN, PRACTITIONER |
-| 38 | POST | `/clinical/medication-requests/{id}/replace` | Reemplazar una receta emitida (crea la corrección) | MEDIO | 27 | CLINICIAN, PRACTITIONER |
-| 39 | POST | `/clinical/medication-requests/{id}/sign` | Firmar una receta en borrador (DRAFT) | MEDIO | 26 | CLINICIAN, PRACTITIONER |
+| 32 | GET | `/clinical/medication-requests/{id}/attachments` | Listar los adjuntos de una receta | BAJO | 26 | CLINICIAN, PRACTITIONER, PATIENT |
+| 33 | POST | `/clinical/medication-requests/{id}/attachments` | Adjuntar un archivo ya subido a una receta | MEDIO | 25 | CLINICIAN, PRACTITIONER |
+| 34 | POST | `/clinical/medication-requests/{id}/edit` | Editar ítems de una receta en borrador (DRAFT) | MEDIO | 26 | CLINICIAN, PRACTITIONER |
+| 35 | POST | `/clinical/medication-requests/{id}/invalidate` | Invalidar una receta emitida | MEDIO | 28 | CLINICIAN, PRACTITIONER |
+| 36 | POST | `/clinical/medication-requests/{id}/issue` | Emitir una receta (la vuelve inmutable) | MEDIO | 38 | CLINICIAN, PRACTITIONER |
+| 37 | POST | `/clinical/medication-requests/{id}/renew` | Renovar una receta (crea una nueva copiando datos) | MEDIO | 28 | CLINICIAN, PRACTITIONER |
+| 38 | POST | `/clinical/medication-requests/{id}/replace` | Reemplazar una receta emitida (crea la corrección) | MEDIO | 29 | CLINICIAN, PRACTITIONER |
+| 39 | POST | `/clinical/medication-requests/{id}/sign` | Firmar una receta en borrador (DRAFT) | MEDIO | 28 | CLINICIAN, PRACTITIONER |
 | 40 | POST | `/clinical/observations` | Registrar una observación con componentes y ejecutantes | MEDIO | 7 | CLINICIAN, PRACTITIONER |
-| 41 | PATCH | `/clinical/observations/{id}/amend` | Corregir/enmendar una observación (value contract) | MEDIO | 22 | CLINICIAN, PRACTITIONER |
-| 42 | GET | `/clinical/patients/{id}/inpatient-stay` | Estancia de internación vigente del paciente | BAJO | 32 | sesión (sin roles) |
-| 43 | GET | `/clinical/patients/{patientProfileId}/received-services` | Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas | BAJO | 6 | CLINICIAN, PRACTITIONER, PATIENT |
-| 44 | GET | `/clinical/patients/{patientProfileId}/summary` | UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros) | MEDIO | 9 | CLINICIAN, PRACTITIONER, PATIENT |
+| 41 | PATCH | `/clinical/observations/{id}/amend` | Corregir/enmendar una observación (value contract) | MEDIO | 24 | CLINICIAN, PRACTITIONER |
+| 42 | GET | `/clinical/patients/{id}/inpatient-stay` | Estancia de internación vigente del paciente | BAJO | 34 | sesión (sin roles) |
+| 43 | GET | `/clinical/patients/{patientProfileId}/received-services` | Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas | BAJO | 9 | CLINICIAN, PRACTITIONER, PATIENT |
+| 44 | GET | `/clinical/patients/{patientProfileId}/summary` | UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros) | MEDIO | 32 | CLINICIAN, PRACTITIONER, PATIENT |
 | 45 | PATCH | `/clinical/placement-incidents/{id}` | Revisar un incidente de ubicación | ALTO | 12 | sesión (sin roles) |
 | 46 | GET | `/clinical/prescription-signature-policies` | Listar las políticas de firma de un tenant | BAJO | 1 | CLINICIAN, SECURITY_ADMIN |
 | 47 | POST | `/clinical/prescription-signature-policies` | Crear una política de firma de receta | MEDIO | 1 | CLINICIAN, SECURITY_ADMIN |
 | 48 | POST | `/clinical/prescription-signature-policies/{id}/deactivate` | Desactivar una política (cierra vigencia, sin borrado duro) | MEDIO | 2 | CLINICIAN, SECURITY_ADMIN |
-| 49 | GET | `/clinical/prescriptions/{id}/pdf` | Descargar el PDF oficial de una receta | BAJO | 32 | CLINICIAN, PRACTITIONER, PATIENT |
+| 49 | GET | `/clinical/prescriptions/{id}/pdf` | Descargar el PDF oficial de una receta | BAJO | 34 | CLINICIAN, PRACTITIONER, PATIENT |
 | 50 | POST | `/clinical/procedures` | Registrar un procedimiento | MEDIO | 7 | CLINICIAN, PRACTITIONER |
-| 51 | POST | `/clinical/procedures/{id}/attachments` | Adjuntar un archivo ya subido a un procedimiento | MEDIO | 23 | CLINICIAN, PRACTITIONER |
+| 51 | POST | `/clinical/procedures/{id}/attachments` | Adjuntar un archivo ya subido a un procedimiento | MEDIO | 25 | CLINICIAN, PRACTITIONER |
 | 52 | POST | `/clinical/requisitions` | Crear una requisición: varios estudios con su detalle, atómicos | MEDIO | 37 | CLINICIAN, PRACTITIONER |
 | 53 | POST | `/clinical/service-requests` | Crear una orden de servicio | MEDIO | 36 | CLINICIAN, PRACTITIONER |
-| 54 | GET | `/clinical/service-requests/{id}` | Leer una orden de servicio con su detalle | BAJO | 26 | CLINICIAN, PRACTITIONER |
-| 55 | POST | `/clinical/service-requests/duplicate-check` | Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26) | BAJO | 28 | CLINICIAN, PRACTITIONER |
+| 54 | GET | `/clinical/service-requests/{id}` | Leer una orden de servicio con su detalle | BAJO | 28 | CLINICIAN, PRACTITIONER |
+| 55 | POST | `/clinical/service-requests/duplicate-check` | Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26) | BAJO | 30 | CLINICIAN, PRACTITIONER |
 | 56 | POST | `/internal/clinical/census-close-tick` | Cerrar los censos vencidos (worker) | MEDIO | 15 | SYSTEM, SYSTEM_WORKER |
 | 57 | GET | `/public/prescriptions/{id}/verify` | Verificar la autenticidad de una receta por su sello | BAJO | 2 | pública |
 | 58 | GET | `/sites/{siteId}/attending-practitioners` | Profesionales a cargo posibles en la sede | BAJO | 9 | sesión (sin roles) |
@@ -102,22 +102,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:381` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-adt.controller.ts:381` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical.inpatient_census_adjustments` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust | `src/modules/clinical/services/inpatient/census.use-cases.ts:444` |
-| `clinical.inpatient_census_adjustments` | LEE | LEE | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust | `src/modules/clinical/services/inpatient/census.use-cases.ts:440` |
-| `clinical.inpatient_census_days` | LEE | LEE | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust | `src/modules/clinical/services/inpatient/census.use-cases.ts:410` |
+| `clinical.inpatient_census_adjustments` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust | `src/modules/clinical/services/inpatient/census.use-cases.ts:439` |
+| `clinical.inpatient_census_adjustments` | LEE | LEE | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust | `src/modules/clinical/services/inpatient/census.use-cases.ts:435` |
+| `clinical.inpatient_census_days` | LEE | LEE | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust | `src/modules/clinical/services/inpatient/census.use-cases.ts:405` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust → InfrastructureAccessService.scopeFilter → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | ClinicalCensusController.adjust → InpatientCensusService.adjust → InpatientCensusUseCases.adjust → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -224,10 +224,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:113` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -418,10 +418,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:175` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -536,7 +536,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /clinical/allergy-intolerances/{id}/attachments` la atiende `ClinicalRecordsController.listAllergyAttachments` (src/modules/clinical/controllers/clinical-records.controller.ts:212). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `AllergyIntolerancesService.listAttachments`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 16 más.
+`GET /clinical/allergy-intolerances/{id}/attachments` la atiende `ClinicalRecordsController.listAllergyAttachments` (src/modules/clinical/controllers/clinical-records.controller.ts:212). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `AllergyIntolerancesService.listAttachments`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 18 más.
 
 ### Requerimientos
 
@@ -544,38 +544,40 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical/controllers/clinical-records.controller.ts:212` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:212` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.allergy_intolerances` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → AllergyIntolerancesRepository.findById | `src/modules/clinical/repositories/allergy-intolerances.repository.ts:117` |
 | `common.file_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → FilesService.listLinkedFilesOf → FileLinksRepository.findByOwner | `src/modules/common/repositories/file-links.repository.ts:78` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → FilesService.listLinkedFilesOf → FileVersionsRepository.findByIds | `src/modules/common/repositories/file-versions.repository.ts:95` |
 | `common.files` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → FilesService.listLinkedFilesOf → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.listAllergyAttachments → AllergyIntolerancesService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -650,7 +652,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/allergy-intolerances/{id}/attachments` la atiende `ClinicalRecordsController.attachFileToAllergy` (src/modules/clinical/controllers/clinical-records.controller.ts:192). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AttachFileToAllergyIntoleranceDto` (1 campo, 1 obligatorio). Delega en `AllergyIntolerancesService.attachFile`. Crea filas en common.file_links. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
+`POST /clinical/allergy-intolerances/{id}/attachments` la atiende `ClinicalRecordsController.attachFileToAllergy` (src/modules/clinical/controllers/clinical-records.controller.ts:192). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AttachFileToAllergyIntoleranceDto` (1 campo, 1 obligatorio). Delega en `AllergyIntolerancesService.attachFile`. Crea filas en common.file_links. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 16 más.
 
 ### Requerimientos
 
@@ -658,19 +660,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:192` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:192` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -680,6 +682,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.allergy_intolerances` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → AllergyIntolerancesRepository.findById | `src/modules/clinical/repositories/allergy-intolerances.repository.ts:117` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `common.file_links` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → FilesService.createLink → FileLinksRepository.create | `src/modules/common/repositories/file-links.repository.ts:43` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → FilesService.createLink → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
 | `common.files` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → FilesService.createLink → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:182` |
@@ -688,9 +692,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → FilesService.createLink → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToAllergy → AllergyIntolerancesService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -781,10 +785,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -894,10 +898,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:184` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -910,7 +914,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.placement_incidents` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.swap → InpatientAdtService.swap → SwapBedsUseCase.execute → AdtSupport.place | `src/modules/clinical/services/inpatient/adt-support.ts:347` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.swap → InpatientAdtService.swap → SwapBedsUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.swap → InpatientAdtService.swap → SwapBedsUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.swap → InpatientAdtService.swap → SwapBedsUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.swap → InpatientAdtService.swap → SwapBedsUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.swap → InpatientAdtService.swap → SwapBedsUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.swap → InpatientAdtService.swap → SwapBedsUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | ClinicalAdtController.swap → InpatientAdtService.swap → SwapBedsUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -1025,7 +1029,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ClinicalEncountersController.openEpisode` — `src/modules/clinical/controllers/clinical-encounters.controller.ts:73`
+- **Implementación:** `ClinicalEncountersController.openEpisode` — `src/modules/clinical/controllers/clinical-encounters.controller.ts:75`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1035,18 +1039,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/care-episodes` la atiende `ClinicalEncountersController.openEpisode` (src/modules/clinical/controllers/clinical-encounters.controller.ts:73). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateCareEpisodeDto` (5 campos, 2 obligatorios). Delega en `CareEpisodesService.open`. Crea filas en clinical.care_episodes. Lee clinical.care_episodes.
+`POST /clinical/care-episodes` la atiende `ClinicalEncountersController.openEpisode` (src/modules/clinical/controllers/clinical-encounters.controller.ts:75). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateCareEpisodeDto` (5 campos, 2 obligatorios). Delega en `CareEpisodesService.open`. Crea filas en clinical.care_episodes. Lee clinical.care_episodes.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-encounters.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-encounters.controller.ts:75` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1118,7 +1122,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 |---|---|
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:279` |
 | INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:595` |
-| CONTROLADOR | `src/modules/clinical/controllers/clinical-encounters.controller.spec.ts:33` |
+| CONTROLADOR | `src/modules/clinical/controllers/clinical-encounters.controller.spec.ts:36` |
 
 ### Flujos
 
@@ -1151,24 +1155,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.createCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.createCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `audit.conditions_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.createCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:275` |
-| `audit.conditions_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.createCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:275` |
-| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.createCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:275` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.createCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.createCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `audit.conditions_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.createCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:272` |
+| `audit.conditions_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.createCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:272` |
+| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.createCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:272` |
 | `clinical.conditions` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.createCondition → ConditionsService.create → ConditionsRepository.create | `src/modules/clinical/repositories/conditions.repository.ts:153` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalRecordsController.createCondition → ConditionsService.create → ConditionsRepository.findActiveByCode | `src/modules/clinical/repositories/conditions.repository.ts:137` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.createCondition → ConditionsService.create → ConditionsService.assertEncounterBelongsToPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.createCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.createCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Cuerpo — DTO `CreateConditionDto` · `application/json`
 
@@ -1278,7 +1282,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/conditions/{id}/attachments` la atiende `ClinicalRecordsController.attachFileToCondition` (src/modules/clinical/controllers/clinical-records.controller.ts:158). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AttachFileToConditionDto` (1 campo, 1 obligatorio). Delega en `ConditionsService.attachFile`. Crea filas en common.file_links. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
+`POST /clinical/conditions/{id}/attachments` la atiende `ClinicalRecordsController.attachFileToCondition` (src/modules/clinical/controllers/clinical-records.controller.ts:158). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AttachFileToConditionDto` (1 campo, 1 obligatorio). Delega en `ConditionsService.attachFile`. Crea filas en common.file_links. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 16 más.
 
 ### Requerimientos
 
@@ -1286,19 +1290,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:158` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:158` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -1308,6 +1312,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ConditionsService.loadConditionOrThrow → ConditionsRepository.findById | `src/modules/clinical/repositories/conditions.repository.ts:107` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `common.file_links` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → FilesService.createLink → FileLinksRepository.create | `src/modules/common/repositories/file-links.repository.ts:43` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → FilesService.createLink → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
 | `common.files` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → FilesService.createLink → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:182` |
@@ -1316,9 +1322,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → FilesService.createLink → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToCondition → ConditionsService.attachFile → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1401,7 +1407,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/conditions/{id}/change-status` la atiende `ClinicalRecordsController.changeConditionStatus` (src/modules/clinical/controllers/clinical-records.controller.ts:109). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ChangeConditionClinicalStatusDto` (2 campos, 2 obligatorios). Delega en `ConditionsService.changeClinicalStatus`. Crea filas en audit.audit_log, audit.conditions_history. Actualiza audit.conditions_history, clinical.conditions. Lee audit.audit_log, audit.conditions_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 14 más.
+`POST /clinical/conditions/{id}/change-status` la atiende `ClinicalRecordsController.changeConditionStatus` (src/modules/clinical/controllers/clinical-records.controller.ts:109). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ChangeConditionClinicalStatusDto` (2 campos, 2 obligatorios). Delega en `ConditionsService.changeClinicalStatus`. Crea filas en audit.audit_log, audit.conditions_history. Actualiza audit.conditions_history, clinical.conditions. Lee audit.audit_log, audit.conditions_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 16 más.
 
 ### Requerimientos
 
@@ -1409,24 +1415,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:109` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:109` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `audit.conditions_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus | `src/modules/clinical/services/conditions.service.ts:370` |
-| `audit.conditions_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus | `src/modules/clinical/services/conditions.service.ts:370` |
-| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus | `src/modules/clinical/services/conditions.service.ts:370` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `audit.conditions_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus | `src/modules/clinical/services/conditions.service.ts:368` |
+| `audit.conditions_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus | `src/modules/clinical/services/conditions.service.ts:368` |
+| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus | `src/modules/clinical/services/conditions.service.ts:368` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -1435,16 +1441,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
-| `clinical.conditions` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus | `src/modules/clinical/services/conditions.service.ts:353` |
+| `clinical.conditions` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus | `src/modules/clinical/services/conditions.service.ts:351` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ConditionsService.loadConditionOrThrow → ConditionsRepository.findById | `src/modules/clinical/repositories/conditions.repository.ts:107` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1535,7 +1543,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/conditions/{id}/verification` la atiende `ClinicalRecordsController.verifyCondition` (src/modules/clinical/controllers/clinical-records.controller.ts:134). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `VerifyConditionDto` (11 campos, 1 obligatorio). Delega en `ConditionsService.verify`. Crea filas en audit.audit_log, audit.conditions_history. Actualiza audit.conditions_history, clinical.conditions. Lee audit.audit_log, audit.conditions_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 17 más.
+`POST /clinical/conditions/{id}/verification` la atiende `ClinicalRecordsController.verifyCondition` (src/modules/clinical/controllers/clinical-records.controller.ts:134). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `VerifyConditionDto` (12 campos, 1 obligatorio). Delega en `ConditionsService.verify`. Crea filas en audit.audit_log, audit.conditions_history. Actualiza audit.conditions_history, clinical.conditions. Lee audit.audit_log, audit.conditions_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 19 más.
 
 ### Requerimientos
 
@@ -1543,24 +1551,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:134` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:134` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `audit.conditions_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.verifyCondition → ConditionsService.verify | `src/modules/clinical/services/conditions.service.ts:531` |
-| `audit.conditions_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.verifyCondition → ConditionsService.verify | `src/modules/clinical/services/conditions.service.ts:531` |
-| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.verifyCondition → ConditionsService.verify | `src/modules/clinical/services/conditions.service.ts:531` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `audit.conditions_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.verifyCondition → ConditionsService.verify | `src/modules/clinical/services/conditions.service.ts:532` |
+| `audit.conditions_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.verifyCondition → ConditionsService.verify | `src/modules/clinical/services/conditions.service.ts:532` |
+| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.verifyCondition → ConditionsService.verify | `src/modules/clinical/services/conditions.service.ts:532` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -1569,19 +1577,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.resolveEvidenceOfPatient | `src/modules/clinical/services/conditions.service.ts:657` |
-| `clinical.conditions` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.verifyCondition → ConditionsService.verify | `src/modules/clinical/services/conditions.service.ts:507` |
-| `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ConditionsService.loadConditionOrThrow → ConditionsRepository.findById | `src/modules/clinical/repositories/conditions.repository.ts:107` |
-| `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.resolveEvidenceOfPatient | `src/modules/clinical/services/conditions.service.ts:673` |
-| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.resolveEvidenceOfPatient | `src/modules/clinical/services/conditions.service.ts:683` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.verifyCondition → ConditionsService.verify → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.resolveEvidenceOfPatient | `src/modules/clinical/services/conditions.service.ts:712` |
+| `clinical.conditions` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.verifyCondition → ConditionsService.verify | `src/modules/clinical/services/conditions.service.ts:505` |
+| `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.assertReplacementOfPatient | `src/modules/clinical/services/conditions.service.ts:600` |
+| `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.resolveEvidenceOfPatient | `src/modules/clinical/services/conditions.service.ts:728` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
+| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.resolveEvidenceOfPatient | `src/modules/clinical/services/conditions.service.ts:738` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.verifyCondition → ConditionsService.verify → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.verifyCondition → ConditionsService.verify → ConditionsService.loadConditionForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1601,9 +1611,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `basedOn.encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/clinical/dto/condition.dto.ts:275` |
 | `basedOn.serviceRequestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/clinical/dto/condition.dto.ts:281` |
 | `basedOn.diagnosticReportId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/clinical/dto/condition.dto.ts:287` |
-| `onsetAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | — | `src/modules/clinical/dto/condition.dto.ts:322` |
-| `expectedResolutionAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | — | `src/modules/clinical/dto/condition.dto.ts:328` |
-| `clinicalCourseConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/clinical/dto/condition.dto.ts:334` |
+| `replacedByConditionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sólo al refutar: diagnóstico (clinical.conditions) que reemplaza a éste. 422 CONDITION_REPLACEMENT_REQUIRES_REFUTED con CONFIRMED, 422 CONDITION_REPLACEMENT_SELF si es el mismo, 422 CONDITION_REPLACEMENT_INVALID si no existe o es de otro paciente | `src/modules/clinical/dto/condition.dto.ts:333` |
+| `onsetAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | — | `src/modules/clinical/dto/condition.dto.ts:339` |
+| `expectedResolutionAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | — | `src/modules/clinical/dto/condition.dto.ts:345` |
+| `clinicalCourseConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/clinical/dto/condition.dto.ts:351` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1626,6 +1637,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
     "serviceRequestId": "00000000-0000-4000-8000-000000000001",
     "diagnosticReportId": "00000000-0000-4000-8000-000000000001"
   },
+  "replacedByConditionId": "00000000-0000-4000-8000-000000000001",
   "onsetAt": "2026-07-31T12:00:00.000Z",
   "expectedResolutionAt": "2026-07-31T12:00:00.000Z",
   "clinicalCourseConceptId": "00000000-0000-4000-8000-000000000001"
@@ -1638,32 +1650,33 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:92` |
-| `codeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a code concept. | `src/modules/clinical/dto/clinical-read.dto.ts:98` |
-| `categoryConceptId` | `string` | No | formato uuid | — | Identificador asociado a category concept. | `src/modules/clinical/dto/clinical-read.dto.ts:104` |
-| `clinicalStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:110` |
-| `verificationStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a verification status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:116` |
-| `severityConceptId` | `string` | No | formato uuid | — | Identificador asociado a severity concept. | `src/modules/clinical/dto/clinical-read.dto.ts:122` |
-| `encounterId` | `string` | No | formato uuid | — | Identificador asociado a encounter. | `src/modules/clinical/dto/clinical-read.dto.ts:128` |
-| `clinicalCourseConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical course concept (Patch v4.0.8). | `src/modules/clinical/dto/clinical-read.dto.ts:134` |
-| `lateralityConceptId` | `string` | No | formato uuid | — | Lateralidad de la condición (columna existente en el modelo; BR-14/CL-11). | `src/modules/clinical/dto/clinical-read.dto.ts:140` |
-| `onsetAt` | `string` | No | formato date-time | — | Valor de onset at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:146` |
-| `expectedResolutionAt` | `string` | No | formato date-time | — | Fecha esperada de resolución o próxima revisión (Patch v4.0.8). | `src/modules/clinical/dto/clinical-read.dto.ts:152` |
-| `resolvedAt` | `string` | No | formato date-time | — | Valor de resolved at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:158` |
-| `noteText` | `string` | No | — | — | Hallazgos y justificación clínica (Patch v4.1.3). | `src/modules/clinical/dto/clinical-read.dto.ts:164` |
-| `lastStatusChangeReasonText` | `string` | No | — | — | Motivo del último cambio de estado clínico, si hubo alguno | `src/modules/clinical/dto/clinical-read.dto.ts:175` |
-| `verification` | `ConditionVerificationDto` | No | — | — | Decisión de verificación (C3 / P41), o `null` si el diagnóstico nunca se confirmó ni refutó por `POST /clinical/conditions/:id/verification`. | `src/modules/clinical/dto/clinical-read.dto.ts:182` |
-| `verification.outcome` | `string` | No | valores: CONFIRMED, REFUTED | — | `CONFIRMED` o `REFUTED`. | `src/modules/clinical/dto/clinical-read.dto.ts:67` |
-| `verification.decidedAt` | `string` | No | formato date-time | — | Instante de la decisión, ISO. | `src/modules/clinical/dto/clinical-read.dto.ts:71` |
-| `verification.decidedByProfileId` | `string` | No | formato uuid | — | Perfil profesional que decidió. | `src/modules/clinical/dto/clinical-read.dto.ts:75` |
-| `verification.reasonText` | `string` | No | admite null | — | Motivo escrito, o `null`. | `src/modules/clinical/dto/clinical-read.dto.ts:79` |
-| `verification.basedOn` | `ConditionVerificationEvidenceDto` | No | — | — | Evidencia elegida, o `null`. | `src/modules/clinical/dto/clinical-read.dto.ts:83` |
-| `verification.basedOn.kind` | `string` | No | valores: NOTE, ANALYSIS | — | `NOTE` o `ANALYSIS`. | `src/modules/clinical/dto/clinical-read.dto.ts:38` |
-| `verification.basedOn.noteId` | `string` | No | formato uuid | — | Nota clínica que respalda la decisión. | `src/modules/clinical/dto/clinical-read.dto.ts:42` |
-| `verification.basedOn.encounterId` | `string` | No | formato uuid | — | Encuentro de la nota. | `src/modules/clinical/dto/clinical-read.dto.ts:46` |
-| `verification.basedOn.serviceRequestId` | `string` | No | formato uuid | — | Orden de estudio. | `src/modules/clinical/dto/clinical-read.dto.ts:50` |
-| `verification.basedOn.diagnosticReportId` | `string` | No | formato uuid | — | Informe del estudio. | `src/modules/clinical/dto/clinical-read.dto.ts:54` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/clinical-read.dto.ts:188` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:93` |
+| `codeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a code concept. | `src/modules/clinical/dto/clinical-read.dto.ts:99` |
+| `categoryConceptId` | `string` | No | formato uuid | — | Identificador asociado a category concept. | `src/modules/clinical/dto/clinical-read.dto.ts:105` |
+| `clinicalStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:111` |
+| `verificationStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a verification status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:117` |
+| `severityConceptId` | `string` | No | formato uuid | — | Identificador asociado a severity concept. | `src/modules/clinical/dto/clinical-read.dto.ts:123` |
+| `encounterId` | `string` | No | formato uuid | — | Identificador asociado a encounter. | `src/modules/clinical/dto/clinical-read.dto.ts:129` |
+| `clinicalCourseConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical course concept (Patch v4.0.8). | `src/modules/clinical/dto/clinical-read.dto.ts:135` |
+| `lateralityConceptId` | `string` | No | formato uuid | — | Lateralidad de la condición (columna existente en el modelo; BR-14/CL-11). | `src/modules/clinical/dto/clinical-read.dto.ts:141` |
+| `onsetAt` | `string` | No | formato date-time | — | Valor de onset at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:147` |
+| `expectedResolutionAt` | `string` | No | formato date-time | — | Fecha esperada de resolución o próxima revisión (Patch v4.0.8). | `src/modules/clinical/dto/clinical-read.dto.ts:153` |
+| `resolvedAt` | `string` | No | formato date-time | — | Valor de resolved at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:159` |
+| `noteText` | `string` | No | — | — | Hallazgos y justificación clínica (Patch v4.1.3). | `src/modules/clinical/dto/clinical-read.dto.ts:165` |
+| `lastStatusChangeReasonText` | `string` | No | — | — | Motivo del último cambio de estado clínico, si hubo alguno | `src/modules/clinical/dto/clinical-read.dto.ts:176` |
+| `verification` | `ConditionVerificationDto` | No | — | — | Decisión de verificación (C3 / P41), o `null` si el diagnóstico nunca se confirmó ni refutó por `POST /clinical/conditions/:id/verification`. | `src/modules/clinical/dto/clinical-read.dto.ts:183` |
+| `verification.outcome` | `string` | No | valores: CONFIRMED, REFUTED | — | `CONFIRMED` o `REFUTED`. | `src/modules/clinical/dto/clinical-read.dto.ts:68` |
+| `verification.decidedAt` | `string` | No | formato date-time | — | Instante de la decisión, ISO. | `src/modules/clinical/dto/clinical-read.dto.ts:72` |
+| `verification.decidedByProfileId` | `string` | No | formato uuid | — | Perfil profesional que decidió. | `src/modules/clinical/dto/clinical-read.dto.ts:76` |
+| `verification.reasonText` | `string` | No | admite null | — | Motivo escrito, o `null`. | `src/modules/clinical/dto/clinical-read.dto.ts:80` |
+| `verification.basedOn` | `ConditionVerificationEvidenceDto` | No | — | — | Evidencia elegida, o `null`. | `src/modules/clinical/dto/clinical-read.dto.ts:84` |
+| `verification.basedOn.kind` | `string` | No | valores: NOTE, ANALYSIS | — | `NOTE` o `ANALYSIS`. | `src/modules/clinical/dto/clinical-read.dto.ts:39` |
+| `verification.basedOn.noteId` | `string` | No | formato uuid | — | Nota clínica que respalda la decisión. | `src/modules/clinical/dto/clinical-read.dto.ts:43` |
+| `verification.basedOn.encounterId` | `string` | No | formato uuid | — | Encuentro de la nota. | `src/modules/clinical/dto/clinical-read.dto.ts:47` |
+| `verification.basedOn.serviceRequestId` | `string` | No | formato uuid | — | Orden de estudio. | `src/modules/clinical/dto/clinical-read.dto.ts:51` |
+| `verification.basedOn.diagnosticReportId` | `string` | No | formato uuid | — | Informe del estudio. | `src/modules/clinical/dto/clinical-read.dto.ts:55` |
+| `replacedByConditionId` | `string` | No | formato uuid | — | Diagnóstico que reemplazó a éste al refutarlo. Ausente = no fue reemplazado | `src/modules/clinical/dto/clinical-read.dto.ts:194` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/clinical-read.dto.ts:200` |
 
 ### Respuestas posibles
 
@@ -1675,7 +1688,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La sesión no tiene un perfil profesional con el que decidir el diagnóstico.; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Condición no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ese diagnóstico ya fue decidido: sólo un presuntivo se confirma o se rechaza |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Escriba el motivo o elija una evidencia: al menos uno de los dos.; PreconditionFailedException: Indique desde cuándo la persona presenta la condición.; PreconditionFailedException: El inicio de la condición no puede ser futuro.; PreconditionFailedException: El curso clínico no es uno del catálogo.; PreconditionFailedException: Indique hasta cuándo se espera la condición, o márquela como crónica.; PreconditionFailedException: El fin esperado no puede ser anterior al inicio. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo un diagnóstico descartado puede indicar el diagnóstico que lo reemplaza.; PreconditionFailedException: Un diagnóstico no puede reemplazarse a sí mismo.; PreconditionFailedException: El diagnóstico que lo reemplaza no existe o no es de esta persona.; PreconditionFailedException: Escriba el motivo o elija una evidencia: al menos uno de los dos.; PreconditionFailedException: Indique desde cuándo la persona presenta la condición.; PreconditionFailedException: El inicio de la condición no puede ser futuro.; PreconditionFailedException: El curso clínico no es uno del catálogo.; PreconditionFailedException: Indique hasta cuándo se espera la condición, o márquela como crónica.; PreconditionFailedException: El fin esperado no puede ser anterior al inicio. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
 
@@ -1718,10 +1731,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-orders.controller.ts:152` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1729,7 +1742,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical.diagnostic_reports` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createDiagnosticReport → DiagnosticReportsService.create → DiagnosticReportsRepository.create | `src/modules/clinical/repositories/diagnostic-reports.repository.ts:77` |
 | `clinical.service_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalOrdersController.createDiagnosticReport → DiagnosticReportsService.create | `src/modules/clinical/services/diagnostic-reports.service.ts:76` |
-| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalOrdersController.createDiagnosticReport → DiagnosticReportsService.create → ServiceRequestsRepository.findById | `src/modules/clinical/repositories/service-requests.repository.ts:107` |
+| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalOrdersController.createDiagnosticReport → DiagnosticReportsService.create → ServiceRequestsRepository.findById | `src/modules/clinical/repositories/service-requests.repository.ts:117` |
 
 ### Cuerpo — DTO `CreateDiagnosticReportDto` · `application/json`
 
@@ -1798,7 +1811,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:78` |
-| CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:87` |
+| CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:91` |
 
 ### Flujos
 
@@ -1823,7 +1836,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/diagnostic-reports/{id}/release` la atiende `ClinicalOrdersController.releaseDiagnosticReport` (src/modules/clinical/controllers/clinical-orders.controller.ts:175). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReleaseDiagnosticReportDto` (1 campo, 0 obligatorios). Delega en `DiagnosticReportsService.release`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+`POST /clinical/diagnostic-reports/{id}/release` la atiende `ClinicalOrdersController.releaseDiagnosticReport` (src/modules/clinical/controllers/clinical-orders.controller.ts:175). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReleaseDiagnosticReportDto` (1 campo, 0 obligatorios). Delega en `DiagnosticReportsService.release`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 13 más.
 
 ### Requerimientos
 
@@ -1831,19 +1844,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-orders.controller.ts:175` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-orders.controller.ts:175` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -1853,13 +1866,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → DiagnosticReportsRepository.findById | `src/modules/clinical/repositories/diagnostic-reports.repository.ts:63` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalOrdersController.releaseDiagnosticReport → DiagnosticReportsService.release → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -1919,7 +1934,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:178` |
-| CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:93` |
+| CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:97` |
 
 ### Flujos
 
@@ -1952,11 +1967,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:231` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-adt.controller.ts:231` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1967,7 +1982,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalAdtController.cancelLocation → InpatientAdtService.cancelLocation → CancelLocationUseCase.execute → AdtSupport.encounter | `src/modules/clinical/services/inpatient/adt-support.ts:128` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.cancelLocation → InpatientAdtService.cancelLocation → CancelLocationUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.cancelLocation → InpatientAdtService.cancelLocation → CancelLocationUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.cancelLocation → InpatientAdtService.cancelLocation → CancelLocationUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.cancelLocation → InpatientAdtService.cancelLocation → CancelLocationUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.cancelLocation → InpatientAdtService.cancelLocation → CancelLocationUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.cancelLocation → InpatientAdtService.cancelLocation → CancelLocationUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | ClinicalAdtController.cancelLocation → InpatientAdtService.cancelLocation → CancelLocationUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -2059,7 +2074,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ClinicalEncountersController.listEncounterAttachments` — `src/modules/clinical/controllers/clinical-encounters.controller.ts:151`
+- **Implementación:** `ClinicalEncountersController.listEncounterAttachments` — `src/modules/clinical/controllers/clinical-encounters.controller.ts:154`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2069,46 +2084,48 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /clinical/encounters/{id}/attachments` la atiende `ClinicalEncountersController.listEncounterAttachments` (src/modules/clinical/controllers/clinical-encounters.controller.ts:151). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `EncountersService.listAttachments`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 16 más.
+`GET /clinical/encounters/{id}/attachments` la atiende `ClinicalEncountersController.listEncounterAttachments` (src/modules/clinical/controllers/clinical-encounters.controller.ts:154). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `EncountersService.listAttachments`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 18 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical/controllers/clinical-encounters.controller.ts:151` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-encounters.controller.ts:151` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical/controllers/clinical-encounters.controller.ts:154` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-encounters.controller.ts:154` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `common.file_links` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → FilesService.listLinkedFilesOf → FileLinksRepository.findByOwner | `src/modules/common/repositories/file-links.repository.ts:78` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → FilesService.listLinkedFilesOf → FileVersionsRepository.findByIds | `src/modules/common/repositories/file-versions.repository.ts:95` |
 | `common.files` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → FilesService.listLinkedFilesOf → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalEncountersController.listEncounterAttachments → EncountersService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2171,7 +2188,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ClinicalEncountersController.attachFileToEncounter` — `src/modules/clinical/controllers/clinical-encounters.controller.ts:131`
+- **Implementación:** `ClinicalEncountersController.attachFileToEncounter` — `src/modules/clinical/controllers/clinical-encounters.controller.ts:134`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2181,27 +2198,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/encounters/{id}/attachments` la atiende `ClinicalEncountersController.attachFileToEncounter` (src/modules/clinical/controllers/clinical-encounters.controller.ts:131). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AttachFileToEncounterDto` (1 campo, 1 obligatorio). Delega en `EncountersService.attachFile`. Crea filas en common.file_links. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
+`POST /clinical/encounters/{id}/attachments` la atiende `ClinicalEncountersController.attachFileToEncounter` (src/modules/clinical/controllers/clinical-encounters.controller.ts:134). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AttachFileToEncounterDto` (1 campo, 1 obligatorio). Delega en `EncountersService.attachFile`. Crea filas en common.file_links. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 15 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-encounters.controller.ts:131` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-encounters.controller.ts:131` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-encounters.controller.ts:134` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-encounters.controller.ts:134` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -2210,6 +2227,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `common.file_links` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → FilesService.createLink → FileLinksRepository.create | `src/modules/common/repositories/file-links.repository.ts:43` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → FilesService.createLink → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
@@ -2219,9 +2237,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → FilesService.createLink → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalEncountersController.attachFileToEncounter → EncountersService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2312,12 +2330,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:134` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CABECERA | If-Match (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-adt.controller.ts:134` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2330,7 +2348,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.placement_incidents` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.assignBed → InpatientAdtService.assignBed → AssignBedUseCase.execute → AdtSupport.place | `src/modules/clinical/services/inpatient/adt-support.ts:347` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.assignBed → InpatientAdtService.assignBed → AssignBedUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.assignBed → InpatientAdtService.assignBed → AssignBedUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.assignBed → InpatientAdtService.assignBed → AssignBedUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.assignBed → InpatientAdtService.assignBed → AssignBedUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.assignBed → InpatientAdtService.assignBed → AssignBedUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.assignBed → InpatientAdtService.assignBed → AssignBedUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | ClinicalAdtController.assignBed → InpatientAdtService.assignBed → AssignBedUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -2462,11 +2480,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-adt.controller.ts:71` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2476,7 +2494,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalAdtController.compatibility → InpatientAdtService.compatibility → InpatientReadUseCases.compatibility → AdtSupport.encounter | `src/modules/clinical/services/inpatient/adt-support.ts:128` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.compatibility → InpatientAdtService.compatibility → InpatientReadUseCases.compatibility → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.compatibility → InpatientAdtService.compatibility → InpatientReadUseCases.compatibility → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.compatibility → InpatientAdtService.compatibility → InpatientReadUseCases.compatibility → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.compatibility → InpatientAdtService.compatibility → InpatientReadUseCases.compatibility → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | ClinicalAdtController.compatibility → InpatientAdtService.compatibility → InpatientReadUseCases.compatibility → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | ClinicalAdtController.compatibility → InpatientAdtService.compatibility → InpatientReadUseCases.compatibility → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_settings` | LEE | LEE | POR_SQL | ClinicalAdtController.compatibility → InpatientAdtService.compatibility → InpatientReadUseCases.compatibility → AdtSupport.compatibility → AdtSupport.compatibilityFor → PracticeCareSpaceOpsAdapter.getOperationalState → CareSpaceOpsCore.snapshot → CareSpaceOpsCore.settings → CareSpaceOpsRepository.settings | `src/modules/practice/repositories/care-space-ops.repository.ts:431` |
@@ -2550,7 +2568,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ClinicalEncountersController.close` — `src/modules/clinical/controllers/clinical-encounters.controller.ts:107`
+- **Implementación:** `ClinicalEncountersController.close` — `src/modules/clinical/controllers/clinical-encounters.controller.ts:109`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2560,66 +2578,65 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/encounters/{id}/close` la atiende `ClinicalEncountersController.close` (src/modules/clinical/controllers/clinical-encounters.controller.ts:107). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CloseEncounterDto` (1 campo, 0 obligatorios). Delega en `EncountersService.close`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza clinical.encounter_locations, clinical.encounter_participants, clinical.encounters, iam.devices. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 27 más.
+`POST /clinical/encounters/{id}/close` la atiende `ClinicalEncountersController.close` (src/modules/clinical/controllers/clinical-encounters.controller.ts:109). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CloseEncounterDto` (1 campo, 0 obligatorios). Delega en `EncounterCloseService.close`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza clinical.encounter_locations, clinical.encounter_participants, clinical.encounters, messaging.in_app_notifications. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 26 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-encounters.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-encounters.controller.ts:107` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-encounters.controller.ts:109` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-encounters.controller.ts:109` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
-| `chart.care_plan_activities` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → CarePlansRepository.findByEncounter → CarePlansRepository.findActivitiesForPlans | `src/modules/chart/repositories/care-plans.repository.ts:171` |
-| `chart.care_plans` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → CarePlansRepository.findByEncounter | `src/modules/chart/repositories/care-plans.repository.ts:131` |
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ClinicalNotesRepository.findHeadersByEncounter | `src/modules/chart/repositories/clinical-notes.repository.ts:284` |
-| `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ClinicalNotesRepository.findVersionsByIds | `src/modules/chart/repositories/clinical-notes.repository.ts:372` |
-| `chart.document_record_files` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → DocumentsRepository.findByEncounter → DocumentsRepository.findFilesForRecords | `src/modules/chart/repositories/documents.repository.ts:174` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → DocumentsRepository.findByEncounter | `src/modules/chart/repositories/documents.repository.ts:138` |
-| `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ConditionsRepository.findByEncounter | `src/modules/clinical/repositories/conditions.repository.ts:122` |
-| `clinical.encounter_locations` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:461` |
-| `clinical.encounter_locations` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncountersRepository.findActiveLocations | `src/modules/clinical/repositories/encounters.repository.ts:396` |
-| `clinical.encounter_participants` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:450` |
-| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:377` |
-| `clinical.encounters` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:440` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → MedicationRequestsRepository.findByEncounter | `src/modules/clinical/repositories/medication-requests.repository.ts:162` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
-| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
-| `messaging.messaging_providers` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
-| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `chart.care_plan_activities` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → CarePlansRepository.findByEncounter → CarePlansRepository.findActivitiesForPlans | `src/modules/chart/repositories/care-plans.repository.ts:171` |
+| `chart.care_plans` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → CarePlansRepository.findByEncounter | `src/modules/chart/repositories/care-plans.repository.ts:131` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ClinicalNotesRepository.findHeadersByEncounter | `src/modules/chart/repositories/clinical-notes.repository.ts:284` |
+| `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ClinicalNotesRepository.findVersionsByIds | `src/modules/chart/repositories/clinical-notes.repository.ts:372` |
+| `chart.document_record_files` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → DocumentsRepository.findByEncounter → DocumentsRepository.findFilesForRecords | `src/modules/chart/repositories/documents.repository.ts:174` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → DocumentsRepository.findByEncounter | `src/modules/chart/repositories/documents.repository.ts:138` |
+| `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ConditionsRepository.findByEncounter | `src/modules/clinical/repositories/conditions.repository.ts:122` |
+| `clinical.encounter_locations` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:461` |
+| `clinical.encounter_locations` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → EncountersRepository.findActiveLocations | `src/modules/clinical/repositories/encounters.repository.ts:396` |
+| `clinical.encounter_participants` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:450` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:377` |
+| `clinical.encounters` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:440` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → MedicationRequestsRepository.findByEncounter | `src/modules/clinical/repositories/medication-requests.repository.ts:162` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalEncountersController.close → EncounterCloseService.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2687,7 +2704,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:132` |
 | INTEGRACION | `test/integration/fx12-check-in-idempotente-por-cita.int-spec.ts:226` |
 | INTEGRACION | `test/integration/fx17-sello-del-encuentro.int-spec.ts:179` |
-| CONTROLADOR | `src/modules/clinical/controllers/clinical-encounters.controller.spec.ts:48` |
+| CONTROLADOR | `src/modules/clinical/controllers/clinical-encounters.controller.spec.ts:51` |
 
 ### Flujos
 
@@ -2720,12 +2737,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:206` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CABECERA | If-Match (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-adt.controller.ts:206` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2749,7 +2766,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalAdtController.discharge → InpatientAdtService.discharge → DischargePatientUseCase.execute → EncounterSealService.computeHash → EncounterSealService.buildPayload → MedicationRequestsRepository.findByEncounter | `src/modules/clinical/repositories/medication-requests.repository.ts:162` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.discharge → InpatientAdtService.discharge → DischargePatientUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.discharge → InpatientAdtService.discharge → DischargePatientUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.discharge → InpatientAdtService.discharge → DischargePatientUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.discharge → InpatientAdtService.discharge → DischargePatientUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.discharge → InpatientAdtService.discharge → DischargePatientUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.discharge → InpatientAdtService.discharge → DischargePatientUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | ClinicalAdtController.discharge → InpatientAdtService.discharge → DischargePatientUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -2856,7 +2873,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /clinical/encounters/{id}/stay` la atiende `ClinicalAdtController.stay` (src/modules/clinical/controllers/clinical-adt.controller.ts:296). Exige sesión; el controlador no declara roles. Delega en `InpatientAdtService.stay`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 22 más.
+`GET /clinical/encounters/{id}/stay` la atiende `ClinicalAdtController.stay` (src/modules/clinical/controllers/clinical-adt.controller.ts:296). Exige sesión; el controlador no declara roles. Delega en `InpatientAdtService.stay`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 24 más.
 
 ### Requerimientos
 
@@ -2864,44 +2881,46 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:296` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-adt.controller.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.encounter_locations` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay | `src/modules/clinical/services/inpatient/inpatient-read.use-cases.ts:275` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → AdtSupport.encounter | `src/modules/clinical/services/inpatient/adt-support.ts:128` |
 | `clinical.placement_incidents` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay | `src/modules/clinical/services/inpatient/inpatient-read.use-cases.ts:281` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
 | `practice.space_unit_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpaceOpsRepository.unitsOf | `src/modules/practice/repositories/care-space-ops.repository.ts:146` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalAdtController.stay → InpatientAdtService.stay → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -2968,12 +2987,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CABECERA | If-Match (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-adt.controller.ts:159` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2986,7 +3005,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.placement_incidents` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.transfer → InpatientAdtService.transfer → TransferPatientUseCase.execute → AdtSupport.place | `src/modules/clinical/services/inpatient/adt-support.ts:347` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.transfer → InpatientAdtService.transfer → TransferPatientUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.transfer → InpatientAdtService.transfer → TransferPatientUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.transfer → InpatientAdtService.transfer → TransferPatientUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.transfer → InpatientAdtService.transfer → TransferPatientUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.transfer → InpatientAdtService.transfer → TransferPatientUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.transfer → InpatientAdtService.transfer → TransferPatientUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | ClinicalAdtController.transfer → InpatientAdtService.transfer → TransferPatientUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -3104,7 +3123,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ClinicalEncountersController.checkIn` — `src/modules/clinical/controllers/clinical-encounters.controller.ts:89`
+- **Implementación:** `ClinicalEncountersController.checkIn` — `src/modules/clinical/controllers/clinical-encounters.controller.ts:91`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3114,27 +3133,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/encounters/check-in` la atiende `ClinicalEncountersController.checkIn` (src/modules/clinical/controllers/clinical-encounters.controller.ts:89). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CheckInEncounterDto` (17 campos, 2 obligatorios). Delega en `EncountersService.checkIn`. Crea filas en audit.audit_log, authz.care_relationships, clinical.encounter_locations, clinical.encounter_participants, clinical.encounters, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza billing.invoices, iam.devices. Lee audit.audit_log, authz.care_relationships, clinical.appointments, clinical.care_episodes, clinical.encounter_locations, clinical.encounter_participants, clinical.encounters, clinical.patient_admission_footprints y 13 más.
+`POST /clinical/encounters/check-in` la atiende `ClinicalEncountersController.checkIn` (src/modules/clinical/controllers/clinical-encounters.controller.ts:91). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CheckInEncounterDto` (17 campos, 2 obligatorios). Delega en `EncountersService.checkIn`. Crea filas en audit.audit_log, authz.care_relationships, clinical.encounter_locations, clinical.encounter_participants, clinical.encounters, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza billing.invoices, messaging.in_app_notifications. Lee audit.audit_log, authz.care_relationships, clinical.appointments, clinical.care_episodes, clinical.encounter_locations, clinical.encounter_participants, clinical.encounters, clinical.patient_admission_footprints y 12 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-encounters.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-encounters.controller.ts:91` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `authz.care_relationships` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → CareRelationshipsRepository.create | `src/modules/authz/repositories/care-relationships.repository.ts:233` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → CareRelationshipsRepository.findActiveInTenant | `src/modules/authz/repositories/care-relationships.repository.ts:86` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `authz.care_relationships` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → CareRelationshipsRepository.create | `src/modules/authz/repositories/care-relationships.repository.ts:269` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → CareRelationshipsRepository.findActiveInTenant | `src/modules/authz/repositories/care-relationships.repository.ts:87` |
 | `billing.invoices` | ESCRIBE | ACTUALIZA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → SchedulingBookingsRepository.linkPaymentInvoiceToEncounter | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:496` |
 | `clinical.appointments` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → EncountersService.resolverAppointmentEncounter → EncountersRepository.findAppointmentForUpdate | `src/modules/clinical/repositories/encounters.repository.ts:271` |
 | `clinical.care_episodes` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → CareEpisodesRepository.findById | `src/modules/clinical/repositories/care-episodes.repository.ts:50` |
@@ -3146,9 +3165,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → EncountersService.resolverAppointmentEncounter → EncountersRepository.findByAppointmentId | `src/modules/clinical/repositories/encounters.repository.ts:289` |
 | `clinical.patient_admission_footprints` | LEE | LEE | POR_SQL | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientHasFootprintInTenant → AuthzClinicalScopeRepository.hasAdmissionFootprint | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:124` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientHasFootprintInTenant | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:106` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
@@ -3265,8 +3283,9 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | INTEGRACION | `test/integration/fx12-check-in-idempotente-por-cita.int-spec.ts:187` |
 | INTEGRACION | `test/integration/fx13-encuentro-en-la-reserva.int-spec.ts:211` |
 | INTEGRACION | `test/integration/p40-orden-basada-en-notas.int-spec.ts:133` |
+| INTEGRACION | `test/integration/report-drafts.int-spec.ts:433` |
 | INTEGRACION | `test/integration/virtual-encounter-auth.int-spec.ts:92` |
-| CONTROLADOR | `src/modules/clinical/controllers/clinical-encounters.controller.spec.ts:42` |
+| CONTROLADOR | `src/modules/clinical/controllers/clinical-encounters.controller.spec.ts:45` |
 
 ### Flujos
 
@@ -3299,10 +3318,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:443` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3405,7 +3424,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/internal/prescription-expiry-notices` la atiende `ClinicalPrescriptionExpiryController.sweep` (src/modules/clinical/controllers/clinical-prescription-expiry.controller.ts:38). Exige sesión con alguno de los roles SYSTEM, SYSTEM_WORKER. Valida el cuerpo como `PrescriptionExpirySweepDto` (1 campo, 0 obligatorios). Delega en `PrescriptionExpiryNoticesService.sweep`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices. Lee clinical.medication_requests, iam.devices, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences y 1 más.
+`POST /clinical/internal/prescription-expiry-notices` la atiende `ClinicalPrescriptionExpiryController.sweep` (src/modules/clinical/controllers/clinical-prescription-expiry.controller.ts:38). Exige sesión con alguno de los roles SYSTEM, SYSTEM_WORKER. Valida el cuerpo como `PrescriptionExpirySweepDto` (1 campo, 0 obligatorios). Delega en `PrescriptionExpiryNoticesService.sweep`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza messaging.in_app_notifications. Lee clinical.medication_requests, messaging.in_app_notifications, messaging.message_channels, messaging.messaging_providers, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences, profiles.person_account_links.
 
 ### Requerimientos
 
@@ -3413,18 +3432,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SYSTEM_WORKER | `src/modules/clinical/controllers/clinical-prescription-expiry.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `clinical.medication_requests` | LEE | LEE | POR_SQL | ClinicalPrescriptionExpiryController.sweep → PrescriptionExpiryNoticesService.sweep → PrescriptionExpiryRepository.findToNotify | `src/modules/clinical/repositories/prescription-expiry.repository.ts:49` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalPrescriptionExpiryController.sweep → PrescriptionExpiryNoticesService.sweep → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ClinicalPrescriptionExpiryController.sweep → PrescriptionExpiryNoticesService.sweep → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalPrescriptionExpiryController.sweep → PrescriptionExpiryNoticesService.sweep → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ClinicalPrescriptionExpiryController.sweep → PrescriptionExpiryNoticesService.sweep → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ClinicalPrescriptionExpiryController.sweep → PrescriptionExpiryNoticesService.sweep → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ClinicalPrescriptionExpiryController.sweep → PrescriptionExpiryNoticesService.sweep → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
@@ -3519,15 +3537,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-medical-aspects.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `clinical.patient_reported_health_statements` | LEE | LEE | DIRECTA | ClinicalMedicalAspectsController.getOwn → MedicalAspectsService.getOwn → PatientReportedHealthStatementsRepository.findByPatient | `src/modules/clinical/repositories/patient-reported-health-statements.repository.ts:35` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalMedicalAspectsController.getOwn → MedicalAspectsService.getOwn → MedicalAspectsService.resolveOwnPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalMedicalAspectsController.getOwn → MedicalAspectsService.getOwn → MedicalAspectsService.resolveOwnPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalMedicalAspectsController.getOwn → MedicalAspectsService.getOwn → MedicalAspectsService.resolveOwnPatientProfileId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo
@@ -3593,10 +3611,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-medical-aspects.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3604,7 +3622,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical.patient_reported_health_statements` | ESCRIBE | CREA | DIRECTA | ClinicalMedicalAspectsController.updateOwn → MedicalAspectsService.updateOwn → PatientReportedHealthStatementsRepository.create | `src/modules/clinical/repositories/patient-reported-health-statements.repository.ts:49` |
 | `clinical.patient_reported_health_statements` | LEE | LEE | DIRECTA | ClinicalMedicalAspectsController.updateOwn → MedicalAspectsService.updateOwn → PatientReportedHealthStatementsRepository.findByPatient | `src/modules/clinical/repositories/patient-reported-health-statements.repository.ts:35` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalMedicalAspectsController.updateOwn → MedicalAspectsService.updateOwn → MedicalAspectsService.resolveOwnPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalMedicalAspectsController.updateOwn → MedicalAspectsService.updateOwn → MedicalAspectsService.resolveOwnPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalMedicalAspectsController.updateOwn → MedicalAspectsService.updateOwn → MedicalAspectsService.resolveOwnPatientProfileId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo — DTO `UpdateOwnMedicalAspectsDto` · `application/json`
@@ -3701,8 +3719,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/clinical/controllers/clinical-procedure-centers.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3713,7 +3731,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.healthcare_services` | LEE | LEE | DIRECTA | ClinicalProcedureCentersController.findOwn → ProcedureCentersService.findForOwnOrders → ProcedureCentersReadRepository.findActiveOfferings | `src/modules/clinical/repositories/procedure-centers-read.repository.ts:62` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ClinicalProcedureCentersController.findOwn → ProcedureCentersService.findForOwnOrders → ProcedureCentersReadRepository.findOpenSites | `src/modules/clinical/repositories/procedure-centers-read.repository.ts:92` |
 | `practice.practices` | LEE | LEE | DIRECTA | ClinicalProcedureCentersController.findOwn → ProcedureCentersService.findForOwnOrders → ProcedureCentersReadRepository.findActivePractices | `src/modules/clinical/repositories/procedure-centers-read.repository.ts:74` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalProcedureCentersController.findOwn → ProcedureCentersService.findForOwnOrders → ProcedureCentersService.resolveOwnPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalProcedureCentersController.findOwn → ProcedureCentersService.findForOwnOrders → ProcedureCentersService.resolveOwnPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalProcedureCentersController.findOwn → ProcedureCentersService.findForOwnOrders → ProcedureCentersService.resolveOwnPatientProfileId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Parámetros
@@ -3799,10 +3817,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:282` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -3913,18 +3931,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:227` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.prescribeMedication → MedicationsService.prescribe → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.prescribeMedication → MedicationsService.prescribe → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.prescribeMedication → MedicationsService.prescribe → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
+| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.prescribeMedication → MedicationsService.prescribe → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.prescribeMedication → MedicationsService.prescribe → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.prescribeMedication → MedicationsService.prescribe → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalRecordsController.prescribeMedication → MedicationsService.prescribe → MedicationsService.assertIndicationBelongsToPatient → ConditionsRepository.findById | `src/modules/clinical/repositories/conditions.repository.ts:107` |
 | `clinical.medication_requests` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.prescribeMedication → MedicationsService.prescribe → MedicationRequestsRepository.create | `src/modules/clinical/repositories/medication-requests.repository.ts:196` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | ClinicalRecordsController.prescribeMedication → MedicationsService.prescribe → FormInstanceOriginValidator.assertUsableOrigin | `src/modules/forms/services/form-instance-origin.validator.ts:43` |
@@ -4047,7 +4065,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /clinical/medication-requests/{id}/attachments` la atiende `ClinicalRecordsController.listMedicationRequestAttachments` (src/modules/clinical/controllers/clinical-records.controller.ts:267). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `MedicationsService.listAttachments`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 16 más.
+`GET /clinical/medication-requests/{id}/attachments` la atiende `ClinicalRecordsController.listMedicationRequestAttachments` (src/modules/clinical/controllers/clinical-records.controller.ts:267). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `MedicationsService.listAttachments`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 18 más.
 
 ### Requerimientos
 
@@ -4055,38 +4073,40 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical/controllers/clinical-records.controller.ts:267` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:267` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → MedicationsService.loadRequestOrThrow → MedicationRequestsRepository.findById | `src/modules/clinical/repositories/medication-requests.repository.ts:147` |
 | `common.file_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → FilesService.listLinkedFilesOf → FileLinksRepository.findByOwner | `src/modules/common/repositories/file-links.repository.ts:78` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → FilesService.listLinkedFilesOf → FileVersionsRepository.findByIds | `src/modules/common/repositories/file-versions.repository.ts:95` |
 | `common.files` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → FilesService.listLinkedFilesOf → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.listMedicationRequestAttachments → MedicationsService.listAttachments → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -4159,7 +4179,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/medication-requests/{id}/attachments` la atiende `ClinicalRecordsController.attachFileToMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:247). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AttachFileToMedicationRequestDto` (1 campo, 1 obligatorio). Delega en `MedicationsService.attachFile`. Crea filas en common.file_links. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
+`POST /clinical/medication-requests/{id}/attachments` la atiende `ClinicalRecordsController.attachFileToMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:247). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AttachFileToMedicationRequestDto` (1 campo, 1 obligatorio). Delega en `MedicationsService.attachFile`. Crea filas en common.file_links. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 16 más.
 
 ### Requerimientos
 
@@ -4167,19 +4187,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:247` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:247` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -4188,6 +4208,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → MedicationsService.loadRequestOrThrow → MedicationRequestsRepository.findById | `src/modules/clinical/repositories/medication-requests.repository.ts:147` |
 | `common.file_links` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → FilesService.createLink → FileLinksRepository.create | `src/modules/common/repositories/file-links.repository.ts:43` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → FilesService.createLink → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
@@ -4197,9 +4219,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → FilesService.createLink → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToMedicationRequest → MedicationsService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -4282,7 +4304,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/medication-requests/{id}/edit` la atiende `ClinicalRecordsController.editMedicationDraft` (src/modules/clinical/controllers/clinical-records.controller.ts:299). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `EditMedicationRequestDraftDto` (14 campos, 0 obligatorios). Delega en `MedicationsService.editDraft`. Crea filas en audit.medication_requests_history. Actualiza audit.medication_requests_history, clinical.medication_requests. Lee audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 13 más.
+`POST /clinical/medication-requests/{id}/edit` la atiende `ClinicalRecordsController.editMedicationDraft` (src/modules/clinical/controllers/clinical-records.controller.ts:299). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `EditMedicationRequestDraftDto` (14 campos, 0 obligatorios). Delega en `MedicationsService.editDraft`. Crea filas en audit.medication_requests_history. Actualiza audit.medication_requests_history, clinical.medication_requests. Lee audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 15 más.
 
 ### Requerimientos
 
@@ -4290,22 +4312,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:299` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
+| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -4315,15 +4337,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.assertIndicationBelongsToPatient → ConditionsRepository.findById | `src/modules/clinical/repositories/conditions.repository.ts:107` |
-| `clinical.medication_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft | `src/modules/clinical/services/medications.service.ts:454` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
+| `clinical.medication_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft | `src/modules/clinical/services/medications.service.ts:449` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → MedicationsService.loadRequestOrThrow → MedicationRequestsRepository.findById | `src/modules/clinical/repositories/medication-requests.repository.ts:147` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.editMedicationDraft → MedicationsService.editDraft → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -4400,7 +4424,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY}; ForbiddenException: Una receta necesita un profesional prescriptor.; ForbiddenException: La sesión no tiene un perfil profesional con el que prescribir.; ForbiddenException: El prescriptor es el profesional de la sesión: no se prescribe en nombre de otro. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY}; ForbiddenException: {message}; ForbiddenException: Una receta necesita un profesional prescriptor.; ForbiddenException: La sesión no tiene un perfil profesional con el que prescribir.; ForbiddenException: El prescriptor es el profesional de la sesión: no se prescribe en nombre de otro. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un borrador (DRAFT) admite edición; una receta emitida es inmutable; PreconditionFailedException: La condición indicada no existe o no pertenece a este paciente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -4437,7 +4461,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/medication-requests/{id}/invalidate` la atiende `ClinicalRecordsController.invalidateMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:349). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `InvalidateMedicationRequestDto` (1 campo, 1 obligatorio). Delega en `MedicationsService.invalidate`. Crea filas en audit.audit_log, audit.medication_requests_history. Actualiza audit.medication_requests_history, clinical.medication_requests. Lee audit.audit_log, audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 14 más.
+`POST /clinical/medication-requests/{id}/invalidate` la atiende `ClinicalRecordsController.invalidateMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:349). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `InvalidateMedicationRequestDto` (1 campo, 1 obligatorio). Delega en `MedicationsService.invalidate`. Crea filas en audit.audit_log, audit.medication_requests_history. Actualiza audit.medication_requests_history, clinical.medication_requests. Lee audit.audit_log, audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 16 más.
 
 ### Requerimientos
 
@@ -4445,24 +4469,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:349` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:349` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -4471,16 +4495,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `clinical.medication_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate | `src/modules/clinical/services/medications.service.ts:688` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → MedicationsService.loadRequestOrThrow → MedicationRequestsRepository.findById | `src/modules/clinical/repositories/medication-requests.repository.ts:147` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.invalidateMedicationRequest → MedicationsService.invalidate → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -4533,7 +4559,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY}; ForbiddenException: {message} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo una receta emitida (ISSUED) puede invalidarse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -4570,7 +4596,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/medication-requests/{id}/issue` la atiende `ClinicalRecordsController.issueMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:332). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `MedicationsService.issue`. Crea filas en audit.audit_log, audit.medication_requests_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza audit.medication_requests_history, clinical.medication_requests, iam.devices. Lee audit.audit_log, audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 21 más.
+`POST /clinical/medication-requests/{id}/issue` la atiende `ClinicalRecordsController.issueMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:332). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `MedicationsService.issue`. Crea filas en audit.audit_log, audit.medication_requests_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza audit.medication_requests_history, clinical.medication_requests, messaging.in_app_notifications. Lee audit.audit_log, audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 22 más.
 
 ### Requerimientos
 
@@ -4578,23 +4604,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:332` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CABECERA | idempotency-key (obligatoria) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:332` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -4603,14 +4629,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `clinical.medication_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue | `src/modules/clinical/services/medications.service.ts:626` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationRequestsRepository.findByIssueIdempotencyKey | `src/modules/clinical/repositories/medication-requests.repository.ts:180` |
 | `clinical.prescription_signature_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → PrescriptionSignaturePoliciesService.isSignatureRequired → PrescriptionSignaturePoliciesRepository.findActive | `src/modules/clinical/repositories/prescription-signature-policies.repository.ts:81` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → ClinicalNotificationsService.prescriptionIssued → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → ClinicalNotificationsService.prescriptionIssued → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → ClinicalNotificationsService.prescriptionIssued → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → ClinicalNotificationsService.prescriptionIssued → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → ClinicalNotificationsService.prescriptionIssued → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → ClinicalNotificationsService.prescriptionIssued → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
@@ -4621,9 +4648,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → ClinicalNotificationsService.prescriptionIssued → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.issueMedicationRequest → MedicationsService.issue → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -4657,7 +4684,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY}; ForbiddenException: {message} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
 | 409 | `CONFLICT` | ConflictException: La clave de idempotencia ya fue usada para emitir otra receta |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un borrador (DRAFT) puede emitirse; PreconditionFailedException: La política vigente exige firmar la receta antes de emitirla |
@@ -4696,7 +4723,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/medication-requests/{id}/renew` la atiende `ClinicalRecordsController.renewMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:385). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RenewMedicationRequestDto` (5 campos, 0 obligatorios). Delega en `MedicationsService.renew`. Crea filas en audit.audit_log, audit.medication_requests_history, clinical.medication_requests. Actualiza audit.medication_requests_history. Lee audit.audit_log, audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 14 más.
+`POST /clinical/medication-requests/{id}/renew` la atiende `ClinicalRecordsController.renewMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:385). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RenewMedicationRequestDto` (5 campos, 0 obligatorios). Delega en `MedicationsService.renew`. Crea filas en audit.audit_log, audit.medication_requests_history, clinical.medication_requests. Actualiza audit.medication_requests_history. Lee audit.audit_log, audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 16 más.
 
 ### Requerimientos
 
@@ -4704,24 +4731,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:385` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:385` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -4730,16 +4757,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `clinical.medication_requests` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationRequestsRepository.create | `src/modules/clinical/repositories/medication-requests.repository.ts:196` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → MedicationsService.loadRequestOrThrow → MedicationRequestsRepository.findById | `src/modules/clinical/repositories/medication-requests.repository.ts:147` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.renewMedicationRequest → MedicationsService.renew → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -4798,7 +4827,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY}; ForbiddenException: {message} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo una receta emitida o completada puede renovarse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -4835,7 +4864,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/medication-requests/{id}/replace` la atiende `ClinicalRecordsController.replaceMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:366). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReplaceMedicationRequestDto` (10 campos, 1 obligatorio). Delega en `MedicationsService.replace`. Crea filas en audit.audit_log, audit.medication_requests_history, clinical.medication_requests. Actualiza audit.medication_requests_history, clinical.medication_requests. Lee audit.audit_log, audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 14 más.
+`POST /clinical/medication-requests/{id}/replace` la atiende `ClinicalRecordsController.replaceMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:366). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ReplaceMedicationRequestDto` (10 campos, 1 obligatorio). Delega en `MedicationsService.replace`. Crea filas en audit.audit_log, audit.medication_requests_history, clinical.medication_requests. Actualiza audit.medication_requests_history, clinical.medication_requests. Lee audit.audit_log, audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 16 más.
 
 ### Requerimientos
 
@@ -4843,24 +4872,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:366` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:366` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -4869,17 +4898,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `clinical.medication_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace | `src/modules/clinical/services/medications.service.ts:776` |
 | `clinical.medication_requests` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationRequestsRepository.create | `src/modules/clinical/repositories/medication-requests.repository.ts:196` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → MedicationsService.loadRequestOrThrow → MedicationRequestsRepository.findById | `src/modules/clinical/repositories/medication-requests.repository.ts:147` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.replaceMedicationRequest → MedicationsService.replace → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -4950,7 +4981,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY}; ForbiddenException: {message} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo una receta emitida (ISSUED) puede reemplazarse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -4987,7 +5018,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/medication-requests/{id}/sign` la atiende `ClinicalRecordsController.signMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:316). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `MedicationsService.sign`. Crea filas en audit.audit_log, audit.medication_requests_history. Actualiza audit.medication_requests_history, clinical.medication_requests. Lee audit.audit_log, audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 14 más.
+`POST /clinical/medication-requests/{id}/sign` la atiende `ClinicalRecordsController.signMedicationRequest` (src/modules/clinical/controllers/clinical-records.controller.ts:316). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `MedicationsService.sign`. Crea filas en audit.audit_log, audit.medication_requests_history. Actualiza audit.medication_requests_history, clinical.medication_requests. Lee audit.audit_log, audit.medication_requests_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions y 16 más.
 
 ### Requerimientos
 
@@ -4995,22 +5026,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:316` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:316` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
-| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:351` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `audit.medication_requests_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | ESCRIBE | CREA | POR_REGISTRO | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
+| `audit.medication_requests_history` | LEE | LEE | POR_REGISTRO | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.versionRequest | `src/modules/clinical/services/medications.service.ts:346` |
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -5019,16 +5050,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `clinical.medication_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign | `src/modules/clinical/services/medications.service.ts:537` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → MedicationsService.loadRequestOrThrow → MedicationRequestsRepository.findById | `src/modules/clinical/repositories/medication-requests.repository.ts:147` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `iam.users` | LEE | LEE | POR_SQL | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.signMedicationRequest → MedicationsService.sign → MedicationsService.loadRequestForWrite → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -5061,7 +5094,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY}; ForbiddenException: Una receta la firma su prescriptor: no se puede firmar en nombre de otro profesional. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY}; ForbiddenException: {message} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un borrador (DRAFT) puede firmarse antes de emitirse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -5107,10 +5140,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-observations.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5122,7 +5155,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.observation_performers` | ESCRIBE | CREA | DIRECTA | ClinicalObservationsController.record → ObservationsService.record → ObservationsRepository.createPerformer | `src/modules/clinical/repositories/observations.repository.ts:412` |
 | `clinical.observation_reference_ranges` | ESCRIBE | CREA | DIRECTA | ClinicalObservationsController.record → ObservationsService.record → ObservationsRepository.createReferenceRange | `src/modules/clinical/repositories/observations.repository.ts:382` |
 | `clinical.observations` | ESCRIBE | CREA | DIRECTA | ClinicalObservationsController.record → ObservationsService.record → ObservationsRepository.create | `src/modules/clinical/repositories/observations.repository.ts:300` |
-| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalObservationsController.record → ObservationsService.record → ObservationsService.assertReferencesBelongToPatient → ServiceRequestsRepository.findById | `src/modules/clinical/repositories/service-requests.repository.ts:107` |
+| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalObservationsController.record → ObservationsService.record → ObservationsService.assertReferencesBelongToPatient → ServiceRequestsRepository.findById | `src/modules/clinical/repositories/service-requests.repository.ts:117` |
 
 ### Cuerpo — DTO `CreateObservationDto` · `application/json`
 
@@ -5292,7 +5325,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /clinical/observations/{id}/amend` la atiende `ClinicalObservationsController.amend` (src/modules/clinical/controllers/clinical-observations.controller.ts:66). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AmendObservationDto` (10 campos, 1 obligatorio). Delega en `ObservationsService.amend`. Crea filas en clinical.observation_notes. Actualiza clinical.observations. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
+`PATCH /clinical/observations/{id}/amend` la atiende `ClinicalObservationsController.amend` (src/modules/clinical/controllers/clinical-observations.controller.ts:66). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AmendObservationDto` (10 campos, 1 obligatorio). Delega en `ObservationsService.amend`. Crea filas en clinical.observation_notes. Actualiza clinical.observations. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
 
 ### Requerimientos
 
@@ -5300,19 +5333,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-observations.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-observations.controller.ts:66` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -5321,6 +5354,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `clinical.observation_components` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ObservationsRepository.findComponents | `src/modules/clinical/repositories/observations.repository.ts:458` |
 | `clinical.observation_notes` | ESCRIBE | CREA | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ObservationsRepository.createNote | `src/modules/clinical/repositories/observations.repository.ts:435` |
 | `clinical.observations` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalObservationsController.amend → ObservationsService.amend | `src/modules/clinical/services/observations.service.ts:357` |
@@ -5329,9 +5364,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.users` | LEE | LEE | POR_SQL | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalObservationsController.amend → ObservationsService.amend → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -5433,7 +5468,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /clinical/patients/{id}/inpatient-stay` la atiende `ClinicalAdtController.currentStay` (src/modules/clinical/controllers/clinical-adt.controller.ts:269). Exige sesión; el controlador no declara roles. Delega en `InpatientAdtService.currentStayOfPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 24 más.
+`GET /clinical/patients/{id}/inpatient-stay` la atiende `ClinicalAdtController.currentStay` (src/modules/clinical/controllers/clinical-adt.controller.ts:269). Exige sesión; el controlador no declara roles. Delega en `InpatientAdtService.currentStayOfPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 26 más.
 
 ### Requerimientos
 
@@ -5441,46 +5476,48 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:269` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-adt.controller.ts:269` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.encounter_locations` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InpatientReadUseCases.stay | `src/modules/clinical/services/inpatient/inpatient-read.use-cases.ts:275` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InpatientReadUseCases.stay → AdtSupport.encounter | `src/modules/clinical/services/inpatient/adt-support.ts:128` |
 | `clinical.patient_admission_footprints` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientHasFootprintInTenant → AuthzClinicalScopeRepository.hasAdmissionFootprint | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:124` |
 | `clinical.placement_incidents` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InpatientReadUseCases.stay | `src/modules/clinical/services/inpatient/inpatient-read.use-cases.ts:281` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InfrastructureAccessService.canAnywhere → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InfrastructureAccessService.canAnywhere → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientHasFootprintInTenant | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:106` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
-| `practice.practices` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InfrastructureAccessService.canAnywhere | `src/modules/practice/services/infrastructure-access.service.ts:622` |
+| `practice.practices` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InfrastructureAccessService.canAnywhere | `src/modules/practice/services/infrastructure-access.service.ts:616` |
 | `practice.space_unit_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → InpatientReadUseCases.stay → InpatientReadUseCases.authorizeStay → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpaceOpsRepository.unitsOf | `src/modules/practice/repositories/care-space-ops.repository.ts:146` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientExists | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:40` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientHasFootprintInTenant | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:92` |
 | `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientHasFootprintInTenant | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:98` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalAdtController.currentStay → InpatientAdtService.currentStayOfPatient → InpatientReadUseCases.currentStayOfPatient → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -5503,7 +5540,7 @@ _No se identificó un DTO de respuesta con campos._
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -5528,7 +5565,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ClinicalReadController.getReceivedServices` — `src/modules/clinical/controllers/clinical-read.controller.ts:110`
+- **Implementación:** `ClinicalReadController.getReceivedServices` — `src/modules/clinical/controllers/clinical-read.controller.ts:116`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5538,17 +5575,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /clinical/patients/{patientProfileId}/received-services` la atiende `ClinicalReadController.getReceivedServices` (src/modules/clinical/controllers/clinical-read.controller.ts:110). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `ReceivedServicesReadService.list`. Lee billing.invoice_lines, billing.invoices, clinical.received_services, practice.practice_sites, procedures_perioperative.procedure_cases, procedures_perioperative.procedure_charge_items.
+`GET /clinical/patients/{patientProfileId}/received-services` la atiende `ClinicalReadController.getReceivedServices` (src/modules/clinical/controllers/clinical-read.controller.ts:116). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `ReceivedServicesReadService.list`. Lee billing.invoice_lines, billing.invoices, clinical.encounters, clinical.received_services, practice.practice_sites, procedures_perioperative.procedure_cases, procedures_perioperative.procedure_charge_items, profiles.person_account_links y 1 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical/controllers/clinical-read.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/clinical/controllers/clinical-read.controller.ts:110` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical/controllers/clinical-read.controller.ts:116` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/clinical/controllers/clinical-read.controller.ts:116` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5556,10 +5593,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `billing.invoice_lines` | LEE | LEE | DIRECTA | ClinicalReadController.getReceivedServices → ReceivedServicesReadService.list → ReceivedServicesReadService.costsOf → ReceivedServicesRepository.findInvoiceLineAmounts | `src/modules/clinical/repositories/received-services.repository.ts:268` |
 | `billing.invoices` | LEE | LEE | DIRECTA | ClinicalReadController.getReceivedServices → ReceivedServicesReadService.list → ReceivedServicesReadService.costsOf → ReceivedServicesRepository.findInvoiceLineAmounts | `src/modules/clinical/repositories/received-services.repository.ts:272` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalReadController.getReceivedServices → ReceivedServicesReadService.list → ClinicalScopeFilterService.build → ClinicalScopeRepository.findEncounterIds | `src/modules/clinical/repositories/clinical-scope.repository.ts:70` |
 | `clinical.received_services` | LEE | LEE | DIRECTA | ClinicalReadController.getReceivedServices → ReceivedServicesReadService.list → ReceivedServicesRepository.findByPatient | `src/modules/clinical/repositories/received-services.repository.ts:195` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ClinicalReadController.getReceivedServices → ReceivedServicesReadService.list → ReceivedServicesRepository.findSiteNames | `src/modules/clinical/repositories/received-services.repository.ts:258` |
 | `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | ClinicalReadController.getReceivedServices → ReceivedServicesReadService.list → ReceivedServicesReadService.costsOf → ReceivedServicesRepository.findChargeLines | `src/modules/clinical/repositories/received-services.repository.ts:221` |
 | `procedures_perioperative.procedure_charge_items` | LEE | LEE | DIRECTA | ClinicalReadController.getReceivedServices → ReceivedServicesReadService.list → ReceivedServicesReadService.costsOf → ReceivedServicesRepository.findChargeLines | `src/modules/clinical/repositories/received-services.repository.ts:219` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalReadController.getReceivedServices → ReceivedServicesReadService.list → ClinicalScopeFilterService.build → PersonAccountLinksRepository.findActiveUserIdsByPersons | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:122` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ClinicalReadController.getReceivedServices → ReceivedServicesReadService.list → ClinicalScopeFilterService.build → PractitionerSpecialtiesRepository.findProfileIdsBySpecialties | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:214` |
 
 ### Parámetros
 
@@ -5576,28 +5616,28 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente de quien se lee. | `src/modules/clinical/dto/received-services.dto.ts:96` |
-| `items` | `array<ReceivedServiceItemDto>` | Sí | — | — | Servicios, el más reciente primero. | `src/modules/clinical/dto/received-services.dto.ts:100` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador del servicio recibido. | `src/modules/clinical/dto/received-services.dto.ts:34` |
-| `items[].type` | `object` | Sí | — | — | Tipo de servicio: intervención médica, vacunación u otro. | `src/modules/clinical/dto/received-services.dto.ts:38` |
-| `items[].typeConceptId` | `string` | Sí | formato uuid | — | Concepto del tipo, para resolver su etiqueta en terminología. | `src/modules/clinical/dto/received-services.dto.ts:42` |
-| `items[].serviceConceptId` | `string` | Sí | formato uuid | — | Qué se hizo: el código del procedimiento, de la vacuna o del tipo de caso. | `src/modules/clinical/dto/received-services.dto.ts:46` |
-| `items[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del servicio. | `src/modules/clinical/dto/received-services.dto.ts:50` |
-| `items[].performedAt` | `string` | Sí | formato date-time | — | Cuándo se realizó. | `src/modules/clinical/dto/received-services.dto.ts:54` |
-| `items[].performerProfileId` | `string` | No | formato uuid | — | Profesional que lo realizó. | `src/modules/clinical/dto/received-services.dto.ts:58` |
-| `items[].performerName` | `string` | No | — | — | Nombre del profesional, ya resuelto: el paciente no puede leer el padrón de profesionales, así que no podría resolverlo desde `performerProfileId`. | `src/modules/clinical/dto/received-services.dto.ts:65` |
-| `items[].practiceSiteId` | `string` | No | formato uuid | — | Sede donde se realizó. | `src/modules/clinical/dto/received-services.dto.ts:69` |
-| `items[].practiceSiteName` | `string` | No | — | — | Nombre de la sede, ya resuelto. | `src/modules/clinical/dto/received-services.dto.ts:73` |
-| `items[].encounterId` | `string` | No | formato uuid | — | Atención en la que ocurrió. | `src/modules/clinical/dto/received-services.dto.ts:77` |
-| `items[].outcomeConceptId` | `string` | No | formato uuid | — | Resultado del servicio, como concepto. | `src/modules/clinical/dto/received-services.dto.ts:81` |
-| `items[].resultText` | `string` | No | — | — | Nota o resultado en texto libre que dejó quien lo realizó. | `src/modules/clinical/dto/received-services.dto.ts:85` |
-| `items[].cost` | `ReceivedServiceCostDto` | Sí | — | — | Costo registrado. `null` si no hay cobro registrado o si quien pide no ve importes. | `src/modules/clinical/dto/received-services.dto.ts:89` |
-| `items[].cost.amount` | `string` | Sí | — | — | Importe decimal exacto; nunca un número de coma flotante. | `src/modules/clinical/dto/received-services.dto.ts:19` |
-| `items[].cost.currencyCode` | `string` | Sí | admite null | — | Código de moneda (`BOB`, `USD`), o `null` si el cargo no lo declara. | `src/modules/clinical/dto/received-services.dto.ts:23` |
-| `items[].cost.source` | `string` | Sí | valores: INVOICE_LINE, CHARGE_ITEMS | — | De dónde sale el importe: la línea de factura enlazada o la suma de los cargos del caso. | `src/modules/clinical/dto/received-services.dto.ts:27` |
-| `limit` | `number` | Sí | — | — | Tope aplicado a la lista | `src/modules/clinical/dto/received-services.dto.ts:104` |
-| `truncated` | `boolean` | Sí | — | — | `true` si hay más servicios de los que el tope dejó pasar. | `src/modules/clinical/dto/received-services.dto.ts:108` |
-| `costsVisible` | `boolean` | Sí | — | — | Si quien pide ve importes. Solo los ve el titular o quien lo representa: el personal clínico lee el servicio sin el dinero. Con `false`, todo `cost` es `null` y no significa «sin cobro». | `src/modules/clinical/dto/received-services.dto.ts:116` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Paciente de quien se lee. | `src/modules/clinical/dto/received-services.dto.ts:97` |
+| `items` | `array<ReceivedServiceItemDto>` | Sí | — | — | Servicios, el más reciente primero. | `src/modules/clinical/dto/received-services.dto.ts:101` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador del servicio recibido. | `src/modules/clinical/dto/received-services.dto.ts:35` |
+| `items[].type` | `object` | Sí | — | — | Tipo de servicio: intervención médica, vacunación u otro. | `src/modules/clinical/dto/received-services.dto.ts:39` |
+| `items[].typeConceptId` | `string` | Sí | formato uuid | — | Concepto del tipo, para resolver su etiqueta en terminología. | `src/modules/clinical/dto/received-services.dto.ts:43` |
+| `items[].serviceConceptId` | `string` | Sí | formato uuid | — | Qué se hizo: el código del procedimiento, de la vacuna o del tipo de caso. | `src/modules/clinical/dto/received-services.dto.ts:47` |
+| `items[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del servicio. | `src/modules/clinical/dto/received-services.dto.ts:51` |
+| `items[].performedAt` | `string` | Sí | formato date-time | — | Cuándo se realizó. | `src/modules/clinical/dto/received-services.dto.ts:55` |
+| `items[].performerProfileId` | `string` | No | formato uuid | — | Profesional que lo realizó. | `src/modules/clinical/dto/received-services.dto.ts:59` |
+| `items[].performerName` | `string` | No | — | — | Nombre del profesional, ya resuelto: el paciente no puede leer el padrón de profesionales, así que no podría resolverlo desde `performerProfileId`. | `src/modules/clinical/dto/received-services.dto.ts:66` |
+| `items[].practiceSiteId` | `string` | No | formato uuid | — | Sede donde se realizó. | `src/modules/clinical/dto/received-services.dto.ts:70` |
+| `items[].practiceSiteName` | `string` | No | — | — | Nombre de la sede, ya resuelto. | `src/modules/clinical/dto/received-services.dto.ts:74` |
+| `items[].encounterId` | `string` | No | formato uuid | — | Atención en la que ocurrió. | `src/modules/clinical/dto/received-services.dto.ts:78` |
+| `items[].outcomeConceptId` | `string` | No | formato uuid | — | Resultado del servicio, como concepto. | `src/modules/clinical/dto/received-services.dto.ts:82` |
+| `items[].resultText` | `string` | No | — | — | Nota o resultado en texto libre que dejó quien lo realizó. | `src/modules/clinical/dto/received-services.dto.ts:86` |
+| `items[].cost` | `ReceivedServiceCostDto` | Sí | — | — | Costo registrado. `null` si no hay cobro registrado o si quien pide no ve importes. | `src/modules/clinical/dto/received-services.dto.ts:90` |
+| `items[].cost.amount` | `string` | Sí | — | — | Importe decimal exacto; nunca un número de coma flotante. | `src/modules/clinical/dto/received-services.dto.ts:20` |
+| `items[].cost.currencyCode` | `string` | Sí | admite null | — | Código de moneda (`BOB`, `USD`), o `null` si el cargo no lo declara. | `src/modules/clinical/dto/received-services.dto.ts:24` |
+| `items[].cost.source` | `string` | Sí | valores: INVOICE_LINE, CHARGE_ITEMS | — | De dónde sale el importe: la línea de factura enlazada o la suma de los cargos del caso. | `src/modules/clinical/dto/received-services.dto.ts:28` |
+| `limit` | `number` | Sí | — | — | Tope aplicado a la lista | `src/modules/clinical/dto/received-services.dto.ts:105` |
+| `truncated` | `boolean` | Sí | — | — | `true` si hay más servicios de los que el tope dejó pasar. | `src/modules/clinical/dto/received-services.dto.ts:109` |
+| `costsVisible` | `boolean` | Sí | — | — | Si quien pide ve importes. Solo los ve el titular o quien lo representa: el personal clínico lee el servicio sin el dinero. Con `false`, todo `cost` es `null` y no significa «sin cobro». | `src/modules/clinical/dto/received-services.dto.ts:117` |
 
 ### Respuestas posibles
 
@@ -5628,7 +5668,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ClinicalReadController.getPatientSummary` — `src/modules/clinical/controllers/clinical-read.controller.ts:75`
+- **Implementación:** `ClinicalReadController.getPatientSummary` — `src/modules/clinical/controllers/clinical-read.controller.ts:79`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5638,31 +5678,54 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /clinical/patients/{patientProfileId}/summary` la atiende `ClinicalReadController.getPatientSummary` (src/modules/clinical/controllers/clinical-read.controller.ts:75). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `ClinicalReadService.getPatientSummary`. Crea filas en audit.data_access_log. Lee audit.conditions_history, clinical.allergy_intolerances, clinical.allergy_reactions, clinical.care_episodes, clinical.conditions, clinical.encounters, clinical.medication_requests, clinical.observations.
+`GET /clinical/patients/{patientProfileId}/summary` la atiende `ClinicalReadController.getPatientSummary` (src/modules/clinical/controllers/clinical-read.controller.ts:79). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `ClinicalReadService.getPatientSummary`. Crea filas en audit.data_access_log. Lee audit.conditions_history, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 23 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical/controllers/clinical-read.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/clinical/controllers/clinical-read.controller.ts:75` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical/controllers/clinical-read.controller.ts:79` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/clinical/controllers/clinical-read.controller.ts:79` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary | `src/modules/clinical/services/clinical-read.service.ts:693` |
+| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary | `src/modules/clinical/services/clinical-read.service.ts:701` |
 | `audit.data_access_log` | ESCRIBE | CREA | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → DataAccessLogRepository.record | `src/modules/audit/repositories/data-access-log.repository.ts:98` |
-| `clinical.allergy_intolerances` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → AllergyIntolerancesRepository.findByPatient | `src/modules/clinical/repositories/allergy-intolerances.repository.ts:102` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.allergy_intolerances` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.loadAllRows → AllergyIntolerancesRepository.findByPatient | `src/modules/clinical/repositories/allergy-intolerances.repository.ts:102` |
 | `clinical.allergy_reactions` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → AllergyReactionsReadRepository.findByAllergyIds | `src/modules/clinical/repositories/allergy-reactions-read.repository.ts:32` |
-| `clinical.care_episodes` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → CareEpisodesRepository.findByPatient | `src/modules/clinical/repositories/care-episodes.repository.ts:85` |
-| `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ConditionsRepository.findByPatient | `src/modules/clinical/repositories/conditions.repository.ts:92` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → EncountersRepository.findByPatient | `src/modules/clinical/repositories/encounters.repository.ts:159` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → MedicationRequestsRepository.findByPatient | `src/modules/clinical/repositories/medication-requests.repository.ts:132` |
-| `clinical.observations` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ObservationsRepository.findByPatient | `src/modules/clinical/repositories/observations.repository.ts:274` |
+| `clinical.care_episodes` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.loadAllRows → CareEpisodesRepository.findByPatient | `src/modules/clinical/repositories/care-episodes.repository.ts:85` |
+| `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.loadAllRows → ConditionsRepository.findByPatient | `src/modules/clinical/repositories/conditions.repository.ts:92` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalScopeFilterService.build → ClinicalScopeRepository.findEncounterIds | `src/modules/clinical/repositories/clinical-scope.repository.ts:70` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.loadAllRows → MedicationRequestsRepository.findByPatient | `src/modules/clinical/repositories/medication-requests.repository.ts:132` |
+| `clinical.observations` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.loadAllRows → ObservationsRepository.findByPatient | `src/modules/clinical/repositories/observations.repository.ts:274` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalScopeFilterService.build → PractitionerSpecialtiesRepository.findProfileIdsBySpecialties | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:214` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalReadController.getPatientSummary → ClinicalReadService.getPatientSummary → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -5679,100 +5742,102 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/clinical/dto/clinical-read.dto.ts:557` |
-| `conditions` | `array<ConditionItemDto>` | Sí | — | — | Valor de conditions mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:563` |
-| `conditions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:92` |
-| `conditions[].codeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a code concept. | `src/modules/clinical/dto/clinical-read.dto.ts:98` |
-| `conditions[].categoryConceptId` | `string` | No | formato uuid | — | Identificador asociado a category concept. | `src/modules/clinical/dto/clinical-read.dto.ts:104` |
-| `conditions[].clinicalStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:110` |
-| `conditions[].verificationStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a verification status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:116` |
-| `conditions[].severityConceptId` | `string` | No | formato uuid | — | Identificador asociado a severity concept. | `src/modules/clinical/dto/clinical-read.dto.ts:122` |
-| `conditions[].encounterId` | `string` | No | formato uuid | — | Identificador asociado a encounter. | `src/modules/clinical/dto/clinical-read.dto.ts:128` |
-| `conditions[].clinicalCourseConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical course concept (Patch v4.0.8). | `src/modules/clinical/dto/clinical-read.dto.ts:134` |
-| `conditions[].lateralityConceptId` | `string` | No | formato uuid | — | Lateralidad de la condición (columna existente en el modelo; BR-14/CL-11). | `src/modules/clinical/dto/clinical-read.dto.ts:140` |
-| `conditions[].onsetAt` | `string` | No | formato date-time | — | Valor de onset at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:146` |
-| `conditions[].expectedResolutionAt` | `string` | No | formato date-time | — | Fecha esperada de resolución o próxima revisión (Patch v4.0.8). | `src/modules/clinical/dto/clinical-read.dto.ts:152` |
-| `conditions[].resolvedAt` | `string` | No | formato date-time | — | Valor de resolved at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:158` |
-| `conditions[].noteText` | `string` | No | — | — | Hallazgos y justificación clínica (Patch v4.1.3). | `src/modules/clinical/dto/clinical-read.dto.ts:164` |
-| `conditions[].lastStatusChangeReasonText` | `string` | No | — | — | Motivo del último cambio de estado clínico, si hubo alguno | `src/modules/clinical/dto/clinical-read.dto.ts:175` |
-| `conditions[].verification` | `ConditionVerificationDto` | No | — | — | Decisión de verificación (C3 / P41), o `null` si el diagnóstico nunca se confirmó ni refutó por `POST /clinical/conditions/:id/verification`. | `src/modules/clinical/dto/clinical-read.dto.ts:182` |
-| `conditions[].verification.outcome` | `string` | No | valores: CONFIRMED, REFUTED | — | `CONFIRMED` o `REFUTED`. | `src/modules/clinical/dto/clinical-read.dto.ts:67` |
-| `conditions[].verification.decidedAt` | `string` | No | formato date-time | — | Instante de la decisión, ISO. | `src/modules/clinical/dto/clinical-read.dto.ts:71` |
-| `conditions[].verification.decidedByProfileId` | `string` | No | formato uuid | — | Perfil profesional que decidió. | `src/modules/clinical/dto/clinical-read.dto.ts:75` |
-| `conditions[].verification.reasonText` | `string` | No | admite null | — | Motivo escrito, o `null`. | `src/modules/clinical/dto/clinical-read.dto.ts:79` |
-| `conditions[].verification.basedOn` | `ConditionVerificationEvidenceDto` | No | — | — | Evidencia elegida, o `null`. | `src/modules/clinical/dto/clinical-read.dto.ts:83` |
-| `conditions[].verification.basedOn.kind` | `string` | No | valores: NOTE, ANALYSIS | — | `NOTE` o `ANALYSIS`. | `src/modules/clinical/dto/clinical-read.dto.ts:38` |
-| `conditions[].verification.basedOn.noteId` | `string` | No | formato uuid | — | Nota clínica que respalda la decisión. | `src/modules/clinical/dto/clinical-read.dto.ts:42` |
-| `conditions[].verification.basedOn.encounterId` | `string` | No | formato uuid | — | Encuentro de la nota. | `src/modules/clinical/dto/clinical-read.dto.ts:46` |
-| `conditions[].verification.basedOn.serviceRequestId` | `string` | No | formato uuid | — | Orden de estudio. | `src/modules/clinical/dto/clinical-read.dto.ts:50` |
-| `conditions[].verification.basedOn.diagnosticReportId` | `string` | No | formato uuid | — | Informe del estudio. | `src/modules/clinical/dto/clinical-read.dto.ts:54` |
-| `conditions[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/clinical-read.dto.ts:188` |
-| `allergies` | `array<AllergyItemDto>` | Sí | — | — | Valor de allergies mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:569` |
-| `allergies[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:197` |
-| `allergies[].substanceConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a substance concept. | `src/modules/clinical/dto/clinical-read.dto.ts:203` |
-| `allergies[].encounterId` | `string` | No | formato uuid | — | Encuentro en el que se detectó, si se registró dentro de una atención (P26). | `src/modules/clinical/dto/clinical-read.dto.ts:209` |
-| `allergies[].typeConceptId` | `string` | No | formato uuid | — | Identificador asociado a type concept. | `src/modules/clinical/dto/clinical-read.dto.ts:215` |
-| `allergies[].categoryConceptId` | `string` | No | formato uuid | — | Identificador asociado a category concept. | `src/modules/clinical/dto/clinical-read.dto.ts:221` |
-| `allergies[].criticalityConceptId` | `string` | No | formato uuid | — | Identificador asociado a criticality concept. | `src/modules/clinical/dto/clinical-read.dto.ts:227` |
-| `allergies[].clinicalStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:233` |
-| `allergies[].reactions` | `array<AllergyReactionItemDto>` | Sí | — | — | Reacciones registradas de esta alergia (BR-14/CL-11: la tabla existe y se escribía; el resumen no la leía). | `src/modules/clinical/dto/clinical-read.dto.ts:240` |
-| `allergies[].reactions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:13` |
-| `allergies[].reactions[].manifestationConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a manifestation concept. | `src/modules/clinical/dto/clinical-read.dto.ts:19` |
-| `allergies[].reactions[].severityConceptId` | `string` | No | formato uuid | — | Identificador asociado a severity concept. | `src/modules/clinical/dto/clinical-read.dto.ts:25` |
-| `allergies[].reactions[].description` | `string` | No | — | — | Descripción libre de la reacción. | `src/modules/clinical/dto/clinical-read.dto.ts:31` |
-| `allergies[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/clinical-read.dto.ts:246` |
-| `medicationRequests` | `array<MedicationRequestItemDto>` | Sí | — | — | Valor de medication requests mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:575` |
-| `medicationRequests[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:255` |
-| `medicationRequests[].medicationConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a medication concept. | `src/modules/clinical/dto/clinical-read.dto.ts:261` |
-| `medicationRequests[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:267` |
-| `medicationRequests[].prescriberProfileId` | `string` | No | formato uuid | — | Identificador asociado a prescriber profile. | `src/modules/clinical/dto/clinical-read.dto.ts:273` |
-| `medicationRequests[].encounterId` | `string` | No | formato uuid | — | Encuentro en el que se prescribió (columna existente en el modelo; BR-14/CL-11: `ConditionItemDto` y `ObservationItemDto` ya lo exponían, la receta no). | `src/modules/clinical/dto/clinical-read.dto.ts:281` |
-| `medicationRequests[].formInstanceId` | `string` | No | formato uuid | — | P43: instancia del formulario médico de la que salió la receta, si salió de uno. | `src/modules/clinical/dto/clinical-read.dto.ts:285` |
-| `medicationRequests[].doseText` | `string` | No | — | — | Valor de dose text mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:291` |
-| `medicationRequests[].frequencyText` | `string` | No | — | — | Valor de frequency text mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:297` |
-| `medicationRequests[].quantityDecimal` | `number` | No | — | — | Cantidad recetada, si la receta la declara. Ausente si no fija cantidad. | `src/modules/clinical/dto/clinical-read.dto.ts:303` |
-| `medicationRequests[].validFrom` | `string` | No | formato date-time | — | Valor de valid from mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:309` |
-| `medicationRequests[].validTo` | `string` | No | formato date-time | — | Valor de valid to mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:315` |
-| `medicationRequests[].patientInstructionsText` | `string` | No | — | — | Indicaciones al paciente impresas en la receta (Patch v4.1.3). | `src/modules/clinical/dto/clinical-read.dto.ts:321` |
-| `medicationRequests[].indicationConditionId` | `string` | No | formato uuid | — | Condición que motiva la prescripción — para qué es la receta (Patch v4.1.6). | `src/modules/clinical/dto/clinical-read.dto.ts:327` |
-| `medicationRequests[].indicationText` | `string` | No | — | — | Motivo escrito a mano cuando no hay condición codificada (P24). | `src/modules/clinical/dto/clinical-read.dto.ts:333` |
-| `medicationRequests[].signedAt` | `string` | No | formato date-time | — | Valor de signed at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:339` |
-| `medicationRequests[].issuedAt` | `string` | No | formato date-time | — | Valor de issued at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:345` |
-| `medicationRequests[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/clinical-read.dto.ts:351` |
-| `observations` | `array<ObservationItemDto>` | Sí | — | — | Valor de observations mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:581` |
-| `observations[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:360` |
-| `observations[].codeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a code concept. | `src/modules/clinical/dto/clinical-read.dto.ts:366` |
-| `observations[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:372` |
-| `observations[].interpretationConceptId` | `string` | No | formato uuid | — | Identificador asociado a interpretation concept. | `src/modules/clinical/dto/clinical-read.dto.ts:378` |
-| `observations[].valueDecimal` | `string` | No | — | — | Valor de value decimal mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:384` |
-| `observations[].valueText` | `string` | No | — | — | Valor de value text mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:390` |
-| `observations[].valueBoolean` | `boolean` | No | — | — | Valor de value boolean mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:396` |
-| `observations[].valueConceptId` | `string` | No | formato uuid | — | Identificador asociado a value concept. | `src/modules/clinical/dto/clinical-read.dto.ts:402` |
-| `observations[].quantityValue` | `string` | No | — | — | Valor de quantity value mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:408` |
-| `observations[].quantityUnitConceptId` | `string` | No | formato uuid | — | Identificador asociado a quantity unit concept. | `src/modules/clinical/dto/clinical-read.dto.ts:414` |
-| `observations[].effectiveStartAt` | `string` | No | formato date-time | — | Valor de effective start at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:420` |
-| `observations[].encounterId` | `string` | No | formato uuid | — | Identificador asociado a encounter. | `src/modules/clinical/dto/clinical-read.dto.ts:426` |
-| `encounters` | `array<EncounterItemDto>` | Sí | — | — | Valor de encounters mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:587` |
-| `encounters[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:435` |
-| `encounters[].episodeId` | `string` | No | formato uuid | — | Identificador asociado a episode. | `src/modules/clinical/dto/clinical-read.dto.ts:441` |
-| `encounters[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:447` |
-| `encounters[].classConceptId` | `string` | No | formato uuid | — | Identificador asociado a class concept. | `src/modules/clinical/dto/clinical-read.dto.ts:453` |
-| `encounters[].primaryPractitionerId` | `string` | No | formato uuid | — | Identificador asociado a primary practitioner. | `src/modules/clinical/dto/clinical-read.dto.ts:459` |
-| `encounters[].reasonText` | `string` | No | — | — | Valor de reason text mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:465` |
-| `encounters[].startAt` | `string` | No | formato date-time | — | Valor de start at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:471` |
-| `encounters[].endAt` | `string` | No | formato date-time | — | Valor de end at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:477` |
-| `encounters[].rowVersion` | `number` | Sí | — | — | Versión de fila para bloqueo optimista (BR-14/CL-16): el cierre concurrente ya compara `expectedRowVersion` contra esta columna; el resumen no la exponía, así que el cliente no tenía con qué mandar el cierre. | `src/modules/clinical/dto/clinical-read.dto.ts:485` |
-| `careEpisodes` | `array<CareEpisodeItemDto>` | Sí | — | — | Episodios de cuidado (internaciones y estancias) del paciente. Va en el mismo `GET` que el resto y no en una llamada aparte por lo mismo que las alergias: es contexto de la atención, y depender de que el cliente se acuerde de pedirlo es depender de que nadie se olvide. | `src/modules/clinical/dto/clinical-read.dto.ts:597` |
-| `careEpisodes[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:500` |
-| `careEpisodes[].tenantId` | `string` | Sí | formato uuid | — | Identificador asociado a tenant. | `src/modules/clinical/dto/clinical-read.dto.ts:506` |
-| `careEpisodes[].typeConceptId` | `string` | No | formato uuid | — | Identificador asociado a type concept. | `src/modules/clinical/dto/clinical-read.dto.ts:512` |
-| `careEpisodes[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:518` |
-| `careEpisodes[].responsiblePractitionerId` | `string` | No | formato uuid | — | Identificador asociado a responsible practitioner. | `src/modules/clinical/dto/clinical-read.dto.ts:524` |
-| `careEpisodes[].startAt` | `string` | No | formato date-time | — | Valor de start at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:530` |
-| `careEpisodes[].endAt` | `string` | No | formato date-time | — | Valor de end at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:536` |
-| `careEpisodes[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/clinical-read.dto.ts:542` |
-| `limit` | `number` | Sí | — | — | Tope aplicado a cada bloque | `src/modules/clinical/dto/clinical-read.dto.ts:603` |
-| `truncated` | `array<string>` | Sí | — | — | Qué bloques quedaron recortados por el tope | `src/modules/clinical/dto/clinical-read.dto.ts:613` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/clinical/dto/clinical-read.dto.ts:576` |
+| `conditions` | `array<ConditionItemDto>` | Sí | — | — | Valor de conditions mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:582` |
+| `conditions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:93` |
+| `conditions[].codeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a code concept. | `src/modules/clinical/dto/clinical-read.dto.ts:99` |
+| `conditions[].categoryConceptId` | `string` | No | formato uuid | — | Identificador asociado a category concept. | `src/modules/clinical/dto/clinical-read.dto.ts:105` |
+| `conditions[].clinicalStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:111` |
+| `conditions[].verificationStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a verification status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:117` |
+| `conditions[].severityConceptId` | `string` | No | formato uuid | — | Identificador asociado a severity concept. | `src/modules/clinical/dto/clinical-read.dto.ts:123` |
+| `conditions[].encounterId` | `string` | No | formato uuid | — | Identificador asociado a encounter. | `src/modules/clinical/dto/clinical-read.dto.ts:129` |
+| `conditions[].clinicalCourseConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical course concept (Patch v4.0.8). | `src/modules/clinical/dto/clinical-read.dto.ts:135` |
+| `conditions[].lateralityConceptId` | `string` | No | formato uuid | — | Lateralidad de la condición (columna existente en el modelo; BR-14/CL-11). | `src/modules/clinical/dto/clinical-read.dto.ts:141` |
+| `conditions[].onsetAt` | `string` | No | formato date-time | — | Valor de onset at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:147` |
+| `conditions[].expectedResolutionAt` | `string` | No | formato date-time | — | Fecha esperada de resolución o próxima revisión (Patch v4.0.8). | `src/modules/clinical/dto/clinical-read.dto.ts:153` |
+| `conditions[].resolvedAt` | `string` | No | formato date-time | — | Valor de resolved at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:159` |
+| `conditions[].noteText` | `string` | No | — | — | Hallazgos y justificación clínica (Patch v4.1.3). | `src/modules/clinical/dto/clinical-read.dto.ts:165` |
+| `conditions[].lastStatusChangeReasonText` | `string` | No | — | — | Motivo del último cambio de estado clínico, si hubo alguno | `src/modules/clinical/dto/clinical-read.dto.ts:176` |
+| `conditions[].verification` | `ConditionVerificationDto` | No | — | — | Decisión de verificación (C3 / P41), o `null` si el diagnóstico nunca se confirmó ni refutó por `POST /clinical/conditions/:id/verification`. | `src/modules/clinical/dto/clinical-read.dto.ts:183` |
+| `conditions[].verification.outcome` | `string` | No | valores: CONFIRMED, REFUTED | — | `CONFIRMED` o `REFUTED`. | `src/modules/clinical/dto/clinical-read.dto.ts:68` |
+| `conditions[].verification.decidedAt` | `string` | No | formato date-time | — | Instante de la decisión, ISO. | `src/modules/clinical/dto/clinical-read.dto.ts:72` |
+| `conditions[].verification.decidedByProfileId` | `string` | No | formato uuid | — | Perfil profesional que decidió. | `src/modules/clinical/dto/clinical-read.dto.ts:76` |
+| `conditions[].verification.reasonText` | `string` | No | admite null | — | Motivo escrito, o `null`. | `src/modules/clinical/dto/clinical-read.dto.ts:80` |
+| `conditions[].verification.basedOn` | `ConditionVerificationEvidenceDto` | No | — | — | Evidencia elegida, o `null`. | `src/modules/clinical/dto/clinical-read.dto.ts:84` |
+| `conditions[].verification.basedOn.kind` | `string` | No | valores: NOTE, ANALYSIS | — | `NOTE` o `ANALYSIS`. | `src/modules/clinical/dto/clinical-read.dto.ts:39` |
+| `conditions[].verification.basedOn.noteId` | `string` | No | formato uuid | — | Nota clínica que respalda la decisión. | `src/modules/clinical/dto/clinical-read.dto.ts:43` |
+| `conditions[].verification.basedOn.encounterId` | `string` | No | formato uuid | — | Encuentro de la nota. | `src/modules/clinical/dto/clinical-read.dto.ts:47` |
+| `conditions[].verification.basedOn.serviceRequestId` | `string` | No | formato uuid | — | Orden de estudio. | `src/modules/clinical/dto/clinical-read.dto.ts:51` |
+| `conditions[].verification.basedOn.diagnosticReportId` | `string` | No | formato uuid | — | Informe del estudio. | `src/modules/clinical/dto/clinical-read.dto.ts:55` |
+| `conditions[].replacedByConditionId` | `string` | No | formato uuid | — | Diagnóstico que reemplazó a éste al refutarlo. Ausente = no fue reemplazado | `src/modules/clinical/dto/clinical-read.dto.ts:194` |
+| `conditions[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/clinical-read.dto.ts:200` |
+| `allergies` | `array<AllergyItemDto>` | Sí | — | — | Valor de allergies mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:588` |
+| `allergies[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:209` |
+| `allergies[].substanceConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a substance concept. | `src/modules/clinical/dto/clinical-read.dto.ts:215` |
+| `allergies[].encounterId` | `string` | No | formato uuid | — | Encuentro en el que se detectó, si se registró dentro de una atención (P26). | `src/modules/clinical/dto/clinical-read.dto.ts:221` |
+| `allergies[].typeConceptId` | `string` | No | formato uuid | — | Identificador asociado a type concept. | `src/modules/clinical/dto/clinical-read.dto.ts:227` |
+| `allergies[].categoryConceptId` | `string` | No | formato uuid | — | Identificador asociado a category concept. | `src/modules/clinical/dto/clinical-read.dto.ts:233` |
+| `allergies[].criticalityConceptId` | `string` | No | formato uuid | — | Identificador asociado a criticality concept. | `src/modules/clinical/dto/clinical-read.dto.ts:239` |
+| `allergies[].clinicalStatusConceptId` | `string` | No | formato uuid | — | Identificador asociado a clinical status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:245` |
+| `allergies[].reactions` | `array<AllergyReactionItemDto>` | Sí | — | — | Reacciones registradas de esta alergia (BR-14/CL-11: la tabla existe y se escribía; el resumen no la leía). | `src/modules/clinical/dto/clinical-read.dto.ts:252` |
+| `allergies[].reactions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:14` |
+| `allergies[].reactions[].manifestationConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a manifestation concept. | `src/modules/clinical/dto/clinical-read.dto.ts:20` |
+| `allergies[].reactions[].severityConceptId` | `string` | No | formato uuid | — | Identificador asociado a severity concept. | `src/modules/clinical/dto/clinical-read.dto.ts:26` |
+| `allergies[].reactions[].description` | `string` | No | — | — | Descripción libre de la reacción. | `src/modules/clinical/dto/clinical-read.dto.ts:32` |
+| `allergies[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/clinical-read.dto.ts:258` |
+| `medicationRequests` | `array<MedicationRequestItemDto>` | Sí | — | — | Valor de medication requests mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:594` |
+| `medicationRequests[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:267` |
+| `medicationRequests[].medicationConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a medication concept. | `src/modules/clinical/dto/clinical-read.dto.ts:273` |
+| `medicationRequests[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:279` |
+| `medicationRequests[].prescriberProfileId` | `string` | No | formato uuid | — | Identificador asociado a prescriber profile. | `src/modules/clinical/dto/clinical-read.dto.ts:285` |
+| `medicationRequests[].encounterId` | `string` | No | formato uuid | — | Encuentro en el que se prescribió (columna existente en el modelo; BR-14/CL-11: `ConditionItemDto` y `ObservationItemDto` ya lo exponían, la receta no). | `src/modules/clinical/dto/clinical-read.dto.ts:293` |
+| `medicationRequests[].formInstanceId` | `string` | No | formato uuid | — | P43: instancia del formulario médico de la que salió la receta, si salió de uno. | `src/modules/clinical/dto/clinical-read.dto.ts:297` |
+| `medicationRequests[].doseText` | `string` | No | — | — | Valor de dose text mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:303` |
+| `medicationRequests[].frequencyText` | `string` | No | — | — | Valor de frequency text mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:309` |
+| `medicationRequests[].quantityDecimal` | `number` | No | — | — | Cantidad recetada, si la receta la declara. Ausente si no fija cantidad. | `src/modules/clinical/dto/clinical-read.dto.ts:315` |
+| `medicationRequests[].validFrom` | `string` | No | formato date-time | — | Valor de valid from mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:321` |
+| `medicationRequests[].validTo` | `string` | No | formato date-time | — | Valor de valid to mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:327` |
+| `medicationRequests[].patientInstructionsText` | `string` | No | — | — | Indicaciones al paciente impresas en la receta (Patch v4.1.3). | `src/modules/clinical/dto/clinical-read.dto.ts:333` |
+| `medicationRequests[].indicationConditionId` | `string` | No | formato uuid | — | Condición que motiva la prescripción — para qué es la receta (Patch v4.1.6). | `src/modules/clinical/dto/clinical-read.dto.ts:339` |
+| `medicationRequests[].indicationText` | `string` | No | — | — | Motivo escrito a mano cuando no hay condición codificada (P24). | `src/modules/clinical/dto/clinical-read.dto.ts:345` |
+| `medicationRequests[].replacedByRequestId` | `string` | No | formato uuid | — | La receta que sustituyó a ésta (cambio de dosis o de fármaco). Ausente si no fue reemplazada. Lo usa la red clínica para encadenar las recetas. | `src/modules/clinical/dto/clinical-read.dto.ts:352` |
+| `medicationRequests[].signedAt` | `string` | No | formato date-time | — | Valor de signed at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:358` |
+| `medicationRequests[].issuedAt` | `string` | No | formato date-time | — | Valor de issued at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:364` |
+| `medicationRequests[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/clinical-read.dto.ts:370` |
+| `observations` | `array<ObservationItemDto>` | Sí | — | — | Valor de observations mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:600` |
+| `observations[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:379` |
+| `observations[].codeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a code concept. | `src/modules/clinical/dto/clinical-read.dto.ts:385` |
+| `observations[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:391` |
+| `observations[].interpretationConceptId` | `string` | No | formato uuid | — | Identificador asociado a interpretation concept. | `src/modules/clinical/dto/clinical-read.dto.ts:397` |
+| `observations[].valueDecimal` | `string` | No | — | — | Valor de value decimal mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:403` |
+| `observations[].valueText` | `string` | No | — | — | Valor de value text mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:409` |
+| `observations[].valueBoolean` | `boolean` | No | — | — | Valor de value boolean mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:415` |
+| `observations[].valueConceptId` | `string` | No | formato uuid | — | Identificador asociado a value concept. | `src/modules/clinical/dto/clinical-read.dto.ts:421` |
+| `observations[].quantityValue` | `string` | No | — | — | Valor de quantity value mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:427` |
+| `observations[].quantityUnitConceptId` | `string` | No | formato uuid | — | Identificador asociado a quantity unit concept. | `src/modules/clinical/dto/clinical-read.dto.ts:433` |
+| `observations[].effectiveStartAt` | `string` | No | formato date-time | — | Valor de effective start at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:439` |
+| `observations[].encounterId` | `string` | No | formato uuid | — | Identificador asociado a encounter. | `src/modules/clinical/dto/clinical-read.dto.ts:445` |
+| `encounters` | `array<EncounterItemDto>` | Sí | — | — | Valor de encounters mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:606` |
+| `encounters[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:454` |
+| `encounters[].episodeId` | `string` | No | formato uuid | — | Identificador asociado a episode. | `src/modules/clinical/dto/clinical-read.dto.ts:460` |
+| `encounters[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:466` |
+| `encounters[].classConceptId` | `string` | No | formato uuid | — | Identificador asociado a class concept. | `src/modules/clinical/dto/clinical-read.dto.ts:472` |
+| `encounters[].primaryPractitionerId` | `string` | No | formato uuid | — | Identificador asociado a primary practitioner. | `src/modules/clinical/dto/clinical-read.dto.ts:478` |
+| `encounters[].reasonText` | `string` | No | — | — | Valor de reason text mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:484` |
+| `encounters[].startAt` | `string` | No | formato date-time | — | Valor de start at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:490` |
+| `encounters[].endAt` | `string` | No | formato date-time | — | Valor de end at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:496` |
+| `encounters[].rowVersion` | `number` | Sí | — | — | Versión de fila para bloqueo optimista (BR-14/CL-16): el cierre concurrente ya compara `expectedRowVersion` contra esta columna; el resumen no la exponía, así que el cliente no tenía con qué mandar el cierre. | `src/modules/clinical/dto/clinical-read.dto.ts:504` |
+| `careEpisodes` | `array<CareEpisodeItemDto>` | Sí | — | — | Episodios de cuidado (internaciones y estancias) del paciente. Va en el mismo `GET` que el resto y no en una llamada aparte por lo mismo que las alergias: es contexto de la atención, y depender de que el cliente se acuerde de pedirlo es depender de que nadie se olvide. | `src/modules/clinical/dto/clinical-read.dto.ts:616` |
+| `careEpisodes[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:519` |
+| `careEpisodes[].tenantId` | `string` | Sí | formato uuid | — | Identificador asociado a tenant. | `src/modules/clinical/dto/clinical-read.dto.ts:525` |
+| `careEpisodes[].typeConceptId` | `string` | No | formato uuid | — | Identificador asociado a type concept. | `src/modules/clinical/dto/clinical-read.dto.ts:531` |
+| `careEpisodes[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical/dto/clinical-read.dto.ts:537` |
+| `careEpisodes[].responsiblePractitionerId` | `string` | No | formato uuid | — | Identificador asociado a responsible practitioner. | `src/modules/clinical/dto/clinical-read.dto.ts:543` |
+| `careEpisodes[].startAt` | `string` | No | formato date-time | — | Valor de start at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:549` |
+| `careEpisodes[].endAt` | `string` | No | formato date-time | — | Valor de end at mantenido por la instancia. | `src/modules/clinical/dto/clinical-read.dto.ts:555` |
+| `careEpisodes[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/clinical-read.dto.ts:561` |
+| `limit` | `number` | Sí | — | — | Tope aplicado a cada bloque | `src/modules/clinical/dto/clinical-read.dto.ts:622` |
+| `truncated` | `array<string>` | Sí | — | — | Qué bloques quedaron recortados por el tope | `src/modules/clinical/dto/clinical-read.dto.ts:630` |
 
 ### Respuestas posibles
 
@@ -5781,7 +5846,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/clinical.md).
@@ -5794,7 +5859,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:141` |
 | INTEGRACION | `test/integration/dependent-link-requests.int-spec.ts:129` |
 | INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:657` |
-| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:425` |
+| INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:428` |
 | INTEGRACION | `test/integration/hardening/mch-007.int-spec.ts:186` |
 
 ### Flujos
@@ -5828,11 +5893,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:306` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-adt.controller.ts:306` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -5842,7 +5907,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.placement_incidents` | LEE | LEE | DIRECTA | ClinicalAdtController.reviewIncident → InpatientAdtService.reviewIncident → ReviewPlacementIncidentUseCase.execute | `src/modules/clinical/services/inpatient/adt.use-cases.ts:1026` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.reviewIncident → InpatientAdtService.reviewIncident → ReviewPlacementIncidentUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.reviewIncident → InpatientAdtService.reviewIncident → ReviewPlacementIncidentUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.reviewIncident → InpatientAdtService.reviewIncident → ReviewPlacementIncidentUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.reviewIncident → InpatientAdtService.reviewIncident → ReviewPlacementIncidentUseCase.execute → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.reviewIncident → InpatientAdtService.reviewIncident → ReviewPlacementIncidentUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ClinicalAdtController.reviewIncident → InpatientAdtService.reviewIncident → ReviewPlacementIncidentUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | ClinicalAdtController.reviewIncident → InpatientAdtService.reviewIncident → ReviewPlacementIncidentUseCase.execute → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -5942,9 +6007,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/clinical/controllers/clinical-prescription-policies.controller.ts:72` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6022,10 +6087,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/clinical/controllers/clinical-prescription-policies.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6130,9 +6195,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/clinical/controllers/clinical-prescription-policies.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-prescription-policies.controller.ts:87` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6204,7 +6269,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /clinical/prescriptions/{id}/pdf` la atiende `ClinicalPrescriptionsController.getPrescriptionPdf` (src/modules/clinical/controllers/clinical-prescriptions.controller.ts:52). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `PrescriptionPdfService.render`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 24 más.
+`GET /clinical/prescriptions/{id}/pdf` la atiende `ClinicalPrescriptionsController.getPrescriptionPdf` (src/modules/clinical/controllers/clinical-prescriptions.controller.ts:52). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `PrescriptionPdfService.render`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 26 más.
 
 ### Requerimientos
 
@@ -6212,30 +6277,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical/controllers/clinical-prescriptions.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-prescriptions.controller.ts:52` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → ConditionsRepository.findById | `src/modules/clinical/repositories/conditions.repository.ts:107` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → MedicationRequestsRepository.findById | `src/modules/clinical/repositories/medication-requests.repository.ts:147` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.resolvePatientDocument → IdentifiersRepository.findCurrentByOwner | `src/modules/common/repositories/identifiers.repository.ts:126` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `insurance.insurance_carriers` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:168` |
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
@@ -6243,14 +6310,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.patient_coverages` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.resolvePractitioner → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.resolvePractitioner → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.resolvePatientName → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.resolvePatientName → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.resolvePatientName → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.resolvePractitioner → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → PrescriptionPdfService.assertPrescriptionCanSee → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ClinicalPrescriptionsController.getPrescriptionPdf → PrescriptionPdfService.render → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
 
 ### Parámetros
@@ -6274,7 +6341,7 @@ _No se identificó un DTO de respuesta con campos._
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -6318,10 +6385,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:404` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6332,7 +6399,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.received_services` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.createProcedure → ProceduresService.create → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.upsert | `src/modules/clinical/repositories/received-services.repository.ts:146` |
 | `clinical.received_services` | LEE | LEE | DIRECTA | ClinicalRecordsController.createProcedure → ProceduresService.create → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.upsert → ReceivedServicesRepository.findBySourceProcedure | `src/modules/clinical/repositories/received-services.repository.ts:54` |
 | `clinical.service_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalRecordsController.createProcedure → ProceduresService.create | `src/modules/clinical/services/procedures.service.ts:81` |
-| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.createProcedure → ProceduresService.create → ServiceRequestsRepository.findById | `src/modules/clinical/repositories/service-requests.repository.ts:107` |
+| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalRecordsController.createProcedure → ProceduresService.create → ServiceRequestsRepository.findById | `src/modules/clinical/repositories/service-requests.repository.ts:117` |
 | `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | ClinicalRecordsController.createProcedure → ProceduresService.create → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.findCaseByPrimaryProcedure | `src/modules/clinical/repositories/received-services.repository.ts:71` |
 
 ### Cuerpo — DTO `CreateProcedureDto` · `application/json`
@@ -6441,7 +6508,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/procedures/{id}/attachments` la atiende `ClinicalRecordsController.attachFileToProcedure` (src/modules/clinical/controllers/clinical-records.controller.ts:426). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AttachFileToProcedureDto` (1 campo, 1 obligatorio). Delega en `ProceduresService.attachFile`. Crea filas en common.file_links. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
+`POST /clinical/procedures/{id}/attachments` la atiende `ClinicalRecordsController.attachFileToProcedure` (src/modules/clinical/controllers/clinical-records.controller.ts:426). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `AttachFileToProcedureDto` (1 campo, 1 obligatorio). Delega en `ProceduresService.attachFile`. Crea filas en common.file_links. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 16 más.
 
 ### Requerimientos
 
@@ -6449,19 +6516,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-records.controller.ts:426` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-records.controller.ts:426` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalGranularScopeService.hasWriteLevelGrant → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
 | `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
@@ -6470,6 +6537,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter → ClinicalScopeRepository.participates | `src/modules/clinical/repositories/clinical-scope.repository.ts:125` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalScopeRepository.isOwnOpenEncounter | `src/modules/clinical/repositories/clinical-scope.repository.ts:88` |
 | `clinical.procedures` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ProceduresRepository.findById | `src/modules/clinical/repositories/procedures.repository.ts:95` |
 | `common.file_links` | ESCRIBE | CREA | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → FilesService.createLink → FileLinksRepository.create | `src/modules/common/repositories/file-links.repository.ts:43` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → FilesService.createLink → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
@@ -6479,9 +6548,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → FilesService.createLink → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalRecordsController.attachFileToProcedure → ProceduresService.attachFile → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 
 ### Parámetros
 
@@ -6566,7 +6635,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/requisitions` la atiende `ClinicalOrdersController.createRequisition` (src/modules/clinical/controllers/clinical-orders.controller.ts:114). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateRequisitionDto` (26 campos, 4 obligatorios). Delega en `RequisitionsService.create`. Crea filas en clinical.service_request_components, clinical.service_request_notes, clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages. Actualiza iam.devices. Lee billing.service_catalog, chart.clinical_note_headers, clinical.diagnostic_reports, clinical.encounters, clinical.service_request_components, clinical.service_request_notes, clinical.service_requests, diagnostics.diagnostic_report_versions y 20 más. Publica ServiceRequestPlaced, clinical.service_request.collection_point_suggested.
+`POST /clinical/requisitions` la atiende `ClinicalOrdersController.createRequisition` (src/modules/clinical/controllers/clinical-orders.controller.ts:114). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateRequisitionDto` (29 campos, 4 obligatorios). Delega en `RequisitionsService.create`. Crea filas en clinical.service_request_components, clinical.service_request_notes, clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages. Actualiza messaging.in_app_notifications. Lee billing.service_catalog, chart.clinical_note_headers, clinical.conditions, clinical.diagnostic_reports, clinical.encounters, clinical.service_request_components, clinical.service_request_notes, clinical.service_requests y 20 más. Publica ServiceRequestPlaced, clinical.service_request.collection_point_suggested.
 
 ### Requerimientos
 
@@ -6574,11 +6643,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-orders.controller.ts:114` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CABECERA | idempotency-key (obligatoria) | `contrato (parameters)` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6586,20 +6655,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → PerformerSelectionValidator.resolve → PerformerSiteDbReader.offersProcedureWithPrice | `src/modules/clinical/services/performer-site-db.reader.ts:40` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestNotesService.assertUsable | `src/modules/clinical/services/service-request-notes.service.ts:57` |
+| `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestsService.assertReasonConditionBelongsToPatient | `src/modules/clinical/services/service-requests.service.ts:276` |
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:191` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestNotesService.assertUsable | `src/modules/clinical/services/service-request-notes.service.ts:80` |
-| `clinical.service_request_components` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestDetailService.writeComponents | `src/modules/clinical/services/service-request-detail.service.ts:365` |
-| `clinical.service_request_components` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestReadService.toResponses → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:466` |
+| `clinical.service_request_components` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestDetailService.writeComponents | `src/modules/clinical/services/service-request-detail.service.ts:377` |
+| `clinical.service_request_components` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestReadService.toResponses → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:462` |
 | `clinical.service_request_notes` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestNotesService.link | `src/modules/clinical/services/service-request-notes.service.ts:136` |
 | `clinical.service_request_notes` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestReadService.toResponses → ServiceRequestNotesService.noteIdsFor | `src/modules/clinical/services/service-request-notes.service.ts:160` |
-| `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:118` |
-| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create | `src/modules/clinical/services/requisitions.service.ts:98` |
+| `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:128` |
+| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create | `src/modules/clinical/services/requisitions.service.ts:101` |
 | `diagnostics.diagnostic_report_versions` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate → DuplicateStudyDetector.releasedVersionOf | `src/modules/clinical/services/duplicate-study-detector.ts:438` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.describe → DuplicateStudyDetector.providerName | `src/modules/clinical/services/duplicate-study-detector.ts:488` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → FormInstanceOriginValidator.assertUsableOrigin | `src/modules/forms/services/form-instance-origin.validator.ts:43` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
@@ -6614,7 +6683,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestReadService.toResponses → SuggestedSiteNamesReader.namesFor | `src/modules/clinical/services/suggested-site-names.reader.ts:31` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → PerformerSelectionValidator.resolve → PerformerSiteDbReader.isActivelyAffiliated | `src/modules/clinical/services/performer-site-db.reader.ts:55` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestReadService.toResponses → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays | `src/modules/clinical/services/service-request-detail.service.ts:493` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestReadService.toResponses → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays | `src/modules/clinical/services/service-request-detail.service.ts:491` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestReadService.toResponses → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
 | `terminology.concept_properties` | LEE | LEE | POR_SQL | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestDetailService.prepare → TerminologyStudyCatalogAdapter.findStudy → TerminologyStudyCatalogAdapter.property | `src/modules/clinical/services/terminology-study-catalog.adapter.ts:132` |
 | `terminology.concept_relationships` | LEE | LEE | POR_SQL | ClinicalOrdersController.createRequisition → RequisitionsService.create → ServiceRequestsService.create → ServiceRequestDetailService.prepare → TerminologyStudyCatalogAdapter.panelComponentIds | `src/modules/clinical/services/terminology-study-catalog.adapter.ts:69` |
@@ -6626,8 +6695,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:436` |
-| Evento de dominio | `clinical.service_request.collection_point_suggested` | `src/modules/clinical/services/service-requests.service.ts:448` |
+| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:467` |
+| Evento de dominio | `clinical.service_request.collection_point_suggested` | `src/modules/clinical/services/service-requests.service.ts:479` |
 
 ### Parámetros
 
@@ -6661,6 +6730,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `items[].imaging.bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Región corporal (value set `imaging-body-structure`). Obligatoria en estudios de imagen del catálogo (422 BODY_SITE_REQUIRED) | `src/modules/clinical/dto/service-request-detail.dto.ts:27` |
 | `items[].imaging.lateralityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Lateralidad (value set `condition-laterality`: izquierda, derecha, bilateral). Exige región; prohibida si la región no es par (422 LATERALITY_NOT_APPLICABLE) | `src/modules/clinical/dto/service-request-detail.dto.ts:36` |
 | `items[].imaging.contrastConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Contraste (value set `imaging-contrast`). Exige modalidad (422 CONTRAST_REQUIRES_MODALITY) | `src/modules/clinical/dto/service-request-detail.dto.ts:45` |
+| `items[].imaging.bodyStructureUberon` | `string` | No | longitud máxima 64 | `@IsOptional()` `@IsString()` `@MaxLength(64)` | Estructura marcada en el modelo 3D del cuerpo (`UBERON:<n>`). 422 BODY_STRUCTURE_FORMAT_INVALID si la forma no es esa; no se verifica contra el atlas | `src/modules/clinical/dto/service-request-detail.dto.ts:56` |
+| `items[].imaging.bodyMeshId` | `string` | No | longitud máxima 64 | `@IsOptional()` `@IsString()` `@MaxLength(64)` | Malla marcada en el modelo 3D (id alfanumérico, p. ej. `BP44`). 422 BODY_MESH_ID_FORMAT_INVALID si no lo es | `src/modules/clinical/dto/service-request-detail.dto.ts:67` |
+| `items[].imaging.boneTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Tipo de hueso (value set `bone-type`; lo elige el médico, no se deriva). Exige región o estructura UBERON (422 BONE_TYPE_REQUIRES_BODY_STRUCTURE / BONE_TYPE_NOT_IN_CATALOG) | `src/modules/clinical/dto/service-request-detail.dto.ts:76` |
 | `items[].duplicateDecision` | `RequisitionDuplicateDecisionDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => RequisitionDuplicateDecisionDto)` | — | `src/modules/clinical/dto/requisition.dto.ts:108` |
 | `items[].duplicateDecision.previousDiagnosticReportId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/clinical/dto/requisition.dto.ts:36` |
 | `items[].duplicateDecision.reusePreviousReport` | `boolean` | No | — | `@ValidateIf( (o: RequisitionDuplicateDecisionDto) => o.reusePreviousReport !== undefined, )` `@IsBoolean()` | Reutilizar el informe previo | `src/modules/clinical/dto/requisition.dto.ts:43` |
@@ -6710,7 +6782,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
         "modalityConceptId": "00000000-0000-4000-8000-000000000001",
         "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
         "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
-        "contrastConceptId": "00000000-0000-4000-8000-000000000001"
+        "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+        "bodyStructureUberon": "UBERON:0000955",
+        "bodyMeshId": "BP44",
+        "boneTypeConceptId": "00000000-0000-4000-8000-000000000001"
       },
       "duplicateDecision": {
         "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
@@ -6731,41 +6806,46 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `requisitionId` | `string` | Sí | formato uuid | — | — | `src/modules/clinical/dto/requisition.dto.ts:189` |
 | `replayed` | `boolean` | Sí | — | — | true si la Idempotency-Key ya había creado esta requisición: se devuelve la existente sin escribir nada | `src/modules/clinical/dto/requisition.dto.ts:195` |
 | `items` | `array<ServiceRequestResponseDto>` | Sí | — | — | — | `src/modules/clinical/dto/requisition.dto.ts:198` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/service-request.dto.ts:311` |
-| `items[].patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/clinical/dto/service-request.dto.ts:317` |
-| `items[].formInstanceId` | `string` | No | formato uuid; admite null | — | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `src/modules/clinical/dto/service-request.dto.ts:328` |
-| `items[].category` | `object` | No | — | — | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `src/modules/clinical/dto/service-request.dto.ts:338` |
-| `items[].basedOnNoteIds` | `array<string>` | Sí | formato uuid | — | Notas médicas que motivan la orden (vacío = ninguna) | `src/modules/clinical/dto/service-request.dto.ts:348` |
-| `items[].status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:354` |
-| `items[].intent` | `string` | Sí | formato uuid | — | Intención (concept id) | `src/modules/clinical/dto/service-request.dto.ts:360` |
-| `items[].performerSelectionConceptId` | `string` | Sí | formato uuid | — | Modo de ejecutor recomendado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:369` |
-| `items[].performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | Médico ejecutor, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:375` |
-| `items[].suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | Sede sugerida, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:381` |
-| `items[].suggestedPracticeSiteName` | `string` | Sí | admite null | — | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `src/modules/clinical/dto/service-request.dto.ts:387` |
-| `items[].suggestedCareSpace` | `object` | Sí | admite null | — | Punto de toma sugerido {id, code, name} (F5b) | `src/modules/clinical/dto/service-request.dto.ts:394` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/service-request.dto.ts:322` |
+| `items[].patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/clinical/dto/service-request.dto.ts:328` |
+| `items[].formInstanceId` | `string` | No | formato uuid; admite null | — | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `src/modules/clinical/dto/service-request.dto.ts:339` |
+| `items[].reasonConditionId` | `string` | No | formato uuid | — | Diagnóstico que el estudio se pidió para confirmar, descartar o seguir. Ausente = la orden no lo declara | `src/modules/clinical/dto/service-request.dto.ts:349` |
+| `items[].category` | `object` | No | — | — | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `src/modules/clinical/dto/service-request.dto.ts:359` |
+| `items[].basedOnNoteIds` | `array<string>` | Sí | formato uuid | — | Notas médicas que motivan la orden (vacío = ninguna) | `src/modules/clinical/dto/service-request.dto.ts:369` |
+| `items[].status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:375` |
+| `items[].intent` | `string` | Sí | formato uuid | — | Intención (concept id) | `src/modules/clinical/dto/service-request.dto.ts:381` |
+| `items[].performerSelectionConceptId` | `string` | Sí | formato uuid | — | Modo de ejecutor recomendado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:390` |
+| `items[].performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | Médico ejecutor, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:396` |
+| `items[].suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | Sede sugerida, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:402` |
+| `items[].suggestedPracticeSiteName` | `string` | Sí | admite null | — | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `src/modules/clinical/dto/service-request.dto.ts:408` |
+| `items[].suggestedCareSpace` | `object` | Sí | admite null | — | Punto de toma sugerido {id, code, name} (F5b) | `src/modules/clinical/dto/service-request.dto.ts:415` |
 | `items[].suggestedCareSpace.id` | `string` | Sí | — | — | — | sin fuente |
 | `items[].suggestedCareSpace.code` | `string` | Sí | — | — | — | sin fuente |
 | `items[].suggestedCareSpace.name` | `string` | Sí | — | — | — | sin fuente |
-| `items[].requisitionId` | `string` | No | formato uuid; admite null | — | v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual). | `src/modules/clinical/dto/service-request.dto.ts:400` |
-| `items[].codeConceptId` | `string` | No | formato uuid | — | v4.2.82: el estudio pedido. | `src/modules/clinical/dto/service-request.dto.ts:404` |
-| `items[].codeDisplay` | `string` | No | — | — | v4.2.82: nombre legible del estudio. | `src/modules/clinical/dto/service-request.dto.ts:408` |
-| `items[].specimenTypeConceptId` | `string` | No | formato uuid; admite null | — | v4.2.82: muestra pedida (nulo = no se indicó). | `src/modules/clinical/dto/service-request.dto.ts:412` |
-| `items[].specimenTypeDisplay` | `string` | No | admite null | — | v4.2.82: nombre legible de la muestra. | `src/modules/clinical/dto/service-request.dto.ts:416` |
-| `items[].components` | `array<ServiceRequestComponentDto>` | No | — | — | v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo va vacío y significa «estudio completo, sin detalle» (órdenes anteriores). | `src/modules/clinical/dto/service-request.dto.ts:423` |
-| `items[].components[].conceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:51` |
-| `items[].components[].display` | `string` | No | — | — | Nombre legible (castellano si existe) | `src/modules/clinical/dto/service-request-detail.dto.ts:54` |
-| `items[].components[].ordinal` | `number` | No | — | — | Posición, desde 1, en el orden en que se marcó | `src/modules/clinical/dto/service-request-detail.dto.ts:59` |
-| `items[].componentsSpecified` | `boolean` | No | — | — | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `src/modules/clinical/dto/service-request.dto.ts:427` |
-| `items[].imaging` | `ServiceRequestImagingDto` | No | — | — | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `src/modules/clinical/dto/service-request.dto.ts:431` |
-| `items[].imaging.modalityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:65` |
-| `items[].imaging.modalityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:67` |
-| `items[].imaging.bodySiteConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:69` |
-| `items[].imaging.bodySiteDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:71` |
-| `items[].imaging.lateralityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:73` |
-| `items[].imaging.lateralityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:75` |
-| `items[].imaging.contrastConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:77` |
-| `items[].imaging.contrastDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:79` |
-| `items[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/service-request.dto.ts:437` |
+| `items[].requisitionId` | `string` | No | formato uuid; admite null | — | v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual). | `src/modules/clinical/dto/service-request.dto.ts:421` |
+| `items[].codeConceptId` | `string` | No | formato uuid | — | v4.2.82: el estudio pedido. | `src/modules/clinical/dto/service-request.dto.ts:425` |
+| `items[].codeDisplay` | `string` | No | — | — | v4.2.82: nombre legible del estudio. | `src/modules/clinical/dto/service-request.dto.ts:429` |
+| `items[].specimenTypeConceptId` | `string` | No | formato uuid; admite null | — | v4.2.82: muestra pedida (nulo = no se indicó). | `src/modules/clinical/dto/service-request.dto.ts:433` |
+| `items[].specimenTypeDisplay` | `string` | No | admite null | — | v4.2.82: nombre legible de la muestra. | `src/modules/clinical/dto/service-request.dto.ts:437` |
+| `items[].components` | `array<ServiceRequestComponentDto>` | No | — | — | v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo va vacío y significa «estudio completo, sin detalle» (órdenes anteriores). | `src/modules/clinical/dto/service-request.dto.ts:444` |
+| `items[].components[].conceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:139` |
+| `items[].components[].display` | `string` | No | — | — | Nombre legible (castellano si existe) | `src/modules/clinical/dto/service-request-detail.dto.ts:142` |
+| `items[].components[].ordinal` | `number` | No | — | — | Posición, desde 1, en el orden en que se marcó | `src/modules/clinical/dto/service-request-detail.dto.ts:147` |
+| `items[].componentsSpecified` | `boolean` | No | — | — | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `src/modules/clinical/dto/service-request.dto.ts:448` |
+| `items[].imaging` | `ServiceRequestImagingDto` | No | — | — | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `src/modules/clinical/dto/service-request.dto.ts:452` |
+| `items[].imaging.modalityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:153` |
+| `items[].imaging.modalityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:155` |
+| `items[].imaging.bodySiteConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:157` |
+| `items[].imaging.bodySiteDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:159` |
+| `items[].imaging.lateralityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:161` |
+| `items[].imaging.lateralityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:163` |
+| `items[].imaging.contrastConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:165` |
+| `items[].imaging.contrastDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:167` |
+| `items[].imaging.bodyStructureUberon` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:169` |
+| `items[].imaging.bodyMeshId` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:171` |
+| `items[].imaging.boneTypeConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:173` |
+| `items[].imaging.boneTypeDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:175` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/service-request.dto.ts:458` |
 
 ### Respuestas posibles
 
@@ -6777,7 +6857,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
 | 409 | `CONFLICT` | ConflictException: La Idempotency-Key ya se usó con un contenido distinto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mismo estudio se pide dos veces en la requisición; PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: {message}; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar; PreconditionFailedException: El punto de toma no es un punto disponible de la sede sugerida; PreconditionFailedException: {error.message} |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mismo estudio se pide dos veces en la requisición; PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: El diagnóstico indicado no existe o no es de esta persona; PreconditionFailedException: {message}; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar; PreconditionFailedException: El punto de toma no es un punto disponible de la sede sugerida; PreconditionFailedException: {error.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/clinical.md).
@@ -6786,7 +6866,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:53` |
+| CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:57` |
 
 ### Flujos
 
@@ -6811,7 +6891,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/service-requests` la atiende `ClinicalOrdersController.createServiceRequest` (src/modules/clinical/controllers/clinical-orders.controller.ts:93). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateServiceRequestDto` (25 campos, 3 obligatorios). Delega en `ServiceRequestsService.create`. Crea filas en clinical.service_request_components, clinical.service_request_notes, clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages. Actualiza iam.devices. Lee billing.service_catalog, chart.clinical_note_headers, clinical.diagnostic_reports, clinical.encounters, clinical.service_request_components, clinical.service_requests, diagnostics.diagnostic_report_versions, directory.tenants y 19 más. Publica ServiceRequestPlaced, clinical.service_request.collection_point_suggested.
+`POST /clinical/service-requests` la atiende `ClinicalOrdersController.createServiceRequest` (src/modules/clinical/controllers/clinical-orders.controller.ts:93). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateServiceRequestDto` (35 campos, 3 obligatorios). Delega en `ServiceRequestsService.create`. Crea filas en clinical.service_request_components, clinical.service_request_notes, clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages. Actualiza messaging.in_app_notifications. Lee billing.service_catalog, chart.clinical_note_headers, clinical.conditions, clinical.diagnostic_reports, clinical.encounters, clinical.service_request_components, clinical.service_requests, diagnostics.diagnostic_report_versions y 19 más. Publica ServiceRequestPlaced, clinical.service_request.collection_point_suggested.
 
 ### Requerimientos
 
@@ -6819,10 +6899,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-orders.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -6830,19 +6910,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → PerformerSelectionValidator.resolve → PerformerSiteDbReader.offersProcedureWithPrice | `src/modules/clinical/services/performer-site-db.reader.ts:40` |
 | `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestNotesService.assertUsable | `src/modules/clinical/services/service-request-notes.service.ts:57` |
+| `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsService.assertReasonConditionBelongsToPatient | `src/modules/clinical/services/service-requests.service.ts:276` |
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:191` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestNotesService.assertUsable | `src/modules/clinical/services/service-request-notes.service.ts:80` |
-| `clinical.service_request_components` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestDetailService.writeComponents | `src/modules/clinical/services/service-request-detail.service.ts:365` |
-| `clinical.service_request_components` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:466` |
+| `clinical.service_request_components` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestDetailService.writeComponents | `src/modules/clinical/services/service-request-detail.service.ts:377` |
+| `clinical.service_request_components` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:462` |
 | `clinical.service_request_notes` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestNotesService.link | `src/modules/clinical/services/service-request-notes.service.ts:136` |
-| `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:118` |
+| `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:128` |
 | `clinical.service_requests` | LEE | LEE | POR_SQL | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:163` |
 | `diagnostics.diagnostic_report_versions` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate → DuplicateStudyDetector.releasedVersionOf | `src/modules/clinical/services/duplicate-study-detector.ts:438` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.describe → DuplicateStudyDetector.providerName | `src/modules/clinical/services/duplicate-study-detector.ts:488` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → FormInstanceOriginValidator.assertUsableOrigin | `src/modules/forms/services/form-instance-origin.validator.ts:43` |
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp | `src/modules/messaging/services/notifications.service.ts:1419` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
@@ -6857,7 +6937,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → SuggestedSiteNamesReader.namesFor | `src/modules/clinical/services/suggested-site-names.reader.ts:31` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → PerformerSelectionValidator.resolve → PerformerSiteDbReader.isActivelyAffiliated | `src/modules/clinical/services/performer-site-db.reader.ts:55` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays | `src/modules/clinical/services/service-request-detail.service.ts:493` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays | `src/modules/clinical/services/service-request-detail.service.ts:491` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
 | `terminology.concept_properties` | LEE | LEE | POR_SQL | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestDetailService.prepare → TerminologyStudyCatalogAdapter.findStudy → TerminologyStudyCatalogAdapter.property | `src/modules/clinical/services/terminology-study-catalog.adapter.ts:132` |
 | `terminology.concept_relationships` | LEE | LEE | POR_SQL | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestDetailService.prepare → TerminologyStudyCatalogAdapter.panelComponentIds | `src/modules/clinical/services/terminology-study-catalog.adapter.ts:69` |
@@ -6869,38 +6949,48 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:436` |
-| Evento de dominio | `clinical.service_request.collection_point_suggested` | `src/modules/clinical/services/service-requests.service.ts:448` |
+| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:467` |
+| Evento de dominio | `clinical.service_request.collection_point_suggested` | `src/modules/clinical/services/service-requests.service.ts:479` |
 
 ### Cuerpo — DTO `CreateServiceRequestDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `custodianTenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant custodio (directory.tenants) | `src/modules/clinical/dto/service-request.dto.ts:41` |
-| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Paciente (profiles.patient_profiles) | `src/modules/clinical/dto/service-request.dto.ts:51` |
-| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro en curso | `src/modules/clinical/dto/service-request.dto.ts:59` |
-| `formInstanceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Instancia CERRADA del formulario médico (forms.form_instances) de la que sale la orden. Opcional: desde la historia se emite sin formulario. Si viaja, debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no) | `src/modules/clinical/dto/service-request.dto.ts:73` |
-| `codeConceptId` | `string` | Sí | formato uuid | `@IsConceptId()` | Código del servicio pedido (concept id) | `src/modules/clinical/dto/service-request.dto.ts:83` |
-| `categoryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Categoría (concept id) | `src/modules/clinical/dto/service-request.dto.ts:94` |
-| `category` | `string` | No | valores: LAB, IMAGING, OTHER | `@IsOptional()` `@IsIn(ANALYSIS_CATEGORIES)` | Categoría de análisis (C2). Se resuelve a categoryConceptId (LAB → SR_LAB, IMAGING → SR_IMAGING, OTHER → SR_OTHER). Si viaja con categoryConceptId y no coinciden: 422 SERVICE_REQUEST_CATEGORY_MISMATCH | `src/modules/clinical/dto/service-request.dto.ts:110` |
-| `basedOnNoteIds` | `array<string>` | No | formato uuid; máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(MAX_BASED_ON_NOTES)` `@ArrayUnique()` `@IsUUID(undefined, { each: true })` | Notas médicas (chart.clinical_note_headers) que motivan la orden. Cada una debe ser del mismo paciente, de un encuentro del tenant custodio, firmada o enmendada y sin confidencialidad restringida (si no, 422 BASED_ON_NOTE_NOT_FOUND, sin distinguir el motivo); y, si la orden tiene encuentro, del mismo encuentro (422 BASED_ON_NOTE_ENCOUNTER_MISMATCH) | `src/modules/clinical/dto/service-request.dto.ts:132` |
-| `priorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Prioridad (concept id) | `src/modules/clinical/dto/service-request.dto.ts:143` |
-| `requesterProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional solicitante | `src/modules/clinical/dto/service-request.dto.ts:154` |
-| `performerTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant ejecutante | `src/modules/clinical/dto/service-request.dto.ts:162` |
-| `performerSelectionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF, SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el paciente | `src/modules/clinical/dto/service-request.dto.ts:174` |
-| `performerPractitionerProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos | `src/modules/clinical/dto/service-request.dto.ts:186` |
-| `suggestedPracticeSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden | `src/modules/clinical/dto/service-request.dto.ts:198` |
-| `specimenTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Muestra pedida (value set `specimen-type`). Sólo con laboratorio o anatomía patológica (422 SPECIMEN_NOT_ALLOWED_FOR_CATEGORY / SPECIMEN_TYPE_NOT_IN_CATALOG, con details.reason) | `src/modules/clinical/dto/service-request.dto.ts:211` |
-| `componentConceptIds` | `array<string>` | No | máximo 500 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(500)` `@ArrayUnique()` `@IsConceptId({ each: true })` | Componentes MARCADOS del panel (conceptos `part-of` del estudio). Un panel desplegable exige la lista y no vacía (422 COMPONENTS_EMPTY); un estudio que no es panel la prohíbe (COMPONENTS_NOT_SELECTABLE); uno ajeno al panel: COMPONENT_NOT_IN_PANEL | `src/modules/clinical/dto/service-request.dto.ts:229` |
-| `imaging` | `ImagingDetailDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => ImagingDetailDto)` | — | `src/modules/clinical/dto/service-request.dto.ts:238` |
+| `modalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Equivale a `imaging.modalityConceptId` | `src/modules/clinical/dto/service-request-detail.dto.ts:91` |
+| `bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Equivale a `imaging.bodySiteConceptId` | `src/modules/clinical/dto/service-request-detail.dto.ts:99` |
+| `lateralityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Equivale a `imaging.lateralityConceptId` | `src/modules/clinical/dto/service-request-detail.dto.ts:107` |
+| `bodyStructureUberon` | `string` | No | longitud máxima 64 | `@IsOptional()` `@IsString()` `@MaxLength(64)` | Equivale a `imaging.bodyStructureUberon` | `src/modules/clinical/dto/service-request-detail.dto.ts:116` |
+| `bodyMeshId` | `string` | No | longitud máxima 64 | `@IsOptional()` `@IsString()` `@MaxLength(64)` | Equivale a `imaging.bodyMeshId` | `src/modules/clinical/dto/service-request-detail.dto.ts:125` |
+| `boneTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Equivale a `imaging.boneTypeConceptId` | `src/modules/clinical/dto/service-request-detail.dto.ts:133` |
+| `custodianTenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant custodio (directory.tenants) | `src/modules/clinical/dto/service-request.dto.ts:43` |
+| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Paciente (profiles.patient_profiles) | `src/modules/clinical/dto/service-request.dto.ts:53` |
+| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro en curso | `src/modules/clinical/dto/service-request.dto.ts:61` |
+| `formInstanceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Instancia CERRADA del formulario médico (forms.form_instances) de la que sale la orden. Opcional: desde la historia se emite sin formulario. Si viaja, debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no) | `src/modules/clinical/dto/service-request.dto.ts:75` |
+| `reasonConditionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Diagnóstico (clinical.conditions) que el estudio se pide para confirmar, descartar o seguir. Debe ser del mismo paciente que la orden (si no, o si no existe: 422 SERVICE_REQUEST_REASON_CONDITION_INVALID, sin distinguir el motivo) | `src/modules/clinical/dto/service-request.dto.ts:90` |
+| `codeConceptId` | `string` | Sí | formato uuid | `@IsConceptId()` | Código del servicio pedido (concept id) | `src/modules/clinical/dto/service-request.dto.ts:100` |
+| `categoryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Categoría (concept id) | `src/modules/clinical/dto/service-request.dto.ts:111` |
+| `category` | `string` | No | valores: LAB, IMAGING, OTHER | `@IsOptional()` `@IsIn(ANALYSIS_CATEGORIES)` | Categoría de análisis (C2). Se resuelve a categoryConceptId (LAB → SR_LAB, IMAGING → SR_IMAGING, OTHER → SR_OTHER). Si viaja con categoryConceptId y no coinciden: 422 SERVICE_REQUEST_CATEGORY_MISMATCH | `src/modules/clinical/dto/service-request.dto.ts:127` |
+| `basedOnNoteIds` | `array<string>` | No | formato uuid; máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(MAX_BASED_ON_NOTES)` `@ArrayUnique()` `@IsUUID(undefined, { each: true })` | Notas médicas (chart.clinical_note_headers) que motivan la orden. Cada una debe ser del mismo paciente, de un encuentro del tenant custodio, firmada o enmendada y sin confidencialidad restringida (si no, 422 BASED_ON_NOTE_NOT_FOUND, sin distinguir el motivo); y, si la orden tiene encuentro, del mismo encuentro (422 BASED_ON_NOTE_ENCOUNTER_MISMATCH) | `src/modules/clinical/dto/service-request.dto.ts:149` |
+| `priorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Prioridad (concept id) | `src/modules/clinical/dto/service-request.dto.ts:160` |
+| `requesterProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional solicitante | `src/modules/clinical/dto/service-request.dto.ts:171` |
+| `performerTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant ejecutante | `src/modules/clinical/dto/service-request.dto.ts:179` |
+| `performerSelectionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF, SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el paciente | `src/modules/clinical/dto/service-request.dto.ts:191` |
+| `performerPractitionerProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos | `src/modules/clinical/dto/service-request.dto.ts:203` |
+| `suggestedPracticeSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden | `src/modules/clinical/dto/service-request.dto.ts:215` |
+| `specimenTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Muestra pedida (value set `specimen-type`). Sólo con laboratorio o anatomía patológica (422 SPECIMEN_NOT_ALLOWED_FOR_CATEGORY / SPECIMEN_TYPE_NOT_IN_CATALOG, con details.reason) | `src/modules/clinical/dto/service-request.dto.ts:226` |
+| `componentConceptIds` | `array<string>` | No | máximo 500 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(500)` `@ArrayUnique()` `@IsConceptId({ each: true })` | Componentes MARCADOS del panel (conceptos `part-of` del estudio). Un panel desplegable exige la lista y no vacía (422 COMPONENTS_EMPTY); un estudio que no es panel la prohíbe (COMPONENTS_NOT_SELECTABLE); uno ajeno al panel: COMPONENT_NOT_IN_PANEL | `src/modules/clinical/dto/service-request.dto.ts:242` |
+| `imaging` | `ImagingDetailDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => ImagingDetailDto)` | — | `src/modules/clinical/dto/service-request.dto.ts:249` |
 | `imaging.modalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Modalidad (value set `service-request-imaging-modality`). Si el estudio del catálogo ya fija una y no se envía, se toma la del estudio; si se envía otra: 422 MODALITY_STUDY_MISMATCH | `src/modules/clinical/dto/service-request-detail.dto.ts:18` |
 | `imaging.bodySiteConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Región corporal (value set `imaging-body-structure`). Obligatoria en estudios de imagen del catálogo (422 BODY_SITE_REQUIRED) | `src/modules/clinical/dto/service-request-detail.dto.ts:27` |
 | `imaging.lateralityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Lateralidad (value set `condition-laterality`: izquierda, derecha, bilateral). Exige región; prohibida si la región no es par (422 LATERALITY_NOT_APPLICABLE) | `src/modules/clinical/dto/service-request-detail.dto.ts:36` |
 | `imaging.contrastConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Contraste (value set `imaging-contrast`). Exige modalidad (422 CONTRAST_REQUIRES_MODALITY) | `src/modules/clinical/dto/service-request-detail.dto.ts:45` |
-| `suggestedCareSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Punto de toma sugerido (F5b) | `src/modules/clinical/dto/service-request.dto.ts:251` |
-| `previousDiagnosticReportId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason. | `src/modules/clinical/dto/service-request.dto.ts:267` |
-| `reusePreviousReport` | `boolean` | No | — | `@ValidateIf( (o: CreateServiceRequestDto) => o.reusePreviousReport !== undefined, )` `@IsBoolean()` | Reutilizar el informe previo detectado en vez de repetir el estudio | `src/modules/clinical/dto/service-request.dto.ts:282` |
-| `duplicateOverrideReason` | `string` | No | longitud mínima 20; longitud máxima 1000 | `@ValidateIf( (o: CreateServiceRequestDto) => o.duplicateOverrideReason !== undefined, )` `@IsString()` `@MinLength(20, { message: 'La justificación clínica requiere al menos 20 caracteres', })` `@MaxLength(1000)` | Justificación clínica formal para repetir un estudio duplicado (mínimo 20 caracteres) | `src/modules/clinical/dto/service-request.dto.ts:302` |
+| `imaging.bodyStructureUberon` | `string` | No | longitud máxima 64 | `@IsOptional()` `@IsString()` `@MaxLength(64)` | Estructura marcada en el modelo 3D del cuerpo (`UBERON:<n>`). 422 BODY_STRUCTURE_FORMAT_INVALID si la forma no es esa; no se verifica contra el atlas | `src/modules/clinical/dto/service-request-detail.dto.ts:56` |
+| `imaging.bodyMeshId` | `string` | No | longitud máxima 64 | `@IsOptional()` `@IsString()` `@MaxLength(64)` | Malla marcada en el modelo 3D (id alfanumérico, p. ej. `BP44`). 422 BODY_MESH_ID_FORMAT_INVALID si no lo es | `src/modules/clinical/dto/service-request-detail.dto.ts:67` |
+| `imaging.boneTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsConceptId()` | Tipo de hueso (value set `bone-type`; lo elige el médico, no se deriva). Exige región o estructura UBERON (422 BONE_TYPE_REQUIRES_BODY_STRUCTURE / BONE_TYPE_NOT_IN_CATALOG) | `src/modules/clinical/dto/service-request-detail.dto.ts:76` |
+| `suggestedCareSpaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Punto de toma sugerido (F5b) | `src/modules/clinical/dto/service-request.dto.ts:262` |
+| `previousDiagnosticReportId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason. | `src/modules/clinical/dto/service-request.dto.ts:278` |
+| `reusePreviousReport` | `boolean` | No | — | `@ValidateIf( (o: CreateServiceRequestDto) => o.reusePreviousReport !== undefined, )` `@IsBoolean()` | Reutilizar el informe previo detectado en vez de repetir el estudio | `src/modules/clinical/dto/service-request.dto.ts:293` |
+| `duplicateOverrideReason` | `string` | No | longitud mínima 20; longitud máxima 1000 | `@ValidateIf( (o: CreateServiceRequestDto) => o.duplicateOverrideReason !== undefined, )` `@IsString()` `@MinLength(20, { message: 'La justificación clínica requiere al menos 20 caracteres', })` `@MaxLength(1000)` | Justificación clínica formal para repetir un estudio duplicado (mínimo 20 caracteres) | `src/modules/clinical/dto/service-request.dto.ts:313` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -6916,10 +7006,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ```json
 {
+  "modalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+  "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+  "bodyStructureUberon": "valor-ejemplo",
+  "bodyMeshId": "00000000-0000-4000-8000-000000000001",
+  "boneTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "custodianTenantId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
   "encounterId": "00000000-0000-4000-8000-000000000001",
   "formInstanceId": "00000000-0000-4000-8000-000000000001",
+  "reasonConditionId": "00000000-0000-4000-8000-000000000001",
   "codeConceptId": "00000000-0000-4000-8000-000000000001",
   "categoryConceptId": "00000000-0000-4000-8000-000000000001",
   "category": "LAB",
@@ -6940,7 +7037,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
     "modalityConceptId": "00000000-0000-4000-8000-000000000001",
     "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
     "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
-    "contrastConceptId": "00000000-0000-4000-8000-000000000001"
+    "contrastConceptId": "00000000-0000-4000-8000-000000000001",
+    "bodyStructureUberon": "UBERON:0000955",
+    "bodyMeshId": "BP44",
+    "boneTypeConceptId": "00000000-0000-4000-8000-000000000001"
   },
   "suggestedCareSpaceId": "00000000-0000-4000-8000-000000000001",
   "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
@@ -6955,41 +7055,46 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/service-request.dto.ts:311` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/clinical/dto/service-request.dto.ts:317` |
-| `formInstanceId` | `string` | No | formato uuid; admite null | — | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `src/modules/clinical/dto/service-request.dto.ts:328` |
-| `category` | `object` | No | — | — | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `src/modules/clinical/dto/service-request.dto.ts:338` |
-| `basedOnNoteIds` | `array<string>` | Sí | formato uuid | — | Notas médicas que motivan la orden (vacío = ninguna) | `src/modules/clinical/dto/service-request.dto.ts:348` |
-| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:354` |
-| `intent` | `string` | Sí | formato uuid | — | Intención (concept id) | `src/modules/clinical/dto/service-request.dto.ts:360` |
-| `performerSelectionConceptId` | `string` | Sí | formato uuid | — | Modo de ejecutor recomendado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:369` |
-| `performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | Médico ejecutor, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:375` |
-| `suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | Sede sugerida, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:381` |
-| `suggestedPracticeSiteName` | `string` | Sí | admite null | — | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `src/modules/clinical/dto/service-request.dto.ts:387` |
-| `suggestedCareSpace` | `object` | Sí | admite null | — | Punto de toma sugerido {id, code, name} (F5b) | `src/modules/clinical/dto/service-request.dto.ts:394` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/service-request.dto.ts:322` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/clinical/dto/service-request.dto.ts:328` |
+| `formInstanceId` | `string` | No | formato uuid; admite null | — | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `src/modules/clinical/dto/service-request.dto.ts:339` |
+| `reasonConditionId` | `string` | No | formato uuid | — | Diagnóstico que el estudio se pidió para confirmar, descartar o seguir. Ausente = la orden no lo declara | `src/modules/clinical/dto/service-request.dto.ts:349` |
+| `category` | `object` | No | — | — | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `src/modules/clinical/dto/service-request.dto.ts:359` |
+| `basedOnNoteIds` | `array<string>` | Sí | formato uuid | — | Notas médicas que motivan la orden (vacío = ninguna) | `src/modules/clinical/dto/service-request.dto.ts:369` |
+| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:375` |
+| `intent` | `string` | Sí | formato uuid | — | Intención (concept id) | `src/modules/clinical/dto/service-request.dto.ts:381` |
+| `performerSelectionConceptId` | `string` | Sí | formato uuid | — | Modo de ejecutor recomendado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:390` |
+| `performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | Médico ejecutor, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:396` |
+| `suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | Sede sugerida, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:402` |
+| `suggestedPracticeSiteName` | `string` | Sí | admite null | — | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `src/modules/clinical/dto/service-request.dto.ts:408` |
+| `suggestedCareSpace` | `object` | Sí | admite null | — | Punto de toma sugerido {id, code, name} (F5b) | `src/modules/clinical/dto/service-request.dto.ts:415` |
 | `suggestedCareSpace.id` | `string` | Sí | — | — | — | sin fuente |
 | `suggestedCareSpace.code` | `string` | Sí | — | — | — | sin fuente |
 | `suggestedCareSpace.name` | `string` | Sí | — | — | — | sin fuente |
-| `requisitionId` | `string` | No | formato uuid; admite null | — | v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual). | `src/modules/clinical/dto/service-request.dto.ts:400` |
-| `codeConceptId` | `string` | No | formato uuid | — | v4.2.82: el estudio pedido. | `src/modules/clinical/dto/service-request.dto.ts:404` |
-| `codeDisplay` | `string` | No | — | — | v4.2.82: nombre legible del estudio. | `src/modules/clinical/dto/service-request.dto.ts:408` |
-| `specimenTypeConceptId` | `string` | No | formato uuid; admite null | — | v4.2.82: muestra pedida (nulo = no se indicó). | `src/modules/clinical/dto/service-request.dto.ts:412` |
-| `specimenTypeDisplay` | `string` | No | admite null | — | v4.2.82: nombre legible de la muestra. | `src/modules/clinical/dto/service-request.dto.ts:416` |
-| `components` | `array<ServiceRequestComponentDto>` | No | — | — | v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo va vacío y significa «estudio completo, sin detalle» (órdenes anteriores). | `src/modules/clinical/dto/service-request.dto.ts:423` |
-| `components[].conceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:51` |
-| `components[].display` | `string` | No | — | — | Nombre legible (castellano si existe) | `src/modules/clinical/dto/service-request-detail.dto.ts:54` |
-| `components[].ordinal` | `number` | No | — | — | Posición, desde 1, en el orden en que se marcó | `src/modules/clinical/dto/service-request-detail.dto.ts:59` |
-| `componentsSpecified` | `boolean` | No | — | — | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `src/modules/clinical/dto/service-request.dto.ts:427` |
-| `imaging` | `ServiceRequestImagingDto` | No | — | — | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `src/modules/clinical/dto/service-request.dto.ts:431` |
-| `imaging.modalityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:65` |
-| `imaging.modalityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:67` |
-| `imaging.bodySiteConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:69` |
-| `imaging.bodySiteDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:71` |
-| `imaging.lateralityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:73` |
-| `imaging.lateralityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:75` |
-| `imaging.contrastConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:77` |
-| `imaging.contrastDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:79` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/service-request.dto.ts:437` |
+| `requisitionId` | `string` | No | formato uuid; admite null | — | v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual). | `src/modules/clinical/dto/service-request.dto.ts:421` |
+| `codeConceptId` | `string` | No | formato uuid | — | v4.2.82: el estudio pedido. | `src/modules/clinical/dto/service-request.dto.ts:425` |
+| `codeDisplay` | `string` | No | — | — | v4.2.82: nombre legible del estudio. | `src/modules/clinical/dto/service-request.dto.ts:429` |
+| `specimenTypeConceptId` | `string` | No | formato uuid; admite null | — | v4.2.82: muestra pedida (nulo = no se indicó). | `src/modules/clinical/dto/service-request.dto.ts:433` |
+| `specimenTypeDisplay` | `string` | No | admite null | — | v4.2.82: nombre legible de la muestra. | `src/modules/clinical/dto/service-request.dto.ts:437` |
+| `components` | `array<ServiceRequestComponentDto>` | No | — | — | v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo va vacío y significa «estudio completo, sin detalle» (órdenes anteriores). | `src/modules/clinical/dto/service-request.dto.ts:444` |
+| `components[].conceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:139` |
+| `components[].display` | `string` | No | — | — | Nombre legible (castellano si existe) | `src/modules/clinical/dto/service-request-detail.dto.ts:142` |
+| `components[].ordinal` | `number` | No | — | — | Posición, desde 1, en el orden en que se marcó | `src/modules/clinical/dto/service-request-detail.dto.ts:147` |
+| `componentsSpecified` | `boolean` | No | — | — | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `src/modules/clinical/dto/service-request.dto.ts:448` |
+| `imaging` | `ServiceRequestImagingDto` | No | — | — | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `src/modules/clinical/dto/service-request.dto.ts:452` |
+| `imaging.modalityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:153` |
+| `imaging.modalityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:155` |
+| `imaging.bodySiteConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:157` |
+| `imaging.bodySiteDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:159` |
+| `imaging.lateralityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:161` |
+| `imaging.lateralityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:163` |
+| `imaging.contrastConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:165` |
+| `imaging.contrastDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:167` |
+| `imaging.bodyStructureUberon` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:169` |
+| `imaging.bodyMeshId` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:171` |
+| `imaging.boneTypeConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:173` |
+| `imaging.boneTypeDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:175` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/service-request.dto.ts:458` |
 
 ### Respuestas posibles
 
@@ -7000,7 +7105,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: {message}; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar; PreconditionFailedException: El punto de toma no es un punto disponible de la sede sugerida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: El diagnóstico indicado no existe o no es de esta persona; PreconditionFailedException: {message}; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar; PreconditionFailedException: El punto de toma no es un punto disponible de la sede sugerida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/clinical.md).
@@ -7010,11 +7115,13 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/hardening/mch-027.int-spec.ts:69` |
+| INTEGRACION | `test/integration/lab-portal-order-intake.int-spec.ts:118` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:158` |
 | INTEGRACION | `test/integration/medical-centers.int-spec.ts:818` |
 | INTEGRACION | `test/integration/p40-orden-basada-en-notas.int-spec.ts:171` |
 | INTEGRACION | `test/integration/patient-diagnostic-orders.int-spec.ts:87` |
-| CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:46` |
+| INTEGRACION | `test/integration/report-drafts.int-spec.ts:151` |
+| CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:50` |
 
 ### Flujos
 
@@ -7039,7 +7146,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /clinical/service-requests/{id}` la atiende `ClinicalOrdersController.getServiceRequest` (src/modules/clinical/controllers/clinical-orders.controller.ts:142). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ServiceRequestReadService.getById`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 18 más.
+`GET /clinical/service-requests/{id}` la atiende `ClinicalOrdersController.getServiceRequest` (src/modules/clinical/controllers/clinical-orders.controller.ts:142). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ServiceRequestReadService.getById`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 20 más.
 
 ### Requerimientos
 
@@ -7047,39 +7154,41 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-orders.controller.ts:142` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical/controllers/clinical-orders.controller.ts:142` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
-| `clinical.service_request_components` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ServiceRequestReadService.toResponses → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:466` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `clinical.service_request_components` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ServiceRequestReadService.toResponses → ServiceRequestDetailService.describe → ServiceRequestDetailService.loadComponents | `src/modules/clinical/services/service-request-detail.service.ts:462` |
 | `clinical.service_request_notes` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ServiceRequestReadService.toResponses → ServiceRequestNotesService.noteIdsFor | `src/modules/clinical/services/service-request-notes.service.ts:160` |
-| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById | `src/modules/clinical/services/service-request-read.service.ts:49` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `clinical.service_requests` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById | `src/modules/clinical/services/service-request-read.service.ts:50` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ServiceRequestReadService.toResponses → SuggestedSiteNamesReader.namesFor | `src/modules/clinical/services/suggested-site-names.reader.ts:31` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ServiceRequestReadService.toResponses → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays | `src/modules/clinical/services/service-request-detail.service.ts:493` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ServiceRequestReadService.toResponses → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays | `src/modules/clinical/services/service-request-detail.service.ts:491` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | ClinicalOrdersController.getServiceRequest → ServiceRequestReadService.getById → ServiceRequestReadService.toResponses → ServiceRequestDetailService.describe → ServiceRequestDetailService.displays → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
 
 ### Parámetros
@@ -7096,41 +7205,46 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/service-request.dto.ts:311` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/clinical/dto/service-request.dto.ts:317` |
-| `formInstanceId` | `string` | No | formato uuid; admite null | — | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `src/modules/clinical/dto/service-request.dto.ts:328` |
-| `category` | `object` | No | — | — | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `src/modules/clinical/dto/service-request.dto.ts:338` |
-| `basedOnNoteIds` | `array<string>` | Sí | formato uuid | — | Notas médicas que motivan la orden (vacío = ninguna) | `src/modules/clinical/dto/service-request.dto.ts:348` |
-| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:354` |
-| `intent` | `string` | Sí | formato uuid | — | Intención (concept id) | `src/modules/clinical/dto/service-request.dto.ts:360` |
-| `performerSelectionConceptId` | `string` | Sí | formato uuid | — | Modo de ejecutor recomendado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:369` |
-| `performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | Médico ejecutor, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:375` |
-| `suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | Sede sugerida, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:381` |
-| `suggestedPracticeSiteName` | `string` | Sí | admite null | — | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `src/modules/clinical/dto/service-request.dto.ts:387` |
-| `suggestedCareSpace` | `object` | Sí | admite null | — | Punto de toma sugerido {id, code, name} (F5b) | `src/modules/clinical/dto/service-request.dto.ts:394` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/service-request.dto.ts:322` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/clinical/dto/service-request.dto.ts:328` |
+| `formInstanceId` | `string` | No | formato uuid; admite null | — | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `src/modules/clinical/dto/service-request.dto.ts:339` |
+| `reasonConditionId` | `string` | No | formato uuid | — | Diagnóstico que el estudio se pidió para confirmar, descartar o seguir. Ausente = la orden no lo declara | `src/modules/clinical/dto/service-request.dto.ts:349` |
+| `category` | `object` | No | — | — | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `src/modules/clinical/dto/service-request.dto.ts:359` |
+| `basedOnNoteIds` | `array<string>` | Sí | formato uuid | — | Notas médicas que motivan la orden (vacío = ninguna) | `src/modules/clinical/dto/service-request.dto.ts:369` |
+| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:375` |
+| `intent` | `string` | Sí | formato uuid | — | Intención (concept id) | `src/modules/clinical/dto/service-request.dto.ts:381` |
+| `performerSelectionConceptId` | `string` | Sí | formato uuid | — | Modo de ejecutor recomendado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:390` |
+| `performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | Médico ejecutor, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:396` |
+| `suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | Sede sugerida, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:402` |
+| `suggestedPracticeSiteName` | `string` | Sí | admite null | — | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `src/modules/clinical/dto/service-request.dto.ts:408` |
+| `suggestedCareSpace` | `object` | Sí | admite null | — | Punto de toma sugerido {id, code, name} (F5b) | `src/modules/clinical/dto/service-request.dto.ts:415` |
 | `suggestedCareSpace.id` | `string` | Sí | — | — | — | sin fuente |
 | `suggestedCareSpace.code` | `string` | Sí | — | — | — | sin fuente |
 | `suggestedCareSpace.name` | `string` | Sí | — | — | — | sin fuente |
-| `requisitionId` | `string` | No | formato uuid; admite null | — | v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual). | `src/modules/clinical/dto/service-request.dto.ts:400` |
-| `codeConceptId` | `string` | No | formato uuid | — | v4.2.82: el estudio pedido. | `src/modules/clinical/dto/service-request.dto.ts:404` |
-| `codeDisplay` | `string` | No | — | — | v4.2.82: nombre legible del estudio. | `src/modules/clinical/dto/service-request.dto.ts:408` |
-| `specimenTypeConceptId` | `string` | No | formato uuid; admite null | — | v4.2.82: muestra pedida (nulo = no se indicó). | `src/modules/clinical/dto/service-request.dto.ts:412` |
-| `specimenTypeDisplay` | `string` | No | admite null | — | v4.2.82: nombre legible de la muestra. | `src/modules/clinical/dto/service-request.dto.ts:416` |
-| `components` | `array<ServiceRequestComponentDto>` | No | — | — | v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo va vacío y significa «estudio completo, sin detalle» (órdenes anteriores). | `src/modules/clinical/dto/service-request.dto.ts:423` |
-| `components[].conceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:51` |
-| `components[].display` | `string` | No | — | — | Nombre legible (castellano si existe) | `src/modules/clinical/dto/service-request-detail.dto.ts:54` |
-| `components[].ordinal` | `number` | No | — | — | Posición, desde 1, en el orden en que se marcó | `src/modules/clinical/dto/service-request-detail.dto.ts:59` |
-| `componentsSpecified` | `boolean` | No | — | — | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `src/modules/clinical/dto/service-request.dto.ts:427` |
-| `imaging` | `ServiceRequestImagingDto` | No | — | — | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `src/modules/clinical/dto/service-request.dto.ts:431` |
-| `imaging.modalityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:65` |
-| `imaging.modalityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:67` |
-| `imaging.bodySiteConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:69` |
-| `imaging.bodySiteDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:71` |
-| `imaging.lateralityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:73` |
-| `imaging.lateralityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:75` |
-| `imaging.contrastConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:77` |
-| `imaging.contrastDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:79` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/service-request.dto.ts:437` |
+| `requisitionId` | `string` | No | formato uuid; admite null | — | v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual). | `src/modules/clinical/dto/service-request.dto.ts:421` |
+| `codeConceptId` | `string` | No | formato uuid | — | v4.2.82: el estudio pedido. | `src/modules/clinical/dto/service-request.dto.ts:425` |
+| `codeDisplay` | `string` | No | — | — | v4.2.82: nombre legible del estudio. | `src/modules/clinical/dto/service-request.dto.ts:429` |
+| `specimenTypeConceptId` | `string` | No | formato uuid; admite null | — | v4.2.82: muestra pedida (nulo = no se indicó). | `src/modules/clinical/dto/service-request.dto.ts:433` |
+| `specimenTypeDisplay` | `string` | No | admite null | — | v4.2.82: nombre legible de la muestra. | `src/modules/clinical/dto/service-request.dto.ts:437` |
+| `components` | `array<ServiceRequestComponentDto>` | No | — | — | v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo va vacío y significa «estudio completo, sin detalle» (órdenes anteriores). | `src/modules/clinical/dto/service-request.dto.ts:444` |
+| `components[].conceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:139` |
+| `components[].display` | `string` | No | — | — | Nombre legible (castellano si existe) | `src/modules/clinical/dto/service-request-detail.dto.ts:142` |
+| `components[].ordinal` | `number` | No | — | — | Posición, desde 1, en el orden en que se marcó | `src/modules/clinical/dto/service-request-detail.dto.ts:147` |
+| `componentsSpecified` | `boolean` | No | — | — | v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). | `src/modules/clinical/dto/service-request.dto.ts:448` |
+| `imaging` | `ServiceRequestImagingDto` | No | — | — | v4.2.82: detalle de imagen; `null` si la orden no lo trae. | `src/modules/clinical/dto/service-request.dto.ts:452` |
+| `imaging.modalityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:153` |
+| `imaging.modalityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:155` |
+| `imaging.bodySiteConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:157` |
+| `imaging.bodySiteDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:159` |
+| `imaging.lateralityConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:161` |
+| `imaging.lateralityDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:163` |
+| `imaging.contrastConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:165` |
+| `imaging.contrastDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:167` |
+| `imaging.bodyStructureUberon` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:169` |
+| `imaging.bodyMeshId` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:171` |
+| `imaging.boneTypeConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:173` |
+| `imaging.boneTypeDisplay` | `string` | No | admite null | — | — | `src/modules/clinical/dto/service-request-detail.dto.ts:175` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/service-request.dto.ts:458` |
 
 ### Respuestas posibles
 
@@ -7148,7 +7262,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:73` |
+| CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:77` |
 
 ### Flujos
 
@@ -7173,7 +7287,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/service-requests/duplicate-check` la atiende `ClinicalOrdersController.checkDuplicateStudy` (src/modules/clinical/controllers/clinical-orders.controller.ts:74). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CheckDuplicateStudyDto` (8 campos, 2 obligatorios). Delega en `ServiceRequestsService.checkDuplicate`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 20 más.
+`POST /clinical/service-requests/duplicate-check` la atiende `ClinicalOrdersController.checkDuplicateStudy` (src/modules/clinical/controllers/clinical-orders.controller.ts:74). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CheckDuplicateStudyDto` (8 campos, 2 obligatorios). Delega en `ServiceRequestsService.checkDuplicate`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 22 más.
 
 ### Requerimientos
 
@@ -7181,41 +7295,43 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical/controllers/clinical-orders.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
-| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
-| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
-| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
-| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
-| `authz.roles` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
-| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.currentRelations → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:101` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolesRepository.findIamPolicyRoles | `src/modules/authz/repositories/roles.repository.ts:56` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:119` |
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:191` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:174` |
 | `clinical.service_requests` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:163` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ServiceRequestsService.resolveCodeConceptId | `src/modules/clinical/services/service-requests.service.ts:671` |
+| `consent.consent_provisions` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
+| `consent.consents` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalGranularScopeService.resolve → ClinicalGranularScopeService.permittedBy → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ServiceRequestsService.resolveCodeConceptId | `src/modules/clinical/services/service-requests.service.ts:706` |
 | `diagnostics.diagnostic_report_versions` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → DuplicateStudyDetector.findDuplicate → DuplicateStudyDetector.releasedVersionOf | `src/modules/clinical/services/duplicate-study-detector.ts:438` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → DuplicateStudyDetector.findActiveOrderWithoutReport → DuplicateStudyDetector.providerName | `src/modules/clinical/services/duplicate-study-detector.ts:488` |
-| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `iam.users` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
-| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1060` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `iam.user_global_roles` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `iam.users` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → IamGlobalRolesAdapter.codesForUser | `src/modules/authz/infrastructure/iam-global-roles.adapter.ts:13` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:136` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:102` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1059` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → ClinicalReadService.resolveReadScope → ClinicalReadService.attendanceBasis → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1034` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → DuplicateStudyDetector.findActiveOrderWithoutReport → DuplicateStudyDetector.designationOrDisplay | `src/modules/clinical/services/duplicate-study-detector.ts:478` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → DuplicateStudyDetector.findActiveOrderWithoutReport → DuplicateStudyDetector.designationOrDisplay → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
 
@@ -7329,8 +7445,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SYSTEM_WORKER | `src/modules/clinical/controllers/clinical-adt.controller.ts:421` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7338,12 +7454,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical.encounter_locations` | LEE | LEE | POR_SQL | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close → InpatientRepository.segments | `src/modules/clinical/repositories/inpatient.repository.ts:195` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close → InpatientRepository.segments | `src/modules/clinical/repositories/inpatient.repository.ts:195` |
-| `clinical.inpatient_census_days` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:312` |
-| `clinical.inpatient_census_days` | LEE | LEE | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:286` |
-| `clinical.inpatient_census_entries` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:351` |
+| `clinical.inpatient_census_days` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:307` |
+| `clinical.inpatient_census_days` | LEE | LEE | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:281` |
+| `clinical.inpatient_census_entries` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:346` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | ClinicalCensusController.tick → InpatientCensusService.tick → InpatientCensusUseCases.tick → InpatientCensusUseCases.close → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -7495,9 +7611,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:282` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/clinical/controllers/clinical-adt.controller.ts:282` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7505,7 +7621,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.attendingPractitioners → InpatientAdtService.attendingPractitioners → InpatientReadUseCases.attendingPractitioners → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.attendingPractitioners → InpatientAdtService.attendingPractitioners → InpatientReadUseCases.attendingPractitioners → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.attendingPractitioners → InpatientAdtService.attendingPractitioners → InpatientReadUseCases.attendingPractitioners → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.attendingPractitioners → InpatientAdtService.attendingPractitioners → InpatientReadUseCases.attendingPractitioners → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | ClinicalAdtController.attendingPractitioners → InpatientAdtService.attendingPractitioners → InpatientReadUseCases.attendingPractitioners → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | ClinicalAdtController.attendingPractitioners → InpatientAdtService.attendingPractitioners → InpatientReadUseCases.attendingPractitioners → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ClinicalAdtController.attendingPractitioners → InpatientAdtService.attendingPractitioners → InpatientReadUseCases.attendingPractitioners → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
@@ -7577,10 +7693,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:339` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | date (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/clinical/controllers/clinical-adt.controller.ts:339` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7592,7 +7708,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.inpatient_census_days` | LEE | LEE | DIRECTA | ClinicalCensusController.view → InpatientCensusService.view → InpatientCensusUseCases.view | `src/modules/clinical/services/inpatient/census.use-cases.ts:158` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalCensusController.view → InpatientCensusService.view → InpatientCensusUseCases.view → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.view → InpatientCensusService.view → InpatientCensusUseCases.view → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.view → InpatientCensusService.view → InpatientCensusUseCases.view → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.view → InpatientCensusService.view → InpatientCensusUseCases.view → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | ClinicalCensusController.view → InpatientCensusService.view → InpatientCensusUseCases.view → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | ClinicalCensusController.view → InpatientCensusService.view → InpatientCensusUseCases.view → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ClinicalCensusController.view → InpatientCensusService.view → InpatientCensusUseCases.view → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |
@@ -7665,11 +7781,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:356` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/clinical/controllers/clinical-adt.controller.ts:356` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7677,12 +7793,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical.encounter_locations` | LEE | LEE | POR_SQL | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close → InpatientRepository.segments | `src/modules/clinical/repositories/inpatient.repository.ts:195` |
 | `clinical.encounters` | LEE | LEE | POR_SQL | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close → InpatientRepository.segments | `src/modules/clinical/repositories/inpatient.repository.ts:195` |
-| `clinical.inpatient_census_days` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:312` |
-| `clinical.inpatient_census_days` | LEE | LEE | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:286` |
-| `clinical.inpatient_census_entries` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:351` |
+| `clinical.inpatient_census_days` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:307` |
+| `clinical.inpatient_census_days` | LEE | LEE | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:281` |
+| `clinical.inpatient_census_entries` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close | `src/modules/clinical/services/inpatient/census.use-cases.ts:346` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | ClinicalCensusController.close → InpatientCensusService.close → InpatientCensusUseCases.close → AdtSupport.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -7783,21 +7899,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:402` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/clinical/controllers/clinical-adt.controller.ts:402` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical.inpatient_census_adjustments` | LEE | LEE | DIRECTA | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators | `src/modules/clinical/services/inpatient/census.use-cases.ts:526` |
-| `clinical.inpatient_census_days` | LEE | LEE | DIRECTA | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators | `src/modules/clinical/services/inpatient/census.use-cases.ts:518` |
+| `clinical.inpatient_census_adjustments` | LEE | LEE | DIRECTA | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators | `src/modules/clinical/services/inpatient/census.use-cases.ts:521` |
+| `clinical.inpatient_census_days` | LEE | LEE | DIRECTA | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators | `src/modules/clinical/services/inpatient/census.use-cases.ts:513` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.cleaning_orders` | LEE | LEE | POR_SQL | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators → InpatientRepository.turnarounds | `src/modules/clinical/repositories/inpatient.repository.ts:253` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | ClinicalCensusController.indicators → InpatientIndicatorsService.indicators → InpatientCensusUseCases.indicators → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
@@ -7872,9 +7988,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical/controllers/clinical-adt.controller.ts:254` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/clinical/controllers/clinical-adt.controller.ts:254` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -7884,7 +8000,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalAdtController.inpatients → InpatientAdtService.inpatients → InpatientReadUseCases.inpatients | `src/modules/clinical/services/inpatient/inpatient-read.use-cases.ts:412` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | ClinicalAdtController.inpatients → InpatientAdtService.inpatients → InpatientReadUseCases.inpatients → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → CareSpaceOpsRepository.grants | `src/modules/practice/repositories/care-space-ops.repository.ts:91` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.inpatients → InpatientAdtService.inpatients → InpatientReadUseCases.inpatients → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isBranchAdmin | `src/modules/practice/services/structure-access.service.ts:270` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.inpatients → InpatientAdtService.inpatients → InpatientReadUseCases.inpatients → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalAdtController.inpatients → InpatientAdtService.inpatients → InpatientReadUseCases.inpatients → InfrastructureAccessService.assertCan → InfrastructureAccessService.actorScope → StructureAccessService.adminLevelOf → StructureAccessService.isOrganizationAdmin → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:76` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | ClinicalAdtController.inpatients → InpatientAdtService.inpatients → InpatientReadUseCases.inpatients → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:85` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | ClinicalAdtController.inpatients → InpatientAdtService.inpatients → InpatientReadUseCases.inpatients → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | ClinicalAdtController.inpatients → InpatientAdtService.inpatients → InpatientReadUseCases.inpatients → InfrastructureAccessService.assertCan → InfrastructureAccessService.resolve → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:74` |

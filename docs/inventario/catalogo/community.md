@@ -18,9 +18,9 @@
 | [content_reports](#content_reports) | Registra reportes de contenido para solicitar evaluación de publicaciones potencialmente inadecuadas. | 11 | 5 | 4 | COINCIDE |
 | [conversation_assignments](#conversation_assignments) | Asigna cada conversación de mensajes a un profesional y a quien del equipo de apoyo la tomó, con su estado y su plazo de respuesta. | 12 | 8 | 0 | COINCIDE |
 | [conversation_internal_notes](#conversation_internal_notes) | Guarda las notas internas del equipo sobre una conversación, que el paciente nunca ve. | 6 | 3 | 0 | COINCIDE |
-| [conversation_participants](#conversation_participants) | Relaciona usuarios con conversaciones para controlar participantes y acceso a mensajes. | 17 | 8 | 41 | COINCIDE |
-| [conversations](#conversations) | Representa conversaciones comunitarias entre usuarios para habilitar comunicación fuera del expediente clínico. | 13 | 8 | 40 | COINCIDE |
-| [direct_messages](#direct_messages) | Conserva mensajes directos entre usuarios para la comunicación privada del producto, separados de las notas clínicas. | 20 | 12 | 11 | COINCIDE |
+| [conversation_participants](#conversation_participants) | Relaciona usuarios con conversaciones para controlar participantes y acceso a mensajes. | 17 | 8 | 44 | COINCIDE |
+| [conversations](#conversations) | Representa conversaciones comunitarias entre usuarios para habilitar comunicación fuera del expediente clínico. | 13 | 8 | 42 | COINCIDE |
+| [direct_messages](#direct_messages) | Conserva mensajes directos entre usuarios para la comunicación privada del producto, separados de las notas clínicas. | 20 | 12 | 14 | COINCIDE |
 | [feed_items](#feed_items) | Compone elementos del feed para presentar publicaciones relevantes a cada usuario. | 15 | 6 | 6 | COINCIDE |
 | [feedback_ticket_comments](#feedback_ticket_comments) | Conserva intercambios y observaciones asociados a tickets de feedback para documentar su atención. | 11 | 3 | 0 | COINCIDE |
 | [feedback_ticket_events](#feedback_ticket_events) | Mantiene eventos de cambio de tickets para reconstruir su ciclo de vida y resolución. | 9 | 4 | 0 | COINCIDE |
@@ -29,7 +29,7 @@
 | [groups](#groups) | Representa grupos comunitarios que reúnen usuarios alrededor de intereses o áreas de salud. | 18 | 12 | 12 | COINCIDE |
 | [hashtags](#hashtags) | Cataloga etiquetas temáticas que organizan y hacen descubrible contenido comunitario. | 11 | 5 | 4 | COINCIDE |
 | [mentions](#mentions) | Relaciona usuarios mencionados en publicaciones o comentarios para facilitar notificaciones y navegación. | 12 | 5 | 3 | COINCIDE |
-| [message_receipts](#message_receipts) | Registra estados de recepción o lectura de mensajes directos para dar seguimiento a su entrega. | 7 | 5 | 2 | COINCIDE |
+| [message_receipts](#message_receipts) | Registra estados de recepción o lectura de mensajes directos para dar seguimiento a su entrega. | 7 | 5 | 3 | COINCIDE |
 | [moderation_appeals](#moderation_appeals) | Gestiona apelaciones de usuarios a decisiones de moderación para habilitar revisión y resolución. | 13 | 7 | 6 | COINCIDE |
 | [moderation_decisions](#moderation_decisions) | Preserva decisiones de moderación para explicar acciones tomadas sobre contenido o usuarios. | 13 | 7 | 6 | COINCIDE |
 | [moderation_queue](#moderation_queue) | Encola contenido que requiere revisión para aplicar normas de participación y seguridad comunitaria. | 16 | 10 | 9 | COINCIDE |
@@ -42,7 +42,7 @@
 | [post_shares](#post_shares) | Registra compartidos de publicaciones para conocer cómo circula contenido público entre usuarios. | 11 | 6 | 0 | COINCIDE |
 | [prestige_awards](#prestige_awards) | Registra reconocimientos otorgados a perfiles para comunicar logros o contribuciones comunitarias. | 17 | 6 | 0 | COINCIDE |
 | [prestige_scores](#prestige_scores) | Mantiene puntajes de reputación o participación asociados a perfiles según reglas del producto. | 16 | 4 | 2 | COINCIDE |
-| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 187 | COINCIDE |
+| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 193 | COINCIDE |
 | [reactions](#reactions) | Registra reacciones de usuarios a contenido comunitario para expresar interacción social. | 10 | 6 | 16 | COINCIDE |
 | [reply_templates](#reply_templates) | Conserva respuestas rápidas de una organización o de un profesional para que el equipo conteste mensajes administrativos con textos acordados. | 12 | 6 | 0 | COINCIDE |
 | [review_dimension_scores](#review_dimension_scores) | Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de atención. | 5 | 2 | 4 | COINCIDE |
@@ -51,8 +51,8 @@
 | [social_follows](#social_follows) | Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actualizaciones públicas. | 11 | 7 | 17 | COINCIDE |
 | [social_notifications](#social_notifications) | Genera avisos sobre interacciones sociales para que usuarios conozcan menciones, respuestas o actividad relevante. | 16 | 8 | 1 | COINCIDE |
 | [social_posts](#social_posts) | Conserva publicaciones públicas de profesionales y organizaciones para informar y facilitar su descubrimiento, sin incorporarlas a la historia clínica. | 16 | 10 | 24 | COINCIDE |
-| [topics](#topics) | Define temas comunitarios para clasificar contenido y espacios de conversación. | 12 | 7 | 2 | COINCIDE |
-| [user_blocks](#user_blocks) | Registra bloqueos entre usuarios para controlar interacciones y seguridad en espacios comunitarios. | 10 | 6 | 34 | COINCIDE |
+| [topics](#topics) | Define temas comunitarios para clasificar contenido y espacios de conversación. | 12 | 7 | 5 | COINCIDE |
+| [user_blocks](#user_blocks) | Registra bloqueos entre usuarios para controlar interacciones y seguridad en espacios comunitarios. | 10 | 6 | 36 | COINCIDE |
 | [verified_badges](#verified_badges) | Representa insignias de verificación pública para indicar atributos revisados de perfiles sanitarios. | 15 | 7 | 56 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -1084,7 +1084,7 @@ Relaciona usuarios con conversaciones para controlar participantes y acceso a me
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: conversation_participants`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ConversationParticipants` — `src/modules/community/entities/conversation_participants.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 7 FK salientes · 0 entrantes · 41 operaciones
+- **Resumen:** 17 columnas · 8 índices · 7 FK salientes · 0 entrantes · 44 operaciones
 
 #### Columnas
 
@@ -1146,6 +1146,7 @@ Relaciona usuarios con conversaciones para controlar participantes y acceso a me
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
 | PATCH /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PUT /community/conversations/{conversationId}/messages/{messageId}/reaction | LEE | DIRECTA |
 | PATCH /community/conversations/{conversationId}/participant | LEE | DIRECTA |
 | DELETE /community/conversations/{conversationId}/pin | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
@@ -1170,6 +1171,8 @@ Relaciona usuarios con conversaciones para controlar participantes y acceso a me
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | CREA | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | CREA | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | CREA | DIRECTA |
@@ -1202,7 +1205,7 @@ Representa conversaciones comunitarias entre usuarios para habilitar comunicaci�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: conversations`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `Conversations` — `src/modules/community/entities/conversations.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 5 entrantes · 40 operaciones
+- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 5 entrantes · 42 operaciones
 
 #### Columnas
 
@@ -1288,6 +1291,8 @@ Representa conversaciones comunitarias entre usuarios para habilitar comunicaci�
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | CREA | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | CREA | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | CREA | DIRECTA |
@@ -1320,7 +1325,7 @@ Conserva mensajes directos entre usuarios para la comunicación privada del prod
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: direct_messages`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `DirectMessages` — `src/modules/community/entities/direct_messages.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 4 entrantes · 11 operaciones
+- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 4 entrantes · 14 operaciones
 
 #### Columnas
 
@@ -1403,8 +1408,11 @@ Conserva mensajes directos entre usuarios para la comunicación privada del prod
 | DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
 | PATCH /community/conversations/{conversationId}/messages/{messageId} | ACTUALIZA | POR_TIPO |
 | PATCH /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PUT /community/conversations/{conversationId}/messages/{messageId}/reaction | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/read | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2066,7 +2074,7 @@ Registra estados de recepción o lectura de mensajes directos para dar seguimien
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: message_receipts`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `MessageReceipts` — `src/modules/community/entities/message_receipts.entity.ts`
-- **Resumen:** 7 columnas · 5 índices · 4 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 7 columnas · 5 índices · 4 FK salientes · 0 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -2105,6 +2113,7 @@ Registra estados de recepción o lectura de mensajes directos para dar seguimien
 |---|---|---|
 | POST /community/conversations/{conversationId}/messages | CREA | DIRECTA |
 | POST /community/conversations/{conversationId}/read | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -3051,7 +3060,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: public_profiles; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `PublicProfiles` — `src/modules/community/entities/public_profiles.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 187 operaciones
+- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 193 operaciones
 
 #### Columnas
 
@@ -3167,6 +3176,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
 | PATCH /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PUT /community/conversations/{conversationId}/messages/{messageId}/reaction | LEE | DIRECTA |
 | PATCH /community/conversations/{conversationId}/participant | LEE | DIRECTA |
 | DELETE /community/conversations/{conversationId}/pin | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
@@ -3247,6 +3257,8 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | POST /diagnostic-units/{id}/verify-and-publish | ACTUALIZA | POR_TIPO |
 | POST /diagnostic-units/{id}/verify-and-publish | CREA | DIRECTA |
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/preview | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | PUT /admin/tenants/{tenantId}/public-profile | ACTUALIZA | POR_TIPO |
 | PUT /admin/tenants/{tenantId}/public-profile | LEE | DIRECTA |
 | POST /admin/tenants/{tenantId}/verification | ACTUALIZA | POR_TIPO |
@@ -3326,6 +3338,9 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | POST /scheduling/bookings/{id}/reschedule | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/reschedule | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | ACTUALIZA | POR_TIPO |
+| POST /scheduling/holds/{holdToken}/request | CREA | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | ACTUALIZA | POR_TIPO |
 | POST /scheduling/internal/dispatch-reminders | CREA | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
@@ -4045,7 +4060,7 @@ Define temas comunitarios para clasificar contenido y espacios de conversación.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: topics`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `Topics` — `src/modules/community/entities/topics.entity.ts`
-- **Resumen:** 12 columnas · 7 índices · 5 FK salientes · 4 entrantes · 2 operaciones
+- **Resumen:** 12 columnas · 7 índices · 5 FK salientes · 4 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -4082,10 +4097,10 @@ Define temas comunitarios para clasificar contenido y espacios de conversación.
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_topics_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_ |
+| `uq_topics_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_topics_parent_topic_id` | no | parent_topic_id | Soporta la clave foránea fk_topics_parent_topic_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_topics_specialty_concept_id` | no | specialty_concept_id | Soporta la clave foránea fk_topics_specialty_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_topics_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_topics_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_topics_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_topics_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_topics_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_topics_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_topics_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_topics_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `gin_topics_search` | no | (to_tsvector('simple', (coalesce(name, '') ¦¦ ' ' ¦¦ coalesce(code, '')))) | GIN para búsqueda textual gobernada _(DOCUMENTO)_ |
@@ -4101,7 +4116,10 @@ Define temas comunitarios para clasificar contenido y espacios de conversación.
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /community/groups | LEE | DIRECTA |
+| GET /community/topics | CREA | DIRECTA |
 | GET /community/topics | LEE | DIRECTA |
+| POST /community/topics | CREA | DIRECTA |
+| POST /community/topics | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -4126,7 +4144,7 @@ Registra bloqueos entre usuarios para controlar interacciones y seguridad en esp
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: user_blocks`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `UserBlocks` — `src/modules/community/entities/user_blocks.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 6 FK salientes · 0 entrantes · 34 operaciones
+- **Resumen:** 10 columnas · 6 índices · 6 FK salientes · 0 entrantes · 36 operaciones
 
 #### Columnas
 
@@ -4180,6 +4198,7 @@ Registra bloqueos entre usuarios para controlar interacciones y seguridad en esp
 | GET /community/conversations/{conversationId}/attachments/{fileId}/content | LEE | DIRECTA |
 | GET /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| PUT /community/conversations/{conversationId}/messages/{messageId}/reaction | LEE | DIRECTA |
 | POST /community/conversations/contacts/search | LEE | POR_SQL |
 | GET /community/feed | LEE | DIRECTA |
 | GET /community/polls/{pollId} | LEE | DIRECTA |
@@ -4199,6 +4218,7 @@ Registra bloqueos entre usuarios para controlar interacciones y seguridad en esp
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/delay | LEE | DIRECTA |

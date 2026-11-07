@@ -351,6 +351,14 @@ psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@localhost:5432/alovida_healt
 Es la **única** base del stack que se publica en el host: Mongo, Redis,
 OpenSearch y MinIO siguen solo en la red interna `alovida`.
 
+Redis acepta `requirepass` por `REDIS_PASSWORD` (variable opcional): con valor, Redis
+exige la contraseña, su healthcheck se autentica y la API y los workers se la
+presentan; vacía, queda sin autenticación. Si las bases viven en el stack
+`alovida-data-<entorno>`, el mismo valor va en su env-file y en las variables de la
+aplicación. Como todo cambio de credencial, se aplica reiniciando Redis y la API
+juntos. En `docker-compose.yml` (desarrollo) el puerto de Redis se publica en
+`REDIS_BIND` (por defecto `127.0.0.1`).
+
 ### Abrirlo a internet exige TLS
 
 `POSTGRES_PUBLIC_BIND=0.0.0.0` publica el puerto en todas las interfaces. La

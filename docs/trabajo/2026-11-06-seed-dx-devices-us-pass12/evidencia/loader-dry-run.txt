@@ -1,0 +1,5 @@
+# node --max-old-space-size=8192 load-dx-device-types-us.mjs (dry-run)
+Product codes en alcance: 3270 · cargables: 3268 · sin nombre publicado (no se cargan): 2
+Propiedades: 29230 · versión: openFDA device/classification export 2026-11-02
+Dry-run: no se tocó la base. Usar --apply para cargar.
+exit=0

@@ -69,6 +69,7 @@ x-app-env: &app-env
   MONGO_DB: ${MONGO_DB:-mantra_redesa_health_document_store}
   REDIS_HOST: redis
   REDIS_PORT: "6379"
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-}
   OPENSEARCH_NODE: http://opensearch:9200
   MINIO_ENDPOINT: minio
   MINIO_PORT: "9000"
@@ -471,13 +472,21 @@ services:
   redis:
     image: redis:8.10-alpine
     restart: always
-    command: redis-server --save 60 1 --loglevel notice
+    # `requirepass` solo si `REDIS_PASSWORD` viene definida: el shell del
+    # contenedor la expande (de ahi el doble signo de dolar), asi no queda
+    # escrita en el compose.
+    command:
+      - sh
+      - -c
+      - 'exec redis-server --save 60 1 --loglevel notice $${REDIS_PASSWORD:+--requirepass "$$REDIS_PASSWORD"}'
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     ports:
-      - "${REDIS_PORT:-6380}:6379"
+      - "${REDIS_BIND:-127.0.0.1}:${REDIS_PORT:-6380}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping 2>/dev/null | grep -q PONG"]
       interval: 5s
       timeout: 5s
       retries: 5

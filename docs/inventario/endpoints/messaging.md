@@ -3,8 +3,8 @@
 # Endpoints del módulo `messaging`
 
 - **Bloque:** Integraciones y Contratos (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
-- **Operaciones:** 21 (20 en el contrato, 1 sólo en el código)
-- **Riesgo:** ALTO 1 · MEDIO 15 · BAJO 5
+- **Operaciones:** 24 (23 en el contrato, 1 sólo en el código)
+- **Riesgo:** ALTO 1 · MEDIO 18 · BAJO 5
 - **Tablas distintas que tocan:** 17
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/messaging.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -17,22 +17,25 @@
 | 3 | POST | `/internal/jobs/{id}/complete` | Cerrar el trabajo con éxito | MEDIO | 2 | SYSTEM, MESSAGING_ADMIN |
 | 4 | POST | `/internal/jobs/{id}/fail` | Registrar el fallo del trabajo | MEDIO | 4 | SYSTEM, MESSAGING_ADMIN |
 | 5 | POST | `/internal/notifications/{requestId}/deliver` | Registrar el intento de entrega ante el proveedor | MEDIO | 10 | SYSTEM, MESSAGING_ADMIN |
-| 6 | GET | `/internal/notifications/pending` | Listar solicitudes de notificación listas para entregar | MEDIO | 3 | SYSTEM, MESSAGING_ADMIN |
-| 7 | POST | `/internal/outbox/relay/run` | Reclamar y publicar un lote del outbox | MEDIO | 2 | SYSTEM, MESSAGING_ADMIN |
-| 8 | POST | `/internal/queues/{code}/claim` | Reclamar un lote de trabajos de la cola | BAJO | 2 | SYSTEM, MESSAGING_ADMIN |
-| 9 | POST | `/notifications/in-app/{id}/read` | Marcar una notificación in-app como leída | MEDIO | 2 | USER, MESSAGING_ADMIN |
-| 10 | POST | `/notifications/in-app/read-all` | Marcar toda mi bandeja como leída | MEDIO | 2 | USER, MESSAGING_ADMIN |
-| 11 | GET | `/notifications/me` | Mis notificaciones in-app | BAJO | 1 | USER, MESSAGING_ADMIN |
-| 12 | GET | `/notifications/preferences/me` | Mis preferencias de notificación in-app | BAJO | 2 | USER, MESSAGING_ADMIN |
-| 13 | PUT | `/notifications/preferences/me` | Guardar mis preferencias de notificación in-app | MEDIO | 3 | USER, MESSAGING_ADMIN |
-| 14 | POST | `/notifications/requests` | Crear una solicitud de notificación | MEDIO | 5 | SYSTEM, MESSAGING_ADMIN |
-| 15 | DESCONOCIDO | `/notifications/web-push` | — | BAJO | 0 | sesión (sin roles) |
-| 16 | GET | `/notifications/web-push/config` | Clave pública VAPID, o enabled=false si no hay push | BAJO | 0 | USER, MESSAGING_ADMIN |
-| 17 | DELETE | `/notifications/web-push/subscription` | Quita la suscripción push de este navegador | MEDIO | 2 | USER, MESSAGING_ADMIN |
-| 18 | PUT | `/notifications/web-push/subscription` | Guarda la suscripción push de este navegador | MEDIO | 3 | USER, MESSAGING_ADMIN |
-| 19 | POST | `/queues/{code}/jobs` | Encolar un trabajo | MEDIO | 3 | SYSTEM, MESSAGING_ADMIN |
-| 20 | POST | `/queues/dead-letter/{deadLetterJobId}/redrive` | Reencolar un trabajo desde la cola muerta | MEDIO | 4 | MESSAGING_ADMIN |
-| 21 | POST | `/webhooks/providers/{providerCode}/receipts` | Conciliar el acuse de entrega que envía el proveedor | ALTO | 7 | pública |
+| 6 | POST | `/internal/notifications/in-app/release-due` | Liberar los avisos in-app aplazados por el silencio nocturno | MEDIO | 2 | SYSTEM, MESSAGING_ADMIN |
+| 7 | GET | `/internal/notifications/pending` | Listar solicitudes de notificación listas para entregar | MEDIO | 3 | SYSTEM, MESSAGING_ADMIN |
+| 8 | POST | `/internal/outbox/relay/run` | Reclamar y publicar un lote del outbox | MEDIO | 2 | SYSTEM, MESSAGING_ADMIN |
+| 9 | POST | `/internal/queues/{code}/claim` | Reclamar un lote de trabajos de la cola | BAJO | 2 | SYSTEM, MESSAGING_ADMIN |
+| 10 | POST | `/notifications/in-app/{id}/read` | Marcar una notificación in-app como leída | MEDIO | 2 | USER, MESSAGING_ADMIN |
+| 11 | POST | `/notifications/in-app/read-all` | Marcar toda mi bandeja como leída | MEDIO | 2 | USER, MESSAGING_ADMIN |
+| 12 | GET | `/notifications/me` | Mis notificaciones in-app | BAJO | 1 | USER, MESSAGING_ADMIN |
+| 13 | DELETE | `/notifications/native-push/token` | Quita el token push (FCM) de esta instalación | MEDIO | 2 | USER, MESSAGING_ADMIN |
+| 14 | PUT | `/notifications/native-push/token` | Guarda el token push (FCM) de esta instalación | MEDIO | 3 | USER, MESSAGING_ADMIN |
+| 15 | GET | `/notifications/preferences/me` | Mis preferencias de notificación in-app | BAJO | 2 | USER, MESSAGING_ADMIN |
+| 16 | PUT | `/notifications/preferences/me` | Guardar mis preferencias de notificación in-app | MEDIO | 3 | USER, MESSAGING_ADMIN |
+| 17 | POST | `/notifications/requests` | Crear una solicitud de notificación | MEDIO | 5 | SYSTEM, MESSAGING_ADMIN |
+| 18 | DESCONOCIDO | `/notifications/web-push` | — | BAJO | 0 | sesión (sin roles) |
+| 19 | GET | `/notifications/web-push/config` | Clave pública VAPID, o enabled=false si no hay push | BAJO | 0 | USER, MESSAGING_ADMIN |
+| 20 | DELETE | `/notifications/web-push/subscription` | Quita la suscripción push de este navegador | MEDIO | 2 | USER, MESSAGING_ADMIN |
+| 21 | PUT | `/notifications/web-push/subscription` | Guarda la suscripción push de este navegador | MEDIO | 3 | USER, MESSAGING_ADMIN |
+| 22 | POST | `/queues/{code}/jobs` | Encolar un trabajo | MEDIO | 3 | SYSTEM, MESSAGING_ADMIN |
+| 23 | POST | `/queues/dead-letter/{deadLetterJobId}/redrive` | Reencolar un trabajo desde la cola muerta | MEDIO | 4 | MESSAGING_ADMIN |
+| 24 | POST | `/webhooks/providers/{providerCode}/receipts` | Conciliar el acuse de entrega que envía el proveedor | ALTO | 7 | pública |
 
 ---
 
@@ -43,7 +46,7 @@
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MessagingInternalController.ackDelivery` — `src/modules/messaging/controllers/messaging-internal.controller.ts:109`
+- **Implementación:** `MessagingInternalController.ackDelivery` — `src/modules/messaging/controllers/messaging-internal.controller.ts:112`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -53,19 +56,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/event-deliveries/{id}/ack` la atiende `MessagingInternalController.ackDelivery` (src/modules/messaging/controllers/messaging-internal.controller.ts:109). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `AckEventDeliveryDto` (2 campos, 1 obligatorio). Delega en `OutboxService.ackDelivery`. Actualiza messaging.event_deliveries. Lee messaging.event_deliveries.
+`POST /internal/event-deliveries/{id}/ack` la atiende `MessagingInternalController.ackDelivery` (src/modules/messaging/controllers/messaging-internal.controller.ts:112). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `AckEventDeliveryDto` (2 campos, 1 obligatorio). Delega en `OutboxService.ackDelivery`. Actualiza messaging.event_deliveries. Lee messaging.event_deliveries.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:109` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging-internal.controller.ts:109` |
+| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:112` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging-internal.controller.ts:112` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -132,7 +135,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:73` |
+| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:76` |
 
 ### Flujos
 
@@ -147,7 +150,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MessagingInternalController.dispatchEvent` — `src/modules/messaging/controllers/messaging-internal.controller.ts:91`
+- **Implementación:** `MessagingInternalController.dispatchEvent` — `src/modules/messaging/controllers/messaging-internal.controller.ts:94`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -157,19 +160,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/events/{domainEventId}/dispatch` la atiende `MessagingInternalController.dispatchEvent` (src/modules/messaging/controllers/messaging-internal.controller.ts:91). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `DispatchEventDto` (1 campo, 0 obligatorios). Delega en `OutboxService.dispatchEvent`. Crea filas en messaging.event_deliveries, messaging.queued_jobs. Lee messaging.domain_events, messaging.event_deliveries, messaging.event_subscriptions, messaging.message_queues, messaging.outbox_messages, messaging.queued_jobs.
+`POST /internal/events/{domainEventId}/dispatch` la atiende `MessagingInternalController.dispatchEvent` (src/modules/messaging/controllers/messaging-internal.controller.ts:94). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `DispatchEventDto` (1 campo, 0 obligatorios). Delega en `OutboxService.dispatchEvent`. Crea filas en messaging.event_deliveries, messaging.queued_jobs. Lee messaging.domain_events, messaging.event_deliveries, messaging.event_subscriptions, messaging.message_queues, messaging.outbox_messages, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: domainEventId | `src/modules/messaging/controllers/messaging-internal.controller.ts:91` |
+| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:94` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: domainEventId | `src/modules/messaging/controllers/messaging-internal.controller.ts:94` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -244,7 +247,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:63` |
+| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:66` |
 
 ### Flujos
 
@@ -259,7 +262,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MessagingInternalController.completeJob` — `src/modules/messaging/controllers/messaging-internal.controller.ts:141`
+- **Implementación:** `MessagingInternalController.completeJob` — `src/modules/messaging/controllers/messaging-internal.controller.ts:144`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -269,19 +272,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/jobs/{id}/complete` la atiende `MessagingInternalController.completeJob` (src/modules/messaging/controllers/messaging-internal.controller.ts:141). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `CompleteJobDto` (2 campos, 1 obligatorio). Delega en `QueuesService.completeJob`. Actualiza messaging.queued_jobs. Lee messaging.queued_jobs.
+`POST /internal/jobs/{id}/complete` la atiende `MessagingInternalController.completeJob` (src/modules/messaging/controllers/messaging-internal.controller.ts:144). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `CompleteJobDto` (2 campos, 1 obligatorio). Delega en `QueuesService.completeJob`. Actualiza messaging.queued_jobs. Lee messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:141` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging-internal.controller.ts:141` |
+| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:144` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging-internal.controller.ts:144` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -348,7 +351,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:93` |
+| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:96` |
 
 ### Flujos
 
@@ -363,7 +366,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MessagingInternalController.failJob` — `src/modules/messaging/controllers/messaging-internal.controller.ts:157`
+- **Implementación:** `MessagingInternalController.failJob` — `src/modules/messaging/controllers/messaging-internal.controller.ts:160`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -373,19 +376,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/jobs/{id}/fail` la atiende `MessagingInternalController.failJob` (src/modules/messaging/controllers/messaging-internal.controller.ts:157). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `FailJobDto` (2 campos, 2 obligatorios). Delega en `QueuesService.failJob`. Crea filas en messaging.dead_letter_jobs. Actualiza messaging.queued_jobs. Lee messaging.message_queues, messaging.queued_jobs.
+`POST /internal/jobs/{id}/fail` la atiende `MessagingInternalController.failJob` (src/modules/messaging/controllers/messaging-internal.controller.ts:160). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `FailJobDto` (2 campos, 2 obligatorios). Delega en `QueuesService.failJob`. Crea filas en messaging.dead_letter_jobs. Actualiza messaging.queued_jobs. Lee messaging.message_queues, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:157` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging-internal.controller.ts:157` |
+| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:160` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging-internal.controller.ts:160` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -457,7 +460,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:103` |
+| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:106` |
 
 ### Flujos
 
@@ -472,7 +475,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MessagingInternalController.deliverNotification` — `src/modules/messaging/controllers/messaging-internal.controller.ts:191`
+- **Implementación:** `MessagingInternalController.deliverNotification` — `src/modules/messaging/controllers/messaging-internal.controller.ts:194`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -482,34 +485,34 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/notifications/{requestId}/deliver` la atiende `MessagingInternalController.deliverNotification` (src/modules/messaging/controllers/messaging-internal.controller.ts:191). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `DeliverNotificationDto` (9 campos, 1 obligatorio). Delega en `NotificationsService.deliverNotification`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries. Actualiza iam.devices, messaging.notification_requests. Lee iam.devices, messaging.message_channels, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs.
+`POST /internal/notifications/{requestId}/deliver` la atiende `MessagingInternalController.deliverNotification` (src/modules/messaging/controllers/messaging-internal.controller.ts:194). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `DeliverNotificationDto` (9 campos, 1 obligatorio). Delega en `NotificationsService.deliverNotification`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries. Actualiza messaging.in_app_notifications, messaging.notification_requests. Lee messaging.message_channels, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests, messaging.provider_channel_configs, messaging.recipient_preferences.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:191` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: requestId | `src/modules/messaging/controllers/messaging-internal.controller.ts:191` |
+| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:194` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: requestId | `src/modules/messaging/controllers/messaging-internal.controller.ts:194` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
-| `iam.devices` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:550` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.messaging_providers` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:573` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findRequestForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:330` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsService.deferBySilence → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 
 ### Parámetros
 
@@ -586,7 +589,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:115` |
+| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:118` |
 
 ### Flujos
 
@@ -594,14 +597,91 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 ---
 
-## 6. GET /internal/notifications/pending
+## 6. POST /internal/notifications/in-app/release-due
+
+- **Origen:** CONTRATO
+- **Nombre:** Liberar los avisos in-app aplazados por el silencio nocturno
+- **Bloque:** Integraciones y Contratos
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `MessagingInternalController.releaseDueInApp` — `src/modules/messaging/controllers/messaging-internal.controller.ts:212`
+
+### Qué es y para qué sirve (negocio)
+
+Liberar los avisos in-app aplazados por el silencio nocturno. Dentro del módulo (descripción del modelo, en inglés): «Provides durable domain events, transactional outbox publication, subscriptions, generic worker queues, retries and dead-letter evidence.» Dominio: Integraciones y Contratos.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_35_messaging.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+
+### Cómo se atiende (sistema)
+
+`POST /internal/notifications/in-app/release-due` la atiende `MessagingInternalController.releaseDueInApp` (src/modules/messaging/controllers/messaging-internal.controller.ts:212). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Delega en `InAppReleaseService.releaseDue`. Actualiza messaging.in_app_notifications. Lee messaging.in_app_notifications.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:212` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.releaseDueInApp → InAppReleaseService.releaseDue | `src/modules/messaging/services/in-app-release.service.ts:69` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingInternalController.releaseDueInApp → InAppReleaseService.releaseDue | `src/modules/messaging/services/in-app-release.service.ts:55` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `limit` | query | Sí | `number` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<ReleaseDueInAppResponseDto>` · DTO `ReleaseDueInAppResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `released` | `number` | Sí | — | — | Deferred rows whose quiet-hours window ended and were claimed now. | `src/modules/messaging/dto/in-app.dto.ts:245` |
+| `announced` | `number` | Sí | — | — | Of those, how many were announced (socket + push); stale ones are not. | `src/modules/messaging/dto/in-app.dto.ts:249` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:140` |
+
+### Flujos
+
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `ctrl:MessagingInternalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. GET /internal/notifications/pending
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar solicitudes de notificación listas para entregar
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MessagingInternalController.listPendingNotifications` — `src/modules/messaging/controllers/messaging-internal.controller.ts:179`
+- **Implementación:** `MessagingInternalController.listPendingNotifications` — `src/modules/messaging/controllers/messaging-internal.controller.ts:182`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -611,24 +691,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /internal/notifications/pending` la atiende `MessagingInternalController.listPendingNotifications` (src/modules/messaging/controllers/messaging-internal.controller.ts:179). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Delega en `NotificationsService.listDeliverable`. Actualiza messaging.notification_requests. Lee messaging.message_channels, messaging.notification_requests.
+`GET /internal/notifications/pending` la atiende `MessagingInternalController.listPendingNotifications` (src/modules/messaging/controllers/messaging-internal.controller.ts:182). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Delega en `NotificationsService.listDeliverable`. Actualiza messaging.notification_requests. Lee messaging.message_channels, messaging.notification_requests.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:179` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:182` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable | `src/modules/messaging/services/notifications.service.ts:334` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable | `src/modules/messaging/services/notifications.service.ts:344` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable → NotificationsRepository.findClaimableRequests | `src/modules/messaging/repositories/notifications.repository.ts:359` |
 
 ### Parámetros
@@ -670,7 +750,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:128` |
+| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:131` |
 
 ### Flujos
 
@@ -678,14 +758,14 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 ---
 
-## 7. POST /internal/outbox/relay/run
+## 8. POST /internal/outbox/relay/run
 
 - **Origen:** CONTRATO
 - **Nombre:** Reclamar y publicar un lote del outbox
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MessagingInternalController.runRelay` — `src/modules/messaging/controllers/messaging-internal.controller.ts:78`
+- **Implementación:** `MessagingInternalController.runRelay` — `src/modules/messaging/controllers/messaging-internal.controller.ts:81`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -695,18 +775,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/outbox/relay/run` la atiende `MessagingInternalController.runRelay` (src/modules/messaging/controllers/messaging-internal.controller.ts:78). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `RunOutboxRelayDto` (3 campos, 1 obligatorio). Delega en `OutboxService.runRelay`. Actualiza messaging.outbox_messages. Lee messaging.outbox_messages.
+`POST /internal/outbox/relay/run` la atiende `MessagingInternalController.runRelay` (src/modules/messaging/controllers/messaging-internal.controller.ts:81). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `RunOutboxRelayDto` (3 campos, 1 obligatorio). Delega en `OutboxService.runRelay`. Actualiza messaging.outbox_messages. Lee messaging.outbox_messages.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:81` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -774,7 +854,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/outbox-relay-race.int-spec.ts:67` |
-| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:53` |
+| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:56` |
 
 ### Flujos
 
@@ -782,14 +862,14 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 ---
 
-## 8. POST /internal/queues/{code}/claim
+## 9. POST /internal/queues/{code}/claim
 
 - **Origen:** CONTRATO
 - **Nombre:** Reclamar un lote de trabajos de la cola
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MessagingInternalController.claimJobs` — `src/modules/messaging/controllers/messaging-internal.controller.ts:124`
+- **Implementación:** `MessagingInternalController.claimJobs` — `src/modules/messaging/controllers/messaging-internal.controller.ts:127`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -799,18 +879,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/queues/{code}/claim` la atiende `MessagingInternalController.claimJobs` (src/modules/messaging/controllers/messaging-internal.controller.ts:124). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `ClaimJobsDto` (2 campos, 1 obligatorio). Delega en `QueuesService.claimJobs`. Lee messaging.message_queues, messaging.queued_jobs.
+`POST /internal/queues/{code}/claim` la atiende `MessagingInternalController.claimJobs` (src/modules/messaging/controllers/messaging-internal.controller.ts:127). Exige sesión con alguno de los roles SYSTEM, MESSAGING_ADMIN. Valida el cuerpo como `ClaimJobsDto` (2 campos, 1 obligatorio). Delega en `QueuesService.claimJobs`. Lee messaging.message_queues, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:124` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:127` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -882,7 +962,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:83` |
+| CONTROLADOR | `src/modules/messaging/controllers/messaging-internal.controller.spec.ts:86` |
 
 ### Flujos
 
@@ -890,7 +970,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 ---
 
-## 9. POST /notifications/in-app/{id}/read
+## 10. POST /notifications/in-app/{id}/read
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar una notificación in-app como leída
@@ -915,15 +995,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:208` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging.controller.ts:208` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markInAppRead → NotificationsService.markInAppRead | `src/modules/messaging/services/notifications.service.ts:724` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markInAppRead → NotificationsService.markInAppRead | `src/modules/messaging/services/notifications.service.ts:760` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingController.markInAppRead → NotificationsService.markInAppRead → NotificationsRepository.findInAppForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:745` |
 
 ### Parámetros
@@ -971,7 +1051,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 ---
 
-## 10. POST /notifications/in-app/read-all
+## 11. POST /notifications/in-app/read-all
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar toda mi bandeja como leída
@@ -996,14 +1076,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:149` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markAllInAppRead → NotificationsService.markAllInAppRead | `src/modules/messaging/services/notifications.service.ts:912` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markAllInAppRead → NotificationsService.markAllInAppRead | `src/modules/messaging/services/notifications.service.ts:948` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingController.markAllInAppRead → NotificationsService.markAllInAppRead → NotificationsRepository.findUnreadInApp | `src/modules/messaging/repositories/notifications.repository.ts:895` |
 
 ### Cuerpo
@@ -1038,7 +1118,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 11. GET /notifications/me
+## 12. GET /notifications/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis notificaciones in-app
@@ -1063,8 +1143,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:128` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1118,7 +1198,9 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:260` |
 
 ### Flujos
 
@@ -1126,7 +1208,192 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. GET /notifications/preferences/me
+## 13. DELETE /notifications/native-push/token
+
+- **Origen:** CONTRATO
+- **Nombre:** Quita el token push (FCM) de esta instalación
+- **Bloque:** Integraciones y Contratos
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `NativePushController.unregister` — `src/modules/messaging/controllers/native-push.controller.ts:37`
+
+### Qué es y para qué sirve (negocio)
+
+Quita el token push (FCM) de esta instalación. Dentro del módulo (descripción del modelo, en inglés): «Provides durable domain events, transactional outbox publication, subscriptions, generic worker queues, retries and dead-letter evidence.» Dominio: Integraciones y Contratos.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_35_messaging.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /notifications/native-push/token` la atiende `NativePushController.unregister` (src/modules/messaging/controllers/native-push.controller.ts:37). Exige sesión con alguno de los roles USER, MESSAGING_ADMIN. Valida el cuerpo como `NativePushTokenDeleteDto` (1 campo, 1 obligatorio). Delega en `NativePushService.unregisterToken`. Actualiza iam.devices. Lee iam.devices.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/native-push.controller.ts:37` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | NativePushController.unregister → NativePushService.unregisterToken | `src/modules/messaging/services/native-push.service.ts:166` |
+| `iam.devices` | LEE | LEE | DIRECTA | NativePushController.unregister → NativePushService.unregisterToken → NativePushService.nativeDevices | `src/modules/messaging/services/native-push.service.ts:214` |
+
+### Cuerpo — DTO `NativePushTokenDeleteDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `token` | `string` | Sí | longitud mínima 1; longitud máxima 4096 | `@IsString()` `@MinLength(1)` `@MaxLength(4096)` | FCM registration token to forget | `src/modules/messaging/dto/native-push.dto.ts:33` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "token": "valor-ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "token": "valor-ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<void>` · HTTP `204`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:191` |
+
+### Flujos
+
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `ctrl:NativePushController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 14. PUT /notifications/native-push/token
+
+- **Origen:** CONTRATO
+- **Nombre:** Guarda el token push (FCM) de esta instalación
+- **Bloque:** Integraciones y Contratos
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `NativePushController.register` — `src/modules/messaging/controllers/native-push.controller.ts:25`
+
+### Qué es y para qué sirve (negocio)
+
+Guarda el token push (FCM) de esta instalación. Dentro del módulo (descripción del modelo, en inglés): «Provides durable domain events, transactional outbox publication, subscriptions, generic worker queues, retries and dead-letter evidence.» Dominio: Integraciones y Contratos.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_35_messaging.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+
+### Cómo se atiende (sistema)
+
+`PUT /notifications/native-push/token` la atiende `NativePushController.register` (src/modules/messaging/controllers/native-push.controller.ts:25). Exige sesión con alguno de los roles USER, MESSAGING_ADMIN. Valida el cuerpo como `NativePushTokenDto` (3 campos, 3 obligatorios). Delega en `NativePushService.registerToken`. Crea filas en iam.devices. Actualiza iam.devices. Lee iam.devices.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/native-push.controller.ts:25` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | NativePushController.register → NativePushService.registerToken | `src/modules/messaging/services/native-push.service.ts:114` |
+| `iam.devices` | ESCRIBE | CREA | DIRECTA | NativePushController.register → NativePushService.registerToken | `src/modules/messaging/services/native-push.service.ts:121` |
+| `iam.devices` | LEE | LEE | DIRECTA | NativePushController.register → NativePushService.registerToken | `src/modules/messaging/services/native-push.service.ts:112` |
+
+### Cuerpo — DTO `NativePushTokenDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `token` | `string` | Sí | longitud mínima 1; longitud máxima 4096 | `@IsString()` `@MinLength(1)` `@MaxLength(4096)` | FCM registration token of this app install | `src/modules/messaging/dto/native-push.dto.ts:11` |
+| `platform` | `string` | Sí | valores: IOS, ANDROID | `@IsIn(['IOS', 'ANDROID'])` | — | `src/modules/messaging/dto/native-push.dto.ts:15` |
+| `deviceFingerprint` | `string` | Sí | longitud mínima 1; longitud máxima 512 | `@IsString()` `@MinLength(1)` `@MaxLength(512)` | Stable install fingerprint, the same one sent to POST /iam/users/:id/devices | `src/modules/messaging/dto/native-push.dto.ts:24` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "token": "valor-ejemplo",
+  "platform": "IOS",
+  "deviceFingerprint": "valor-ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "token": "valor-ejemplo",
+  "platform": "IOS",
+  "deviceFingerprint": "valor-ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<void>` · HTTP `204`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:170` |
+
+### Flujos
+
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `ctrl:NativePushController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 15. GET /notifications/preferences/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis preferencias de notificación in-app
@@ -1151,8 +1418,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:172` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1198,7 +1465,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. PUT /notifications/preferences/me
+## 16. PUT /notifications/preferences/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Guardar mis preferencias de notificación in-app
@@ -1223,10 +1490,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:190` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1306,7 +1573,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. POST /notifications/requests
+## 17. POST /notifications/requests
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una solicitud de notificación
@@ -1331,10 +1598,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1432,7 +1699,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 ---
 
-## 15. DESCONOCIDO /notifications/web-push
+## 18. DESCONOCIDO /notifications/web-push
 
 - **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
 - **Nombre:** —
@@ -1457,8 +1724,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_35_messaging.puml
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/messaging/controllers/web-push.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1494,7 +1761,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. GET /notifications/web-push/config
+## 19. GET /notifications/web-push/config
 
 - **Origen:** CONTRATO
 - **Nombre:** Clave pública VAPID, o enabled=false si no hay push
@@ -1519,8 +1786,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/web-push.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1550,7 +1817,9 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/push-notificaciones.int-spec.ts:292` |
 
 ### Flujos
 
@@ -1558,7 +1827,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 17. DELETE /notifications/web-push/subscription
+## 20. DELETE /notifications/web-push/subscription
 
 - **Origen:** CONTRATO
 - **Nombre:** Quita la suscripción push de este navegador
@@ -1583,10 +1852,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/web-push.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1645,7 +1914,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 18. PUT /notifications/web-push/subscription
+## 21. PUT /notifications/web-push/subscription
 
 - **Origen:** CONTRATO
 - **Nombre:** Guarda la suscripción push de este navegador
@@ -1670,10 +1939,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/web-push.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1745,7 +2014,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 19. POST /queues/{code}/jobs
+## 22. POST /queues/{code}/jobs
 
 - **Origen:** CONTRATO
 - **Nombre:** Encolar un trabajo
@@ -1770,10 +2039,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1867,7 +2136,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 ---
 
-## 20. POST /queues/dead-letter/{deadLetterJobId}/redrive
+## 23. POST /queues/dead-letter/{deadLetterJobId}/redrive
 
 - **Origen:** CONTRATO
 - **Nombre:** Reencolar un trabajo desde la cola muerta
@@ -1892,11 +2161,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: deadLetterJobId | `src/modules/messaging/controllers/messaging.controller.ts:75` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -1974,7 +2243,7 @@ El árbol de decisión completo está en [flujos](../flujos/messaging.md).
 
 ---
 
-## 21. POST /webhooks/providers/{providerCode}/receipts
+## 24. POST /webhooks/providers/{providerCode}/receipts
 
 - **Origen:** CONTRATO
 - **Nombre:** Conciliar el acuse de entrega que envía el proveedor
@@ -2000,7 +2269,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/messaging/controllers/provider-webhooks.controller.ts:33` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -2009,9 +2278,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `messaging.delivery_receipts` | ESCRIBE | CREA | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.createReceipt | `src/modules/messaging/repositories/notifications.repository.ts:608` |
 | `messaging.delivery_receipts` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findReceipt | `src/modules/messaging/repositories/notifications.repository.ts:629` |
 | `messaging.messaging_providers` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findProviderByCode | `src/modules/messaging/repositories/notifications.repository.ts:423` |
-| `messaging.notification_deliveries` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:649` |
+| `messaging.notification_deliveries` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:685` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findDeliveryByProviderRefForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:571` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:654` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:690` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findRequestForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:330` |
 
 ### Parámetros

@@ -73,6 +73,27 @@ export class AffiliationInvitationsRepository {
     );
   }
 
+  /**
+   * Turns a code off. Scoped by tenant in the statement itself: an id of another
+   * organization matches no row, exactly like an id that does not exist.
+   * Idempotent: a code that is already revoked is returned again.
+   */
+  async revoke(
+    em: EntityManager,
+    tenantId: string,
+    id: string,
+    actorUserId: string,
+  ): Promise<AffiliationInvitationRow | null> {
+    const rows = await em.execute<AffiliationInvitationRow[]>(
+      `UPDATE directory.affiliation_invitations
+          SET status_concept_id = ?, updated_at = now(), updated_by_user_id = ?
+        WHERE id = ? AND tenant_id = ?
+      RETURNING ${COLUMNS}`,
+      [AFF_INV.STATUS_REVOKED, actorUserId, id, tenantId],
+    );
+    return rows[0] ?? null;
+  }
+
   /** Lookup by code hash. Runs in system context: the caller does not know the tenant yet. */
   async findByTokenHash(
     em: EntityManager,

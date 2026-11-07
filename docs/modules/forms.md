@@ -9,7 +9,7 @@
 # Módulo `forms`
 
 **Fuente:** [`src/modules/forms/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/forms/README.md)
-· 6 controllers · 6 services · 6 repositories · 16 entidades · 17 DTO
+· 9 controllers · 8 services · 8 repositories · 16 entidades · 25 DTO
 
 ---
 
@@ -22,14 +22,14 @@ gobernadas por política, instancias de formulario, captura/curación de valores
 
 ## Rutas HTTP y alcance (medido)
 
-<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+<!-- Medido el 2026-11-06 (guion de preguntas y FAQ del profesional). Repetir con:
   find src/modules/forms -name '*.controller.ts' | wc -l
   find src/modules/forms -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
   find src/modules/forms -name '*.entity.ts' | wc -l
   find src/modules/forms -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **6 controllers, 25 rutas HTTP, 16 entidades y 6 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **9 controllers, 36 rutas HTTP, 16 entidades y 8 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -64,6 +64,37 @@ Entidades (`tableName`, 16 de 16 archivos `*.entity.ts`): `dynamic_field_definit
 | `GET /forms/me/instances/:id` | sesión | `forms-me` |
 | `POST /forms/values/import` | CLINICIAN, PRACTITIONER | `forms-values` |
 | `PATCH /forms/values/:id` | CLINICIAN, PRACTITIONER | `forms-values` |
+| `GET /forms/question-scripts` | PRACTITIONER, CLINICIAN | `forms-question-scripts` |
+| `POST /forms/question-scripts` | PRACTITIONER, CLINICIAN | `forms-question-scripts` |
+| `GET /forms/question-scripts/:id` | PRACTITIONER, CLINICIAN | `forms-question-scripts` |
+| `PATCH /forms/question-scripts/:id` | PRACTITIONER, CLINICIAN | `forms-question-scripts` |
+| `DELETE /forms/question-scripts/:id` | PRACTITIONER, CLINICIAN | `forms-question-scripts` |
+| `GET /forms/faqs` | PRACTITIONER, CLINICIAN | `forms-faqs` |
+| `POST /forms/faqs` | PRACTITIONER, CLINICIAN | `forms-faqs` |
+| `PUT /forms/faqs/order` | PRACTITIONER, CLINICIAN | `forms-faqs` |
+| `PATCH /forms/faqs/:id` | PRACTITIONER, CLINICIAN | `forms-faqs` |
+| `DELETE /forms/faqs/:id` | PRACTITIONER, CLINICIAN | `forms-faqs` |
+| `GET /public/profiles/p/:slug/faqs` | pública | `forms-faqs-public` |
+
+## Guion de preguntas y preguntas frecuentes del profesional
+
+`forms.question_scripts`, `forms.question_script_items` y `forms.faq_entries`
+(modelo v4.2.97) no tienen entidad: los repositorios
+`QuestionScriptsRepository` y `FaqEntriesRepository` son SQL crudo.
+
+- El dueño es `actor.practitionerProfileId` (claim `hpid`); no se acepta del
+  cliente. Sin perfil profesional, 422 `PRACTITIONER_PROFILE_REQUIRED`.
+- Lo ajeno, lo inexistente y un guion archivado responden el mismo 404.
+- `PATCH /forms/question-scripts/:id` exige `version` (`row_version` en la
+  base); distinta de la guardada, 409 `QUESTION_SCRIPT_VERSION_MISMATCH`.
+  `items` reemplaza la lista entera en el orden recibido. `DELETE` archiva.
+- `options` es obligatorio (≥ 2, sin vacías ni repetidas) en
+  `single_choice`/`multiple_choice` y prohibido en el resto: 400.
+- `PUT /forms/faqs/order` exige exactamente los ids propios (422
+  `FAQ_ORDER_MISMATCH`); el alta va al final con un candado de asesoría por
+  dueño, así dos altas simultáneas no comparten posición.
+- La lectura pública sale del slug de la ficha del profesional, como el resto de
+  `/public/profiles/…`, y sólo devuelve las publicadas.
 
 ## Endpoints (UC → ruta)
 
@@ -122,7 +153,7 @@ Entidades (`tableName`, 16 de 16 archivos `*.entity.ts`): `dynamic_field_definit
   (`ResourceNotFoundException` → 404, `ConflictException` → 409,
   `PreconditionFailedException` → 422).
 
-## Permisos
+## Permissions
 
 Guard JWT global. Endpoints de gobernanza/administración de extensibilidad exigen
 `SECURITY_ADMIN`; los clínicos/steward/ETL requieren solo autenticación.

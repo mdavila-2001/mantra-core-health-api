@@ -3,6 +3,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ResourceNotFoundException,
+  getCurrentTenantId,
   type AuthenticatedUser,
 } from '../../../../common';
 import { SchedulingErrorReason } from '../../scheduling.error-reasons';
@@ -33,7 +34,7 @@ import {
   WorkerBatchResultDto,
   WaitlistCandidateSlotsResponseDto,
 } from '../../presentation/dto';
-import { AGENDA_OPERATOR_ROLES } from '../../domain/booking/agenda-actors';
+import { operatesAnyAgenda } from '../../domain/booking/agenda-actors';
 
 const DEFAULT_WORKER_BATCH = 100;
 const DEFAULT_PRIORITY = 0;
@@ -226,8 +227,9 @@ export class SchedulingWaitlistService {
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
-      return;
+    // El oficio de agenda se lee en la organización activa; un rol de mostrador
+    // de OTRA organización no exime de ser titular o apoderado.
+    if (operatesAnyAgenda(actor, getCurrentTenantId())) return;
     if (actor.patientProfileId === patientProfileId) return;
     // Quien lo representa (B.1): la madre que anota a su hijo en la cola tiene
     // que poder verla. Se pregunta al final y sólo si hizo falta, para no pagar
@@ -252,8 +254,7 @@ export class SchedulingWaitlistService {
     resourceId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
-      return;
+    if (operatesAnyAgenda(actor, getCurrentTenantId())) return;
 
     const practitioner = await this.reader.findResourcePractitioner(resourceId);
     if (

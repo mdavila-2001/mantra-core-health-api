@@ -193,7 +193,7 @@ export class CreateDirectAppointmentUseCase {
       actor.practitionerProfileId !== undefined &&
       resource.resourceRefId === actor.practitionerProfileId &&
       PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType);
-    if (!operatesAnyAgenda(actor) && !isOwnAgenda) {
+    if (!operatesAnyAgenda(actor, resource.tenantId) && !isOwnAgenda) {
       throw new ForbiddenException(
         'Un profesional solo puede asignar citas en su propia agenda.',
       );

@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `consent`
 
-Referencia exhaustiva de 27 operación(es) del módulo `consent`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 28 operación(es) del módulo `consent`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-me`, `consent-patient-objections`, `consent-practitioner-access`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents`
 - **Controladores:** `ConsentEvidenceController`, `ConsentMeController`, `ConsentSweepController`, `ConsentsController`, `EncounterInformedConsentsController`, `HipaaAuthorizationsController`, `PatientObjectionsController`, `PractitionerAccessRequestsController`, `PrivacyRestrictionsController`, `ProcessingLegalBasesController`, `TreatmentInformedConsentsController`
@@ -29,15 +29,16 @@ Referencia exhaustiva de 27 operación(es) del módulo `consent`, derivada del c
 16. [POST /consent/patient-objections/{id}/resolve](#16-post-consent-patient-objections-id-resolve) — Resolver objeción del paciente
 17. [POST /consent/practitioner-access-requests](#17-post-consent-practitioner-access-requests) — Pedir acceso al expediente de un paciente encontrado en la búsqueda
 18. [POST /consent/practitioner-access-requests/{id}/decision](#18-post-consent-practitioner-access-requests-id-decision) — Aceptar (con las especialidades autorizadas) o rechazar la solicitud
-19. [GET /consent/practitioner-access-requests/mine](#19-get-consent-practitioner-access-requests-mine) — Mis solicitudes de vínculo pendientes de decisión
-20. [POST /consent/privacy-restrictions](#20-post-consent-privacy-restrictions) — Aplicar restricción de privacidad que afecta RLS clínico
-21. [POST /consent/processing-legal-bases](#21-post-consent-processing-legal-bases) — Establecer/versionar base legal de procesamiento
-22. [GET /consent/treatment-informed-consents](#22-get-consent-treatment-informed-consents) — Listar consentimientos informados de tratamiento
-23. [POST /consent/treatment-informed-consents](#23-post-consent-treatment-informed-consents) — Capturar consentimiento informado de tratamiento
-24. [GET /consent/treatment-informed-consents/{id}](#24-get-consent-treatment-informed-consents-id) — Leer un consentimiento informado de tratamiento
-25. [POST /consent/treatment-informed-consents/{id}/evidence](#25-post-consent-treatment-informed-consents-id-evidence) — Adjuntar evidencia de firma al consentimiento de tratamiento
-26. [PATCH /consent/treatment-informed-consents/{id}/post-emergency-information](#26-patch-consent-treatment-informed-consents-id-post-emergency-information) — Registrar la información posterior a una emergencia
-27. [PATCH /consent/treatment-informed-consents/{id}/withdraw](#27-patch-consent-treatment-informed-consents-id-withdraw) — Revocar un consentimiento informado de tratamiento
+19. [POST /consent/practitioner-access-requests/{id}/revoke](#19-post-consent-practitioner-access-requests-id-revoke) — Revocar un acceso granular que el paciente ya había aceptado
+20. [GET /consent/practitioner-access-requests/mine](#20-get-consent-practitioner-access-requests-mine) — Mis solicitudes de vínculo pendientes de decisión
+21. [POST /consent/privacy-restrictions](#21-post-consent-privacy-restrictions) — Aplicar restricción de privacidad que afecta RLS clínico
+22. [POST /consent/processing-legal-bases](#22-post-consent-processing-legal-bases) — Establecer/versionar base legal de procesamiento
+23. [GET /consent/treatment-informed-consents](#23-get-consent-treatment-informed-consents) — Listar consentimientos informados de tratamiento
+24. [POST /consent/treatment-informed-consents](#24-post-consent-treatment-informed-consents) — Capturar consentimiento informado de tratamiento
+25. [GET /consent/treatment-informed-consents/{id}](#25-get-consent-treatment-informed-consents-id) — Leer un consentimiento informado de tratamiento
+26. [POST /consent/treatment-informed-consents/{id}/evidence](#26-post-consent-treatment-informed-consents-id-evidence) — Adjuntar evidencia de firma al consentimiento de tratamiento
+27. [PATCH /consent/treatment-informed-consents/{id}/post-emergency-information](#27-patch-consent-treatment-informed-consents-id-post-emergency-information) — Registrar la información posterior a una emergencia
+28. [PATCH /consent/treatment-informed-consents/{id}/withdraw](#28-patch-consent-treatment-informed-consents-id-withdraw) — Revocar un consentimiento informado de tratamiento
 
 ---
 
@@ -2439,6 +2440,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | Ya existe una solicitud pendiente o un vínculo activo con este paciente | Excepción explícita en src/modules/consent/services/practitioner-access-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2593,6 +2596,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | La solicitud no tiene profesional asociado | Excepción explícita en src/modules/consent/services/practitioner-access-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | Sólo se pueden autorizar especialidades que el profesional pidió | Excepción explícita en src/modules/consent/services/practitioner-access-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | Aceptar exige autorizar al menos una especialidad; si no autoriza ninguna, rechace la solicitud | Excepción explícita en src/modules/consent/services/practitioner-access-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2610,7 +2615,120 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /consent/practitioner-access-requests/mine
+## 19. POST /consent/practitioner-access-requests/{id}/revoke
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-practitioner-access`
+- **Nombre:** Revocar un acceso granular que el paciente ya había aceptado
+- **Operation ID:** `PractitionerAccessRequestsController_revoke`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerAccessRequestsController.revoke](../../src/modules/consent/controllers/practitioner-access-requests.controller.ts)
+
+### Descripción de negocio
+
+Revocar un acceso granular que el paciente ya había aceptado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El paciente revoca un acceso granular que ya había aceptado.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /consent/practitioner-access-requests/{id}/revoke` en `PractitionerAccessRequestsController_revoke`. El controlador delega en `PractitionerAccessRevocationService.revoke`. No recibe body. El tipo de retorno estático es `Promise<StatusResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /consent/practitioner-access-requests/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /consent/practitioner-access-requests/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<StatusResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/consent/services/practitioner-access-revocation.service.ts |
+| 404 | `NOT_FOUND` | CONSENT_NOT_FOUND.message | Excepción explícita en src/modules/consent/services/consents.service.ts |
+| 409 | `CONFLICT` | El consentimiento no está activo | Excepción explícita en src/modules/consent/services/consents.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/practitioner-access-requests/{id}/revoke"
+}
+```
+
+---
+
+## 20. GET /consent/practitioner-access-requests/mine
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-practitioner-access`
@@ -2724,7 +2842,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /consent/privacy-restrictions
+## 21. POST /consent/privacy-restrictions
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-privacy-restrictions`
@@ -2866,7 +2984,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /consent/processing-legal-bases
+## 22. POST /consent/processing-legal-bases
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-processing-legal-bases`
@@ -3006,7 +3124,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /consent/treatment-informed-consents
+## 23. GET /consent/treatment-informed-consents
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
@@ -3219,7 +3337,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /consent/treatment-informed-consents
+## 24. POST /consent/treatment-informed-consents
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
@@ -3509,7 +3627,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /consent/treatment-informed-consents/{id}
+## 25. GET /consent/treatment-informed-consents/{id}
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
@@ -3718,7 +3836,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /consent/treatment-informed-consents/{id}/evidence
+## 26. POST /consent/treatment-informed-consents/{id}/evidence
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
@@ -3858,7 +3976,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. PATCH /consent/treatment-informed-consents/{id}/post-emergency-information
+## 27. PATCH /consent/treatment-informed-consents/{id}/post-emergency-information
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
@@ -4086,7 +4204,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. PATCH /consent/treatment-informed-consents/{id}/withdraw
+## 28. PATCH /consent/treatment-informed-consents/{id}/withdraw
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`

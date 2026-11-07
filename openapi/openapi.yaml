@@ -13960,6 +13960,103 @@ paths:
       description: >-
         Imagen del logo para miembros de la organización. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /tenants/{tenantId}/representatives/{role}/name:
+    patch:
+      description: >-
+        role: LEGAL_REPRESENTATIVE, GENERAL_MANAGER, COMMERCIAL_MANAGER o MARKETING_MANAGER. Recibe las mismas cuatro
+        partes que el registro.
+      operationId: TenantRepresentativesController_rename
+      parameters:
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: role
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRepresentativeNameDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Corregir el nombre del representante legal o de una gerencia
+      tags:
+        - directory-tenants
+  /tenants/{tenantId}/branches/location-preview:
+    post:
+      description: >-
+        Acepta enlaces largos y los cortos maps.app.goo.gl. No guarda nada: sirve para mostrar el pin antes de crear la
+        sucursal.
+      operationId: BranchLocationController_preview
+      parameters:
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveMapLinkDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Coordenadas de un enlace de Google Maps u OpenStreetMap
+      tags:
+        - directory-tenants
   /community/public-profiles:
     post:
       operationId: CommunitySocialController_createProfile
@@ -47310,6 +47407,9 @@ paths:
         las respuestas de error usan el envelope ErrorResponse.
   /me/support-agenda:
     get:
+      description: >-
+        Devuelve como mucho `limit` turnos (500) por hora; con `truncated: true` el rango tenía más: acote `from`/`to` y
+        vuelva a pedir. La lectura queda en la bitácora de acceso a datos.
       operationId: SupportStaffController_agenda
       parameters:
         - name: tenantId
@@ -47339,6 +47439,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportAgendaResponseDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -47356,9 +47460,6 @@ paths:
       summary: Agenda de un doctor asignado (403 si no hay vínculo activo)
       tags:
         - delegated-access-support-staff
-      description: >-
-        Agenda de un doctor asignado (403 si no hay vínculo activo). Requiere JWT y los roles o alcances declarados por
-        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /org/support-catalog:
     get:
       operationId: SupportStaffController_orgCatalog
@@ -48023,6 +48124,44 @@ paths:
       description: >-
         Listar los códigos de afiliación de la organización. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /org/affiliation-invitations/{id}/revoke:
+    post:
+      operationId: AffiliationInvitationsController_revoke
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Revocar un código o QR de afiliación
+      tags:
+        - delegated-access-affiliation-invitations
+      description: >-
+        Revocar un código o QR de afiliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
   /affiliation-invitations/redeem:
     post:
       operationId: AffiliationInvitationsController_redeem
@@ -49191,6 +49330,93 @@ paths:
       summary: Órdenes de laboratorio e imagenología del paciente, con sus informes
       tags:
         - diagnostics-orders
+  /diagnostics/patients/{patientProfileId}/reports/{reportId}:
+    get:
+      description: >-
+        Valores con unidad, rango de referencia e interpretación, conclusión, fecha de liberación y archivos de la
+        versión liberada vigente. Un informe sin liberar responde 404.
+      operationId: DiagnosticsOrdersController_getReleasedResult
+      parameters:
+        - name: patientProfileId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: reportId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PractitionerDiagnosticResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Sin acceso a la historia
+        '404':
+          description: No existe, no es de ese paciente u organización, o no está liberado
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Resultado liberado de un informe del paciente
+      tags:
+        - diagnostics-orders
+  /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content:
+    get:
+      description: >-
+        Autoriza por acceso a la historia, alcance de lectura, informe liberado del paciente y archivo de esa versión.
+        Todo lo demás responde 404.
+      operationId: DiagnosticsOrdersController_getReleasedResultFileContent
+      parameters:
+        - name: patientProfileId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: reportId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: fileId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bytes del archivo
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Sin acceso a la historia
+        '404':
+          description: El informe no está disponible o el archivo no cuelga de su versión liberada
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Descargar un archivo del resultado liberado
+      tags:
+        - diagnostics-orders
   /diagnostic-results/me:
     get:
       description: Sólo versiones liberadas con visibilidad de paciente. Un informe redactado y no liberado no aparece.
@@ -49633,6 +49859,134 @@ paths:
       security:
         - bearer: []
       summary: Órdenes derivadas al laboratorio, con su estado derivado
+      tags:
+        - diagnostics-lab-portal
+    post:
+      description: >-
+        Queda con el centro como custodio y ejecutor, sin encuentro ni médico de la plataforma; quien firmó el papel va
+        en `externalRequesterName`. El estudio se valida contra el mismo catálogo que la orden del médico (422 con
+        `reason`).
+      operationId: DiagnosticsLabPortalController_createOrder
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLabOrderDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: El centro carga una orden que llega en papel o por mostrador
+      tags:
+        - diagnostics-lab-portal
+  /diagnostics/lab/patients/lookup:
+    post:
+      description: >-
+        Coincidencia exacta con el documento de identidad vigente. `POST` porque el documento es PHI y no viaja en la
+        URL. 404 si nadie lo tiene.
+      operationId: DiagnosticsLabPortalController_lookupPatient
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LabPatientLookupDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Paciente por número de documento, para cargar su orden
+      tags:
+        - diagnostics-lab-portal
+  /diagnostics/lab/orders/{orderId}:
+    put:
+      description: >-
+        Reemplaza el estudio, su detalle, la prioridad y el solicitante externo. Sólo órdenes con `canEdit`: las de un
+        médico o las ya recibidas responden 409.
+      operationId: DiagnosticsLabPortalController_updateOrder
+      parameters:
+        - name: orderId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLabOrderDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabOrderDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: La orden no es editable
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Corregir una orden que cargó el centro, antes de recibirla
       tags:
         - diagnostics-lab-portal
   /diagnostics/lab/orders/{orderId}/transitions:
@@ -52885,6 +53239,403 @@ paths:
       description: >-
         Corregir valor con supersede y snapshot inmutable. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /forms/question-scripts:
+    get:
+      operationId: FormsQuestionScriptsController_list
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Listar mis guiones de preguntas activos
+      tags:
+        - forms-question-scripts
+      description: >-
+        Listar mis guiones de preguntas activos. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    post:
+      operationId: FormsQuestionScriptsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestionScriptDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Crear un guion de preguntas
+      tags:
+        - forms-question-scripts
+      description: >-
+        Crear un guion de preguntas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /forms/question-scripts/{id}:
+    get:
+      operationId: FormsQuestionScriptsController_get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Leer un guion de preguntas propio
+      tags:
+        - forms-question-scripts
+      description: >-
+        Leer un guion de preguntas propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+    patch:
+      operationId: FormsQuestionScriptsController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateQuestionScriptDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Editar un guion propio (items reemplaza la lista; 409 si version no coincide)
+      tags:
+        - forms-question-scripts
+      description: >-
+        Editar un guion propio (items reemplaza la lista; 409 si version no coincide). Requiere JWT y los roles o
+        alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: FormsQuestionScriptsController_archive
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Archivar un guion propio
+      tags:
+        - forms-question-scripts
+      description: >-
+        Archivar un guion propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /forms/faqs:
+    get:
+      operationId: FormsFaqsController_list
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Listar mis preguntas frecuentes, en orden
+      tags:
+        - forms-faqs
+      description: >-
+        Listar mis preguntas frecuentes, en orden. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    post:
+      operationId: FormsFaqsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFaqDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Agregar una pregunta frecuente al final
+      tags:
+        - forms-faqs
+      description: >-
+        Agregar una pregunta frecuente al final. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /forms/faqs/order:
+    put:
+      operationId: FormsFaqsController_reorder
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderFaqsDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Reordenar mis preguntas frecuentes (lista completa)
+      tags:
+        - forms-faqs
+      description: >-
+        Reordenar mis preguntas frecuentes (lista completa). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /forms/faqs/{id}:
+    patch:
+      operationId: FormsFaqsController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFaqDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Editar una pregunta frecuente propia
+      tags:
+        - forms-faqs
+      description: >-
+        Editar una pregunta frecuente propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: FormsFaqsController_remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Borrar una pregunta frecuente propia
+      tags:
+        - forms-faqs
+      description: >-
+        Borrar una pregunta frecuente propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /public/profiles/p/{slug}/faqs:
+    get:
+      description: >-
+        Sin sesión. Sólo las publicadas, por posición. Un slug inexistente, oculto o que no es de profesional responde
+        404.
+      operationId: FormsFaqsPublicController_list
+      parameters:
+        - name: slug
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      summary: Preguntas frecuentes publicadas de un profesional
+      tags:
+        - forms-public
+      security: []
   /geo/tracked-subjects:
     post:
       operationId: GeoTrackedSubjectsController_enroll
@@ -86852,6 +87603,10 @@ tags:
     description: >-
       Operaciones del dominio funcional forms definition sets. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: forms-faqs
+    description: >-
+      Operaciones del dominio funcional forms faqs. Consulte el catálogo Markdown de endpoints para payloads mínimos,
+      restricciones, ejemplos completos y semántica de negocio.
   - name: forms-fields
     description: >-
       Operaciones del dominio funcional forms fields. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -86864,6 +87619,14 @@ tags:
     description: >-
       Operaciones del dominio funcional forms me. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: forms-public
+    description: >-
+      Operaciones del dominio funcional forms public. Consulte el catálogo Markdown de endpoints para payloads mínimos,
+      restricciones, ejemplos completos y semántica de negocio.
+  - name: forms-question-scripts
+    description: >-
+      Operaciones del dominio funcional forms question scripts. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: forms-values
     description: >-
       Operaciones del dominio funcional forms values. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -88605,6 +89368,14 @@ components:
         code:
           type: string
           description: Código TOTP de la app autenticadora. Obligatorio cuando verify=true.
+          example: '123456'
+        currentPassword:
+          type: string
+          description: 'Contraseña actual (o `mfaCode`): obligatoria para dar de alta un factor propio'
+          maxLength: 200
+        mfaCode:
+          type: string
+          description: 'Código de un factor ya verificado (o `currentPassword`): reautentica el alta de un factor propio'
           example: '123456'
       additionalProperties: false
     CreateDeviceDto:
@@ -96946,6 +97717,39 @@ components:
       required:
         - fileId
       additionalProperties: false
+    UpdateRepresentativeNameDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          example: Wendy
+        middleName:
+          type: string
+          maxLength: 100
+          example: Jennyfer
+        lastName:
+          type: string
+          maxLength: 100
+          example: Dávila
+        motherLastName:
+          type: string
+          maxLength: 100
+          example: Yamal
+      required:
+        - name
+        - lastName
+      additionalProperties: false
+    ResolveMapLinkDto:
+      type: object
+      properties:
+        url:
+          type: string
+          maxLength: 2000
+          example: https://maps.app.goo.gl/uwjxPfc6SYBhtQ3e7
+      required:
+        - url
+      additionalProperties: false
     CreatePublicProfileDto:
       type: object
       properties:
@@ -98780,6 +99584,13 @@ components:
             historia se emite sin formulario. Si viaja, debe existir, estar cerrada y ser del mismo encuentro (422
             PRECONDITION_FAILED si no)
           format: uuid
+        reasonConditionId:
+          type: string
+          description: >-
+            Diagnóstico (clinical.conditions) que el estudio se pide para confirmar, descartar o seguir. Debe ser del
+            mismo paciente que la orden (si no, o si no existe: 422 SERVICE_REQUEST_REASON_CONDITION_INVALID, sin
+            distinguir el motivo)
+          format: uuid
         codeConceptId:
           type: string
           description: Código del servicio pedido (concept id)
@@ -99161,6 +99972,13 @@ components:
           maxLength: 500
         basedOn:
           $ref: '#/components/schemas/DiagnosisEvidenceDto'
+        replacedByConditionId:
+          type: string
+          description: >-
+            Sólo al refutar: diagnóstico (clinical.conditions) que reemplaza a éste. 422
+            CONDITION_REPLACEMENT_REQUIRES_REFUTED con CONFIRMED, 422 CONDITION_REPLACEMENT_SELF si es el mismo, 422
+            CONDITION_REPLACEMENT_INVALID si no existe o es de otro paciente
+          format: uuid
         onsetAt:
           type: string
           format: date-time
@@ -108518,6 +109336,16 @@ components:
         specimen:
           type: string
           nullable: true
+        sampleType:
+          type: string
+          enum:
+            - BLOOD
+            - URINE
+            - STOOL
+            - FLUID
+            - SWAB
+            - OTHER
+          description: What is drawn from the patient, to browse by sample type
         suggestedPrice:
           nullable: true
           type: object
@@ -108538,6 +109366,7 @@ components:
         - name
         - loinc
         - specimen
+        - sampleType
         - suggestedPrice
         - offeredServiceId
         - components
@@ -108558,6 +109387,18 @@ components:
         - code
         - name
         - items
+    LabSampleTypeDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: BLOOD
+        name:
+          type: string
+          example: Análisis de sangre
+      required:
+        - code
+        - name
     LabCatalogDto:
       type: object
       properties:
@@ -108565,15 +109406,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LabCatalogSectionDto'
+        sampleTypes:
+          description: Sample types in display order (blood first)
+          type: array
+          items:
+            $ref: '#/components/schemas/LabSampleTypeDto'
         count:
           type: number
         priceRule:
           type: string
           description: How suggested prices were chosen
+        catalogVersion:
+          type: string
+          nullable: true
+          description: >-
+            Version of the LOINC study catalog loaded in this database (laboratorio.json), or null when only the basic
+            boot análisis are there: no sections, LOINC nor components until `yarn catalog:studies:load` runs
       required:
         - sections
+        - sampleTypes
         - count
         - priceRule
+        - catalogVersion
     LabCatalogImportDto:
       type: object
       properties:
@@ -117810,6 +118664,13 @@ components:
           type: string
           description: Motivo del rechazo (obligatorio si REJECT)
           maxLength: 4000
+        targetEncounterId:
+          type: string
+          description: >-
+            Sólo con ACCEPT: atención (clinical.encounters) del tenant destino en la que se recibe al paciente. 422
+            REFERRAL_TARGET_ENCOUNTER_NOT_ALLOWED con REJECT; 422 REFERRAL_TARGET_ENCOUNTER_INVALID si no existe, es de
+            otro paciente o de otro tenant
+          format: uuid
       required:
         - decision
       additionalProperties: false
@@ -118059,6 +118920,10 @@ components:
         counterReferralAt:
           type: string
           format: date-time
+        targetEncounterId:
+          type: string
+          description: Atención en la que el destino recibió al paciente. Ausente = no registrada
+          format: uuid
         transfer:
           nullable: true
           type: object
@@ -118203,6 +119068,10 @@ components:
         counterReferralAt:
           type: string
           format: date-time
+        targetEncounterId:
+          type: string
+          description: Atención en la que el destino recibió al paciente. Ausente = no registrada
+          format: uuid
         transfer:
           nullable: true
           type: object
@@ -119723,6 +120592,54 @@ components:
           type: string
           maxLength: 500
       additionalProperties: false
+    SupportAgendaItemDto:
+      type: object
+      properties:
+        bookingId:
+          type: string
+          format: uuid
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        statusCode:
+          type: string
+          nullable: true
+        patientProfileId:
+          type: string
+          format: uuid
+        patientName:
+          type: string
+          nullable: true
+      required:
+        - bookingId
+        - startAt
+        - endAt
+        - patientProfileId
+    SupportAgendaResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupportAgendaItemDto'
+        count:
+          type: number
+        truncated:
+          type: boolean
+          description: >-
+            true = el rango tiene más turnos que `limit` y se devolvieron los primeros por hora; acote el rango y vuelva
+            a pedir.
+        limit:
+          type: number
+          description: Tope de turnos por respuesta.
+      required:
+        - items
+        - count
+        - truncated
+        - limit
     DecideSupportLinkDto:
       type: object
       properties:
@@ -120890,6 +121807,202 @@ components:
         - targetId
         - ruleCode
       additionalProperties: false
+    DiagnosticResultReferenceRangeDto:
+      type: object
+      properties:
+        low:
+          type: string
+          nullable: true
+        high:
+          type: string
+          nullable: true
+        text:
+          type: string
+          nullable: true
+        unitConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        unit:
+          type: string
+          nullable: true
+      required:
+        - low
+        - high
+        - text
+        - unitConceptId
+        - unit
+    DiagnosticResultValueDto:
+      type: object
+      properties:
+        observationId:
+          type: string
+          format: uuid
+        codeConceptId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          nullable: true
+        value:
+          type: string
+          nullable: true
+        valueKind:
+          type: string
+          enum:
+            - QUANTITY
+            - DECIMAL
+            - INTEGER
+            - TEXT
+            - BOOLEAN
+            - CONCEPT
+            - DATETIME
+            - DATE
+          nullable: true
+        valueConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        unitConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        unit:
+          type: string
+          nullable: true
+        referenceRange:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticResultReferenceRangeDto'
+        interpretationConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        interpretationCode:
+          type: string
+          nullable: true
+        interpretation:
+          type: string
+          nullable: true
+        statusConceptId:
+          type: string
+          format: uuid
+        effectiveAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - observationId
+        - codeConceptId
+        - name
+        - value
+        - valueKind
+        - valueConceptId
+        - unitConceptId
+        - unit
+        - referenceRange
+        - interpretationConceptId
+        - interpretationCode
+        - interpretation
+        - statusConceptId
+        - effectiveAt
+    DiagnosticResultFileSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          nullable: true
+        contentRoleConceptId:
+          type: string
+          format: uuid
+        presentationFormatConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        ordinal:
+          type: number
+          nullable: true
+      required:
+        - id
+        - fileId
+        - name
+        - contentRoleConceptId
+        - presentationFormatConceptId
+        - ordinal
+    PractitionerDiagnosticResultDto:
+      type: object
+      properties:
+        reportId:
+          type: string
+          format: uuid
+        patientProfileId:
+          type: string
+          format: uuid
+        serviceRequestId:
+          type: string
+          format: uuid
+          nullable: true
+        codeConceptId:
+          type: string
+          format: uuid
+        codeDisplay:
+          type: string
+          nullable: true
+        categoryConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        versionId:
+          type: string
+          format: uuid
+        versionNumber:
+          type: number
+        clinicalStatusConceptId:
+          type: string
+          format: uuid
+        issuedAt:
+          type: string
+          format: date-time
+          nullable: true
+        releasedAt:
+          type: string
+          format: date-time
+        patientVisible:
+          type: boolean
+        conclusionText:
+          type: string
+          nullable: true
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticResultValueDto'
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticResultFileSummaryDto'
+      required:
+        - reportId
+        - patientProfileId
+        - serviceRequestId
+        - codeConceptId
+        - codeDisplay
+        - categoryConceptId
+        - versionId
+        - versionNumber
+        - clinicalStatusConceptId
+        - issuedAt
+        - releasedAt
+        - patientVisible
+        - conclusionText
+        - values
+        - files
     PatientInsuranceSettlementExclusionDto:
       type: object
       properties:
@@ -121121,6 +122234,9 @@ components:
         encounterId:
           type: string
           format: uuid
+        reasonConditionId:
+          type: string
+          format: uuid
         codeConceptId:
           type: string
           format: uuid
@@ -121268,6 +122384,177 @@ components:
       required:
         - scope
       additionalProperties: false
+    LabPatientLookupDto:
+      type: object
+      properties:
+        nationalId:
+          type: string
+          maxLength: 40
+          description: Exact national id number
+      required:
+        - nationalId
+      additionalProperties: false
+    CreateLabOrderDto:
+      type: object
+      properties:
+        codeConceptId:
+          type: string
+          format: uuid
+        category:
+          type: string
+          enum:
+            - LAB
+            - IMAGING
+        priorityConceptId:
+          type: string
+          format: uuid
+        specimenTypeConceptId:
+          type: string
+          format: uuid
+        imaging:
+          $ref: '#/components/schemas/ImagingDetailDto'
+        externalRequesterName:
+          type: string
+          maxLength: 200
+        externalRequesterLicense:
+          type: string
+          maxLength: 64
+        patientProfileId:
+          type: string
+          format: uuid
+      required:
+        - codeConceptId
+        - category
+        - patientProfileId
+      additionalProperties: false
+    UpdateLabOrderDto:
+      type: object
+      properties:
+        codeConceptId:
+          type: string
+          format: uuid
+        category:
+          type: string
+          enum:
+            - LAB
+            - IMAGING
+        priorityConceptId:
+          type: string
+          format: uuid
+        specimenTypeConceptId:
+          type: string
+          format: uuid
+        imaging:
+          $ref: '#/components/schemas/ImagingDetailDto'
+        externalRequesterName:
+          type: string
+          maxLength: 200
+        externalRequesterLicense:
+          type: string
+          maxLength: 64
+      required:
+        - codeConceptId
+        - category
+      additionalProperties: false
+    LabOrderFileDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        sizeBytes:
+          type: number
+      required:
+        - id
+        - fileName
+        - sizeBytes
+    LabOrderReportStateDto:
+      type: object
+      properties:
+        draftStatus:
+          type: string
+          enum:
+            - DRAFT
+            - PUBLISHED
+          nullable: true
+          description: Null when the tenant never opened a written report.
+        publishedVersionId:
+          type: string
+          format: uuid
+      required:
+        - draftStatus
+    LabOrderDto:
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        studyName:
+          type: string
+        patientName:
+          type: string
+        requesterName:
+          type: string
+        requestedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - RECEIVED
+            - PROCESSED
+            - UPLOADED
+            - CANCELLED
+            - REJECTED
+        reason:
+          type: string
+          nullable: true
+        canReject:
+          type: boolean
+          description: 'Whether REJECT applies now: a received order with an open specimen.'
+        registeredByPerformer:
+          type: boolean
+        canEdit:
+          type: boolean
+        codeConceptId:
+          type: string
+          format: uuid
+        priorityConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        externalRequesterName:
+          type: string
+          nullable: true
+        externalRequesterLicense:
+          type: string
+          nullable: true
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/LabOrderFileDto'
+        report:
+          $ref: '#/components/schemas/LabOrderReportStateDto'
+      required:
+        - orderId
+        - studyName
+        - patientName
+        - requesterName
+        - requestedAt
+        - status
+        - reason
+        - canReject
+        - registeredByPerformer
+        - canEdit
+        - codeConceptId
+        - priorityConceptId
+        - externalRequesterName
+        - externalRequesterLicense
+        - files
+        - report
     LabOrderTransitionDto:
       type: object
       properties:
@@ -122856,6 +124143,136 @@ components:
       required:
         - dataType
         - value
+      additionalProperties: false
+    QuestionScriptItemInputDto:
+      type: object
+      properties:
+        questionText:
+          type: string
+          maxLength: 500
+        helpText:
+          type: object
+          maxLength: 1000
+          nullable: true
+        answerType:
+          type: string
+          enum:
+            - free_text
+            - yes_no
+            - single_choice
+            - multiple_choice
+            - number
+            - date
+        options:
+          nullable: true
+          description: Required (≥ 2 distinct, non-blank) for single_choice/multiple_choice; forbidden otherwise
+          type: array
+          items:
+            type: string
+        required:
+          type: boolean
+      required:
+        - questionText
+        - answerType
+        - required
+      additionalProperties: false
+    CreateQuestionScriptDto:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 160
+        description:
+          type: object
+          maxLength: 1600
+          nullable: true
+        specialtyCode:
+          type: object
+          maxLength: 64
+          nullable: true
+        items:
+          minItems: 1
+          maxItems: 100
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionScriptItemInputDto'
+      required:
+        - title
+        - items
+      additionalProperties: false
+    UpdateQuestionScriptDto:
+      type: object
+      properties:
+        version:
+          type: number
+          minimum: 1
+          description: Version the client last read
+        title:
+          type: string
+          maxLength: 160
+        description:
+          type: object
+          maxLength: 1600
+          nullable: true
+        specialtyCode:
+          type: object
+          maxLength: 64
+          nullable: true
+        items:
+          minItems: 1
+          maxItems: 100
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionScriptItemInputDto'
+      required:
+        - version
+      additionalProperties: false
+    CreateFaqDto:
+      type: object
+      properties:
+        question:
+          type: string
+          maxLength: 300
+        answer:
+          type: string
+          maxLength: 3000
+        category:
+          type: object
+          maxLength: 120
+          nullable: true
+        isPublished:
+          type: boolean
+          default: false
+      required:
+        - question
+        - answer
+      additionalProperties: false
+    ReorderFaqsDto:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - ids
+      additionalProperties: false
+    UpdateFaqDto:
+      type: object
+      properties:
+        question:
+          type: string
+          maxLength: 300
+        answer:
+          type: string
+          maxLength: 3000
+        category:
+          type: object
+          maxLength: 120
+          nullable: true
+        isPublished:
+          type: boolean
       additionalProperties: false
     CreateTrackedSubjectDto:
       type: object

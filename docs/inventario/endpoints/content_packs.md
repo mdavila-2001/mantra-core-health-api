@@ -42,8 +42,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/content_packs/content-packs.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -110,10 +110,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/content_packs/content-packs.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:209` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:158` |
 
 ### Tablas que afecta
 
@@ -129,7 +129,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `clinical_ext.drug_interactions` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → VademecumSeedService.run → VademecumSeedService.seedInteractions | `src/common/seed/vademecum-seed.service.ts:548` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → CommonRecordsAdapter.createContactPoint → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → BoliviaInsuranceSeedService.run → BoliviaInsuranceSeedService.seedShowcases → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → BoliviaInsuranceSeedService.run → BoliviaInsuranceSeedService.seedShowcases → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → BoliviaInsuranceSeedService.run → BoliviaInsuranceSeedService.seedShowcases → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:390` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → BoliviaInsuranceSeedService.run → BoliviaInsuranceSeedService.seedShowcases | `src/common/seed/bolivia-insurance-seed.service.ts:276` |
 | `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → ProviderAccountsSeedService.ensureMembership | `src/common/seed/provider-accounts-seed.service.ts:197` |
 | `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → ProviderAccountsSeedService.ensureMembership | `src/common/seed/provider-accounts-seed.service.ts:203` |
@@ -147,7 +147,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `forms.field_assignments` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ClinicalFormsSeedService.run → ClinicalFormsSeedService.seedForms | `src/common/seed/clinical-forms-seed.service.ts:713` |
 | `forms.field_definition_sets` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ClinicalFormsSeedService.run → ClinicalFormsSeedService.seedExtensionPolicy | `src/common/seed/clinical-forms-seed.service.ts:479` |
 | `forms.field_definition_sets` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ClinicalFormsSeedService.run → ClinicalFormsSeedService.seedExtensionPolicy | `src/common/seed/clinical-forms-seed.service.ts:478` |
-| `iam.authentication_credentials` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → CredentialsRepository.createPassword | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:315` |
+| `iam.authentication_credentials` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → CredentialsRepository.createPassword | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:323` |
 | `iam.authentication_credentials` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount | `src/common/seed/provider-accounts-seed.service.ts:139` |
 | `iam.security_events` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → SecurityEventsRepository.record | `src/modules/iam/infrastructure/repositories/security-events.repository.ts:47` |
 | `iam.user_global_roles` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → UserGlobalRolesRepository.create | `src/modules/iam/infrastructure/repositories/user-global-roles.repository.ts:27` |

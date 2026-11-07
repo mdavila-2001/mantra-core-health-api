@@ -11,29 +11,29 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [administrator_profiles](#administrator_profiles) | Representa el perfil de administración institucional para distinguirlo de la identidad personal y de la cuenta de acceso. | 8 | 4 | 0 | COINCIDE |
-| [admission_requirements](#admission_requirements) | sin propósito | 21 | 7 | 20 | COINCIDE |
+| [admission_requirements](#admission_requirements) | sin propósito | 21 | 7 | 22 | COINCIDE |
 | [emergency_staff_profiles](#emergency_staff_profiles) | Representa integrantes del personal de emergencia y permite identificarlos en las responsabilidades de atención correspondientes. | 8 | 4 | 0 | COINCIDE |
-| [health_practitioner_profiles](#health_practitioner_profiles) | Representa el perfil sanitario de un profesional para atribuirle atención, observaciones, prescripciones y responsabilidades clínicas. | 17 | 9 | 148 | COINCIDE |
+| [health_practitioner_profiles](#health_practitioner_profiles) | Representa el perfil sanitario de un profesional para atribuirle atención, observaciones, prescripciones y responsabilidades clínicas. | 17 | 9 | 155 | COINCIDE |
 | [insurance_representative_profiles](#insurance_representative_profiles) | Representa a personas con rol de representación de seguros para vincularlas con procesos de cobertura y coordinación asistencial. | 8 | 4 | 0 | COINCIDE |
-| [jurisdiction_authorizations](#jurisdiction_authorizations) | Conserva las autorizaciones profesionales por jurisdicción necesarias para representar dónde puede ejercer un profesional. | 19 | 9 | 72 | COINCIDE |
-| [patient_identity_links](#patient_identity_links) | Vincula identificadores de paciente de fuentes o sistemas distintos para conciliación de identidad clínica. | 15 | 10 | 4 | COINCIDE |
-| [patient_merge_events](#patient_merge_events) | Preserva evidencia de las decisiones y movimientos realizados al resolver perfiles duplicados de pacientes. | 9 | 8 | 4 | COINCIDE |
+| [jurisdiction_authorizations](#jurisdiction_authorizations) | Conserva las autorizaciones profesionales por jurisdicción necesarias para representar dónde puede ejercer un profesional. | 19 | 9 | 80 | COINCIDE |
+| [patient_identity_links](#patient_identity_links) | Vincula identificadores de paciente de fuentes o sistemas distintos para conciliación de identidad clínica. | 15 | 10 | 3 | COINCIDE |
+| [patient_merge_events](#patient_merge_events) | Preserva evidencia de las decisiones y movimientos realizados al resolver perfiles duplicados de pacientes. | 9 | 8 | 3 | COINCIDE |
 | [patient_portal_proxies](#patient_portal_proxies) | Identifica personas habilitadas para actuar como delegadas en el portal del paciente, conservando su vínculo con el paciente representado. | 14 | 9 | 60 | COINCIDE |
-| [patient_primary_practitioners](#patient_primary_practitioners) | sin propósito | 10 | 6 | 7 | COINCIDE |
-| [patient_profiles](#patient_profiles) | Identifica el perfil de paciente y habilita asociar a esa persona su historia, atención y datos de salud. | 13 | 9 | 169 | COINCIDE |
-| [person_account_links](#person_account_links) | Relaciona una persona con una o más cuentas de usuario para mantener identidad y autenticación como conceptos separados. | 13 | 8 | 284 | COINCIDE |
-| [person_profiles](#person_profiles) | Conserva los datos de perfil compartidos de una persona que pueden ser utilizados por sus distintos roles dentro del sistema médico. | 9 | 6 | 74 | COINCIDE |
-| [persons](#persons) | Representa a una persona natural una sola vez, separando su identidad humana de sus cuentas de acceso y de sus roles clínicos. | 27 | 14 | 197 | COINCIDE |
-| [practitioner_admission_events](#practitioner_admission_events) | sin propósito | 15 | 5 | 26 | COINCIDE |
-| [practitioner_admission_reviews](#practitioner_admission_reviews) | sin propósito | 21 | 9 | 55 | COINCIDE |
-| [practitioner_admissions](#practitioner_admissions) | sin propósito | 26 | 10 | 64 | COINCIDE |
-| [practitioner_affiliations](#practitioner_affiliations) | Vincula profesionales con organizaciones o sedes donde prestan servicios para dar contexto institucional a la atención. | 17 | 9 | 38 | COINCIDE |
+| [patient_primary_practitioners](#patient_primary_practitioners) | sin propósito | 10 | 6 | 17 | COINCIDE |
+| [patient_profiles](#patient_profiles) | Identifica el perfil de paciente y habilita asociar a esa persona su historia, atención y datos de salud. | 13 | 9 | 185 | COINCIDE |
+| [person_account_links](#person_account_links) | Relaciona una persona con una o más cuentas de usuario para mantener identidad y autenticación como conceptos separados. | 13 | 8 | 310 | COINCIDE |
+| [person_profiles](#person_profiles) | Conserva los datos de perfil compartidos de una persona que pueden ser utilizados por sus distintos roles dentro del sistema médico. | 9 | 6 | 89 | COINCIDE |
+| [persons](#persons) | Representa a una persona natural una sola vez, separando su identidad humana de sus cuentas de acceso y de sus roles clínicos. | 27 | 14 | 218 | COINCIDE |
+| [practitioner_admission_events](#practitioner_admission_events) | sin propósito | 15 | 5 | 28 | COINCIDE |
+| [practitioner_admission_reviews](#practitioner_admission_reviews) | sin propósito | 21 | 9 | 62 | COINCIDE |
+| [practitioner_admissions](#practitioner_admissions) | sin propósito | 26 | 10 | 67 | COINCIDE |
+| [practitioner_affiliations](#practitioner_affiliations) | Vincula profesionales con organizaciones o sedes donde prestan servicios para dar contexto institucional a la atención. | 17 | 9 | 40 | COINCIDE |
 | [practitioner_languages](#practitioner_languages) | Registra los idiomas que un profesional puede usar en su práctica para apoyar una atención comprensible para el paciente. | 10 | 5 | 15 | COINCIDE |
-| [practitioner_specialties](#practitioner_specialties) | Asocia especialidades clínicas codificadas a profesionales para describir su ámbito de práctica. | 17 | 8 | 80 | COINCIDE |
-| [professional_credentials](#professional_credentials) | Registra credenciales y documentación profesional que sustentan la identidad y habilitación declarada de un prestador. | 24 | 10 | 46 | COINCIDE |
+| [practitioner_specialties](#practitioner_specialties) | Asocia especialidades clínicas codificadas a profesionales para describir su ámbito de práctica. | 17 | 8 | 90 | COINCIDE |
+| [professional_credentials](#professional_credentials) | Registra credenciales y documentación profesional que sustentan la identidad y habilitación declarada de un prestador. | 24 | 10 | 50 | COINCIDE |
 | [provider_operator_profiles](#provider_operator_profiles) | Representa personas operadoras de prestadores que necesitan identidad de perfil propia para gestionar procesos institucionales del sistema médico. | 8 | 4 | 0 | COINCIDE |
-| [related_persons](#related_persons) | Registra vínculos de una persona con otras personas relevantes para la atención, el apoyo o la representación del paciente. | 12 | 7 | 13 | COINCIDE |
-| [secretary_profiles](#secretary_profiles) | Representa personal secretarial vinculado a tareas de coordinación y soporte de la práctica asistencial. | 7 | 3 | 9 | COINCIDE |
+| [related_persons](#related_persons) | Registra vínculos de una persona con otras personas relevantes para la atención, el apoyo o la representación del paciente. | 12 | 7 | 12 | COINCIDE |
+| [secretary_profiles](#secretary_profiles) | Representa personal secretarial vinculado a tareas de coordinación y soporte de la práctica asistencial. | 7 | 3 | 10 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -361,7 +361,7 @@ _Sin propósito registrado._
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `AdmissionRequirements` — `src/modules/profiles/entities/admission_requirements.entity.ts`
-- **Resumen:** 21 columnas · 7 índices · 6 FK salientes · 2 entrantes · 20 operaciones
+- **Resumen:** 21 columnas · 7 índices · 6 FK salientes · 2 entrantes · 22 operaciones
 
 #### Columnas
 
@@ -428,6 +428,7 @@ _Sin propósito registrado._
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /admissions | LEE | DIRECTA |
 | GET /admissions/{id} | LEE | DIRECTA |
@@ -444,6 +445,7 @@ _Sin propósito registrado._
 | POST /profiles/practitioners | LEE | DIRECTA |
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 
 #### Gobierno
@@ -530,7 +532,7 @@ Representa el perfil sanitario de un profesional para atribuirle atención, obse
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: health_practitioner_profiles`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `HealthPractitionerProfiles` — `src/modules/profiles/entities/health_practitioner_profiles.entity.ts`
-- **Resumen:** 17 columnas · 9 índices · 9 FK salientes · 94 entrantes · 148 operaciones
+- **Resumen:** 17 columnas · 9 índices · 9 FK salientes · 94 entrantes · 155 operaciones
 
 #### Columnas
 
@@ -687,6 +689,7 @@ Representa el perfil sanitario de un profesional para atribuirle atención, obse
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /audit/me/data-access | LEE | POR_SQL |
+| POST /authz/me/primary-practitioner-requests | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -718,6 +721,7 @@ Representa el perfil sanitario de un profesional para atribuirle atención, obse
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
 | GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
+| GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
 | GET /clinical/service-requests/{id} | LEE | DIRECTA |
@@ -747,8 +751,14 @@ Representa el perfil sanitario de un profesional para atribuirle atención, obse
 | POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
 | PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
 | PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | GET /public/prescription-shares/{token} | LEE | DIRECTA |
 | GET /diagnostics/patients/{patientProfileId}/imaging-studies | LEE | DIRECTA |
+| PUT /diagnostics/report-drafts/{id} | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/preview | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| GET /diagnostics/report-drafts/signers | LEE | DIRECTA |
 | GET /forms/instances | LEE | DIRECTA |
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /iam/auth/login | LEE | DIRECTA |
@@ -759,8 +769,6 @@ Representa el perfil sanitario de un profesional para atribuirle atención, obse
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
 | POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
-| POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
-| POST /identity/me/practitioner/license-verification | LEE | DIRECTA |
 | GET /identity/me/verification-types | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /insurance/practitioner-requests | LEE | DIRECTA |
@@ -818,6 +826,7 @@ Representa el perfil sanitario de un profesional para atribuirle atención, obse
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | GET /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
@@ -919,7 +928,7 @@ Conserva las autorizaciones profesionales por jurisdicción necesarias para repr
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: jurisdiction_authorizations`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `JurisdictionAuthorizations` — `src/modules/profiles/entities/jurisdiction_authorizations.entity.ts`
-- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 1 entrantes · 72 operaciones
+- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 1 entrantes · 80 operaciones
 
 #### Columnas
 
@@ -963,7 +972,7 @@ Conserva las autorizaciones profesionales por jurisdicción necesarias para repr
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_jurisdiction_authorizations_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_jurisdiction_authorizations_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_jurisdiction_authorizations_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_jurisdiction_authorizations_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_jurisdiction_authorizations_jurisdiction_concept_id` | no | jurisdiction_concept_id | Soporta la clave foránea fk_jurisdiction_authorizations_jurisdiction_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_jurisdiction_authorizations_practice_scope_concept_id` | no | practice_scope_concept_id | Soporta la clave foránea fk_jurisdiction_authorizations_practice_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_jurisdiction_authorizations_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_jurisdiction_authorizations_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -979,7 +988,13 @@ Conserva las autorizaciones profesionales por jurisdicción necesarias para repr
 |---|---|---|
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | GET /public/prescriptions/{id}/verify | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | GET /public/prescription-shares/{token} | LEE | DIRECTA |
+| PUT /diagnostics/report-drafts/{id} | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/preview | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| GET /diagnostics/report-drafts/signers | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
@@ -1043,6 +1058,8 @@ Conserva las autorizaciones profesionales por jurisdicción necesarias para repr
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | ACTUALIZA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/onboarding | LEE | DIRECTA |
@@ -1073,7 +1090,7 @@ Vincula identificadores de paciente de fuentes o sistemas distintos para concili
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: patient_identity_links`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PatientIdentityLinks` — `src/modules/profiles/entities/patient_identity_links.entity.ts`
-- **Resumen:** 15 columnas · 10 índices · 7 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 15 columnas · 10 índices · 7 FK salientes · 1 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -1136,7 +1153,6 @@ Vincula identificadores de paciente de fuentes o sistemas distintos para concili
 | POST /profiles/patients/{profileId}/identity-links | ACTUALIZA | POR_TIPO |
 | POST /profiles/patients/{profileId}/identity-links | CREA | DIRECTA |
 | POST /profiles/patients/{profileId}/identity-links | LEE | DIRECTA |
-| POST /profiles/patients/merge | ACTUALIZA | DIRECTA |
 
 #### Gobierno
 
@@ -1161,7 +1177,7 @@ Preserva evidencia de las decisiones y movimientos realizados al resolver perfil
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: patient_merge_events`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PatientMergeEvents` — `src/modules/profiles/entities/patient_merge_events.entity.ts`
-- **Resumen:** 9 columnas · 8 índices · 7 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 9 columnas · 8 índices · 7 FK salientes · 1 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -1207,7 +1223,6 @@ Preserva evidencia de las decisiones y movimientos realizados al resolver perfil
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /profiles/patients/merge | CREA | DIRECTA |
 | GET /profiles/patients/merge-events | LEE | DIRECTA |
 | POST /profiles/patients/merge/{eventId}/reverse | CREA | DIRECTA |
 | POST /profiles/patients/merge/{eventId}/reverse | LEE | DIRECTA |
@@ -1294,6 +1309,7 @@ Identifica personas habilitadas para actuar como delegadas en el portal del paci
 | GET /clinical/encounters/{id}/stay | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
+| GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
@@ -1323,7 +1339,6 @@ Identifica personas habilitadas para actuar como delegadas en el portal del paci
 | POST /profiles/patients/me/dependents | CREA | DIRECTA |
 | DELETE /profiles/patients/me/photo | LEE | POR_SQL |
 | PUT /profiles/patients/me/photo | LEE | POR_SQL |
-| POST /profiles/patients/merge | ACTUALIZA | DIRECTA |
 | POST /profiles/persons/{personId}/decease | ACTUALIZA | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -1371,7 +1386,7 @@ _Sin propósito registrado._
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PatientPrimaryPractitioners` — `src/modules/profiles/entities/patient_primary_practitioners.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -1418,6 +1433,16 @@ _Sin propósito registrado._
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /authz/care-relationships/{id}/respond | ACTUALIZA | POR_TIPO |
+| POST /authz/care-relationships/{id}/respond | CREA | DIRECTA |
+| POST /authz/care-relationships/{id}/respond | LEE | DIRECTA |
+| POST /authz/care-relationships/{id}/revoke | ACTUALIZA | POR_TIPO |
+| POST /authz/care-relationships/{id}/revoke | LEE | DIRECTA |
+| POST /authz/me/care-relationships/{id}/revoke | ACTUALIZA | POR_TIPO |
+| POST /authz/me/care-relationships/{id}/revoke | LEE | DIRECTA |
+| POST /authz/practitioners/me/care-relationships/{id}/respond | ACTUALIZA | POR_TIPO |
+| POST /authz/practitioners/me/care-relationships/{id}/respond | CREA | DIRECTA |
+| POST /authz/practitioners/me/care-relationships/{id}/respond | LEE | DIRECTA |
 | DELETE /profiles/patients/me/primary-practitioner | ACTUALIZA | POR_TIPO |
 | DELETE /profiles/patients/me/primary-practitioner | LEE | DIRECTA |
 | GET /profiles/patients/me/primary-practitioner | LEE | DIRECTA |
@@ -1449,7 +1474,7 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: patient_profiles`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PatientProfiles` — `src/modules/profiles/entities/patient_profiles.entity.ts`
-- **Resumen:** 13 columnas · 9 índices · 8 FK salientes · 86 entrantes · 169 operaciones
+- **Resumen:** 13 columnas · 9 índices · 8 FK salientes · 86 entrantes · 185 operaciones
 
 #### Columnas
 
@@ -1628,6 +1653,7 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 | GET /clinical/me/procedure-centers | LEE | DIRECTA |
 | GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
+| GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
@@ -1644,11 +1670,15 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 | GET /consent/me/objections | LEE | DIRECTA |
 | GET /consent/me/treatment-informed-consents | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests/{id}/revoke | LEE | DIRECTA |
 | GET /consent/practitioner-access-requests/mine | LEE | DIRECTA |
 | POST /consent/privacy-restrictions | LEE | DIRECTA |
 | GET /consent/treatment-informed-consents | LEE | DIRECTA |
 | GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
 | POST /practitioner-delegates/{id}/grants | LEE | DIRECTA |
+| DELETE /diagnostic-results/me/orders/{orderId}/booking | LEE | DIRECTA |
+| POST /diagnostic-results/me/orders/{orderId}/booking | LEE | DIRECTA |
+| GET /diagnostic-results/me/orders/{orderId}/booking-options | LEE | DIRECTA |
 | GET /diagnostic-results/me | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId} | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | LEE | DIRECTA |
@@ -1656,6 +1686,21 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 | POST /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke | LEE | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| POST /diagnostics/lab/patients/lookup | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/preview | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
@@ -1702,7 +1747,6 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 | GET /sites/{siteId}/sample-collection-points | LEE | POR_SQL |
 | GET /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
-| GET /profiles/patients | LEE | POR_SQL |
 | POST /profiles/patients | CREA | DIRECTA |
 | POST /profiles/patients | LEE | DIRECTA |
 | GET /profiles/patients/{profileId} | LEE | DIRECTA |
@@ -1731,11 +1775,8 @@ Identifica el perfil de paciente y habilita asociar a esa persona su historia, a
 | GET /profiles/patients/me/primary-practitioner | LEE | DIRECTA |
 | PUT /profiles/patients/me/primary-practitioner | LEE | DIRECTA |
 | GET /profiles/patients/me/summary | LEE | DIRECTA |
-| POST /profiles/patients/merge | ACTUALIZA | POR_TIPO |
-| POST /profiles/patients/merge | LEE | DIRECTA |
 | POST /profiles/patients/merge/{eventId}/reverse | ACTUALIZA | POR_TIPO |
 | POST /profiles/patients/merge/{eventId}/reverse | LEE | DIRECTA |
-| POST /profiles/patients/search | LEE | POR_SQL |
 | GET /profiles/practitioners/me/primary-patients | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -1786,7 +1827,7 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: person_account_links`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PersonAccountLinks` — `src/modules/profiles/entities/person_account_links.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 0 entrantes · 284 operaciones
+- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 0 entrantes · 310 operaciones
 
 #### Columnas
 
@@ -1822,11 +1863,11 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_person_account_links_person_id` | no | person_id | Soporta la clave foránea fk_person_account_links_person_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 14 consulta(s) de repositorio filtran u ordenan por «person_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_person_account_links_user_id` | no | user_id | Soporta la clave foránea fk_person_account_links_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 10 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_person_account_links_link_type_concept_id` | no | link_type_concept_id | Soporta la clave foránea fk_person_account_links_link_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «link_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_person_account_links_person_id` | no | person_id | Soporta la clave foránea fk_person_account_links_person_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 17 consulta(s) de repositorio filtran u ordenan por «person_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_person_account_links_user_id` | no | user_id | Soporta la clave foránea fk_person_account_links_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 13 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_person_account_links_link_type_concept_id` | no | link_type_concept_id | Soporta la clave foránea fk_person_account_links_link_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «link_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_person_account_links_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_person_account_links_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_person_account_links_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_person_account_links_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 22 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_person_account_links_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_person_account_links_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 28 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_person_account_links_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_person_account_links_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_person_account_links_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_person_account_links_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `gist_person_account_links_effective_period` | no | (tstzrange(valid_from, valid_to, '[)')) | GiST para periodos, no solapamiento y geografía _(DOCUMENTO)_ |
@@ -1840,10 +1881,13 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 | POST /authz/care-relationships/request | LEE | DIRECTA |
 | POST /authz/legal-representations | LEE | DIRECTA |
 | GET /authz/me/access | LEE | DIRECTA |
+| GET /authz/me/access-requests | LEE | DIRECTA |
 | POST /authz/me/care-relationships/{id}/revoke | LEE | DIRECTA |
 | POST /authz/me/clinical-access-grants/{grantId}/revoke | LEE | DIRECTA |
+| POST /authz/me/primary-practitioner-requests | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | LEE | DIRECTA |
+| POST /authz/practitioners/me/care-relationships/{id}/respond | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -1854,6 +1898,7 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 | POST /charts/notes/versions/{versionId}/exam-findings | LEE | DIRECTA |
 | POST /charts/notes/versions/{versionId}/release | LEE | DIRECTA |
 | POST /charts/notes/versions/{versionId}/withhold | LEE | DIRECTA |
+| GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
 | POST /clinical/admissions | LEE | DIRECTA |
 | GET /clinical/allergy-intolerances/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/allergy-intolerances/{id}/attachments | LEE | DIRECTA |
@@ -1881,6 +1926,8 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | PATCH /clinical/observations/{id}/amend | LEE | DIRECTA |
 | GET /clinical/patients/{id}/inpatient-stay | LEE | DIRECTA |
+| GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
+| GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/requisitions | LEE | DIRECTA |
@@ -1919,6 +1966,7 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 | GET /consent/me/treatment-informed-consents | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests/{id}/revoke | LEE | DIRECTA |
 | GET /consent/practitioner-access-requests/mine | LEE | DIRECTA |
 | GET /consent/treatment-informed-consents | LEE | DIRECTA |
 | POST /consent/treatment-informed-consents | LEE | DIRECTA |
@@ -1926,6 +1974,7 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 | POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
 | PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
 | PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | GET /approvals/pending | LEE | POR_SQL |
 | GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
@@ -1950,6 +1999,9 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 | POST /practitioner-delegates/{id}/accept | LEE | POR_SQL |
 | POST /practitioner-delegates/{id}/reject | LEE | POR_SQL |
 | POST /support-engagement-requests | LEE | POR_SQL |
+| DELETE /diagnostic-results/me/orders/{orderId}/booking | LEE | DIRECTA |
+| POST /diagnostic-results/me/orders/{orderId}/booking | LEE | DIRECTA |
+| GET /diagnostic-results/me/orders/{orderId}/booking-options | LEE | DIRECTA |
 | GET /diagnostic-results/me | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId} | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | LEE | DIRECTA |
@@ -1957,7 +2009,16 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 | POST /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke | LEE | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| POST /diagnostics/critical-results | LEE | DIRECTA |
 | GET /diagnostics/patients/{patientProfileId}/imaging-studies | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/orders | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId} | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content | LEE | DIRECTA |
+| PUT /diagnostics/report-drafts/{id} | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| GET /diagnostics/report-drafts/signers | LEE | DIRECTA |
+| POST /diagnostics/reports/{reportId}/patient-release | LEE | DIRECTA |
 | GET /forms/instances | LEE | DIRECTA |
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /iam/auth/login | LEE | DIRECTA |
@@ -2028,7 +2089,12 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 | GET /dental-procedures | LEE | DIRECTA |
 | POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
+| PATCH /procedure-cases/{id} | LEE | DIRECTA |
+| POST /procedure-cases/{id}/confirm | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-assessments | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members | LEE | DIRECTA |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | LEE | DIRECTA |
 | GET /admissions | LEE | DIRECTA |
 | POST /admissions/{id}/claim | LEE | DIRECTA |
 | POST /admissions/{id}/decision | LEE | DIRECTA |
@@ -2073,6 +2139,7 @@ Relaciona una persona con una o más cuentas de usuario para mantener identidad 
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | GET /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
@@ -2143,7 +2210,7 @@ Conserva los datos de perfil compartidos de una persona que pueden ser utilizado
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: person_profiles`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PersonProfiles` — `src/modules/profiles/entities/person_profiles.entity.ts`
-- **Resumen:** 9 columnas · 6 índices · 5 FK salientes · 0 entrantes · 74 operaciones
+- **Resumen:** 9 columnas · 6 índices · 5 FK salientes · 0 entrantes · 89 operaciones
 
 #### Columnas
 
@@ -2200,6 +2267,21 @@ Conserva los datos de perfil compartidos de una persona que pueden ser utilizado
 | POST /referrals | LEE | DIRECTA |
 | POST /me/practitioner/support-staff | CREA | DIRECTA |
 | POST /org/support-staff | CREA | DIRECTA |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| POST /diagnostics/lab/patients/lookup | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/preview | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
 | GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
@@ -2288,7 +2370,7 @@ Representa a una persona natural una sola vez, separando su identidad humana de 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: persons`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `Persons` — `src/modules/profiles/entities/persons.entity.ts`
-- **Resumen:** 27 columnas · 14 índices · 13 FK salientes · 16 entrantes · 197 operaciones
+- **Resumen:** 27 columnas · 14 índices · 13 FK salientes · 16 entrantes · 218 operaciones
 
 #### Columnas
 
@@ -2381,6 +2463,8 @@ Representa a una persona natural una sola vez, separando su identidad humana de 
 |---|---|---|
 | GET /audit/me/data-access | LEE | POR_SQL |
 | GET /authz/me/access | LEE | DIRECTA |
+| GET /authz/me/access-requests | LEE | DIRECTA |
+| GET /authz/practitioners/me/access-requests | LEE | DIRECTA |
 | GET /billing/bed-day/stays | LEE | POR_SQL |
 | GET /billing/simulated/charges | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | LEE | POR_SQL |
@@ -2406,6 +2490,7 @@ Representa a una persona natural una sola vez, separando su identidad humana de 
 | GET /referrals/targets | LEE | POR_SQL |
 | GET /community/profiles/{profileId}/reviews | LEE | DIRECTA |
 | GET /public/profiles/{prefijo}/{slug}/reviews | LEE | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | GET /approvals/pending | LEE | POR_SQL |
 | GET /me/practitioner/governance-panel | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
@@ -2431,9 +2516,29 @@ Representa a una persona natural una sola vez, separando su identidad humana de 
 | POST /practitioner-delegates/{id}/reject | LEE | POR_SQL |
 | GET /public/prescription-shares/{token} | LEE | DIRECTA |
 | POST /support-engagement-requests | LEE | POR_SQL |
+| GET /diagnostic-units/me/bookings | LEE | POR_SQL |
+| GET /diagnostics/lab/orders | LEE | DIRECTA |
+| POST /diagnostics/lab/orders | LEE | DIRECTA |
+| PUT /diagnostics/lab/orders/{orderId} | LEE | DIRECTA |
+| POST /diagnostics/lab/orders/{orderId}/transitions | LEE | DIRECTA |
+| POST /diagnostics/lab/patients/lookup | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files | LEE | DIRECTA |
+| GET /diagnostics/lab/result-files/{id}/content | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/{id}/withdrawal | LEE | DIRECTA |
+| POST /diagnostics/lab/result-files/search | LEE | DIRECTA |
+| GET /diagnostics/lab/result-targets | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads | LEE | DIRECTA |
+| POST /diagnostics/lab/result-uploads/{uploadId}/complete | LEE | DIRECTA |
+| GET /diagnostics/lab/summary | LEE | DIRECTA |
+| PUT /diagnostics/report-drafts/{id} | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/preview | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/publish | LEE | DIRECTA |
+| POST /diagnostics/report-drafts/{id}/signature-request | LEE | DIRECTA |
+| GET /diagnostics/report-drafts/signers | LEE | DIRECTA |
 | GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
+| PATCH /tenants/{tenantId}/representatives/{role}/name | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
 | POST /iam/auth/register-patient | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
@@ -2443,6 +2548,7 @@ Representa a una persona natural una sola vez, separando su identidad humana de 
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /iam/users/assisted-registration | CREA | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | GET /insurance-claims | LEE | DIRECTA |
@@ -2504,7 +2610,6 @@ Representa a una persona natural una sola vez, separando su identidad humana de 
 | POST /admissions/{id}/suspend | LEE | DIRECTA |
 | POST /admissions/search | LEE | DIRECTA |
 | POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
-| GET /profiles/patients | LEE | DIRECTA |
 | POST /profiles/patients | CREA | DIRECTA |
 | GET /profiles/patients/{profileId} | LEE | DIRECTA |
 | POST /profiles/patients/{profileId}/related-persons | CREA | DIRECTA |
@@ -2523,11 +2628,8 @@ Representa a una persona natural una sola vez, separando su identidad humana de 
 | DELETE /profiles/patients/me/photo | LEE | DIRECTA |
 | PUT /profiles/patients/me/photo | LEE | DIRECTA |
 | GET /profiles/patients/me/summary | LEE | DIRECTA |
-| POST /profiles/patients/merge | ACTUALIZA | POR_TIPO |
-| POST /profiles/patients/merge | LEE | DIRECTA |
 | POST /profiles/patients/merge/{eventId}/reverse | ACTUALIZA | POR_TIPO |
 | POST /profiles/patients/merge/{eventId}/reverse | LEE | DIRECTA |
-| POST /profiles/patients/search | LEE | DIRECTA |
 | POST /profiles/persons/{personId}/account-links | LEE | DIRECTA |
 | POST /profiles/persons/{personId}/decease | ACTUALIZA | POR_TIPO |
 | POST /profiles/persons/{personId}/decease | LEE | DIRECTA |
@@ -2544,6 +2646,7 @@ Representa a una persona natural una sola vez, separando su identidad humana de 
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/primary-patients | LEE | DIRECTA |
@@ -2600,7 +2703,7 @@ _Sin propósito registrado._
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PractitionerAdmissionEvents` — `src/modules/profiles/entities/practitioner_admission_events.entity.ts`
-- **Resumen:** 15 columnas · 5 índices · 8 FK salientes · 0 entrantes · 26 operaciones
+- **Resumen:** 15 columnas · 5 índices · 8 FK salientes · 0 entrantes · 28 operaciones
 
 #### Columnas
 
@@ -2652,6 +2755,7 @@ _Sin propósito registrado._
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /identity/checks/{id}/results | CREA | DIRECTA |
+| POST /identity/manual-review/{id}/decision | CREA | DIRECTA |
 | POST /internal/identity/checks/{id}/results | CREA | DIRECTA |
 | GET /admissions/{id} | LEE | DIRECTA |
 | POST /admissions/{id}/claim | CREA | DIRECTA |
@@ -2674,6 +2778,7 @@ _Sin propósito registrado._
 | POST /profiles/credentials/{credentialId}/verify | CREA | DIRECTA |
 | POST /profiles/practitioners | CREA | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | CREA | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | CREA | DIRECTA |
 
 #### Gobierno
@@ -2699,7 +2804,7 @@ _Sin propósito registrado._
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PractitionerAdmissionReviews` — `src/modules/profiles/entities/practitioner_admission_reviews.entity.ts`
-- **Resumen:** 21 columnas · 9 índices · 9 FK salientes · 0 entrantes · 55 operaciones
+- **Resumen:** 21 columnas · 9 índices · 9 FK salientes · 0 entrantes · 62 operaciones
 
 #### Columnas
 
@@ -2777,7 +2882,10 @@ _Sin propósito registrado._
 | POST /identity/checks/{id}/results | CREA | DIRECTA |
 | POST /identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | BORRA | POR_TIPO |
+| POST /identity/manual-review/{id}/decision | CREA | DIRECTA |
 | POST /identity/manual-review/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | BORRA | POR_TIPO |
 | POST /internal/identity/checks/{id}/results | CREA | DIRECTA |
 | POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
@@ -2819,6 +2927,10 @@ _Sin propósito registrado._
 | POST /profiles/practitioners/me/admission/resubmit | CREA | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | BORRA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/submit | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | ACTUALIZA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 
 #### Gobierno
@@ -2844,7 +2956,7 @@ _Sin propósito registrado._
 - **Estado del propósito:** PENDING_REVIEW
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PractitionerAdmissions` — `src/modules/profiles/entities/practitioner_admissions.entity.ts`
-- **Resumen:** 26 columnas · 10 índices · 8 FK salientes · 2 entrantes · 64 operaciones
+- **Resumen:** 26 columnas · 10 índices · 8 FK salientes · 2 entrantes · 67 operaciones
 
 #### Columnas
 
@@ -2943,6 +3055,7 @@ _Sin propósito registrado._
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | CREA | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | CREA | DIRECTA |
 | POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | CREA | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
@@ -2981,6 +3094,8 @@ _Sin propósito registrado._
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | CREA | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | GET /profiles/practitioners/me/summary | LEE | DIRECTA |
@@ -3008,7 +3123,7 @@ Vincula profesionales con organizaciones o sedes donde prestan servicios para da
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: practitioner_affiliations`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PractitionerAffiliations` — `src/modules/profiles/entities/practitioner_affiliations.entity.ts`
-- **Resumen:** 17 columnas · 9 índices · 7 FK salientes · 0 entrantes · 38 operaciones
+- **Resumen:** 17 columnas · 9 índices · 7 FK salientes · 0 entrantes · 40 operaciones
 
 #### Columnas
 
@@ -3075,6 +3190,8 @@ Vincula profesionales con organizaciones o sedes donde prestan servicios para da
 | GET /p/{slug} | LEE | POR_SQL |
 | GET /public/profiles/{prefijo}/{slug} | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
+| POST /affiliation-invitations/redeem | CREA | DIRECTA |
+| POST /affiliation-invitations/redeem | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | GET /profiles/practitioners | LEE | DIRECTA |
@@ -3211,7 +3328,7 @@ Asocia especialidades clínicas codificadas a profesionales para describir su á
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: practitioner_specialties`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `PractitionerSpecialties` — `src/modules/profiles/entities/practitioner_specialties.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 7 FK salientes · 0 entrantes · 80 operaciones
+- **Resumen:** 17 columnas · 8 índices · 7 FK salientes · 0 entrantes · 90 operaciones
 
 #### Columnas
 
@@ -3252,7 +3369,7 @@ Asocia especialidades clínicas codificadas a profesionales para describir su á
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_practitioner_specialties_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_practitioner_specialties_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_practitioner_specialties_specialty_concept_id` | no | specialty_concept_id | Soporta la clave foránea fk_practitioner_specialties_specialty_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «specialty_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_specialties_specialty_concept_id` | no | specialty_concept_id | Soporta la clave foránea fk_practitioner_specialties_specialty_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «specialty_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practitioner_specialties_supporting_credential_id` | no | supporting_credential_id | Soporta la clave foránea fk_practitioner_specialties_supporting_credential_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practitioner_specialties_specialty_role_concept_id` | no | specialty_role_concept_id | Soporta la clave foránea fk_practitioner_specialties_specialty_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practitioner_specialties_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_practitioner_specialties_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3271,6 +3388,9 @@ Asocia especialidades clínicas codificadas a profesionales para describir su á
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /billing/service-catalog/procedure-specialties/mine | LEE | POR_SQL |
+| GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
+| GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
+| GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | GET /f/{slug} | LEE | POR_SQL |
 | POST /internal/community/search/reindex | LEE | POR_SQL |
@@ -3286,6 +3406,9 @@ Asocia especialidades clínicas codificadas a profesionales para describir su á
 | GET /public/search/pharmacies | LEE | POR_SQL |
 | GET /public/search/practitioners | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
+| GET /diagnostics/patients/{patientProfileId}/orders | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId} | LEE | DIRECTA |
+| GET /diagnostics/patients/{patientProfileId}/reports/{reportId}/files/{fileId}/content | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
@@ -3294,6 +3417,8 @@ Asocia especialidades clínicas codificadas a profesionales para describir su á
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
@@ -3346,6 +3471,8 @@ Asocia especialidades clínicas codificadas a profesionales para describir su á
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | ACTUALIZA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | GET /profiles/practitioners/me/onboarding | LEE | DIRECTA |
 | GET /profiles/practitioners/me/summary | LEE | DIRECTA |
@@ -3374,7 +3501,7 @@ Registra credenciales y documentación profesional que sustentan la identidad y 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: professional_credentials`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `ProfessionalCredentials` — `src/modules/profiles/entities/professional_credentials.entity.ts`
-- **Resumen:** 24 columnas · 10 índices · 10 FK salientes · 2 entrantes · 46 operaciones
+- **Resumen:** 24 columnas · 10 índices · 10 FK salientes · 2 entrantes · 50 operaciones
 
 #### Columnas
 
@@ -3449,6 +3576,8 @@ Registra credenciales y documentación profesional que sustentan la identidad y 
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | POST /procedure-cases/{id}/confirm | LEE | DIRECTA |
@@ -3485,6 +3614,8 @@ Registra credenciales y documentación profesional que sustentan la identidad y 
 | GET /profiles/practitioners/me/admission | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/resubmit | ACTUALIZA | POR_TIPO |
 | POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/submit | ACTUALIZA | POR_TIPO |
+| POST /profiles/practitioners/me/admission/submit | LEE | DIRECTA |
 | POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | GET /profiles/practitioners/me/summary | LEE | DIRECTA |
 
@@ -3573,7 +3704,7 @@ Registra vínculos de una persona con otras personas relevantes para la atenció
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: related_persons`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `RelatedPersons` — `src/modules/profiles/entities/related_persons.entity.ts`
-- **Resumen:** 12 columnas · 7 índices · 6 FK salientes · 3 entrantes · 13 operaciones
+- **Resumen:** 12 columnas · 7 índices · 6 FK salientes · 3 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -3634,7 +3765,6 @@ Registra vínculos de una persona con otras personas relevantes para la atenció
 | POST /profiles/patients/me/dependents | CREA | DIRECTA |
 | DELETE /profiles/patients/me/photo | LEE | POR_SQL |
 | PUT /profiles/patients/me/photo | LEE | POR_SQL |
-| POST /profiles/patients/merge | ACTUALIZA | DIRECTA |
 
 #### Gobierno
 
@@ -3659,7 +3789,7 @@ Representa personal secretarial vinculado a tareas de coordinación y soporte de
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_05_profiles.puml: secretary_profiles`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_05_profiles.puml` · **DDL:** `SQL/05_profiles/02_tables.sql`
 - **Entidad del ORM:** `SecretaryProfiles` — `src/modules/profiles/entities/secretary_profiles.entity.ts`
-- **Resumen:** 7 columnas · 3 índices · 4 FK salientes · 1 entrantes · 9 operaciones
+- **Resumen:** 7 columnas · 3 índices · 4 FK salientes · 1 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -3695,6 +3825,7 @@ Representa personal secretarial vinculado a tareas de coordinación y soporte de
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /affiliation-invitations/redeem | LEE | POR_SQL |
 | POST /me/practitioner/support-invitations | LEE | POR_SQL |
 | POST /me/practitioner/support-staff | CREA | DIRECTA |
 | POST /me/practitioner/support-staff | LEE | POR_SQL |

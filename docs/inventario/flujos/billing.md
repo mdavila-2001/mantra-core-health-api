@@ -3,12 +3,12 @@
 # Flujos del módulo `billing`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 53 (49 con decisiones propias, 4 sin ellas)
+- **Operaciones:** 56 (51 con decisiones propias, 5 sin ellas)
 - Inventario de endpoints del módulo: [billing](../endpoints/billing.md)
 
 ## Proceso: Módulo Billing (17)
 
-- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 53
+- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 56
 - **Actores:** CLINICIAN · Cualquier sesión válida · PATIENT · PRACTITIONER · SECURITY_ADMIN · SYSTEM · SYSTEM_WORKER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/billing/README.md`
@@ -47,13 +47,16 @@ _Fuente: `src/modules/billing/README.md:3`_
 |  |  | GET /billing/invoices/{id} | SECURITY_ADMIN | BAJO | 3 |
 |  |  | GET /billing/patient-statements | SECURITY_ADMIN | BAJO | 2 |
 | `ctrl:BillingServiceCatalogController` | Operaciones de BillingServiceCatalogController que el README no asigna a un caso de uso | GET /billing/service-catalog | Cualquier sesión válida | BAJO | 1 |
-|  |  | POST /billing/service-catalog | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 5 |
+|  |  | POST /billing/service-catalog | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 12 |
 |  |  | PATCH /billing/service-catalog/{id} | PRACTITIONER · CLINICIAN · SECURITY_ADMIN | MEDIO | 4 |
 |  |  | GET /billing/service-catalog/{id}/image | Cualquier sesión válida | BAJO | 4 |
+|  |  | POST /billing/service-catalog/import | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 10 |
 |  |  | POST /billing/service-catalog/import-procedures | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 5 |
 |  |  | GET /billing/service-catalog/procedure-specialties | Cualquier sesión válida | BAJO | 1 |
 |  |  | GET /billing/service-catalog/procedure-specialties/mine | Cualquier sesión válida | BAJO | 3 |
 |  |  | GET /billing/service-catalog/procedures | Cualquier sesión válida | BAJO | 2 |
+|  |  | GET /billing/service-catalog/repository | Cualquier sesión válida | BAJO | 11 |
+|  |  | GET /billing/service-catalog/repository/facets | Cualquier sesión válida | BAJO | 7 |
 | `ctrl:BillingSimulatedController` | Operaciones de BillingSimulatedController que el README no asigna a un caso de uso | GET /billing/simulated/catalogs | Cualquier sesión válida | BAJO | 0 |
 |  |  | GET /billing/simulated/charges | Cualquier sesión válida | BAJO | 11 |
 |  |  | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | Cualquier sesión válida | BAJO | 11 |
@@ -266,7 +269,7 @@ flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a10(["Cualquier sesión válida"]):::actor
   a13(["SECURITY_ADMIN · PRACTITIONER · CLINICIAN"]):::actor
-  a17(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
+  a19(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
   t3[("billing.invoices")]:::tabla
   t4[("practice.practices")]:::tabla
   t6[("billing.invoice_lines")]:::tabla
@@ -274,56 +277,69 @@ flowchart LR
   t11[("billing.service_catalog")]:::tabla
   t14[("common.file_versions")]:::tabla
   t15[("common.files")]:::tabla
-  t18[("practice.practitioner_role_assignments")]:::tabla
-  t21[("terminology.catalog_concepts")]:::tabla
-  t22[("terminology.concept_properties")]:::tabla
-  t25[("profiles.practitioner_specialties")]:::tabla
-  t29[("billing.payments_received")]:::tabla
-  t30[("billing.receivable_payment_allocations")]:::tabla
-  t31[("billing.siat_simulated_invoices")]:::tabla
-  t38[("billing.billing_document_links")]:::tabla
-  t39[("billing.charge_captures")]:::tabla
-  e41>"billing.charge_capture.invoiced"]:::evento
-  t51[("clinical.encounters")]:::tabla
-  t52[("profiles.persons")]:::tabla
-  t55[("billing.siat_simulated_outbox")]:::tabla
+  t16[("terminology.catalog_concepts")]:::tabla
+  t20[("practice.practitioner_role_assignments")]:::tabla
+  t23[("terminology.code_system_versions")]:::tabla
+  t24[("terminology.code_systems")]:::tabla
+  t27[("terminology.concept_properties")]:::tabla
+  t30[("profiles.practitioner_specialties")]:::tabla
+  t33[("terminology.concept_designations")]:::tabla
+  t36[("terminology.concept_relationships")]:::tabla
+  t37[("terminology.value_set_members")]:::tabla
+  t38[("terminology.value_set_versions")]:::tabla
+  t42[("billing.payments_received")]:::tabla
+  t43[("billing.receivable_payment_allocations")]:::tabla
+  t44[("billing.siat_simulated_invoices")]:::tabla
+  t51[("billing.billing_document_links")]:::tabla
+  t52[("billing.charge_captures")]:::tabla
+  e54>"billing.charge_capture.invoiced"]:::evento
+  t64[("clinical.encounters")]:::tabla
+  t65[("profiles.persons")]:::tabla
+  t68[("billing.siat_simulated_outbox")]:::tabla
   subgraph s0["ctrl:BillingReceivablesController · Operaciones de BillingReceivablesController…"]
     o1["GET /billing/invoices"]:::op
     o5["GET /billing/invoices/{id}"]:::op
     o7["GET /billing/patient-statements"]:::op
   end
+  t17[("+6 tablas más")]
+  t25[("+4 tablas más")]
+  t34[("+5 tablas más")]
+  t39[("+1 tablas más")]
   subgraph s1["ctrl:BillingServiceCatalogController · Operaciones de BillingServiceCatalogCont…"]
     o9["GET /billing/service-catalog"]:::op
     o12["POST /billing/service-catalog"]:::op
-    o16["PATCH /billing/service-catalog/{id}"]:::op
-    o19["GET /billing/service-catalog/{id}/image"]:::op
-    o20["POST /billing/service-catalog/import-procedures"]:::op
-    o23["GET /billing/service-catalog/procedure-specialties"]:::op
-    o24["GET /billing/service-catalog/procedure-specialties/mine"]:::op
-    o26["GET /billing/service-catalog/procedures"]:::op
+    o18["PATCH /billing/service-catalog/{id}"]:::op
+    o21["GET /billing/service-catalog/{id}/image"]:::op
+    o22["POST /billing/service-catalog/import"]:::op
+    o26["POST /billing/service-catalog/import-procedures"]:::op
+    o28["GET /billing/service-catalog/procedure-specialties"]:::op
+    o29["GET /billing/service-catalog/procedure-specialties/mine"]:::op
+    o31["GET /billing/service-catalog/procedures"]:::op
+    o32["GET /billing/service-catalog/repository"]:::op
+    o35["GET /billing/service-catalog/repository/facets"]:::op
   end
-  t32[("+5 tablas más")]
-  t34[("+5 tablas más")]
-  t36[("+6 tablas más")]
-  t40[("+16 tablas más")]
-  t43[("+5 tablas más")]
-  t45[("+6 tablas más")]
-  t47[("+6 tablas más")]
-  t49[("+7 tablas más")]
+  t45[("+5 tablas más")]
+  t47[("+5 tablas más")]
+  t49[("+6 tablas más")]
+  t53[("+16 tablas más")]
+  t56[("+5 tablas más")]
+  t58[("+6 tablas más")]
+  t60[("+6 tablas más")]
+  t62[("+7 tablas más")]
   subgraph s2["ctrl:BillingSimulatedController · Operaciones de BillingSimulatedController que…"]
-    o27["GET /billing/simulated/catalogs"]:::op
-    o28["GET /billing/simulated/charges"]:::op
-    o33["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
-    o35["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
-    o37["POST /billing/simulated/charges/{chargeId}/payment"]:::op
-    o42["GET /billing/simulated/invoices/{invoiceId}"]:::op
-    o44["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
-    o46["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
-    o48["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
-    o50["GET /billing/simulated/my-invoices"]:::op
-    o53["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
-    o54["GET /billing/simulated/outbox"]:::op
-    o56["GET /billing/simulated/status"]:::op
+    o40["GET /billing/simulated/catalogs"]:::op
+    o41["GET /billing/simulated/charges"]:::op
+    o46["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
+    o48["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
+    o50["POST /billing/simulated/charges/{chargeId}/payment"]:::op
+    o55["GET /billing/simulated/invoices/{invoiceId}"]:::op
+    o57["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
+    o59["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
+    o61["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
+    o63["GET /billing/simulated/my-invoices"]:::op
+    o66["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
+    o67["GET /billing/simulated/outbox"]:::op
+    o69["GET /billing/simulated/status"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -343,114 +359,140 @@ flowchart LR
   o12 -->|"LEE"| t14
   o12 -->|"LEE"| t15
   o12 -->|"LEE"| t4
-  a17 --> o16
-  o16 -->|"ACTUALIZA"| t11
-  o16 -->|"LEE"| t11
-  o16 -->|"LEE"| t4
-  o16 -->|"LEE"| t18
-  a10 --> o19
-  o19 -->|"LEE"| t11
-  o19 -->|"LEE"| t14
-  o19 -->|"LEE"| t15
-  o19 -->|"LEE"| t4
-  a13 --> o20
-  o20 -->|"CREA"| t11
-  o20 -->|"LEE"| t11
-  o20 -->|"LEE"| t4
-  o20 -->|"LEE"| t21
-  o20 -->|"LEE"| t22
-  a10 --> o23
-  o23 -->|"LEE"| t22
-  a10 --> o24
-  o24 -->|"LEE"| t25
-  o24 -->|"LEE"| t21
-  o24 -->|"LEE"| t22
-  a10 --> o26
-  o26 -->|"LEE"| t21
-  o26 -->|"LEE"| t22
-  a10 --> o27
+  o12 -->|"LEE"| t16
+  o12 -.-> t17
+  a19 --> o18
+  o18 -->|"ACTUALIZA"| t11
+  o18 -->|"LEE"| t11
+  o18 -->|"LEE"| t4
+  o18 -->|"LEE"| t20
+  a10 --> o21
+  o21 -->|"LEE"| t11
+  o21 -->|"LEE"| t14
+  o21 -->|"LEE"| t15
+  o21 -->|"LEE"| t4
+  a13 --> o22
+  o22 -->|"CREA"| t11
+  o22 -->|"LEE"| t11
+  o22 -->|"LEE"| t4
+  o22 -->|"LEE"| t16
+  o22 -->|"LEE"| t23
+  o22 -->|"LEE"| t24
+  o22 -.-> t25
+  a13 --> o26
+  o26 -->|"CREA"| t11
+  o26 -->|"LEE"| t11
+  o26 -->|"LEE"| t4
+  o26 -->|"LEE"| t16
+  o26 -->|"LEE"| t27
   a10 --> o28
-  o28 -->|"LEE"| t6
-  o28 -->|"LEE"| t3
-  o28 -->|"LEE"| t29
-  o28 -->|"LEE"| t30
-  o28 -->|"LEE"| t11
-  o28 -->|"LEE"| t31
-  o28 -.-> t32
-  a10 --> o33
-  o33 -->|"LEE"| t6
-  o33 -->|"LEE"| t3
-  o33 -->|"LEE"| t29
-  o33 -->|"LEE"| t30
-  o33 -->|"LEE"| t11
-  o33 -->|"LEE"| t31
-  o33 -.-> t34
+  o28 -->|"LEE"| t27
+  a10 --> o29
+  o29 -->|"LEE"| t30
+  o29 -->|"LEE"| t16
+  o29 -->|"LEE"| t27
+  a10 --> o31
+  o31 -->|"LEE"| t16
+  o31 -->|"LEE"| t27
+  a10 --> o32
+  o32 -->|"LEE"| t11
+  o32 -->|"LEE"| t16
+  o32 -->|"LEE"| t23
+  o32 -->|"LEE"| t24
+  o32 -->|"LEE"| t33
+  o32 -->|"LEE"| t27
+  o32 -.-> t34
   a10 --> o35
-  o35 -->|"LEE"| t6
-  o35 -->|"LEE"| t3
-  o35 -->|"LEE"| t29
-  o35 -->|"LEE"| t30
-  o35 -->|"LEE"| t11
-  o35 -->|"CREA"| t31
-  o35 -.-> t36
-  a10 --> o37
-  o37 -->|"CREA"| t38
-  o37 -->|"LEE"| t39
-  o37 -->|"CREA"| t6
-  o37 -->|"LEE"| t6
-  o37 -->|"CREA"| t3
-  o37 -->|"LEE"| t3
-  o37 -.-> t40
-  o37 -->|"evento"| e41
-  a10 --> o42
-  o42 -->|"LEE"| t6
-  o42 -->|"LEE"| t3
-  o42 -->|"LEE"| t29
-  o42 -->|"LEE"| t30
-  o42 -->|"LEE"| t11
-  o42 -->|"LEE"| t31
-  o42 -.-> t43
-  a10 --> o44
-  o44 -->|"LEE"| t6
-  o44 -->|"LEE"| t3
-  o44 -->|"LEE"| t29
-  o44 -->|"LEE"| t30
-  o44 -->|"LEE"| t11
-  o44 -->|"ACTUALIZA"| t31
-  o44 -.-> t45
+  o35 -->|"LEE"| t16
+  o35 -->|"LEE"| t23
+  o35 -->|"LEE"| t24
+  o35 -->|"LEE"| t36
+  o35 -->|"LEE"| t37
+  o35 -->|"LEE"| t38
+  o35 -.-> t39
+  a10 --> o40
+  a10 --> o41
+  o41 -->|"LEE"| t6
+  o41 -->|"LEE"| t3
+  o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t43
+  o41 -->|"LEE"| t11
+  o41 -->|"LEE"| t44
+  o41 -.-> t45
   a10 --> o46
   o46 -->|"LEE"| t6
   o46 -->|"LEE"| t3
-  o46 -->|"LEE"| t29
-  o46 -->|"LEE"| t30
+  o46 -->|"LEE"| t42
+  o46 -->|"LEE"| t43
   o46 -->|"LEE"| t11
-  o46 -->|"ACTUALIZA"| t31
+  o46 -->|"LEE"| t44
   o46 -.-> t47
   a10 --> o48
   o48 -->|"LEE"| t6
   o48 -->|"LEE"| t3
-  o48 -->|"LEE"| t29
-  o48 -->|"LEE"| t30
+  o48 -->|"LEE"| t42
+  o48 -->|"LEE"| t43
   o48 -->|"LEE"| t11
-  o48 -->|"ACTUALIZA"| t31
+  o48 -->|"CREA"| t44
   o48 -.-> t49
   a10 --> o50
-  o50 -->|"LEE"| t31
-  o50 -->|"LEE"| t51
-  o50 -->|"LEE"| t4
+  o50 -->|"CREA"| t51
   o50 -->|"LEE"| t52
-  a10 --> o53
-  o53 -->|"LEE"| t31
-  o53 -->|"LEE"| t51
-  o53 -->|"LEE"| t4
-  o53 -->|"LEE"| t52
-  a10 --> o54
-  o54 -->|"LEE"| t31
-  o54 -->|"LEE"| t55
-  o54 -->|"LEE"| t51
-  a10 --> o56
-  o56 -->|"LEE"| t51
-  o56 -->|"LEE"| t4
+  o50 -->|"CREA"| t6
+  o50 -->|"LEE"| t6
+  o50 -->|"CREA"| t3
+  o50 -->|"LEE"| t3
+  o50 -.-> t53
+  o50 -->|"evento"| e54
+  a10 --> o55
+  o55 -->|"LEE"| t6
+  o55 -->|"LEE"| t3
+  o55 -->|"LEE"| t42
+  o55 -->|"LEE"| t43
+  o55 -->|"LEE"| t11
+  o55 -->|"LEE"| t44
+  o55 -.-> t56
+  a10 --> o57
+  o57 -->|"LEE"| t6
+  o57 -->|"LEE"| t3
+  o57 -->|"LEE"| t42
+  o57 -->|"LEE"| t43
+  o57 -->|"LEE"| t11
+  o57 -->|"ACTUALIZA"| t44
+  o57 -.-> t58
+  a10 --> o59
+  o59 -->|"LEE"| t6
+  o59 -->|"LEE"| t3
+  o59 -->|"LEE"| t42
+  o59 -->|"LEE"| t43
+  o59 -->|"LEE"| t11
+  o59 -->|"ACTUALIZA"| t44
+  o59 -.-> t60
+  a10 --> o61
+  o61 -->|"LEE"| t6
+  o61 -->|"LEE"| t3
+  o61 -->|"LEE"| t42
+  o61 -->|"LEE"| t43
+  o61 -->|"LEE"| t11
+  o61 -->|"ACTUALIZA"| t44
+  o61 -.-> t62
+  a10 --> o63
+  o63 -->|"LEE"| t44
+  o63 -->|"LEE"| t64
+  o63 -->|"LEE"| t4
+  o63 -->|"LEE"| t65
+  a10 --> o66
+  o66 -->|"LEE"| t44
+  o66 -->|"LEE"| t64
+  o66 -->|"LEE"| t4
+  o66 -->|"LEE"| t65
+  a10 --> o67
+  o67 -->|"LEE"| t44
+  o67 -->|"LEE"| t68
+  o67 -->|"LEE"| t64
+  a10 --> o69
+  o69 -->|"LEE"| t64
+  o69 -->|"LEE"| t4
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -2352,7 +2394,7 @@ flowchart TD
 
 #### 27. POST /billing/service-catalog
 
-Dar de alta un servicio en el catálogo maestro
+Dar de alta en el catálogo un servicio del repositorio
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -2361,8 +2403,8 @@ Dar de alta un servicio en el catálogo maestro
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {labels.subject} no le pertenece |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Imagen no encontrada |
-| 409 | `CONFLICT` | ConflictException: Ya existe un servicio con ese código en el catálogo |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 409 | `CONFLICT` | ConflictException: Ese servicio ya está en el catálogo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El servicio se elige del repositorio: indicá serviceConceptId; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: Ese servicio no es del repositorio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2391,73 +2433,95 @@ flowchart TD
   n10 --> n11
   n12(["404 NOT_FOUND Práctica no encontrada"]):::error
   n11 --> n12
-  n13{"dto.imageFileId !== undefined"}:::decision
-  n14["Llama a BillingServiceCatalogService.assertImageUsable"]:::llamada
+  n13{"!dto.serviceConceptId"}:::decision
+  n14(["422 PRECONDITION_FAILED El servicio se elige del repositorio: indicá serviceConceptId"]):::error
   n13 -->|"sí"| n14
-  n15["Intenta"]:::intento
-  n14 --> n15
-  n16["Llama a AttachableFileService.assertUsableBy"]:::llamada
-  n15 --> n16
-  n17["Llama a FilesRepository.findById"]:::llamada
+  n15{"dto.imageFileId !== undefined"}:::decision
+  n13 -->|"no"| n15
+  n16["Llama a BillingServiceCatalogService.assertImageUsable"]:::llamada
+  n15 -->|"sí"| n16
+  n17["Intenta"]:::intento
   n16 --> n17
-  n18[("LEE common.files")]:::efecto
+  n18["Transacción: transactional(…)"]:::transaccion
   n17 --> n18
-  n19{"!file"}:::decision
+  n19["Llama a AttachableFileService.assertUsableBy"]:::llamada
   n18 --> n19
-  n20(["404 NOT_FOUND {labels.notFound}"]):::error
-  n19 -->|"sí"| n20
-  n21{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
-  n19 -->|"no"| n21
-  n22(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
-  n21 -->|"sí"| n22
-  n23{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n21 -->|"no"| n23
-  n24(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n23 -->|"sí"| n24
-  n25{"!file.currentVersionId"}:::decision
-  n23 -->|"no"| n25
-  n26(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a AttachableFileService.assertVersionUsable"]:::llamada
-  n25 -->|"no"| n27
-  n28{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n27 --> n28
-  n29(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n20["Llama a FilesRepository.findById"]:::llamada
+  n19 --> n20
+  n21[("LEE common.files")]:::efecto
+  n20 --> n21
+  n22{"!file"}:::decision
+  n21 --> n22
+  n23(["404 NOT_FOUND {labels.notFound}"]):::error
+  n22 -->|"sí"| n23
+  n24{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
+  n22 -->|"no"| n24
+  n25(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
+  n24 -->|"sí"| n25
+  n26{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n24 -->|"no"| n26
+  n27(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n26 -->|"sí"| n27
+  n28{"!file.currentVersionId"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
   n28 -->|"sí"| n29
-  n30{"!file.currentVersionId"}:::decision
+  n30["Llama a AttachableFileService.assertVersionUsable"]:::llamada
   n28 -->|"no"| n30
-  n31(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n30 -->|"sí"| n31
-  n32{"!version"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n32 -->|"sí"| n33
-  n34{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
-  n32 -->|"no"| n34
-  n35(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
-  n34 -->|"sí"| n35
-  n36{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
-  n34 -->|"no"| n36
-  n37(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
-  n36 -->|"sí"| n37
-  n38(["404 NOT_FOUND Imagen no encontrada"]):::error
-  n36 -->|"no"| n38
-  n39["Transacción: transactional(…)"]:::transaccion
-  n13 -->|"no"| n39
-  n40["Llama a ServiceCatalogRepository.findByCode"]:::llamada
-  n39 --> n40
-  n41[("LEE billing.service_catalog")]:::efecto
-  n40 --> n41
-  n42{"clash"}:::decision
-  n41 --> n42
-  n43(["409 CONFLICT Ya existe un servicio con ese código en el catálogo"]):::error
-  n42 -->|"sí"| n43
-  n44["Llama a ServiceCatalogRepository.create"]:::llamada
-  n42 -->|"no"| n44
-  n45[("CREA billing.service_catalog")]:::efecto
+  n31{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n30 --> n31
+  n32(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n31 -->|"sí"| n32
+  n33{"!file.currentVersionId"}:::decision
+  n31 -->|"no"| n33
+  n34(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n33 -->|"sí"| n34
+  n35{"!version"}:::decision
+  n33 -->|"no"| n35
+  n36(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n35 -->|"sí"| n36
+  n37{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n35 -->|"no"| n37
+  n38(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n37 -->|"sí"| n38
+  n39{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n37 -->|"no"| n39
+  n40(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n39 -->|"sí"| n40
+  n41(["404 NOT_FOUND Imagen no encontrada"]):::error
+  n39 -->|"no"| n41
+  n42["Llama a BillingServiceCatalogService.requireImportable"]:::llamada
+  n15 -->|"no"| n42
+  n43["Llama a ServiceRepositoryService.resolveImportable"]:::llamada
+  n42 --> n43
+  n44[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members · LEE ter…")]:::efecto
+  n43 --> n44
+  n45{"!concept"}:::decision
   n44 --> n45
-  n46(("201 Responde con éxito")):::ok
-  n45 --> n46
+  n46(["422 PRECONDITION_FAILED Ese servicio no es del repositorio"]):::error
+  n45 -->|"sí"| n46
+  n47["Transacción: transactional(…)"]:::transaccion
+  n45 -->|"no"| n47
+  n48["Llama a BillingServiceCatalogService.findImported"]:::llamada
+  n47 --> n48
+  n49[("LEE billing.service_catalog")]:::efecto
+  n48 --> n49
+  n50["Llama a ServiceCatalogRepository.findByCode"]:::llamada
+  n49 --> n50
+  n51[("LEE billing.service_catalog")]:::efecto
+  n50 --> n51
+  n52{"existing"}:::decision
+  n51 --> n52
+  n53(["409 CONFLICT Ese servicio ya está en el catálogo"]):::error
+  n52 -->|"sí"| n53
+  n54["Llama a BillingServiceCatalogService.insertFromConcept"]:::llamada
+  n52 -->|"no"| n54
+  n55["Llama a ServiceCatalogRepository.create"]:::llamada
+  n54 --> n55
+  n56[("CREA billing.service_catalog")]:::efecto
+  n55 --> n56
+  n57(("201 Responde con éxito")):::ok
+  n56 --> n57
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2589,46 +2653,46 @@ flowchart TD
   n9 -->|"sí"| n10
   n11["Intenta"]:::intento
   n9 -->|"no"| n11
-  n12["Llama a AttachableFileService.assertUsableForAuthorizedContext"]:::llamada
+  n12["Transacción: transactional(…)"]:::transaccion
   n11 --> n12
-  n13["Llama a FilesRepository.findById"]:::llamada
+  n13["Llama a AttachableFileService.assertUsableForAuthorizedContext"]:::llamada
   n12 --> n13
-  n14[("LEE common.files")]:::efecto
+  n14["Llama a FilesRepository.findById"]:::llamada
   n13 --> n14
-  n15{"!file"}:::decision
+  n15[("LEE common.files")]:::efecto
   n14 --> n15
-  n16(["404 NOT_FOUND {labels.notFound}"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a AttachableFileService.assertVersionUsable"]:::llamada
-  n15 -->|"no"| n17
-  n18{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n17 --> n18
-  n19(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n18 -->|"sí"| n19
-  n20{"!file.currentVersionId"}:::decision
-  n18 -->|"no"| n20
-  n21(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n20 -->|"sí"| n21
-  n22["Llama a FileVersionsRepository.findById"]:::llamada
-  n20 -->|"no"| n22
-  n23[("LEE common.file_versions")]:::efecto
-  n22 --> n23
-  n24{"!version"}:::decision
+  n16{"!file"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND {labels.notFound}"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a AttachableFileService.assertVersionUsable"]:::llamada
+  n16 -->|"no"| n18
+  n19{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n18 --> n19
+  n20(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"!file.currentVersionId"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a FileVersionsRepository.findById"]:::llamada
+  n21 -->|"no"| n23
+  n24[("LEE common.file_versions")]:::efecto
   n23 --> n24
-  n25(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n24 -->|"sí"| n25
-  n26{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
-  n24 -->|"no"| n26
-  n27(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
-  n26 -->|"sí"| n27
-  n28{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
-  n26 -->|"no"| n28
-  n29(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
-  n28 -->|"sí"| n29
-  n30{"file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL && file.tenantId === tenantId"}:::decision
-  n28 -->|"no"| n30
+  n25{"!version"}:::decision
+  n24 --> n25
+  n26(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n25 -->|"sí"| n26
+  n27{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n25 -->|"no"| n27
+  n28(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n27 -->|"sí"| n28
+  n29{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n29 -->|"sí"| n30
   n31["Llama a FileUploadService.downloadForAuthorizedContext"]:::llamada
-  n30 -->|"sí"| n31
+  n29 -->|"no"| n31
   n32["Llama a FilesRepository.findById"]:::llamada
   n31 --> n32
   n33[("LEE common.files")]:::efecto
@@ -2671,7 +2735,6 @@ flowchart TD
   n49 -->|"no"| n51
   n52(["404 NOT_FOUND {notVisible.message}"]):::error
   n47 -->|"no"| n52
-  n30 -->|"no"| n52
   n53(("200 Responde con éxito")):::ok
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -2681,7 +2744,83 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /billing/service-catalog/import-procedures
+#### 30. POST /billing/service-catalog/import
+
+Importar servicios del repositorio a mi catálogo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay servicios que no son del repositorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a BillingServiceCatalogService.importServices"]:::llamada
+  n2 --> n3
+  n4["Llama a BillingServiceCatalogService.assertRegistrationCanRegister"]:::llamada
+  n3 --> n4
+  n5{"roles.some((role) =› actor.roles.includes(role))"}:::decision
+  n4 --> n5
+  n6["Llama a PracticeTenantLookupService.findTenantOfPractice"]:::llamada
+  n5 -->|"sí"| n6
+  n7["Llama a PracticesRepository.findById"]:::llamada
+  n6 --> n7
+  n8[("LEE practice.practices")]:::efecto
+  n7 --> n8
+  n9["Llama a PracticeTenantLookupService.isOwnOffice"]:::llamada
+  n8 --> n9
+  n5 -->|"no"| n9
+  n10["Llama a PracticesRepository.findById"]:::llamada
+  n9 --> n10
+  n11[("LEE practice.practices")]:::efecto
+  n10 --> n11
+  n12(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n11 --> n12
+  n13["Llama a ServiceRepositoryService.resolveImportable"]:::llamada
+  n14[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members · LEE ter…")]:::efecto
+  n13 --> n14
+  n15{"missing.length › 0"}:::decision
+  n14 --> n15
+  n16(["422 PRECONDITION_FAILED Hay servicios que no son del repositorio"]):::error
+  n15 -->|"sí"| n16
+  n17["Transacción: transactional(…)"]:::transaccion
+  n15 -->|"no"| n17
+  n18["Repite: por cada const request de dto.items"]:::bucle
+  n17 --> n18
+  n19["Llama a BillingServiceCatalogService.findImported"]:::llamada
+  n18 -->|"cada elemento"| n19
+  n20[("LEE billing.service_catalog")]:::efecto
+  n19 --> n20
+  n21["Llama a ServiceCatalogRepository.findByCode"]:::llamada
+  n20 --> n21
+  n22[("LEE billing.service_catalog")]:::efecto
+  n21 --> n22
+  n23["Llama a BillingServiceCatalogService.insertFromConcept"]:::llamada
+  n22 --> n23
+  n24["Llama a ServiceCatalogRepository.create"]:::llamada
+  n23 --> n24
+  n25[("CREA billing.service_catalog")]:::efecto
+  n24 --> n25
+  n26(("200 Responde con éxito")):::ok
+  n25 --> n26
+  n18 -->|"al terminar"| n26
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 31. POST /billing/service-catalog/import-procedures
 
 Importar en lote procedimientos del arancel al catálogo
 
@@ -2761,7 +2900,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. GET /billing/service-catalog/procedures
+#### 32. GET /billing/service-catalog/procedures
 
 Listar el nomenclador de procedimientos (arancel de referencia)
 
@@ -2805,7 +2944,51 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. GET /billing/simulated/catalogs
+#### 33. GET /billing/service-catalog/repository
+
+Buscar en el repositorio de servicios (para importar)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ServiceRepositoryService.search"]:::llamada
+  n2 --> n3
+  n4["Repite: por cada const token de tokens"]:::bucle
+  n3 --> n4
+  n5[("LEE terminology.concept_designations")]:::efecto
+  n4 -->|"cada elemento"| n5
+  n6{"options.specialtyConceptId"}:::decision
+  n5 --> n6
+  n4 -->|"al terminar"| n6
+  n7[("LEE terminology.concept_relationships")]:::efecto
+  n6 -->|"sí"| n7
+  n8[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members · LEE ter…")]:::efecto
+  n7 --> n8
+  n6 -->|"no"| n8
+  n9["Llama a ServiceRepositoryService.enrich"]:::llamada
+  n8 --> n9
+  n10[("LEE terminology.concept_relationships · LEE terminology.catalog_concepts · LEE terminology.concept_properties…")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 34. GET /billing/simulated/catalogs
 
 Catálogos paramétricos del SIAT simulado
 
@@ -2840,7 +3023,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /billing/simulated/charges
+#### 35. GET /billing/simulated/charges
 
 Cobros de consultas (opcionalmente de una persona)
 
@@ -2886,7 +3069,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+#### 36. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
 
@@ -2944,7 +3127,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. POST /billing/simulated/charges/{chargeId}/invoices
+#### 37. POST /billing/simulated/charges/{chargeId}/invoices
 
 Emitir la factura SIAT simulada de un cobro pagado
 
@@ -3032,7 +3215,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. POST /billing/simulated/charges/{chargeId}/payment
+#### 38. POST /billing/simulated/charges/{chargeId}/payment
 
 Registrar el pago real de un cobro
 
@@ -3204,7 +3387,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. GET /billing/simulated/invoices/{invoiceId}
+#### 39. GET /billing/simulated/invoices/{invoiceId}
 
 Una factura simulada, dentro del alcance de quien la pide
 
@@ -3289,7 +3472,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. POST /billing/simulated/invoices/{invoiceId}/annulment
+#### 40. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 Anular la factura (sólo administración)
 
@@ -3375,7 +3558,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+#### 41. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 Revertir la anulación (sólo administración)
 
@@ -3476,7 +3659,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. POST /billing/simulated/invoices/{invoiceId}/email
+#### 42. POST /billing/simulated/invoices/{invoiceId}/email
 
 Encolar el envío (simulado, no se envía) de la factura
 
@@ -3572,7 +3755,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 41. GET /billing/simulated/my-invoices
+#### 43. GET /billing/simulated/my-invoices
 
 Mis facturas: recibidas (paciente) o emitidas (quien factura)
 
@@ -3611,7 +3794,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. GET /billing/simulated/my-invoices/{invoiceId}
+#### 44. GET /billing/simulated/my-invoices/{invoiceId}
 
 Una de mis facturas
 
@@ -3658,7 +3841,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 43. GET /billing/simulated/outbox
+#### 45. GET /billing/simulated/outbox
 
 Bandeja de correo simulada (sólo administración)
 
@@ -3707,7 +3890,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 44. GET /billing/simulated/status
+#### 46. GET /billing/simulated/status
 
 Estado fiscal simulado: emisores y credenciales sintéticas
 
@@ -3757,7 +3940,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 45. GET /billing/space-tariffs
+#### 47. GET /billing/space-tariffs
 
 Tarifas de espacios
 
@@ -3817,7 +4000,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 46. POST /billing/space-tariffs
+#### 48. POST /billing/space-tariffs
 
 Crear una tarifa de espacio
 
@@ -3931,7 +4114,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 47. POST /billing/space-tariffs/{id}/close
+#### 49. POST /billing/space-tariffs/{id}/close
 
 Cerrar la vigencia de una tarifa
 
@@ -4028,7 +4211,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 48. POST /internal/billing/bed-day-charges/run
+#### 50. POST /internal/billing/bed-day-charges/run
 
 Devengar día-cama y quirófano (worker)
 
@@ -4162,7 +4345,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 49. GET /patient-spending/me
+#### 51. GET /patient-spending/me
 
 Mis gastos de salud
 
@@ -4210,3 +4393,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /billing/service-catalog | 200, 400, 401, 403, 429 | 1 |
 | GET /billing/service-catalog/procedure-specialties | 200, 401, 403, 429 | 1 |
 | GET /billing/service-catalog/procedure-specialties/mine | 200, 401, 403, 429 | 3 |
+| GET /billing/service-catalog/repository/facets | 200, 401, 403, 429 | 7 |

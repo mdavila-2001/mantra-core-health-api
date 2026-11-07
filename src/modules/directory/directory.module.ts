@@ -7,6 +7,12 @@ import { CommonModule } from '../common/common.module';
 import { DiagnosticUnitsModule } from '../diagnostic_units/diagnostic_units.module';
 import { DirectoryAuthorizationModule } from './directory-authorization.module';
 import { OrganizationLogoController } from './controllers/organization-logo.controller';
+import { BranchLocationController } from './controllers/branch-location.controller';
+import { ResolveMapLinkUseCase } from './application/use-cases/resolve-map-link.use-case';
+import { HttpMapLinkResolver } from './infrastructure/http-map-link-resolver';
+import { MAP_LINK_RESOLVER_PORT } from './domain/ports/map-link-resolver.port';
+import { TenantRepresentativesController } from './controllers/tenant-representatives.controller';
+import { TenantRepresentativeNameService } from './services/tenant-representative-name.service';
 import { MembershipInvitationsController } from './controllers/membership-invitations.controller';
 import { MembershipInvitationsService } from './services/membership-invitations.service';
 import { OrganizationLogoService } from './services/organization-logo.service';
@@ -72,6 +78,8 @@ import {
     MembershipInvitationsController,
     TenantsController,
     OrganizationLogoController,
+    TenantRepresentativesController,
+    BranchLocationController,
   ],
   providers: [
     OrganizationLogoService,
@@ -81,6 +89,9 @@ import {
     TenantAffiliationDocumentsService,
     TenantTaxIdentifierService,
     TenantLegalRepresentativesService,
+    TenantRepresentativeNameService,
+    ResolveMapLinkUseCase,
+    { provide: MAP_LINK_RESOLVER_PORT, useClass: HttpMapLinkResolver },
     // P50: lo que una farmacia necesita para operar, y la puerta para
     // completar los papeles que el alta pública dejó opcionales.
     PharmacyOperatingRequirementsService,

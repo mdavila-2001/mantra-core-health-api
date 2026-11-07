@@ -444,7 +444,69 @@ describe('SupportStaffService', () => {
         'doc-profile',
         new Date('2026-11-01T00:00:00Z'),
         new Date('2026-11-08T00:00:00Z'),
+        501,
       );
+    });
+
+    describe('tope de la agenda', () => {
+      const query = {
+        tenantId: 'tenant-a',
+        practitionerRoleAssignmentId: 'pra-1',
+        from: '2026-11-01T00:00:00Z',
+        to: '2026-11-08T00:00:00Z',
+      };
+      const active = () =>
+        row({
+          kind: 'PRACTITIONER',
+          careSpaceId: null,
+          practitionerRoleAssignmentId: 'pra-1',
+          status: 'ACTIVE',
+        });
+      const turnos = (n: number) =>
+        Array.from({ length: n }, (_, i) => ({
+          bookingId: `b-${i}`,
+          startAt: new Date(Date.UTC(2026, 10, 2, 0, i)),
+          endAt: new Date(Date.UTC(2026, 10, 2, 0, i + 1)),
+          statusCode: null,
+          patientProfileId: `p-${i}`,
+          patientName: `Paciente ${i}`,
+        }));
+
+      it('pide al repositorio un turno de más para saber si hubo más y lo dice en la respuesta', async () => {
+        const { service, repo } = build([active()]);
+        repo.findPractitionerAgenda.mockResolvedValue(turnos(501));
+        const res = await service.agenda(query, SECRETARY);
+        expect(repo.findPractitionerAgenda).toHaveBeenCalledWith(
+          expect.anything(),
+          'tenant-a',
+          'doc-profile',
+          new Date('2026-11-01T00:00:00Z'),
+          new Date('2026-11-08T00:00:00Z'),
+          501,
+        );
+        expect(res.items).toHaveLength(500);
+        expect(res.count).toBe(500);
+        expect(res.truncated).toBe(true);
+        expect(res.limit).toBe(500);
+        // Se descarta el turno de sobra, no uno de los primeros.
+        expect(res.items[499].bookingId).toBe('b-499');
+      });
+
+      it('con exactamente el tope no hay truncado', async () => {
+        const { service, repo } = build([active()]);
+        repo.findPractitionerAgenda.mockResolvedValue(turnos(500));
+        const res = await service.agenda(query, SECRETARY);
+        expect(res.items).toHaveLength(500);
+        expect(res.truncated).toBe(false);
+        expect(res.limit).toBe(500);
+      });
+
+      it('con pocos turnos devuelve todos y truncated=false', async () => {
+        const { service, repo } = build([active()]);
+        repo.findPractitionerAgenda.mockResolvedValue(turnos(3));
+        const res = await service.agenda(query, SECRETARY);
+        expect(res).toMatchObject({ count: 3, truncated: false, limit: 500 });
+      });
     });
 
     it('un rango de más de 31 días se rechaza', async () => {

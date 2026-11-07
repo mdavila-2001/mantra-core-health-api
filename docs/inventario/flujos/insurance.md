@@ -26,10 +26,10 @@ _Fuente: `src/modules/insurance/README.md:3`_
 | `ctrl:AppealsController` | Operaciones de AppealsController que el README no asigna a un caso de uso | POST /claim-disputes/{id}/appeal-decisions | BILLING · FINANCE | MEDIO | 4 |
 | `ctrl:BrokerCommissionController` | Operaciones de BrokerCommissionController que el README no asigna a un caso de uso | POST /broker-commission-statements | BILLING · FINANCE | MEDIO | 4 |
 | `ctrl:ClaimsController` | Operaciones de ClaimsController que el README no asigna a un caso de uso | POST /insurance-claims | BILLING · FINANCE | MEDIO | 22 |
-|  |  | POST /insurance-claims/{id}/adjudications | BILLING · FINANCE | MEDIO | 18 |
+|  |  | POST /insurance-claims/{id}/adjudications | BILLING · FINANCE | MEDIO | 19 |
 |  |  | POST /insurance-claims/{id}/disputes | BILLING · FINANCE · BILLING_OPERATOR · SECURITY_ADMIN · PATIENT | MEDIO | 10 |
 |  |  | POST /insurance-claims/{id}/eob | BILLING · FINANCE | MEDIO | 21 |
-|  |  | POST /insurance-claims/{id}/patient-invoice | BILLING · FINANCE | MEDIO | 25 |
+|  |  | POST /insurance-claims/{id}/patient-invoice | BILLING · FINANCE | MEDIO | 24 |
 |  |  | POST /insurance-claims/{id}/reversals | BILLING · FINANCE | MEDIO | 15 |
 |  |  | POST /insurance-claims/quote | BILLING · FINANCE | BAJO | 10 |
 | `ctrl:ClaimsReadController` | Operaciones de ClaimsReadController que el README no asigna a un caso de uso | GET /insurance-claims | BILLING_OPERATOR · SECURITY_ADMIN | BAJO | 11 |
@@ -107,10 +107,10 @@ _Fuente: `src/modules/insurance/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["BILLING · FINANCE"]):::actor
-  a22(["BILLING · FINANCE · BILLING_OPERATOR · SECURITY_ADMIN · PAT…"]):::actor
-  a45(["BILLING_OPERATOR · SECURITY_ADMIN"]):::actor
-  a64(["BILLING · FINANCE · PATIENT"]):::actor
-  a68(["Cualquier sesión válida"]):::actor
+  a21(["BILLING · FINANCE · BILLING_OPERATOR · SECURITY_ADMIN · PAT…"]):::actor
+  a44(["BILLING_OPERATOR · SECURITY_ADMIN"]):::actor
+  a63(["BILLING · FINANCE · PATIENT"]):::actor
+  a67(["Cualquier sesión válida"]):::actor
   t3[("insurance.claim_appeal_decisions")]:::tabla
   t4[("insurance.claim_disputes")]:::tabla
   t6[("insurance.broker_carrier_agreements")]:::tabla
@@ -123,35 +123,34 @@ flowchart LR
   t14[("directory.tenant_memberships")]:::tabla
   t15[("insurance.insurance_claim_lines")]:::tabla
   t18[("insurance.claim_adjudication_versions")]:::tabla
-  t19[("insurance.claim_line_adjudications")]:::tabla
-  t23[("insurance.insurance_claims")]:::tabla
-  t24[("insurance.patient_coverages")]:::tabla
-  t25[("messaging.domain_events")]:::tabla
-  t26[("messaging.outbox_messages")]:::tabla
-  e28>"~null"]:::evento
+  t22[("insurance.insurance_claims")]:::tabla
+  t23[("insurance.patient_coverages")]:::tabla
+  t24[("messaging.domain_events")]:::tabla
+  t25[("messaging.outbox_messages")]:::tabla
+  e27>"~null"]:::evento
+  t29[("insurance.claim_line_adjudications")]:::tabla
   t32[("billing.invoice_lines")]:::tabla
   t33[("billing.invoices")]:::tabla
-  t34[("iam.devices")]:::tabla
+  t34[("insurance.insurance_plan_benefits")]:::tabla
   t37[("insurance.claim_reversals")]:::tabla
-  t40[("insurance.insurance_plan_benefits")]:::tabla
-  t41[("insurance.insurance_plans")]:::tabla
-  t42[("insurance.insurance_products")]:::tabla
-  t46[("insurance.insurance_carriers")]:::tabla
-  t49[("clinical.diagnostic_reports")]:::tabla
-  t50[("diagnostics.diagnostic_report_versions")]:::tabla
-  t51[("directory.tenants")]:::tabla
-  t54[("insurance.coordination_of_benefits")]:::tabla
-  t56[("insurance.coverage_eligibility_requests")]:::tabla
-  t57[("insurance.coverage_eligibility_responses")]:::tabla
-  t59[("insurance.broker_clients")]:::tabla
-  t60[("insurance.coverage_dependents")]:::tabla
-  t62[("terminology.catalog_concepts")]:::tabla
-  t65[("profiles.patient_profiles")]:::tabla
-  t66[("profiles.person_account_links")]:::tabla
-  t69[("clinical.appointments")]:::tabla
-  t70[("clinical.conditions")]:::tabla
-  t71[("clinical.encounters")]:::tabla
-  t72[("clinical.immunizations")]:::tabla
+  t40[("insurance.insurance_plans")]:::tabla
+  t41[("insurance.insurance_products")]:::tabla
+  t45[("insurance.insurance_carriers")]:::tabla
+  t48[("clinical.diagnostic_reports")]:::tabla
+  t49[("diagnostics.diagnostic_report_versions")]:::tabla
+  t50[("directory.tenants")]:::tabla
+  t53[("insurance.coordination_of_benefits")]:::tabla
+  t55[("insurance.coverage_eligibility_requests")]:::tabla
+  t56[("insurance.coverage_eligibility_responses")]:::tabla
+  t58[("insurance.broker_clients")]:::tabla
+  t59[("insurance.coverage_dependents")]:::tabla
+  t61[("terminology.catalog_concepts")]:::tabla
+  t64[("profiles.patient_profiles")]:::tabla
+  t65[("profiles.person_account_links")]:::tabla
+  t68[("clinical.appointments")]:::tabla
+  t69[("clinical.conditions")]:::tabla
+  t70[("clinical.encounters")]:::tabla
+  t71[("clinical.immunizations")]:::tabla
   subgraph s0["ctrl:AppealsController · Operaciones de AppealsController que el README no asig…"]
     o1["POST /claim-disputes/{id}/appeal-decisions"]:::op
   end
@@ -159,37 +158,37 @@ flowchart LR
     o5["POST /broker-commission-statements"]:::op
   end
   t16[("+16 tablas más")]
-  t20[("+12 tablas más")]
-  t27[("+4 tablas más")]
+  t19[("+13 tablas más")]
+  t26[("+4 tablas más")]
   t30[("+15 tablas más")]
-  t35[("+19 tablas más")]
+  t35[("+18 tablas más")]
   t38[("+9 tablas más")]
-  t43[("+4 tablas más")]
+  t42[("+4 tablas más")]
   subgraph s2["ctrl:ClaimsController · Operaciones de ClaimsController que el README no asigna…"]
     o9["POST /insurance-claims"]:::op
     o17["POST /insurance-claims/{id}/adjudications"]:::op
-    o21["POST /insurance-claims/{id}/disputes"]:::op
-    o29["POST /insurance-claims/{id}/eob"]:::op
+    o20["POST /insurance-claims/{id}/disputes"]:::op
+    o28["POST /insurance-claims/{id}/eob"]:::op
     o31["POST /insurance-claims/{id}/patient-invoice"]:::op
     o36["POST /insurance-claims/{id}/reversals"]:::op
     o39["POST /insurance-claims/quote"]:::op
   end
-  t47[("+5 tablas más")]
-  t52[("+14 tablas más")]
+  t46[("+5 tablas más")]
+  t51[("+14 tablas más")]
   subgraph s3["ctrl:ClaimsReadController · Operaciones de ClaimsReadController que el README n…"]
-    o44["GET /insurance-claims"]:::op
-    o48["GET /insurance-claims/{id}"]:::op
+    o43["GET /insurance-claims"]:::op
+    o47["GET /insurance-claims/{id}"]:::op
   end
   subgraph s4["ctrl:CoverageController · Operaciones de CoverageController que el README no as…"]
-    o53["POST /coordination-of-benefits"]:::op
-    o55["POST /coverage-eligibility-requests"]:::op
-    o58["POST /patient-coverages"]:::op
-    o61["GET /patient-coverages/by-patient/{patientProfileId}"]:::op
-    o63["GET /patient-coverages/me"]:::op
+    o52["POST /coordination-of-benefits"]:::op
+    o54["POST /coverage-eligibility-requests"]:::op
+    o57["POST /patient-coverages"]:::op
+    o60["GET /patient-coverages/by-patient/{patientProfileId}"]:::op
+    o62["GET /patient-coverages/me"]:::op
   end
-  t73[("+13 tablas más")]
+  t72[("+13 tablas más")]
   subgraph s5["ctrl:InsuranceAnalyticsController · Operaciones de InsuranceAnalyticsController…"]
-    o67["GET /insurance/analytics/loss-ratio"]:::op
+    o66["GET /insurance/analytics/loss-ratio"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -213,36 +212,36 @@ flowchart LR
   o17 -->|"LEE"| t11
   o17 -->|"LEE"| t12
   o17 -->|"LEE"| t13
+  o17 -->|"LEE"| t14
   o17 -->|"CREA"| t18
   o17 -->|"LEE"| t18
-  o17 -->|"CREA"| t19
-  o17 -.-> t20
-  a22 --> o21
-  o21 -->|"CREA"| t4
-  o21 -->|"LEE"| t4
-  o21 -->|"LEE"| t23
-  o21 -->|"LEE"| t24
-  o21 -->|"CREA"| t25
-  o21 -->|"CREA"| t26
-  o21 -.-> t27
-  o21 -->|"evento"| e28
-  a2 --> o29
-  o29 -->|"LEE"| t11
-  o29 -->|"LEE"| t12
-  o29 -->|"LEE"| t13
-  o29 -->|"LEE"| t14
-  o29 -->|"LEE"| t18
-  o29 -->|"LEE"| t19
-  o29 -.-> t30
+  o17 -.-> t19
+  a21 --> o20
+  o20 -->|"CREA"| t4
+  o20 -->|"LEE"| t4
+  o20 -->|"LEE"| t22
+  o20 -->|"LEE"| t23
+  o20 -->|"CREA"| t24
+  o20 -->|"CREA"| t25
+  o20 -.-> t26
+  o20 -->|"evento"| e27
+  a2 --> o28
+  o28 -->|"LEE"| t11
+  o28 -->|"LEE"| t12
+  o28 -->|"LEE"| t13
+  o28 -->|"LEE"| t14
+  o28 -->|"LEE"| t18
+  o28 -->|"LEE"| t29
+  o28 -.-> t30
   a2 --> o31
   o31 -->|"CREA"| t32
   o31 -->|"LEE"| t32
   o31 -->|"CREA"| t33
-  o31 -->|"ACTUALIZA"| t34
-  o31 -->|"LEE"| t34
   o31 -->|"LEE"| t15
+  o31 -->|"LEE"| t22
+  o31 -->|"LEE"| t34
   o31 -.-> t35
-  o31 -->|"evento"| e28
+  o31 -->|"evento"| e27
   a2 --> o36
   o36 -->|"LEE"| t11
   o36 -->|"LEE"| t12
@@ -254,63 +253,63 @@ flowchart LR
   a2 --> o39
   o39 -->|"LEE"| t10
   o39 -->|"LEE"| t15
-  o39 -->|"LEE"| t23
+  o39 -->|"LEE"| t22
+  o39 -->|"LEE"| t34
   o39 -->|"LEE"| t40
   o39 -->|"LEE"| t41
-  o39 -->|"LEE"| t42
-  o39 -.-> t43
-  a45 --> o44
-  o44 -->|"LEE"| t13
-  o44 -->|"LEE"| t18
-  o44 -->|"LEE"| t4
-  o44 -->|"LEE"| t8
-  o44 -->|"LEE"| t46
-  o44 -->|"LEE"| t23
-  o44 -.-> t47
-  a45 --> o48
-  o48 -->|"LEE"| t49
-  o48 -->|"LEE"| t11
-  o48 -->|"LEE"| t13
-  o48 -->|"LEE"| t50
-  o48 -->|"LEE"| t51
-  o48 -->|"LEE"| t18
-  o48 -.-> t52
-  a2 --> o53
-  o53 -->|"ACTUALIZA"| t54
-  o53 -->|"CREA"| t54
-  o53 -->|"LEE"| t54
-  o53 -->|"LEE"| t24
-  a2 --> o55
-  o55 -->|"ACTUALIZA"| t56
-  o55 -->|"CREA"| t56
-  o55 -->|"LEE"| t56
-  o55 -->|"CREA"| t57
-  o55 -->|"LEE"| t24
-  a2 --> o58
-  o58 -->|"CREA"| t59
-  o58 -->|"CREA"| t60
-  o58 -->|"LEE"| t41
-  o58 -->|"CREA"| t24
-  o58 -->|"LEE"| t24
-  a2 --> o61
-  o61 -->|"LEE"| t10
-  o61 -->|"LEE"| t46
-  o61 -->|"LEE"| t41
-  o61 -->|"LEE"| t42
-  o61 -->|"LEE"| t24
-  o61 -->|"LEE"| t62
-  a64 --> o63
-  o63 -->|"LEE"| t24
-  o63 -->|"LEE"| t65
-  o63 -->|"LEE"| t66
-  a68 --> o67
-  o67 -->|"LEE"| t69
-  o67 -->|"LEE"| t70
-  o67 -->|"LEE"| t71
-  o67 -->|"LEE"| t72
-  o67 -->|"LEE"| t14
-  o67 -->|"LEE"| t18
-  o67 -.-> t73
+  o39 -.-> t42
+  a44 --> o43
+  o43 -->|"LEE"| t13
+  o43 -->|"LEE"| t18
+  o43 -->|"LEE"| t4
+  o43 -->|"LEE"| t8
+  o43 -->|"LEE"| t45
+  o43 -->|"LEE"| t22
+  o43 -.-> t46
+  a44 --> o47
+  o47 -->|"LEE"| t48
+  o47 -->|"LEE"| t11
+  o47 -->|"LEE"| t13
+  o47 -->|"LEE"| t49
+  o47 -->|"LEE"| t50
+  o47 -->|"LEE"| t18
+  o47 -.-> t51
+  a2 --> o52
+  o52 -->|"ACTUALIZA"| t53
+  o52 -->|"CREA"| t53
+  o52 -->|"LEE"| t53
+  o52 -->|"LEE"| t23
+  a2 --> o54
+  o54 -->|"ACTUALIZA"| t55
+  o54 -->|"CREA"| t55
+  o54 -->|"LEE"| t55
+  o54 -->|"CREA"| t56
+  o54 -->|"LEE"| t23
+  a2 --> o57
+  o57 -->|"CREA"| t58
+  o57 -->|"CREA"| t59
+  o57 -->|"LEE"| t40
+  o57 -->|"CREA"| t23
+  o57 -->|"LEE"| t23
+  a2 --> o60
+  o60 -->|"LEE"| t10
+  o60 -->|"LEE"| t45
+  o60 -->|"LEE"| t40
+  o60 -->|"LEE"| t41
+  o60 -->|"LEE"| t23
+  o60 -->|"LEE"| t61
+  a63 --> o62
+  o62 -->|"LEE"| t23
+  o62 -->|"LEE"| t64
+  o62 -->|"LEE"| t65
+  a67 --> o66
+  o66 -->|"LEE"| t68
+  o66 -->|"LEE"| t69
+  o66 -->|"LEE"| t70
+  o66 -->|"LEE"| t71
+  o66 -->|"LEE"| t14
+  o66 -->|"LEE"| t18
+  o66 -.-> t72
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3

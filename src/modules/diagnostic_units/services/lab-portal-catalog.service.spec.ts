@@ -27,6 +27,10 @@ import {
 } from './lab-portal.testing';
 import { LabPortalStudyCatalogService } from './lab-portal-study-catalog.service';
 import { labReferencePrice } from '../../study_catalog/lab-reference-prices';
+import {
+  catalogVersionOf,
+  toCatalogItems,
+} from './lab-portal-study-catalog.items';
 
 describe('LabPortalCatalogService', () => {
   it('creates a published offering with its first price on a public BOB list', async () => {
@@ -308,12 +312,22 @@ describe('LabPortalStudyCatalogService (proceso 4.2)', () => {
     const { studyCatalog } = build();
     const res = await inT(T1, () => studyCatalog.catalog());
     expect(res.count).toBe(1);
+    expect(res.catalogVersion).toBe('2026-10-31');
+    expect(res.sampleTypes.map((t) => t.code)).toEqual([
+      'BLOOD',
+      'URINE',
+      'STOOL',
+      'FLUID',
+      'SWAB',
+      'OTHER',
+    ]);
     const [section] = res.sections;
     expect(section).toMatchObject({ code: 'HEMATO', name: 'Hematología' });
     expect(section.items[0]).toMatchObject({
       conceptId: HEMO,
       code: 'HEMOGRAMA',
       offeredServiceId: null,
+      sampleType: 'BLOOD',
       suggestedPrice: labReferencePrice('HEMOGRAMA'),
     });
     expect(section.items[0].components.map((c) => c.code)).toEqual([
@@ -411,5 +425,38 @@ describe('LabPortalStudyCatalogService (proceso 4.2)', () => {
     });
     expect(list.items.filter((i) => i.parentId === own.id)).toHaveLength(2);
     expect(em.rows(DiagnosticStudyComponents)).toHaveLength(2);
+  });
+});
+
+describe('catalog not loaded (only the basic boot análisis)', () => {
+  // What a database shows when `yarn catalog:studies:load` never ran: 47
+  // `clinical:STUDY_*` concepts with no section, LOINC nor components.
+  const legacy = [
+    {
+      id: HEMO,
+      code: 'clinical:STUDY_ACIDO_URICO',
+      display: 'Ácido úrico',
+      name: 'Ácido úrico',
+      family: 'LAB' as const,
+      sort_key: 'acido urico',
+      props: null,
+    },
+  ];
+
+  it('reports no catalog version, so the screen can say it is missing', () => {
+    expect(catalogVersionOf(legacy)).toBeNull();
+  });
+
+  it('lists such an análisis under «Otros análisis», without components', () => {
+    const [item] = toCatalogItems(legacy, []).values();
+    expect(item.section).toEqual({ code: 'OTROS', name: 'Otros análisis' });
+    expect(item.components).toEqual([]);
+  });
+
+  it('takes the newest version when rows carry several', () => {
+    const at = (v: string) => ({ ...legacy[0], props: { catalog_version: v } });
+    expect(
+      catalogVersionOf([at('2026-09-01'), at('2026-10-31'), legacy[0]]),
+    ).toBe('2026-10-31');
   });
 });

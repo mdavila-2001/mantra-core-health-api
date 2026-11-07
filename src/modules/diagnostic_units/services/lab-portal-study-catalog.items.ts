@@ -7,6 +7,7 @@ import type {
   LabCatalogComponentDto,
   LabCatalogItemDto,
 } from '../dto/lab-portal-catalog.dto';
+import { sampleTypeOf } from './lab-sample-types';
 
 /** A catalog análisis with the section it is listed under. */
 export type CatalogItem = LabCatalogItemDto & {
@@ -16,6 +17,19 @@ export type CatalogItem = LabCatalogItemDto & {
 const text = (v: unknown): string | null => (typeof v === 'string' ? v : null);
 const named = (v: unknown, key: string): string | null =>
   v && typeof v === 'object' ? text((v as Record<string, unknown>)[key]) : null;
+
+/**
+ * The newest LOINC catalog version among the rows, or `null` when none carries
+ * one: the loader (`tools/study-catalogs/load-study-catalogs.mjs`) never ran on
+ * this database and only the basic boot análisis exist, without section, LOINC
+ * or components.
+ */
+export function catalogVersionOf(rows: readonly StudyRow[]): string | null {
+  const versions = rows
+    .map((r) => text(r.props?.catalog_version))
+    .filter((v): v is string => v !== null);
+  return versions.length === 0 ? null : versions.sort().at(-1)!;
+}
 
 /** Pure: catalog rows and their direct components, with suggested prices, by concept. */
 export function toCatalogItems(
@@ -46,6 +60,7 @@ export function toCatalogItems(
           name: r.name,
           loinc: text(r.props?.loinc_code),
           specimen: named(r.props?.specimen, 'nombre'),
+          sampleType: sampleTypeOf(named(r.props?.specimen, 'codigo')).code,
           suggestedPrice: labReferencePrice(code),
           offeredServiceId: null,
           components: byPanel.get(r.id) ?? [],

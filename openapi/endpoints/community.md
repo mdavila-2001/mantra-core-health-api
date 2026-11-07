@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 100 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 102 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline`
-- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
+- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessageReactionsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -26,91 +26,93 @@ Referencia exhaustiva de 100 operación(es) del módulo `community`, derivada de
 13. [POST /community/conversations/{conversationId}/messages](#13-post-community-conversations-conversationid-messages) — Enviar un mensaje directo en la conversación
 14. [DELETE /community/conversations/{conversationId}/messages/{messageId}](#14-delete-community-conversations-conversationid-messages-messageid) — Eliminar un mensaje propio
 15. [PATCH /community/conversations/{conversationId}/messages/{messageId}](#15-patch-community-conversations-conversationid-messages-messageid) — Editar el texto de un mensaje propio
-16. [PATCH /community/conversations/{conversationId}/participant](#16-patch-community-conversations-conversationid-participant) — Marcar la conversación como favorita, fijada o archivada
-17. [DELETE /community/conversations/{conversationId}/pin](#17-delete-community-conversations-conversationid-pin) — Soltar el mensaje fijado de la conversación
-18. [POST /community/conversations/{conversationId}/pin](#18-post-community-conversations-conversationid-pin) — Fijar un mensaje de la conversación
-19. [GET /community/conversations/{conversationId}/presence](#19-get-community-conversations-conversationid-presence) — Presencia de los demás participantes
-20. [POST /community/conversations/{conversationId}/read](#20-post-community-conversations-conversationid-read) — Marcar mensajes como leídos (recibos)
-21. [POST /community/conversations/contacts/search](#21-post-community-conversations-contacts-search) — Buscar personas para iniciar una conversación
-22. [GET /community/feed](#22-get-community-feed) — Timeline de un perfil
-23. [DELETE /community/follows](#23-delete-community-follows) — Dejar de seguir un objeto social
-24. [GET /community/follows](#24-get-community-follows) — Seguimientos activos de un perfil
-25. [POST /community/follows](#25-post-community-follows) — Seguir un objeto social
-26. [GET /community/groups](#26-get-community-groups) — Grupos de una organización
-27. [POST /community/groups](#27-post-community-groups) — Crear un grupo/comunidad
-28. [GET /community/groups/{groupId}](#28-get-community-groups-groupid) — Ficha de un grupo
-29. [GET /community/groups/{groupId}/members](#29-get-community-groups-groupid-members) — Integrantes de un grupo
-30. [POST /community/groups/{groupId}/members](#30-post-community-groups-groupid-members) — Unirse a un grupo / comunidad
-31. [DELETE /community/groups/{groupId}/members/{member}](#31-delete-community-groups-groupid-members-member) — Salir del grupo o dar de baja a un integrante
-32. [PATCH /community/groups/{groupId}/members/{member}](#32-patch-community-groups-groupid-members-member) — Aprobar/rechazar un alta o cambiar el rol
-33. [GET /community/groups/{groupId}/posts](#33-get-community-groups-groupid-posts) — Muro de un grupo
-34. [POST /community/groups/{groupId}/posts](#34-post-community-groups-groupid-posts) — Publicar en el muro del grupo
-35. [GET /community/moderation/appeals](#35-get-community-moderation-appeals) — Apelaciones presentadas, con su decisión
-36. [POST /community/moderation/appeals/{appealId}/resolve](#36-post-community-moderation-appeals-appealid-resolve) — Resolver una apelación de moderación
-37. [GET /community/moderation/decisions](#37-get-community-moderation-decisions) — Decisiones de moderación tomadas
-38. [POST /community/moderation/decisions/{decisionId}/appeal](#38-post-community-moderation-decisions-decisionid-appeal) — Apelar una decisión de moderación
-39. [GET /community/moderation/decisions/mine](#39-get-community-moderation-decisions-mine) — Mis propias decisiones de moderación
-40. [GET /community/moderation/queue](#40-get-community-moderation-queue) — Cola de moderación con filtros y cursor
-41. [POST /community/moderation/queue/{queueId}/decision](#41-post-community-moderation-queue-queueid-decision) — Resolver moderación (decisión + strike)
-42. [GET /community/notifications](#42-get-community-notifications) — Notificaciones sociales de un perfil
-43. [GET /community/polls/{pollId}](#43-get-community-polls-pollid) — Encuesta con opciones, recuentos y voto propio
-44. [POST /community/polls/{pollId}/votes](#44-post-community-polls-pollid-votes) — Votar en una encuesta
-45. [GET /community/posts/{postId}](#45-get-community-posts-postid) — Publicación con media, hashtags y menciones
-46. [GET /community/posts/{postId}/comments](#46-get-community-posts-postid-comments) — Comentarios de una publicación (hilo anidado)
-47. [POST /community/posts/{postId}/polls](#47-post-community-posts-postid-polls) — Crear una encuesta con opciones sobre un post
-48. [GET /community/posts/{postId}/reactions](#48-get-community-posts-postid-reactions) — Reacciones de una publicación, agrupadas por tipo
-49. [GET /community/profiles/{profileId}](#49-get-community-profiles-profileid) — Ficha de un perfil público
-50. [GET /community/profiles/{profileId}/auto-reply](#50-get-community-profiles-profileid-auto-reply) — Respuesta automática por inactividad del perfil
-51. [PUT /community/profiles/{profileId}/auto-reply](#51-put-community-profiles-profileid-auto-reply) — Configurar la respuesta automática del perfil
-52. [GET /community/profiles/{profileId}/posts](#52-get-community-profiles-profileid-posts) — Publicaciones de un perfil
-53. [POST /community/profiles/{profileId}/posts](#53-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
-54. [GET /community/profiles/{profileId}/reviews](#54-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
-55. [POST /community/profiles/{profileId}/reviews](#55-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
-56. [POST /community/profiles/{profileId}/reviews/{reviewId}/responses](#56-post-community-profiles-profileid-reviews-reviewid-responses) — Responder una reseña de la propia vitrina
-57. [GET /community/profiles/by-slug/{slug}](#57-get-community-profiles-by-slug-slug) — Ficha de un perfil público por su slug
-58. [GET /community/profiles/me](#58-get-community-profiles-me) — Consultar la vitrina pública propia
-59. [PUT /community/profiles/me](#59-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
-60. [GET /community/profiles/me/stats](#60-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
-61. [GET /community/profiles/organization-showcases/me](#61-get-community-profiles-organization-showcases-me) — Vitrinas de organización que la sesión puede atender en el chat
-62. [POST /community/public-profiles](#62-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
-63. [GET /community/ratings](#63-get-community-ratings) — Calificaciones de un médico, paciente u organización
-64. [PUT /community/ratings](#64-put-community-ratings) — Calificar con estrellas a un médico, paciente u organización
-65. [GET /community/ratings/mine](#65-get-community-ratings-mine) — Mis calificaciones
-66. [GET /community/ratings/summary](#66-get-community-ratings-summary) — Nota media de un médico, paciente u organización
-67. [PUT /community/reactions](#67-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
-68. [POST /community/reports](#68-post-community-reports) — Reportar contenido y encolar moderación
-69. [GET /community/topics](#69-get-community-topics) — Temas de la comunidad
-70. [GET /f/{slug}](#70-get-f-slug) — Ficha pública de una farmacia
-71. [GET /internal/community/feed/pending](#71-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-72. [POST /internal/community/feed/ranking/apply](#72-post-internal-community-feed-ranking-apply) — Aplicar rank_score recalculado
-73. [GET /internal/community/feed/ranking/pending](#73-get-internal-community-feed-ranking-pending) — Items de feed pendientes de puntuar
-74. [POST /internal/community/feed/rebuild](#74-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
-75. [GET /internal/community/search/health](#75-get-internal-community-search-health) — Estado del índice del directorio público
-76. [POST /internal/community/search/reindex](#76-post-internal-community-search-reindex) — Reindexar el directorio público
-77. [POST /internal/community/verification/badges](#77-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
-78. [POST /internal/community/verification/badges/{targetId}/revoke](#78-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
-79. [POST /internal/community/verification/badges/expire-sweep](#79-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
-80. [GET /l/{slug}](#80-get-l-slug) — Ficha pública de un laboratorio
-81. [GET /o/{slug}](#81-get-o-slug) — Ficha pública de una organización
-82. [GET /p/{slug}](#82-get-p-slug) — Ficha pública de un profesional
-83. [GET /patients/me/reviewable-care](#83-get-patients-me-reviewable-care) — Consultar si una atención recibida se puede calificar
-84. [POST /patients/me/reviews](#84-post-patients-me-reviews) — Calificar una atención recibida
-85. [GET /public/comments/{commentId}/replies](#85-get-public-comments-commentid-replies) — Respuestas de un comentario público
-86. [GET /public/media/{id}](#86-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
-87. [GET /public/nearby](#87-get-public-nearby) — Prestadores cercanos, en línea recta
-88. [GET /public/posts](#88-get-public-posts) — Últimas publicaciones de todos los profesionales
-89. [GET /public/posts/{postId}/comments](#89-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
-90. [GET /public/posts/{postId}/reactions](#90-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
-91. [GET /public/profiles/{prefijo}/{slug}](#91-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
-92. [GET /public/profiles/{prefijo}/{slug}/reviews](#92-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
-93. [GET /public/search](#93-get-public-search) — Buscador público unificado
-94. [GET /public/search/diagnostic-units](#94-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-95. [GET /public/search/insurers](#95-get-public-search-insurers) — Aseguradoras en el directorio público
-96. [GET /public/search/medications](#96-get-public-search-medications) — Medicamentos ofertados públicamente
-97. [GET /public/search/organizations](#97-get-public-search-organizations) — Organizaciones en el directorio público
-98. [GET /public/search/pharmacies](#98-get-public-search-pharmacies) — Farmacias en el directorio público
-99. [GET /public/search/practitioners](#99-get-public-search-practitioners) — Profesionales en el directorio público
-100. [GET /s/{slug}](#100-get-s-slug) — Ficha pública de una aseguradora
+16. [PUT /community/conversations/{conversationId}/messages/{messageId}/reaction](#16-put-community-conversations-conversationid-messages-messageid-reaction) — Reaccionar a un mensaje (una reacción por perfil)
+17. [PATCH /community/conversations/{conversationId}/participant](#17-patch-community-conversations-conversationid-participant) — Marcar la conversación como favorita, fijada o archivada
+18. [DELETE /community/conversations/{conversationId}/pin](#18-delete-community-conversations-conversationid-pin) — Soltar el mensaje fijado de la conversación
+19. [POST /community/conversations/{conversationId}/pin](#19-post-community-conversations-conversationid-pin) — Fijar un mensaje de la conversación
+20. [GET /community/conversations/{conversationId}/presence](#20-get-community-conversations-conversationid-presence) — Presencia de los demás participantes
+21. [POST /community/conversations/{conversationId}/read](#21-post-community-conversations-conversationid-read) — Marcar mensajes como leídos (recibos)
+22. [POST /community/conversations/contacts/search](#22-post-community-conversations-contacts-search) — Buscar personas para iniciar una conversación
+23. [GET /community/feed](#23-get-community-feed) — Timeline de un perfil
+24. [DELETE /community/follows](#24-delete-community-follows) — Dejar de seguir un objeto social
+25. [GET /community/follows](#25-get-community-follows) — Seguimientos activos de un perfil
+26. [POST /community/follows](#26-post-community-follows) — Seguir un objeto social
+27. [GET /community/groups](#27-get-community-groups) — Grupos de una organización
+28. [POST /community/groups](#28-post-community-groups) — Crear un grupo/comunidad
+29. [GET /community/groups/{groupId}](#29-get-community-groups-groupid) — Ficha de un grupo
+30. [GET /community/groups/{groupId}/members](#30-get-community-groups-groupid-members) — Integrantes de un grupo
+31. [POST /community/groups/{groupId}/members](#31-post-community-groups-groupid-members) — Unirse a un grupo / comunidad
+32. [DELETE /community/groups/{groupId}/members/{member}](#32-delete-community-groups-groupid-members-member) — Salir del grupo o dar de baja a un integrante
+33. [PATCH /community/groups/{groupId}/members/{member}](#33-patch-community-groups-groupid-members-member) — Aprobar/rechazar un alta o cambiar el rol
+34. [GET /community/groups/{groupId}/posts](#34-get-community-groups-groupid-posts) — Muro de un grupo
+35. [POST /community/groups/{groupId}/posts](#35-post-community-groups-groupid-posts) — Publicar en el muro del grupo
+36. [GET /community/moderation/appeals](#36-get-community-moderation-appeals) — Apelaciones presentadas, con su decisión
+37. [POST /community/moderation/appeals/{appealId}/resolve](#37-post-community-moderation-appeals-appealid-resolve) — Resolver una apelación de moderación
+38. [GET /community/moderation/decisions](#38-get-community-moderation-decisions) — Decisiones de moderación tomadas
+39. [POST /community/moderation/decisions/{decisionId}/appeal](#39-post-community-moderation-decisions-decisionid-appeal) — Apelar una decisión de moderación
+40. [GET /community/moderation/decisions/mine](#40-get-community-moderation-decisions-mine) — Mis propias decisiones de moderación
+41. [GET /community/moderation/queue](#41-get-community-moderation-queue) — Cola de moderación con filtros y cursor
+42. [POST /community/moderation/queue/{queueId}/decision](#42-post-community-moderation-queue-queueid-decision) — Resolver moderación (decisión + strike)
+43. [GET /community/notifications](#43-get-community-notifications) — Notificaciones sociales de un perfil
+44. [GET /community/polls/{pollId}](#44-get-community-polls-pollid) — Encuesta con opciones, recuentos y voto propio
+45. [POST /community/polls/{pollId}/votes](#45-post-community-polls-pollid-votes) — Votar en una encuesta
+46. [GET /community/posts/{postId}](#46-get-community-posts-postid) — Publicación con media, hashtags y menciones
+47. [GET /community/posts/{postId}/comments](#47-get-community-posts-postid-comments) — Comentarios de una publicación (hilo anidado)
+48. [POST /community/posts/{postId}/polls](#48-post-community-posts-postid-polls) — Crear una encuesta con opciones sobre un post
+49. [GET /community/posts/{postId}/reactions](#49-get-community-posts-postid-reactions) — Reacciones de una publicación, agrupadas por tipo
+50. [GET /community/profiles/{profileId}](#50-get-community-profiles-profileid) — Ficha de un perfil público
+51. [GET /community/profiles/{profileId}/auto-reply](#51-get-community-profiles-profileid-auto-reply) — Respuesta automática por inactividad del perfil
+52. [PUT /community/profiles/{profileId}/auto-reply](#52-put-community-profiles-profileid-auto-reply) — Configurar la respuesta automática del perfil
+53. [GET /community/profiles/{profileId}/posts](#53-get-community-profiles-profileid-posts) — Publicaciones de un perfil
+54. [POST /community/profiles/{profileId}/posts](#54-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
+55. [GET /community/profiles/{profileId}/reviews](#55-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
+56. [POST /community/profiles/{profileId}/reviews](#56-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
+57. [POST /community/profiles/{profileId}/reviews/{reviewId}/responses](#57-post-community-profiles-profileid-reviews-reviewid-responses) — Responder una reseña de la propia vitrina
+58. [GET /community/profiles/by-slug/{slug}](#58-get-community-profiles-by-slug-slug) — Ficha de un perfil público por su slug
+59. [GET /community/profiles/me](#59-get-community-profiles-me) — Consultar la vitrina pública propia
+60. [PUT /community/profiles/me](#60-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
+61. [GET /community/profiles/me/stats](#61-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
+62. [GET /community/profiles/organization-showcases/me](#62-get-community-profiles-organization-showcases-me) — Vitrinas de organización que la sesión puede atender en el chat
+63. [POST /community/public-profiles](#63-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
+64. [GET /community/ratings](#64-get-community-ratings) — Calificaciones de un médico, paciente u organización
+65. [PUT /community/ratings](#65-put-community-ratings) — Calificar con estrellas a un médico, paciente u organización
+66. [GET /community/ratings/mine](#66-get-community-ratings-mine) — Mis calificaciones
+67. [GET /community/ratings/summary](#67-get-community-ratings-summary) — Nota media de un médico, paciente u organización
+68. [PUT /community/reactions](#68-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
+69. [POST /community/reports](#69-post-community-reports) — Reportar contenido y encolar moderación
+70. [GET /community/topics](#70-get-community-topics) — Temas de la comunidad
+71. [POST /community/topics](#71-post-community-topics) — Crear un tema propio
+72. [GET /f/{slug}](#72-get-f-slug) — Ficha pública de una farmacia
+73. [GET /internal/community/feed/pending](#73-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
+74. [POST /internal/community/feed/ranking/apply](#74-post-internal-community-feed-ranking-apply) — Aplicar rank_score recalculado
+75. [GET /internal/community/feed/ranking/pending](#75-get-internal-community-feed-ranking-pending) — Items de feed pendientes de puntuar
+76. [POST /internal/community/feed/rebuild](#76-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+77. [GET /internal/community/search/health](#77-get-internal-community-search-health) — Estado del índice del directorio público
+78. [POST /internal/community/search/reindex](#78-post-internal-community-search-reindex) — Reindexar el directorio público
+79. [POST /internal/community/verification/badges](#79-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
+80. [POST /internal/community/verification/badges/{targetId}/revoke](#80-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
+81. [POST /internal/community/verification/badges/expire-sweep](#81-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
+82. [GET /l/{slug}](#82-get-l-slug) — Ficha pública de un laboratorio
+83. [GET /o/{slug}](#83-get-o-slug) — Ficha pública de una organización
+84. [GET /p/{slug}](#84-get-p-slug) — Ficha pública de un profesional
+85. [GET /patients/me/reviewable-care](#85-get-patients-me-reviewable-care) — Consultar si una atención recibida se puede calificar
+86. [POST /patients/me/reviews](#86-post-patients-me-reviews) — Calificar una atención recibida
+87. [GET /public/comments/{commentId}/replies](#87-get-public-comments-commentid-replies) — Respuestas de un comentario público
+88. [GET /public/media/{id}](#88-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
+89. [GET /public/nearby](#89-get-public-nearby) — Prestadores cercanos, en línea recta
+90. [GET /public/posts](#90-get-public-posts) — Últimas publicaciones de todos los profesionales
+91. [GET /public/posts/{postId}/comments](#91-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
+92. [GET /public/posts/{postId}/reactions](#92-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
+93. [GET /public/profiles/{prefijo}/{slug}](#93-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+94. [GET /public/profiles/{prefijo}/{slug}/reviews](#94-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
+95. [GET /public/search](#95-get-public-search) — Buscador público unificado
+96. [GET /public/search/diagnostic-units](#96-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+97. [GET /public/search/insurers](#97-get-public-search-insurers) — Aseguradoras en el directorio público
+98. [GET /public/search/medications](#98-get-public-search-medications) — Medicamentos ofertados públicamente
+99. [GET /public/search/organizations](#99-get-public-search-organizations) — Organizaciones en el directorio público
+100. [GET /public/search/pharmacies](#100-get-public-search-pharmacies) — Farmacias en el directorio público
+101. [GET /public/search/practitioners](#101-get-public-search-practitioners) — Profesionales en el directorio público
+102. [GET /s/{slug}](#102-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -443,7 +445,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -812,7 +814,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1389,7 +1391,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1611,11 +1613,20 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "senderProfileId": "00000000-0000-4000-8000-000000000001",
       "replyToMessageId": "00000000-0000-4000-8000-000000000001",
       "contentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "contentType": {},
       "bodyText": "valor-ejemplo",
       "attachmentFileId": "00000000-0000-4000-8000-000000000001",
       "isEdited": true,
       "deletedAt": "2026-07-31T12:00:00.000Z",
-      "sentAt": "2026-07-31T12:00:00.000Z"
+      "sentAt": "2026-07-31T12:00:00.000Z",
+      "reactions": [
+        {
+          "emoji": "valor-ejemplo",
+          "profileIds": [
+            "valor-ejemplo"
+          ]
+        }
+      ]
     }
   ],
   "count": 1,
@@ -1628,11 +1639,20 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "senderProfileId": "00000000-0000-4000-8000-000000000001",
     "replyToMessageId": "00000000-0000-4000-8000-000000000001",
     "contentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "contentType": {},
     "bodyText": "valor-ejemplo",
     "attachmentFileId": "00000000-0000-4000-8000-000000000001",
     "isEdited": true,
     "deletedAt": "2026-07-31T12:00:00.000Z",
-    "sentAt": "2026-07-31T12:00:00.000Z"
+    "sentAt": "2026-07-31T12:00:00.000Z",
+    "reactions": [
+      {
+        "emoji": "valor-ejemplo",
+        "profileIds": [
+          "valor-ejemplo"
+        ]
+      }
+    ]
   },
   "peers": [
     {
@@ -1653,32 +1673,40 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<DirectMessageDto>` | Sin restricción adicional declarada | Mensajes de la página, del más reciente al más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<DirectMessageDto>` | Sin restricción adicional declarada | Mensajes de la página, del más reciente al más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","contentType":{},"bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z","reactions":[{"emoji":"valor-ejemplo","profileIds":["valor-ejemplo"]}]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador del mensaje. | `00000000-0000-4000-8000-000000000001` |
 | `items[].conversationId` | Sí | `string` | formato `uuid` | Conversación a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `items[].senderProfileId` | Sí | `string` | formato `uuid` | Perfil que lo envió. | `00000000-0000-4000-8000-000000000001` |
 | `items[].replyToMessageId` | No | `string` | formato `uuid`; admite null | Mensaje al que responde, si responde a alguno. | `00000000-0000-4000-8000-000000000001` |
 | `items[].contentTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de contenido. | `00000000-0000-4000-8000-000000000001` |
+| `items[].contentType` | No | `object` | Sin restricción adicional declarada | Tipo de contenido legible: `STICKER` lo dibuja el cliente sin burbuja. Ausente si el concepto no es uno de los tipos de mensaje conocidos. | `{}` |
 | `items[].bodyText` | No | `string` | admite null | Cuerpo del mensaje. | `valor-ejemplo` |
 | `items[].attachmentFileId` | No | `string` | formato `uuid`; admite null | Adjunto en `common.files`. | `00000000-0000-4000-8000-000000000001` |
 | `items[].isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
 | `items[].deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
 | `items[].sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+| `items[].reactions` | No | `array<MessageReactionDto>` | Sin restricción adicional declarada | Reacciones con emoji, agrupadas por emoji (v4.2.91). | `[{"emoji":"valor-ejemplo","profileIds":["valor-ejemplo"]}]` |
+| `items[].reactions[].emoji` | No | `string` | Sin restricción adicional declarada | The emoji. | `valor-ejemplo` |
+| `items[].reactions[].profileIds` | No | `array<string>` | formato `uuid` | Profiles that reacted with this emoji, oldest first. | `["valor-ejemplo"]` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántos trae esta página. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null`. | `valor-ejemplo` |
 | `peerReadUpTo` | No | `string` | formato `date-time`; admite null | Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT. `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios cuyo `sentAt` sea anterior o igual a esta marca. | `2026-07-31T12:00:00.000Z` |
-| `pinnedMessage` | No | `DirectMessageDto` | Sin restricción adicional declarada | El mensaje fijado en la conversación, completo, o `null` (F4.6). Viaja con la primera página para que la barra superior se pinte sin otra llamada, aunque el mensaje sea de hace meses y no esté en la página. | `{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"}` |
+| `pinnedMessage` | No | `DirectMessageDto` | Sin restricción adicional declarada | El mensaje fijado en la conversación, completo, o `null` (F4.6). Viaja con la primera página para que la barra superior se pinte sin otra llamada, aunque el mensaje sea de hace meses y no esté en la página. | `{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","contentType":{},"bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z","reactions":[{"emoji":"valor-ejemplo","profileIds":["valor-ejemplo"]}]}` |
 | `pinnedMessage.id` | No | `string` | formato `uuid` | Identificador del mensaje. | `00000000-0000-4000-8000-000000000001` |
 | `pinnedMessage.conversationId` | No | `string` | formato `uuid` | Conversación a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `pinnedMessage.senderProfileId` | No | `string` | formato `uuid` | Perfil que lo envió. | `00000000-0000-4000-8000-000000000001` |
 | `pinnedMessage.replyToMessageId` | No | `string` | formato `uuid`; admite null | Mensaje al que responde, si responde a alguno. | `00000000-0000-4000-8000-000000000001` |
 | `pinnedMessage.contentTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de contenido. | `00000000-0000-4000-8000-000000000001` |
+| `pinnedMessage.contentType` | No | `object` | Sin restricción adicional declarada | Tipo de contenido legible: `STICKER` lo dibuja el cliente sin burbuja. Ausente si el concepto no es uno de los tipos de mensaje conocidos. | `{}` |
 | `pinnedMessage.bodyText` | No | `string` | admite null | Cuerpo del mensaje. | `valor-ejemplo` |
 | `pinnedMessage.attachmentFileId` | No | `string` | formato `uuid`; admite null | Adjunto en `common.files`. | `00000000-0000-4000-8000-000000000001` |
 | `pinnedMessage.isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
 | `pinnedMessage.deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
 | `pinnedMessage.sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+| `pinnedMessage.reactions` | No | `array<MessageReactionDto>` | Sin restricción adicional declarada | Reacciones con emoji, agrupadas por emoji (v4.2.91). | `[{"emoji":"valor-ejemplo","profileIds":["valor-ejemplo"]}]` |
+| `pinnedMessage.reactions[].emoji` | No | `string` | Sin restricción adicional declarada | The emoji. | `valor-ejemplo` |
+| `pinnedMessage.reactions[].profileIds` | No | `array<string>` | formato `uuid` | Profiles that reacted with this emoji, oldest first. | `["valor-ejemplo"]` |
 | `peers` | No | `array<ConversationPeerDto>` | Sin restricción adicional declarada | Los demás participantes con su sello, como en la bandeja. Viaja sólo con la primera página (la cabecera del hilo se pinta al abrir y no en cada página de historia). Es el «detalle» de la conversación: no hay `GET :id`. | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo","verification":{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}}]` |
 | `peers[].profileId` | No | `string` | formato `uuid` | Perfil público del participante. | `00000000-0000-4000-8000-000000000001` |
 | `peers[].displayName` | No | `string` | admite null | Cómo se llama, para poder pintar la fila. | `Nombre de ejemplo` |
@@ -1766,8 +1794,8 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `senderProfileId` | Sí | `string` | formato `uuid` | Perfil remitente (participante activo) | `00000000-0000-4000-8000-000000000001` |
-| `bodyText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Texto del mensaje | `valor-ejemplo` |
-| `contentType` | No | `string` | valores: `TEXT`, `MEDIA` | Tipo de contenido | `TEXT` |
+| `bodyText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Texto del mensaje. Vacío o en blanco equivale a no mandarlo; obligatorio si no hay adjunto | `valor-ejemplo` |
+| `contentType` | No | `string` | valores: `TEXT`, `MEDIA`, `STICKER` | Tipo de contenido. STICKER: un sticker propio (imagen), exige adjunto | `TEXT` |
 | `replyToMessageId` | No | `string` | formato `uuid` | Mensaje al que responde | `00000000-0000-4000-8000-000000000001` |
 | `attachmentFileId` | No | `string` | formato `uuid` | Archivo adjunto (common.files) | `00000000-0000-4000-8000-000000000001` |
 
@@ -2082,11 +2110,20 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "senderProfileId": "00000000-0000-4000-8000-000000000001",
   "replyToMessageId": "00000000-0000-4000-8000-000000000001",
   "contentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "contentType": {},
   "bodyText": "valor-ejemplo",
   "attachmentFileId": "00000000-0000-4000-8000-000000000001",
   "isEdited": true,
   "deletedAt": "2026-07-31T12:00:00.000Z",
-  "sentAt": "2026-07-31T12:00:00.000Z"
+  "sentAt": "2026-07-31T12:00:00.000Z",
+  "reactions": [
+    {
+      "emoji": "valor-ejemplo",
+      "profileIds": [
+        "valor-ejemplo"
+      ]
+    }
+  ]
 }
 ```
 
@@ -2099,11 +2136,15 @@ Campos de la respuesta:
 | `senderProfileId` | Sí | `string` | formato `uuid` | Perfil que lo envió. | `00000000-0000-4000-8000-000000000001` |
 | `replyToMessageId` | No | `string` | formato `uuid`; admite null | Mensaje al que responde, si responde a alguno. | `00000000-0000-4000-8000-000000000001` |
 | `contentTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de contenido. | `00000000-0000-4000-8000-000000000001` |
+| `contentType` | No | `object` | Sin restricción adicional declarada | Tipo de contenido legible: `STICKER` lo dibuja el cliente sin burbuja. Ausente si el concepto no es uno de los tipos de mensaje conocidos. | `{}` |
 | `bodyText` | No | `string` | admite null | Cuerpo del mensaje. | `valor-ejemplo` |
 | `attachmentFileId` | No | `string` | formato `uuid`; admite null | Adjunto en `common.files`. | `00000000-0000-4000-8000-000000000001` |
 | `isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
 | `deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
 | `sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+| `reactions` | No | `array<MessageReactionDto>` | Sin restricción adicional declarada | Reacciones con emoji, agrupadas por emoji (v4.2.91). | `[{"emoji":"valor-ejemplo","profileIds":["valor-ejemplo"]}]` |
+| `reactions[].emoji` | No | `string` | Sin restricción adicional declarada | The emoji. | `valor-ejemplo` |
+| `reactions[].profileIds` | No | `array<string>` | formato `uuid` | Profiles that reacted with this emoji, oldest first. | `["valor-ejemplo"]` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2121,7 +2162,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Sólo el autor puede editar o eliminar su mensaje | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | El mensaje ya fue eliminado | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | El mensaje no tiene marca de envío: no se puede editar | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
-| 422 | `PRECONDITION_FAILED` | Pasaron más de 5 minutos: el mensaje ya no se puede editar | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | Pasaron más de 15 minutos: el mensaje ya no se puede editar | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2139,7 +2180,170 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. PATCH /community/conversations/{conversationId}/participant
+## 16. PUT /community/conversations/{conversationId}/messages/{messageId}/reaction
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-messaging`
+- **Nombre:** Reaccionar a un mensaje (una reacción por perfil)
+- **Operation ID:** `CommunityMessageReactionsController_react`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityMessageReactionsController.react](../../src/modules/community/controllers/community-message-reactions.controller.ts)
+
+### Descripción de negocio
+
+Reaccionar a un mensaje (una reacción por perfil). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Sets, replaces (another emoji) or removes (`emoji: null`) a reaction.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /community/conversations/{conversationId}/messages/{messageId}/reaction` en `CommunityMessageReactionsController_react`. El controlador delega en `CommunityMessageReactionsService.react`. Valida el body como `ReactToMessageDto` y consume `application/json`. El tipo de retorno estático es `Promise<DirectMessageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `messageId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReactToMessageDto`; los campos opcionales se omiten.
+
+```http
+PUT /community/conversations/00000000-0000-4000-8000-000000000001/messages/00000000-0000-4000-8000-000000000001/reaction HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "emoji": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`, `messageId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `emoji` | Sí | `string` | longitud máxima 32; admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /community/conversations/00000000-0000-4000-8000-000000000001/messages/00000000-0000-4000-8000-000000000001/reaction HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "emoji": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DirectMessageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "conversationId": "00000000-0000-4000-8000-000000000001",
+  "senderProfileId": "00000000-0000-4000-8000-000000000001",
+  "replyToMessageId": "00000000-0000-4000-8000-000000000001",
+  "contentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "contentType": {},
+  "bodyText": "valor-ejemplo",
+  "attachmentFileId": "00000000-0000-4000-8000-000000000001",
+  "isEdited": true,
+  "deletedAt": "2026-07-31T12:00:00.000Z",
+  "sentAt": "2026-07-31T12:00:00.000Z",
+  "reactions": [
+    {
+      "emoji": "valor-ejemplo",
+      "profileIds": [
+        "valor-ejemplo"
+      ]
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador del mensaje. | `00000000-0000-4000-8000-000000000001` |
+| `conversationId` | Sí | `string` | formato `uuid` | Conversación a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `senderProfileId` | Sí | `string` | formato `uuid` | Perfil que lo envió. | `00000000-0000-4000-8000-000000000001` |
+| `replyToMessageId` | No | `string` | formato `uuid`; admite null | Mensaje al que responde, si responde a alguno. | `00000000-0000-4000-8000-000000000001` |
+| `contentTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de contenido. | `00000000-0000-4000-8000-000000000001` |
+| `contentType` | No | `object` | Sin restricción adicional declarada | Tipo de contenido legible: `STICKER` lo dibuja el cliente sin burbuja. Ausente si el concepto no es uno de los tipos de mensaje conocidos. | `{}` |
+| `bodyText` | No | `string` | admite null | Cuerpo del mensaje. | `valor-ejemplo` |
+| `attachmentFileId` | No | `string` | formato `uuid`; admite null | Adjunto en `common.files`. | `00000000-0000-4000-8000-000000000001` |
+| `isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
+| `deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
+| `sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+| `reactions` | No | `array<MessageReactionDto>` | Sin restricción adicional declarada | Reacciones con emoji, agrupadas por emoji (v4.2.91). | `[{"emoji":"valor-ejemplo","profileIds":["valor-ejemplo"]}]` |
+| `reactions[].emoji` | No | `string` | Sin restricción adicional declarada | The emoji. | `valor-ejemplo` |
+| `reactions[].profileIds` | No | `array<string>` | formato `uuid` | Profiles that reacted with this emoji, oldest first. | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-message-reactions.service.ts |
+| 404 | `NOT_FOUND` | Mensaje no encontrado | Excepción explícita en src/modules/community/services/community-message-reactions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Existe un bloqueo entre los participantes | Excepción explícita en src/modules/community/services/community-message-reactions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/messages/{messageId}/reaction"
+}
+```
+
+---
+
+## 17. PATCH /community/conversations/{conversationId}/participant
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2277,7 +2481,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. DELETE /community/conversations/{conversationId}/pin
+## 18. DELETE /community/conversations/{conversationId}/pin
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2391,7 +2595,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /community/conversations/{conversationId}/pin
+## 19. POST /community/conversations/{conversationId}/pin
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2523,7 +2727,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /community/conversations/{conversationId}/presence
+## 20. GET /community/conversations/{conversationId}/presence
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2644,7 +2848,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /community/conversations/{conversationId}/read
+## 21. POST /community/conversations/{conversationId}/read
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2774,7 +2978,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /community/conversations/contacts/search
+## 22. POST /community/conversations/contacts/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2911,7 +3115,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /community/feed
+## 23. GET /community/feed
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-timeline`
@@ -3085,7 +3289,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. DELETE /community/follows
+## 24. DELETE /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3195,7 +3399,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /community/follows
+## 25. GET /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3324,7 +3528,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /community/follows
+## 26. POST /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3422,7 +3626,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3454,7 +3658,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /community/groups
+## 27. GET /community/groups
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3594,7 +3798,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /community/groups
+## 28. POST /community/groups
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3698,7 +3902,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3733,7 +3937,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /community/groups/{groupId}
+## 29. GET /community/groups/{groupId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3884,7 +4088,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /community/groups/{groupId}/members
+## 30. GET /community/groups/{groupId}/members
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4018,7 +4222,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /community/groups/{groupId}/members
+## 31. POST /community/groups/{groupId}/members
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4148,7 +4352,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. DELETE /community/groups/{groupId}/members/{member}
+## 32. DELETE /community/groups/{groupId}/members/{member}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4267,7 +4471,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. PATCH /community/groups/{groupId}/members/{member}
+## 33. PATCH /community/groups/{groupId}/members/{member}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4386,6 +4590,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Solicitud de notificación no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Hay que indicar una decisión o un rol | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 422 | `PRECONDITION_FAILED` | La solicitud de ingreso ya estaba resuelta | Excepción explícita en src/modules/community/services/community-groups.service.ts |
@@ -4393,6 +4599,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La notificación está suprimida | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La notificación ya no admite intentos | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una notificación in-app necesita destinatario interno | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4410,7 +4620,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /community/groups/{groupId}/posts
+## 34. GET /community/groups/{groupId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4550,7 +4760,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /community/groups/{groupId}/posts
+## 35. POST /community/groups/{groupId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4684,11 +4894,17 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Solicitud de notificación no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La notificación está suprimida | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La notificación ya no admite intentos | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una notificación in-app necesita destinatario interno | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4706,7 +4922,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /community/moderation/appeals
+## 36. GET /community/moderation/appeals
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -4861,7 +5077,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /community/moderation/appeals/{appealId}/resolve
+## 37. POST /community/moderation/appeals/{appealId}/resolve
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -4957,7 +5173,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -4988,7 +5204,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /community/moderation/decisions
+## 38. GET /community/moderation/decisions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5122,7 +5338,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /community/moderation/decisions/{decisionId}/appeal
+## 39. POST /community/moderation/decisions/{decisionId}/appeal
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5219,7 +5435,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -5252,7 +5468,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. GET /community/moderation/decisions/mine
+## 40. GET /community/moderation/decisions/mine
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5381,7 +5597,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /community/moderation/queue
+## 41. GET /community/moderation/queue
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5530,7 +5746,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /community/moderation/queue/{queueId}/decision
+## 42. POST /community/moderation/queue/{queueId}/decision
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5668,7 +5884,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. GET /community/notifications
+## 43. GET /community/notifications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-timeline`
@@ -5805,7 +6021,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /community/polls/{pollId}
+## 44. GET /community/polls/{pollId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -5944,7 +6160,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /community/polls/{pollId}/votes
+## 45. POST /community/polls/{pollId}/votes
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -6076,7 +6292,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /community/posts/{postId}
+## 46. GET /community/posts/{postId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6221,7 +6437,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /community/posts/{postId}/comments
+## 47. GET /community/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6375,7 +6591,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. POST /community/posts/{postId}/polls
+## 48. POST /community/posts/{postId}/polls
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -6518,7 +6734,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. GET /community/posts/{postId}/reactions
+## 49. GET /community/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6643,7 +6859,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. GET /community/profiles/{profileId}
+## 50. GET /community/profiles/{profileId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6802,7 +7018,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. GET /community/profiles/{profileId}/auto-reply
+## 51. GET /community/profiles/{profileId}/auto-reply
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6928,7 +7144,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. PUT /community/profiles/{profileId}/auto-reply
+## 52. PUT /community/profiles/{profileId}/auto-reply
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7087,7 +7303,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. GET /community/profiles/{profileId}/posts
+## 53. GET /community/profiles/{profileId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7245,7 +7461,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. POST /community/profiles/{profileId}/posts
+## 54. POST /community/profiles/{profileId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7420,7 +7636,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. GET /community/profiles/{profileId}/reviews
+## 55. GET /community/profiles/{profileId}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -7579,7 +7795,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. POST /community/profiles/{profileId}/reviews
+## 56. POST /community/profiles/{profileId}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -7731,7 +7947,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
+## 57. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -7827,7 +8043,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -7860,7 +8076,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. GET /community/profiles/by-slug/{slug}
+## 58. GET /community/profiles/by-slug/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8019,7 +8235,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 58. GET /community/profiles/me
+## 59. GET /community/profiles/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8145,7 +8361,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 59. PUT /community/profiles/me
+## 60. PUT /community/profiles/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8315,7 +8531,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 60. GET /community/profiles/me/stats
+## 61. GET /community/profiles/me/stats
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8434,7 +8650,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 61. GET /community/profiles/organization-showcases/me
+## 62. GET /community/profiles/organization-showcases/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8551,7 +8767,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 62. POST /community/public-profiles
+## 63. POST /community/public-profiles
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8697,7 +8913,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 63. GET /community/ratings
+## 64. GET /community/ratings
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -8817,7 +9033,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 64. PUT /community/ratings
+## 65. PUT /community/ratings
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -8968,7 +9184,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 65. GET /community/ratings/mine
+## 66. GET /community/ratings/mine
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -9085,7 +9301,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 66. GET /community/ratings/summary
+## 67. GET /community/ratings/summary
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -9194,7 +9410,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 67. PUT /community/reactions
+## 68. PUT /community/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -9327,7 +9543,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 68. POST /community/reports
+## 69. POST /community/reports
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -9457,7 +9673,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 69. GET /community/topics
+## 70. GET /community/topics
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -9470,11 +9686,11 @@ Ejemplo de error normalizado:
 
 Temas de la comunidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Temas activos con los que se clasifican grupos y publicaciones.
+Contexto declarado en el controlador: Temas activos (categorías y temas) con los que se clasifican grupos y publicaciones.
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /community/topics` en `CommunityTopicsController_listTopics`. El controlador delega en `CommunityGroupsReadService.listTopics`. No recibe body. El tipo de retorno estático es `Promise<TopicPageDto>`.
+NestJS resuelve `GET /community/topics` en `CommunityTopicsController_listTopics`. El controlador delega en `CommunityTopicsService.listTopics`. No recibe body. El tipo de retorno estático es `Promise<TopicPageDto>`.
 
 ### Parámetros
 
@@ -9576,7 +9792,136 @@ Ejemplo de error normalizado:
 
 ---
 
-## 70. GET /f/{slug}
+## 71. POST /community/topics
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-groups`
+- **Nombre:** Crear un tema propio
+- **Operation ID:** `CommunityTopicsController_createTopic`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityTopicsController.createTopic](../../src/modules/community/controllers/community-topics.controller.ts)
+
+### Descripción de negocio
+
+Crear un tema propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Crea un tema propio bajo «Temas propios»; si ya existe con ese nombre, lo devuelve.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /community/topics` en `CommunityTopicsController_createTopic`. El controlador delega en `CommunityTopicsService.createTopic`. Valida el body como `CreateTopicDto` y consume `application/json`. El tipo de retorno estático es `Promise<TopicListItemDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateTopicDto`; los campos opcionales se omiten.
+
+```http
+POST /community/topics HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 3; longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /community/topics HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<TopicListItemDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<TopicListItemDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<TopicListItemDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<TopicListItemDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<TopicListItemDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<TopicListItemDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<TopicListItemDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<TopicListItemDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<TopicListItemDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TopicListItemDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TopicListItemDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "parentTopicId": "00000000-0000-4000-8000-000000000001",
+  "specialtyConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador del tema. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código estable. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Nombre de ejemplo` |
+| `parentTopicId` | No | `string` | formato `uuid`; admite null | Tema padre, si cuelga de otro. | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptId` | No | `string` | formato `uuid`; admite null | Especialidad con la que se corresponde, si se declaró. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | El nombre del tema necesita al menos tres letras o números | Excepción explícita en src/modules/community/services/community-topics.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/topics"
+}
+```
+
+---
+
+## 72. GET /f/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9798,7 +10143,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 71. GET /internal/community/feed/pending
+## 73. GET /internal/community/feed/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9915,7 +10260,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 72. POST /internal/community/feed/ranking/apply
+## 74. POST /internal/community/feed/ranking/apply
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -10048,7 +10393,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 73. GET /internal/community/feed/ranking/pending
+## 75. GET /internal/community/feed/ranking/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -10173,7 +10518,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 74. POST /internal/community/feed/rebuild
+## 76. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -10302,7 +10647,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 75. GET /internal/community/search/health
+## 77. GET /internal/community/search/health
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10413,7 +10758,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 76. POST /internal/community/search/reindex
+## 78. POST /internal/community/search/reindex
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10543,7 +10888,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 77. POST /internal/community/verification/badges
+## 79. POST /internal/community/verification/badges
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10668,7 +11013,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 78. POST /internal/community/verification/badges/{targetId}/revoke
+## 80. POST /internal/community/verification/badges/{targetId}/revoke
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10790,7 +11135,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 79. POST /internal/community/verification/badges/expire-sweep
+## 81. POST /internal/community/verification/badges/expire-sweep
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10897,7 +11242,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 80. GET /l/{slug}
+## 82. GET /l/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11119,7 +11464,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 81. GET /o/{slug}
+## 83. GET /o/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11341,7 +11686,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 82. GET /p/{slug}
+## 84. GET /p/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11563,7 +11908,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 83. GET /patients/me/reviewable-care
+## 85. GET /patients/me/reviewable-care
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -11681,7 +12026,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 84. POST /patients/me/reviews
+## 86. POST /patients/me/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -11831,7 +12176,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 85. GET /public/comments/{commentId}/replies
+## 87. GET /public/comments/{commentId}/replies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11924,7 +12269,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 86. GET /public/media/{id}
+## 88. GET /public/media/{id}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12018,7 +12363,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 87. GET /public/nearby
+## 89. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12113,7 +12458,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 88. GET /public/posts
+## 90. GET /public/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12201,7 +12546,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 89. GET /public/posts/{postId}/comments
+## 91. GET /public/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12293,7 +12638,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 90. GET /public/posts/{postId}/reactions
+## 92. GET /public/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12385,7 +12730,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 91. GET /public/profiles/{prefijo}/{slug}
+## 93. GET /public/profiles/{prefijo}/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12608,7 +12953,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 92. GET /public/profiles/{prefijo}/{slug}/reviews
+## 94. GET /public/profiles/{prefijo}/{slug}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12714,7 +13059,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 93. GET /public/search
+## 95. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12814,7 +13159,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 94. GET /public/search/diagnostic-units
+## 96. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12914,7 +13259,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 95. GET /public/search/insurers
+## 97. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -13014,7 +13359,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 96. GET /public/search/medications
+## 98. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -13114,7 +13459,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 97. GET /public/search/organizations
+## 99. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -13217,7 +13562,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 98. GET /public/search/pharmacies
+## 100. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -13317,7 +13662,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 99. GET /public/search/practitioners
+## 101. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -13421,7 +13766,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 100. GET /s/{slug}
+## 102. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
