@@ -20,12 +20,17 @@ import {
   DecisionResultDto,
 } from '../dto';
 import { DELEG } from '../delegated_access.concepts';
+import { DelegationScopeService } from './delegation-scope.service';
 import {
   GRANT_TYPE_CONCEPT,
   PURPOSE_OF_USE_CONCEPT,
   RESOURCE_TYPE_CONCEPT,
   STATUS,
 } from './concept-maps';
+
+/** El 404 de una solicitud inexistente o ajena: idéntico en ambos casos. */
+const requestNotFound = (): ResourceNotFoundException =>
+  new ResourceNotFoundException('Solicitud no encontrada');
 
 /**
  * UC-29-04 (solicitar acceso delegado con aprobación previa) y UC-29-05
@@ -43,6 +48,8 @@ export class AccessRequestsService {
    * @param grantsRepo - Valor de grants repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param scope - Política común de alcance por tenant (obligatoria: sin ella
+   *   la autorización no se puede saltar en silencio).
    */
   constructor(
     private readonly em: EntityManager,
@@ -51,11 +58,16 @@ export class AccessRequestsService {
     private readonly grantsRepo: DelegatedAccessGrantsRepository,
     private readonly eventsRepo: DelegationEventsRepository,
     private readonly logger: PinoLogger,
+    private readonly scope: DelegationScopeService,
   ) {
     this.logger.setContext(AccessRequestsService.name);
   }
 
-  /** UC-29-04: abre una solicitud de acceso delegado (decisión PENDING). */
+  /**
+   * UC-29-04: abre una solicitud de acceso delegado (decisión PENDING). La
+   * delegación tiene que ser de la organización activa y el paciente y el
+   * encuentro pedidos, existir en ella.
+   */
   async requestAccess(
     delegateId: string,
     dto: CreateAccessRequestDto,
@@ -69,18 +81,24 @@ export class AccessRequestsService {
       },
       'Opening delegated access request',
     );
+    const tenantId = this.scope.resolveTenant();
     return this.em.transactional(async (tx) => {
-      const delegate = await this.delegatesRepo.findById(tx, delegateId);
-      if (!delegate) {
-        throw new ResourceNotFoundException('Delegación no encontrada', {
-          delegateId,
-        });
-      }
+      const { delegate } = await this.scope.loadDelegationInTenant(
+        tx,
+        delegateId,
+        tenantId,
+      );
       if (delegate.statusConceptId !== STATUS.ACTIVE) {
         throw new PreconditionFailedException('La delegación no está activa', {
           delegateId,
         });
       }
+      await this.scope.assertGrantTarget(
+        tx,
+        tenantId,
+        dto.patientProfileId,
+        dto.encounterId,
+      );
 
       const dup = await this.requestsRepo.findOpenDuplicate(
         tx,
@@ -129,7 +147,11 @@ export class AccessRequestsService {
     });
   }
 
-  /** UC-29-05: decide la solicitud; si se aprueba emite el grant scoped. */
+  /**
+   * UC-29-05: decide la solicitud; si se aprueba emite el grant scoped. La
+   * solicitud tiene que ser de la organización activa y, al aprobar, el
+   * paciente y el encuentro del grant existir en ella.
+   */
   async decide(
     requestId: string,
     dto: DecideAccessRequestDto,
@@ -144,12 +166,26 @@ export class AccessRequestsService {
       },
       'Deciding delegated access request',
     );
+    const tenantId = this.scope.resolveTenant();
     return this.em.transactional(async (tx) => {
       const request = await this.requestsRepo.findById(tx, requestId);
-      if (!request) {
-        throw new ResourceNotFoundException('Solicitud no encontrada', {
-          requestId,
-        });
+      if (!request) throw requestNotFound();
+      // El alcance se prueba ANTES de mirar el estado: una solicitud de otra
+      // organización responde como una inexistente (404 uniforme: mismo
+      // mensaje, mismo `reason`, sin `details`), nunca con su estado (un 412
+      // «no está abierta» confirmaría que el id existe) ni con el 404 de la
+      // delegación (que distinguiría «ajena» de «inexistente»).
+      try {
+        await this.scope.loadDelegationInTenant(
+          tx,
+          request.practitionerDelegateAssignmentId,
+          tenantId,
+        );
+      } catch (error) {
+        if (error instanceof ResourceNotFoundException) {
+          throw requestNotFound();
+        }
+        throw error;
       }
       if (request.statusConceptId !== DELEG.REQUEST_OPEN) {
         throw new PreconditionFailedException('La solicitud no está abierta', {
@@ -158,6 +194,14 @@ export class AccessRequestsService {
       }
 
       const approved = dto.decision === 'APPROVED';
+      if (approved) {
+        await this.scope.assertGrantTarget(
+          tx,
+          tenantId,
+          request.patientProfileId,
+          dto.encounterId ?? request.encounterId,
+        );
+      }
       request.decisionConceptId = approved
         ? DELEG.DECISION_APPROVED
         : DELEG.DECISION_DENIED;

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { CONCEPTS, createdBy, touch } from '../../../common';
+import { CONCEPTS, ConflictException, createdBy } from '../../../common';
 import { DIR } from '../../directory/directory.concepts';
 import { TenantMemberships } from '../../directory/entities';
 import { PRAC } from '../../practice/practice.concepts';
@@ -132,7 +132,13 @@ export class SupportStaffProvisioningRepository {
     return { id };
   }
 
-  /** Garantiza que la membresía de la secretaria en el tenant esté ACTIVE. */
+  /**
+   * Abre la membresía ACTIVE de una cuenta recién creada por el hospital. Si ya
+   * hay una activa, la devuelve. Una previa terminada, suspendida o invitada no
+   * se revive: la cerró o la retuvo otra decisión, y este camino no la toma.
+   *
+   * @throws ConflictException si el par ya tiene una membresía no activa.
+   */
   async ensureActiveTenantMembership(
     em: EntityManager,
     data: {
@@ -152,10 +158,9 @@ export class SupportStaffProvisioningRepository {
 
     if (existing) {
       if (existing.statusConceptId !== DIR.MEMBERSHIP_ACTIVE) {
-        existing.statusConceptId = DIR.MEMBERSHIP_ACTIVE;
-        existing.startDate = new Date();
-        touch(existing, data.actorUserId);
-        await em.flush();
+        throw new ConflictException(
+          'La cuenta ya tiene una membresía en la organización que no está activa',
+        );
       }
       return existing;
     }

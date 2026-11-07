@@ -6,6 +6,7 @@ import {
   DomainException,
   ErrorCode,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -14,7 +15,6 @@ import {
   readWithSystemRls,
 } from '../../../common/tenant/rls-transaction';
 import { DIR } from '../../directory/directory.concepts';
-import { IamErrorReason } from '../../iam/iam.error-reasons';
 import { IamSupportStaffSelfRegistrationService } from '../../iam/application/services';
 import type { RegisterSupportStaffDto } from '../../iam/presentation/dto';
 import { DelegatedAccessErrorReason as Reason } from '../delegated_access.error-reasons';
@@ -86,11 +86,15 @@ export class SupportStaffProvisioningService {
       // `@TenantAgnostic` route: no request transaction to inherit. The membership
       // lands in the tenant of the practitioner's own assignment, read above.
       if (isRlsEnforced()) await applyTenantRls(tx, role.tenantId);
-      await this.provisioningRepo.ensureActiveTenantMembership(tx, {
-        userId: secretary.userId,
-        tenantId: role.tenantId,
-        actorUserId: actor.id,
-      });
+      // Un doctor nunca abre la membresía del hospital: nace INVITED (la misma
+      // que deja una invitación del doctor) y sólo la activa la decisión del
+      // hospital. El vínculo ACTIVE da la agenda de este doctor y nada más.
+      await this.supportLinksRepo.findOrCreateMembership(
+        tx,
+        secretary.userId,
+        role.tenantId,
+        actor.id,
+      );
 
       const existingLinks = await this.supportLinksRepo.findLinks(tx, {
         supportUserId: secretary.userId,
@@ -197,7 +201,12 @@ export class SupportStaffProvisioningService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (PLATFORM_ADMIN_ROLES.some((r) => actor.roles.includes(r))) return;
+    // El rol se contrasta con la organización del contexto: un SECURITY_ADMIN o
+    // SUPERADMIN acotado a otra organización (`scopedRoles`) no administra esta.
+    const platform = PLATFORM_ADMIN_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId),
+    );
+    if (platform) return;
     const isAdmin = await this.supportLinksRepo.isOrganizationAdmin(
       em,
       tenantId,
@@ -214,35 +223,23 @@ export class SupportStaffProvisioningService {
     }
   }
 
+  /**
+   * Da de alta la cuenta de la secretaria. Sólo una cuenta nueva: si el
+   * documento ya tiene una cuenta, el alta falla igual para cualquier
+   * documento ya registrado (409 `NATIONAL_ID_ALREADY_REGISTERED`), sea de una
+   * secretaria o de otra persona, y no se vincula nada. Vincular a una cuenta
+   * existente exige que ella acepte: es la invitación (`PENDING`), no el alta
+   * directa.
+   */
   private async obtainSecretary(
     dto: RegisterSupportStaffDto,
     ip?: string,
   ): Promise<{ userId: string; personId: string; supportProfileId: string }> {
-    try {
-      const reg = await this.iamSupportStaff.register(dto, ip);
-      return {
-        userId: reg.userId,
-        personId: reg.personId,
-        supportProfileId: reg.supportProfileId,
-      };
-    } catch (err) {
-      if (
-        err instanceof ConflictException &&
-        err.reason === IamErrorReason.NATIONAL_ID_ALREADY_REGISTERED
-      ) {
-        const existing = await this.supportLinksRepo.findSecretaryByNationalId(
-          this.em.fork(),
-          dto.nationalId,
-        );
-        if (existing) {
-          return {
-            userId: existing.userId,
-            personId: existing.personId,
-            supportProfileId: existing.personId,
-          };
-        }
-      }
-      throw err;
-    }
+    const reg = await this.iamSupportStaff.register(dto, ip);
+    return {
+      userId: reg.userId,
+      personId: reg.personId,
+      supportProfileId: reg.supportProfileId,
+    };
   }
 }

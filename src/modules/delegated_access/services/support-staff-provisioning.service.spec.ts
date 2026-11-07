@@ -4,6 +4,8 @@ import {
   DomainException,
   ResourceNotFoundException,
 } from '../../../common';
+import { IamErrorReason } from '../../iam/iam.error-reasons';
+import { DelegatedAccessErrorReason as Reason } from '../delegated_access.error-reasons';
 import { SupportStaffProvisioningService } from './support-staff-provisioning.service';
 
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
@@ -32,6 +34,7 @@ describe('SupportStaffProvisioningService', () => {
     };
     mockSupportLinksRepo = {
       isOrganizationAdmin: fn(),
+      findOrCreateMembership: fn().mockResolvedValue({ id: 'membership-inv' }),
       findSecretaryByNationalId: fn(),
       findLinks: fn().mockResolvedValue([]),
     };
@@ -125,15 +128,16 @@ describe('SupportStaffProvisioningService', () => {
           actorUserId: 'doctor-user-1',
         }),
       );
+      // Un doctor nunca abre la membresía del hospital: nace INVITED y la
+      // activa la decisión del hospital.
       expect(
         mockProvisioningRepo.ensureActiveTenantMembership,
-      ).toHaveBeenCalledWith(
+      ).not.toHaveBeenCalled();
+      expect(mockSupportLinksRepo.findOrCreateMembership).toHaveBeenCalledWith(
         mockEm,
-        expect.objectContaining({
-          userId: 'sec-user-1',
-          tenantId: 'tenant-hospital-1',
-          actorUserId: 'doctor-user-1',
-        }),
+        'sec-user-1',
+        'tenant-hospital-1',
+        'doctor-user-1',
       );
     });
 
@@ -158,9 +162,10 @@ describe('SupportStaffProvisioningService', () => {
           personId: 'sec-person-1',
           supportProfileId: 'sec-person-1',
         });
-        mockProvisioningRepo.ensureActiveTenantMembership.mockImplementation(
+        mockSupportLinksRepo.findOrCreateMembership.mockImplementation(
           async () => {
             calls.push('membership');
+            return { id: 'membership-inv' };
           },
         );
         mockProvisioningRepo.createActivePractitionerLink.mockResolvedValue({
@@ -273,6 +278,201 @@ describe('SupportStaffProvisioningService', () => {
           practiceSiteId: 'site-uuid-1',
         }),
       );
+    });
+  });
+  describe('D-1: la administración se contrasta con la organización del contexto', () => {
+    const dto = {
+      nationalId: '7654321',
+      password: 'SecretPassword123!',
+      practiceSiteId: 'site-uuid-1',
+    } as any;
+    const registered = () => {
+      mockIamSupportStaff.register.mockResolvedValue({
+        userId: 'sec-user-2',
+        personId: 'sec-person-2',
+        supportProfileId: 'sec-person-2',
+      });
+      mockProvisioningRepo.ensureActiveTenantMembership.mockResolvedValue({
+        id: 'membership-uuid-1',
+      });
+      mockProvisioningRepo.createActiveLocationLink.mockResolvedValue({
+        id: 'link-org-uuid-1',
+      });
+    };
+
+    it('un SECURITY_ADMIN acotado a la organización A no da de alta en B (aunque sea miembro de B)', async () => {
+      mockSupportLinksRepo.isOrganizationAdmin.mockResolvedValue(false);
+      registered();
+      const actor = {
+        id: 'admin-a',
+        roles: ['SECURITY_ADMIN'],
+        scopedRoles: { 'tenant-A': ['SECURITY_ADMIN'] },
+      } as any;
+
+      await expect(
+        service.provisionForOrganization('tenant-B', dto, actor),
+      ).rejects.toMatchObject({
+        reason: Reason.SUPPORT_ORGANIZATION_ADMIN_REQUIRED,
+      });
+      expect(mockIamSupportStaff.register).not.toHaveBeenCalled();
+      expect(
+        mockProvisioningRepo.createActiveLocationLink,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('un SUPERADMIN acotado a A tampoco alcanza B', async () => {
+      mockSupportLinksRepo.isOrganizationAdmin.mockResolvedValue(false);
+      registered();
+      const actor = {
+        id: 'sa-a',
+        roles: ['SUPERADMIN'],
+        scopedRoles: { 'tenant-A': ['SUPERADMIN'] },
+      } as any;
+
+      await expect(
+        service.provisionForOrganization('tenant-B', dto, actor),
+      ).rejects.toThrow(DomainException);
+      expect(mockIamSupportStaff.register).not.toHaveBeenCalled();
+    });
+
+    it('un SECURITY_ADMIN acotado a B da de alta en B', async () => {
+      mockSupportLinksRepo.isOrganizationAdmin.mockResolvedValue(false);
+      registered();
+      const actor = {
+        id: 'admin-b',
+        roles: ['SECURITY_ADMIN'],
+        scopedRoles: { 'tenant-B': ['SECURITY_ADMIN'] },
+      } as any;
+
+      const res = await service.provisionForOrganization(
+        'tenant-B',
+        dto,
+        actor,
+      );
+      expect(res.linkId).toBe('link-org-uuid-1');
+    });
+
+    it('un SECURITY_ADMIN global (sin ámbito) sigue dando de alta', async () => {
+      mockSupportLinksRepo.isOrganizationAdmin.mockResolvedValue(false);
+      registered();
+      const actor = { id: 'admin-g', roles: ['SECURITY_ADMIN'] } as any;
+
+      const res = await service.provisionForOrganization(
+        'tenant-B',
+        dto,
+        actor,
+      );
+      expect(res.linkId).toBe('link-org-uuid-1');
+    });
+
+    it('un SECURITY_ADMIN acotado a A que es OWNER/ADMIN de B por su membresía da de alta en B', async () => {
+      mockSupportLinksRepo.isOrganizationAdmin.mockResolvedValue(true);
+      registered();
+      const actor = {
+        id: 'admin-a',
+        roles: ['SECURITY_ADMIN'],
+        scopedRoles: { 'tenant-A': ['SECURITY_ADMIN'] },
+      } as any;
+
+      const res = await service.provisionForOrganization(
+        'tenant-B',
+        dto,
+        actor,
+      );
+      expect(res.linkId).toBe('link-org-uuid-1');
+      expect(mockSupportLinksRepo.isOrganizationAdmin).toHaveBeenCalledWith(
+        mockEm,
+        'tenant-B',
+        'admin-a',
+      );
+    });
+  });
+
+  describe('D-2: una cuenta existente no se vincula sin su consentimiento', () => {
+    const exists = () =>
+      new ConflictException(
+        'Ya existe una cuenta con ese documento de identidad',
+        undefined,
+        IamErrorReason.NATIONAL_ID_ALREADY_REGISTERED,
+      );
+    const orgActor = { id: 'owner-1', roles: ['USER'] } as any;
+    const docActor = {
+      id: 'doctor-user-1',
+      practitionerProfileId: 'prac-prof-1',
+      roles: ['PRACTITIONER'],
+    } as any;
+    const orgDto = { nationalId: '7654321', practiceSiteId: 's1' } as any;
+    const docDto = {
+      nationalId: '7654321',
+      practitionerRoleAssignmentId: 'role-assign-1',
+    } as any;
+
+    beforeEach(() => {
+      mockIamSupportStaff.register.mockRejectedValue(exists());
+      mockSupportLinksRepo.isOrganizationAdmin.mockResolvedValue(true);
+      mockProvisioningRepo.findActiveRoleAssignmentOfPractitioner.mockResolvedValue(
+        { id: 'role-assign-1', tenantId: 'tenant-hospital-1' },
+      );
+    });
+
+    it('hospital: con un documento de secretaria ya registrada no crea vínculo ni membresía', async () => {
+      mockSupportLinksRepo.findSecretaryByNationalId.mockResolvedValue({
+        userId: 'existing-user',
+        personId: 'existing-person',
+      });
+
+      await expect(
+        service.provisionForOrganization('tenant-hospital-1', orgDto, orgActor),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(
+        mockProvisioningRepo.ensureActiveTenantMembership,
+      ).not.toHaveBeenCalled();
+      expect(
+        mockProvisioningRepo.createActiveLocationLink,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('doctor: con un documento de secretaria ya registrada no crea vínculo ni membresía', async () => {
+      mockSupportLinksRepo.findSecretaryByNationalId.mockResolvedValue({
+        userId: 'existing-user',
+        personId: 'existing-person',
+      });
+
+      await expect(
+        service.provisionForPractitioner(docDto, docActor),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(
+        mockProvisioningRepo.createActivePractitionerLink,
+      ).not.toHaveBeenCalled();
+      expect(
+        mockSupportLinksRepo.findOrCreateMembership,
+      ).not.toHaveBeenCalled();
+      expect(
+        mockProvisioningRepo.ensureActiveTenantMembership,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('sin oráculo: documento de secretaria y documento de otra persona responden exactamente igual', async () => {
+      const outcome = async (secretary: unknown) => {
+        mockSupportLinksRepo.findSecretaryByNationalId.mockResolvedValue(
+          secretary,
+        );
+        try {
+          await service.provisionForOrganization(
+            'tenant-hospital-1',
+            orgDto,
+            orgActor,
+          );
+        } catch (error) {
+          return error as ConflictException;
+        }
+        throw new Error('debía fallar');
+      };
+      const secretary = await outcome({ userId: 'u', personId: 'p' });
+      const other = await outcome(null);
+
+      expect(secretary.getStatus()).toBe(other.getStatus());
+      expect(secretary.getResponse()).toEqual(other.getResponse());
     });
   });
 });

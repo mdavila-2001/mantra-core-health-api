@@ -91,6 +91,15 @@ acota el rango y se vuelve a pedir). Al terminar el
 último vínculo vivo de un hospital, la membresía de apoyo se cierra. Los motivos y mensajes de los
 cuerpos no se guardan: las tablas no tienen columna para ellos.
 
+El alta directa (`POST /org/support-staff` y `POST /me/practitioner/support-staff`) crea la cuenta y el
+vínculo `ACTIVE` en un paso, sólo para un documento **sin cuenta**: si el documento ya está
+registrado, sea de una secretaria o de cualquier otra persona, responde el mismo 409
+`NATIONAL_ID_ALREADY_REGISTERED` y no vincula nada; a una cuenta existente se la invita (`PENDING`) y
+la acepta ella. El hospital exige ser OWNER/ADMIN activo de la organización del contexto o un rol de
+plataforma válido en ella (uno acotado a otra organización no sirve); el doctor deja la membresía del
+hospital `INVITED`, igual que su invitación. El alta directa nunca revive una membresía terminada o
+suspendida.
+
 ## Endpoints (UC → ruta)
 
 | UC       | Método y ruta                                       | Descripción                                       | Permiso          |

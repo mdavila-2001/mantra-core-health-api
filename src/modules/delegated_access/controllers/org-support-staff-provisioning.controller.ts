@@ -11,6 +11,7 @@ import { Throttle } from '@nestjs/throttler';
 import {
   Audited,
   CurrentUser,
+  Roles,
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
@@ -32,7 +33,11 @@ export class OrgSupportStaffProvisioningController {
     entity: 'organization_user_assignment',
     entityId: 'result.linkId',
   })
+  // `@Roles()` vacío: sin rol global. Lo decide el servicio, que exige ser
+  // OWNER/ADMIN activo de la organización del contexto o tener
+  // SECURITY_ADMIN/SUPERADMIN válido en ella (uno acotado a otra no sirve).
   @Post('org/support-staff')
+  @Roles()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
